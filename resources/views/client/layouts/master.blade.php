@@ -3,7 +3,7 @@
 <!-- Mirrored from demo-egenslab.b-cdn.net/html/eg-shop-fashion/v1/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 11 Jan 2025 13:58:45 GMT -->
 
 <head>
-    <title>EG Shop Fashion - Multipurpose e-Commerce HTML Template</title>
+    <title> aaaaaaa EG Shop Fashion - Multipurpose e-Commerce HTML Template</title>
 
     <!-- Required meta tags -->
     <meta charset="utf-8" />
