@@ -36,15 +36,16 @@
                         <div class="cr-cat-list cr-card card-default mb-24px">
                             <div class="cr-card-content">
                                 <div class="cr-cat-form">
-                                    <h3>Add New Category</h3>
+                                    <h3>Edit Category</h3>
 
-                                    <form method="POST" action="{{ route('admin.category.store') }}">
+                                    <form method="POST" action="{{ route('admin.category.update',$category->id) }}">
                                         @csrf
+                                        @method('PUT')
                                         <div class="form-group">
                                             <label>Name</label>
                                             <div class="col-12">
                                                 <input id="name" name="name"
-                                                    class="form-control here slug-title" type="text value="{{ old('name') }}">
+                                                    class="form-control here slug-title" type="text" value="{{ old('name',$category->name) }}">
                                             </div>
                                         </div>
 
@@ -52,7 +53,7 @@
                                             <label>Slug</label>
                                             <div class="col-12">
                                                 <input id="slug" name="slug" class="form-control here set-slug"
-                                                    type="text">
+                                                    type="text" value="{{ old('slug', $category->slug) }}">
                                             </div>
                                         </div>
 
@@ -61,7 +62,7 @@
                                             <label>Full Description</label>
                                             <div class="col-12">
                                                 <textarea id="description" name="description" cols="40"
-                                                    rows="4" class="form-control"></textarea>
+                                                    rows="4" class="form-control">{{ old('description', $category->description) }}</textarea>
                                             </div>
                                         </div>
 
@@ -69,14 +70,14 @@
                                             <label for="status">Status</label>
                                             <div class="col-12">
                                                 <select id="status" name="status" class="form-control">
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
+                                                    <option value="active" {{ old('status', $category->status) == 'active' ? 'selected' : '' }}>Active</option>
+                                                    <option value="inactive" {{ old('status', $category->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-12 d-flex">
-                                                <button type="submit" class="cr-btn-primary">Submit</button>
+                                                <button type="submit" class="cr-btn-primary">Update</button>
                                             </div>
                                         </div>
 
@@ -98,7 +99,7 @@
                                         <th>Name</th>
                                         <th>Description</th>
                                         <th>Status</th>
-                                        <th>Actionssss</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
 
@@ -125,7 +126,7 @@
                                                 </button>
 
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="#">Edit</a>
+                                                    <a class="dropdown-item" href="{{ route('admin.category.edit', $category->id) }}">Edit</a>
                                                     <form method="POST" action="{{ route('admin.category.destroy', $category->id) }}" style="display:inline;">
                                                         @csrf
                                                         @method('DELETE')

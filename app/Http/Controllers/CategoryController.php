@@ -13,7 +13,7 @@ class CategoryController extends Controller
     public function index()
     {
             $categories= Category::all();
-            return view('admin.category',compact('categories'));
+            return view('admin.category.category-add',compact('categories'));
     }
 
     /**
@@ -21,7 +21,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('admin.category');
+        return view('admin.category.category-add');
     }
 
     /**
@@ -55,9 +55,11 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit($id)
     {
-        //
+         $category = Category::findOrFail($id);
+         $categories= Category::all();
+         return view('admin.category.category-edit',compact('category','categories'));
     }
 
     /**
@@ -65,7 +67,20 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|unique:categories,slug|max:255' . $id,
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+        ]);
+        $category = Category::findOrFail($id);
+        $category->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'description' => $request->description,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('admin.category')->with('success','Category Update Success');
     }
 
     /**

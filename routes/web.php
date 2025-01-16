@@ -40,4 +40,8 @@ Route::get('/admin/login',[AuthController::class,'login'])->name('admin.auth.log
 Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');
 Route::get('/admin/category/create', [CategoryController::class, 'create'])->name('admin.category.create');
 Route::post('/admin/category',[CategoryController::class,'store'])->name('admin.category.store');
+
 Route::delete('/admin/category/{id}',[CategoryController::class,'destroy'])->name('admin.category.destroy');
+
+Route::get('/admin/category/{id}/edit',[CategoryController::class,'edit'])->name('admin.category.edit');
+Route::put('admin/category/{id}',[CategoryController::class,'update'])->name('admin.category.update');
