@@ -43,7 +43,9 @@ Route::get('/admin/forgot-password',[AuthController::class,'forgotpassword'])->n
 Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');
 Route::get('/admin/category/create', [CategoryController::class, 'create'])->name('admin.category.create');
 Route::post('/admin/category',[CategoryController::class,'store'])->name('admin.category.store');
+
 Route::delete('/admin/category/{id}',[CategoryController::class,'destroy'])->name('admin.category.destroy');
+
 
 //client/cart
 Route::get('/cart',[CartController::class,'cart'])->name('client.cart.cart');
@@ -53,3 +55,7 @@ Route::get('/checkout',[CartController::class,'checkout'])->name('client.cart.ch
 //client/product
 Route::get('/list-product',[ProductController::class,'listproduct'])->name('client.product.list-product');
 Route::get('/product-details',[ProductController::class,'productdetails'])->name('client.product.product-details');
+
+Route::get('/admin/category/{id}/edit',[CategoryController::class,'edit'])->name('admin.category.edit');
+Route::put('admin/category/{id}',[CategoryController::class,'update'])->name('admin.category.update');
+
