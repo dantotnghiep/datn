@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use App\Models\Category;
 use Illuminate\Support\Facades\Route;
 
@@ -19,35 +20,19 @@ Route::get('/', function () {
     return view('client.index');
 });
 
+// Route::prefix('admin')
+//     ->group(function () {
+//         Route::get('/', [ProductController::class, 'dashboard'])->name('dashboard');
+//         Route::get('/add-product', [ProductController::class, 'add-product'])->name('add-product');
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//     });
 
 //Route Admin code đây cho mình nhé iu anh emmmm
-Route::get('/admin', function () {
-    return view('admin.dashboard');
-})->name('admin.dashboard');
+//admin/Product
+Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboard');
+Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.products.product-list');
+Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.products.add-product');
 
-Route::get('/admin/product-list', function () {
-    return view('admin.product-list');
-});
-Route::get('/admin/add-product', function () {
-    return view('admin.add-product');
-});
 
 //admin/Category
 Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');
