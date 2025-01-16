@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Models\Category;
@@ -33,6 +34,7 @@ Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboa
 Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.products.product-list');
 Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.products.add-product');
 
+Route::get('/admin/login',[AuthController::class,'login'])->name('admin.auth.login');
 
 //admin/Category
 Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');
