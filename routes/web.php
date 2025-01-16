@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Models\Category;
@@ -34,10 +35,21 @@ Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboa
 Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.products.product-list');
 Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.products.add-product');
 
+//admin/Auth
 Route::get('/admin/login',[AuthController::class,'login'])->name('admin.auth.login');
+Route::get('/admin/forgot-password',[AuthController::class,'forgotpassword'])->name('admin.auth.forgot-password');
 
 //admin/Category
 Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');
 Route::get('/admin/category/create', [CategoryController::class, 'create'])->name('admin.category.create');
 Route::post('/admin/category',[CategoryController::class,'store'])->name('admin.category.store');
 Route::delete('/admin/category/{id}',[CategoryController::class,'destroy'])->name('admin.category.destroy');
+
+//client/cart
+Route::get('/cart',[CartController::class,'cart'])->name('client.cart.cart');
+Route::get('/order',[CartController::class,'order'])->name('client.cart.order');
+Route::get('/checkout',[CartController::class,'checkout'])->name('client.cart.checkout');
+
+//client/product
+Route::get('/list-product',[ProductController::class,'listproduct'])->name('client.product.list-product');
+Route::get('/product-details',[ProductController::class,'productdetails'])->name('client.product.product-details');

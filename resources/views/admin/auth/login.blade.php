@@ -13,7 +13,7 @@
                                         <!-- Login form -->
                                         <form class="login-form" method="post">
                                             <div class="imgcontainer">
-                                                <a href="index.html"><img src="assets/img/logo/full-logo.png" alt="logo"
+                                                <a href="index.html"><img src="/be/assets/img/logo/full-logo.png" alt="logo"
                                                         class="logo"></a>
                                             </div>
                                             <div class="input-control">

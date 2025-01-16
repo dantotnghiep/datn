@@ -50,6 +50,9 @@
             @include('admin.layouts.partials.footer')
         </footer>
 
+        <!-- Feature tools -->
+		@include('admin.layouts.partials.feature-tools')
+
         
     </main>
 

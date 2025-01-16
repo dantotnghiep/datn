@@ -15,6 +15,16 @@ class ProductController extends Controller
         return view('admin.dashboard');
     }
 
+    public function listproduct()
+    {
+        return view('client.product.list-product');
+    }
+
+    public function productdetails()
+    {
+        return view('client.product.product-details');
+    }
+
     public function index()
     {
         return view('admin.products.product-list');
