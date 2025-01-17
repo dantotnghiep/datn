@@ -21,4 +21,11 @@ class ProductVariation extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function attributes(){
+        return $this->hasMany(VariationAttributeValue::class,'variation_id');
+    }
+    public function images(){
+        return $this->hasMany(ProductImage::class,'variation_id');
+    }
 }

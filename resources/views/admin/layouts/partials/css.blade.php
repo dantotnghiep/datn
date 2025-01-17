@@ -19,4 +19,42 @@
 <link id="main-css" href="/be/assets/css/style.css" rel="stylesheet">
 <!-- SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+    .menu-item {
+    position: relative;
+}
+
+.submenu {
+    list-style: none;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin: 0;
+    display: none; /* Ẩn submenu ban đầu */
+    z-index: 1000;
+}
+
+.submenu li {
+    border-bottom: 1px solid #ddd;
+}
+
+.submenu li:last-child {
+    border-bottom: none;
+}
+
+.submenu a {
+    text-decoration: none;
+    color: #333;
+    padding: 10px 20px;
+    display: block;
+}
+
+.submenu a:hover {
+    background-color: #f1f1f1;
+}
+
+</style>
 

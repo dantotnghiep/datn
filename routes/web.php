@@ -29,26 +29,11 @@ Route::get('/',[CategoryController::class,'dashboard'])->name('client.index');
 
 //Route Admin code đây cho mình nhé iu anh emmmm
 //admin/Product
-Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboard');
-Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.products.product-list');
-Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.products.add-product');
 
-//admin/Auth
-Route::get('/admin/login',[AuthController::class,'login'])->name('admin.auth.login');
-Route::get('/admin/forgot-password',[AuthController::class,'forgotpassword'])->name('admin.auth.forgot-password');
 
 //client/Auth
 Route::get('/login',[AuthController::class,'loginclient'])->name('client.auth.login');
 Route::get('/register',[AuthController::class,'register'])->name('clinet.auth.register');
-
-//admin/Category
-Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');
-Route::get('/admin/category/create', [CategoryController::class, 'create'])->name('admin.category.create');
-Route::post('/admin/category',[CategoryController::class,'store'])->name('admin.category.store');
-Route::get('/admin/category/{id}/edit',[CategoryController::class,'edit'])->name('admin.category.edit');
-Route::put('admin/category/{id}',[CategoryController::class,'update'])->name('admin.category.update');
-Route::delete('/admin/category/{id}',[CategoryController::class,'destroy'])->name('admin.category.destroy');
-
 
 //client/cart
 Route::get('/cart',[CartController::class,'cart'])->name('client.cart.cart');
@@ -58,6 +43,49 @@ Route::get('/checkout',[CartController::class,'checkout'])->name('client.cart.ch
 //client/product
 Route::get('/list-product',[ProductController::class,'listproduct'])->name('client.product.list-product');
 Route::get('/product-details',[ProductController::class,'productdetails'])->name('client.product.product-details');
+
+
+//ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
+
+Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboard');
+//admin/Auth
+Route::get('/admin/login',[AuthController::class,'login'])->name('admin.auth.login');
+Route::get('/admin/forgot-password',[AuthController::class,'forgotpassword'])->name('admin.auth.forgot-password');
+
+
+//admin/Category
+Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');
+Route::get('/admin/category/create', [CategoryController::class, 'create'])->name('admin.category.create');
+Route::post('/admin/category',[CategoryController::class,'store'])->name('admin.category.store');
+Route::get('/admin/category/{id}/edit',[CategoryController::class,'edit'])->name('admin.category.edit');
+Route::put('admin/category/{id}',[CategoryController::class,'update'])->name('admin.category.update');
+Route::delete('/admin/category/{id}',[CategoryController::class,'destroy'])->name('admin.category.destroy');
+
+//admin/attributes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//admin/Product
+Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboard');
+Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.products.product-list');
+Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.products.add-product');
+
+
+
+
 
 
 

@@ -1,8 +1,10 @@
 <div class="cr-sidebar-overlay"></div>
 <div class="cr-sidebar" data-mode="light">
     <div class="cr-sb-logo">
-        <a href="{{ route('admin.dashboard') }}" class="sb-full"><img src="/be/assets/img/logo/full-logo.png" alt="logo"></a>
-        <a href="{{ route('admin.dashboard') }}" class="sb-collapse"><img src="/be/assets/img/logo/collapse-logo.png" alt="logo"></a>
+        <a href="{{ route('admin.dashboard') }}" class="sb-full"><img src="/be/assets/img/logo/full-logo.png"
+                alt="logo"></a>
+        <a href="{{ route('admin.dashboard') }}" class="sb-collapse"><img src="/be/assets/img/logo/collapse-logo.png"
+                alt="logo"></a>
     </div>
     <div class="cr-sb-wrapper">
         <div class="cr-sb-content">
@@ -16,12 +18,35 @@
                                     class="ri-checkbox-blank-circle-line"></i>ecommerce</a></li>
                         <li><a href="{{ route('admin.products.product-list') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Product list</a></li>
-                        <li><a href="{{ route('admin.products.add-product') }}" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Add Product</a></li>
+                        <li class="menu-item">
+                            <a href="{{ route('admin.products.add-product') }}" class="cr-page-link drop"
+                                onclick="toggleSubmenu(event)">
+                                <i class="ri-checkbox-blank-circle-line"></i> Add Product
+                            </a>
+                            <!-- Submenu -->
+                            <ul class="submenu" style="display: none;">
+                                <li>
+                                    <a href="">
+                                        <i class="ri-checkbox-blank-circle-line"></i> Add Product
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="">
+                                        <i class="ri-checkbox-blank-circle-line"></i> Add Attribute
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="">
+                                        <i class="ri-checkbox-blank-circle-line"></i> Attribute Values
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>
                         <li><a href="add-sub-category.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Add Sub Category</a></li> 
+                                    class="ri-checkbox-blank-circle-line"></i>Add Sub Category</a></li>
                         <li><a href="order-list.html" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Order List</a></li>
                         <li class="cr-sb-item sb-subdrop-item">
@@ -103,3 +128,23 @@
         </div>
     </div>
 </div>
+<script>
+    function toggleSubmenu(event) {
+        event.preventDefault(); // Ngăn chặn hành động mặc định của liên kết
+        const submenu = event.target.nextElementSibling; // Lấy submenu kế tiếp
+        if (submenu && submenu.classList.contains('submenu')) {
+            submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+        }
+    }
+
+    // Đóng tất cả menu con khi click bên ngoài
+    document.addEventListener('click', function (event) {
+        const menus = document.querySelectorAll('.submenu');
+        menus.forEach(menu => {
+            if (!menu.contains(event.target) && !menu.previousElementSibling.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    });
+</script>
+
