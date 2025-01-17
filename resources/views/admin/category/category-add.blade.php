@@ -7,7 +7,7 @@
         <!-- Page title & breadcrumb -->
         <div class="cr-page-title cr-page-title-2">
             <div class="cr-breadcrumb">
-                <h5>Category111112221</h5>
+                <h5>Category1111</h5>
                 <ul>
                     <li><a href="index.html">Carrot</a></li>
                     <li>Category</li>
