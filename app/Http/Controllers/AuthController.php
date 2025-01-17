@@ -15,4 +15,14 @@ class AuthController extends Controller
     {
         return view('admin.auth.forgot-password');
     }
+
+    public function loginclient()
+    {
+        return view('client.auth.login');
+    }
+
+    public function register()
+    {
+        return view('client.auth.register');
+    }
 }

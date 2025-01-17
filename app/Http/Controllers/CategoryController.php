@@ -11,6 +11,11 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function dashboard()
+    {
+        return view('client.index');
+    }
+
     public function index()
     {
         $categories = Category::all();

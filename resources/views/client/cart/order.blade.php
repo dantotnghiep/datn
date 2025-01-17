@@ -1,5 +1,7 @@
 @extends('client.layouts.master')
 @section('content')
+@include('client.layouts.partials.lelf-navbar')
+
 <div class="dashbord-wrapper ml-110 mt-100">
     <div class="container">
         <div class="row">

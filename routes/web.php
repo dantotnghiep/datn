@@ -18,9 +18,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('client.index');
-});
+Route::get('/',[CategoryController::class,'dashboard'])->name('client.index');
 
 // Route::prefix('admin')
 //     ->group(function () {
@@ -38,6 +36,10 @@ Route::get('/admin/add-product',[ProductController::class,'create'])->name('admi
 //admin/Auth
 Route::get('/admin/login',[AuthController::class,'login'])->name('admin.auth.login');
 Route::get('/admin/forgot-password',[AuthController::class,'forgotpassword'])->name('admin.auth.forgot-password');
+
+//client/Auth
+Route::get('/login',[AuthController::class,'loginclient'])->name('client.auth.login');
+Route::get('/register',[AuthController::class,'register'])->name('clinet.auth.register');
 
 //admin/Category
 Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');

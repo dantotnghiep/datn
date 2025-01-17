@@ -1,5 +1,7 @@
 @extends('client.layouts.master')
 @section('content')
+@include('client.layouts.partials.lelf-navbar')
+
     <div class="checkout-area ml-110 mt-100">
         <div class="container">
 
@@ -90,7 +92,7 @@
                             <ul class="added-products">
                                 <li class="single-product">
                                     <div class="product-img">
-                                        <img src="assets/images/product/added-p1.png" alt="">
+                                        <img src="/client/assets/images/product/added-p1.png" alt="">
                                     </div>
                                     <div class="product-info">
                                         <h5 class="product-title"><a href="product.html">Something Yellow Party
@@ -108,7 +110,7 @@
                                 </li>
                                 <li class="single-product">
                                     <div class="product-img">
-                                        <img src="assets/images/product/added-p2.png" alt="">
+                                        <img src="/client/assets/images/product/added-p2.png" alt="">
                                     </div>
                                     <div class="product-info">
                                         <h5 class="product-title"><a href="product.html">Women Yellow Pattern Shirt</a>
@@ -126,7 +128,7 @@
                                 </li>
                                 <li class="single-product">
                                     <div class="product-img">
-                                        <img src="assets/images/product/added-p3.png" alt="">
+                                        <img src="/client/assets/images/product/added-p3.png" alt="">
                                     </div>
                                     <div class="product-info">
                                         <h5 class="product-title"><a href="product.html">Man Mannequin Casual</a></h5>
@@ -186,7 +188,7 @@
                                     <label class="form-check-label" for="flexRadioDefault3">
                                         PayPal
                                     </label>
-                                    <img src="assets/images/payment/payment-cards.png" alt="">
+                                    <img src="/client/assets/images/payment/payment-cards.png" alt="">
                                     <a href="#" class="about-paypal">What is PayPal</a>
                                 </div>
                             </div>

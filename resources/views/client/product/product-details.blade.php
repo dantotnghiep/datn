@@ -1,5 +1,7 @@
 @extends('client.layouts.master')
 @section('content')
+@include('client.layouts.partials.lelf-navbar')
+
 <div class="product-details-area mt-100 ml-110">
     <div class="container">
         <div class="product-details-wrapper">
@@ -10,25 +12,25 @@
                             <div class="product-variation active" id="v-pills-home-tab" data-bs-toggle="pill"
                                 data-bs-target="#v-pills-home" role="tab" aria-controls="v-pills-home">
                                 <div class="pd-showcase-img">
-                                    <img src="assets/images/product/pd-sm1.png" alt="">
+                                    <img src="/client/assets/images/product/pd-sm1.png" alt="">
                                 </div>
                             </div>
                             <div class="product-variation" id="v-pills-profile-tab" data-bs-toggle="pill"
                                 data-bs-target="#v-pills-profile" role="tab" aria-controls="v-pills-profile">
                                 <div class="pd-showcase-img">
-                                    <img src="assets/images/product/pd-sm2.png" alt="">
+                                    <img src="/client/assets/images/product/pd-sm2.png" alt="">
                                 </div>
                             </div>
                             <div class="product-variation" id="v-pills-messages-tab" data-bs-toggle="pill"
                                 data-bs-target="#v-pills-messages" role="tab" aria-controls="v-pills-messages">
                                 <div class="pd-showcase-img">
-                                    <img src="assets/images/product/pd-sm3.png" alt="">
+                                    <img src="/client/assets/images/product/pd-sm3.png" alt="">
                                 </div>
                             </div>
                             <div class="product-variation" id="v-pills-settings-tab" data-bs-toggle="pill"
                                 data-bs-target="#v-pills-settings" role="tab" aria-controls="v-pills-settings">
                                 <div class="pd-showcase-img">
-                                    <img src="assets/images/product/pd-sm4.png" alt="">
+                                    <img src="/client/assets/images/product/pd-sm4.png" alt="">
                                 </div>
                             </div>
                         </div>
@@ -36,25 +38,25 @@
                             <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
                                 aria-labelledby="v-pills-home-tab">
                                 <div class="pd-preview-img">
-                                    <img src="assets/images/product/pd-xl2.png" alt="">
+                                    <img src="/client/assets/images/product/pd-xl2.png" alt="">
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="v-pills-profile" role="tabpanel"
                                 aria-labelledby="v-pills-profile-tab">
                                 <div class="pd-preview-img">
-                                    <img src="assets/images/product/pd-xl3.png" alt="">
+                                    <img src="/client/assets/images/product/pd-xl3.png" alt="">
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="v-pills-messages" role="tabpanel"
                                 aria-labelledby="v-pills-messages-tab">
                                 <div class="pd-preview-img">
-                                    <img src="assets/images/product/pd-xl14.png" alt="">
+                                    <img src="/client/assets/images/product/pd-xl14.png" alt="">
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="v-pills-settings" role="tabpanel"
                                 aria-labelledby="v-pills-settings-tab">
                                 <div class="pd-preview-img">
-                                    <img src="assets/images/product/pd-xl1.png" alt="">
+                                    <img src="/client/assets/images/product/pd-xl1.png" alt="">
                                 </div>
                             </div>
                         </div>
@@ -206,7 +208,7 @@
                                             <div class="client-review-card">
                                                 <div class="review-card-head">
                                                     <div class="client-img">
-                                                        <img src="assets/images/shapes/reviewer1.png" alt="">
+                                                        <img src="/client/assets/images/shapes/reviewer1.png" alt="">
                                                     </div>
                                                     <div class="client-info">
                                                         <h5 class="client-name">Jenny Wilson <span
@@ -240,7 +242,7 @@
                                             <div class="client-review-card">
                                                 <div class="review-card-head">
                                                     <div class="client-img">
-                                                        <img src="assets/images/shapes/reviewer2.png" alt="">
+                                                        <img src="/client/assets/images/shapes/reviewer2.png" alt="">
                                                     </div>
                                                     <div class="client-info">
                                                         <h5 class="client-name">Jenny Wilson <span
