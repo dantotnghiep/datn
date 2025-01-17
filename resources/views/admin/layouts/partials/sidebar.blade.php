@@ -14,14 +14,14 @@
                     <ul class="cr-sb-drop condense">
                         <li><a href="index.html" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>ecommerce</a></li>
-                        <li><a href="product-list.html" class="cr-page-link drop"><i
+                        <li><a href="{{ route('admin.products.product-list') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Product list</a></li>
-                        <li><a href="add-product.html" class="cr-page-link drop"><i
+                        <li><a href="{{ route('admin.products.add-product') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Product</a></li>
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>
                         <li><a href="add-sub-category.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Add Sub Category</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Add Sub Category</a></li> 
                         <li><a href="order-list.html" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Order List</a></li>
                         <li class="cr-sb-item sb-subdrop-item">

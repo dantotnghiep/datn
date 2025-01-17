@@ -45,7 +45,8 @@ Route::get('/register',[AuthController::class,'register'])->name('clinet.auth.re
 Route::get('/admin/category',[CategoryController::class,'index'])->name('admin.category');
 Route::get('/admin/category/create', [CategoryController::class, 'create'])->name('admin.category.create');
 Route::post('/admin/category',[CategoryController::class,'store'])->name('admin.category.store');
-
+Route::get('/admin/category/{id}/edit',[CategoryController::class,'edit'])->name('admin.category.edit');
+Route::put('admin/category/{id}',[CategoryController::class,'update'])->name('admin.category.update');
 Route::delete('/admin/category/{id}',[CategoryController::class,'destroy'])->name('admin.category.destroy');
 
 
@@ -58,6 +59,5 @@ Route::get('/checkout',[CartController::class,'checkout'])->name('client.cart.ch
 Route::get('/list-product',[ProductController::class,'listproduct'])->name('client.product.list-product');
 Route::get('/product-details',[ProductController::class,'productdetails'])->name('client.product.product-details');
 
-Route::get('/admin/category/{id}/edit',[CategoryController::class,'edit'])->name('admin.category.edit');
-Route::put('admin/category/{id}',[CategoryController::class,'update'])->name('admin.category.update');
+
 
