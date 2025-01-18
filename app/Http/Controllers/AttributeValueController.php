@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AttributeValueController extends Controller
 {
@@ -11,7 +14,9 @@ class AttributeValueController extends Controller
      */
     public function index()
     {
-        //
+        $attributeValues = AttributeValue::with('attribute')->get();
+        $attributes = Attribute::all(); // Lấy tất cả AttributeValues kèm Attribute liên kết
+        return view('admin.attribute.attribute-values', compact('attributeValues','attributes'));
     }
 
     /**
@@ -19,7 +24,8 @@ class AttributeValueController extends Controller
      */
     public function create()
     {
-        return view('admin.attribute.attribute-values');
+        $attributes = Attribute::all(); // Lấy danh sách tất cả Attributes
+        return view('admin.attribute.attribute-values', compact('attributes'));
     }
 
     /**
@@ -27,7 +33,17 @@ class AttributeValueController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'attribute_id' => 'required|exists:attributes,id',
+            'value' => 'required|string|max:255',
+            'slug' => 'nullable|string|unique:attribute_values,slug',
+        ]);
+        AttributeValue::create([
+            'attribute_id' => $request->attribute_id,
+            'value' => $request->value,
+            'slug' =>$request->slug ?? Str::slug($request->value, '-'),
+        ]);
+        return redirect()->route('admin.attribute-values')->with('success','Thêm giá tri thuộc tính thành công');
     }
 
     /**
