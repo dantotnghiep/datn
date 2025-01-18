@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attribute;
 use Illuminate\Http\Request;
 
 class AttributeController extends Controller
@@ -11,7 +12,8 @@ class AttributeController extends Controller
      */
     public function index()
     {
-        
+        $attributes = Attribute::all();
+        return view('admin.attribute.attribute', compact('attributes'));
     }
 
     /**
@@ -27,7 +29,16 @@ class AttributeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|unique:attributes,slug|max:255',
+        ]);
+
+        Attribute::create([
+                'name'=>$request->name,
+                'slug'=>$request->slug,
+        ]);
+        return redirect()->route('admin.attribute.attribute')->with('success','Thuộc Tính đã được thêm');
     }
 
     /**
@@ -43,7 +54,9 @@ class AttributeController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $attributes = Attribute::all();
+        $attribute = Attribute::findOrFail($id);
+        return view('admin.attribute.attribute-edit',compact('attribute','attributes'));
     }
 
     /**
@@ -51,7 +64,17 @@ class AttributeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $attribute = Attribute::findOrFail($id);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|unique:attributes,slug,' . $id,
+        ]);
+
+        $attribute->update([
+            'name'=>$request->name,
+            'slug'=>$request->slug,
+        ]);
+        return redirect()->route('admin.attribute.attribute')->with('success',"Update Thành Công");
     }
 
     /**
@@ -59,6 +82,8 @@ class AttributeController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $attribute = Attribute::findOrFail($id);
+        $attribute->delete();
+        return redirect()->route('admin.attribute.attribute')->with('success','Xóa Thành Công Thuộc Tính Của Sản Phẩm');
     }
 }

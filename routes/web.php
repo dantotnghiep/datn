@@ -6,7 +6,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
-use App\Models\Category;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -64,7 +63,14 @@ Route::put('admin/category/{id}',[CategoryController::class,'update'])->name('ad
 Route::delete('/admin/category/{id}',[CategoryController::class,'destroy'])->name('admin.category.destroy');
 
 //admin/attributes
-Route::get('/admin/attribute',[AttributeController::class,'create'])->name('admin.attribute.attribute');
+Route::get('/admin/attribute',[AttributeController::class,'index'])->name('admin.attribute.attribute');
+Route::get('/admin/attribute/create',[AttributeController::class,'create'])->name('admin.attribute.create');
+Route::post('/admin/attribute',[AttributeController::class,'store'])->name('admin.attribute.store');
+Route::get('/admin/attribute/{id}/edit',[AttributeController::class,'edit'])->name('admin.attribute.edit');
+Route::put('/admin/attribute/{id}',[AttributeController::class,'update'])->name('admin.attribute.update');
+Route::delete('admin/attribute/{id}/delete',[AttributeController::class,'destroy'])->name('admin.attribute.destroy');
+
+//admin/attributesValues
 Route::get('/admin/attribute-values',[AttributeValueController::class,'create'])->name('admin.attribute.attribute-values');
 
 
