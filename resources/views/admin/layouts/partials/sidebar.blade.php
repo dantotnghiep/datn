@@ -19,24 +19,24 @@
                         <li><a href="{{ route('admin.products.product-list') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Product list</a></li>
                         <li class="menu-item">
-                            <a href="{{ route('admin.products.add-product') }}" class="cr-page-link drop"
+                            <a href="" class="cr-page-link drop"
                                 onclick="toggleSubmenu(event)">
                                 <i class="ri-checkbox-blank-circle-line"></i> Add Product
                             </a>
                             <!-- Submenu -->
                             <ul class="submenu" style="display: none;">
                                 <li>
-                                    <a href="">
+                                    <a href="{{ route('admin.products.add-product') }}">
                                         <i class="ri-checkbox-blank-circle-line"></i> Add Product
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="">
+                                    <a href="{{ route('admin.attribute.attribute') }}">
                                         <i class="ri-checkbox-blank-circle-line"></i> Add Attribute
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="">
+                                    <a href="{{ route('admin.attribute.attribute-values') }}">
                                         <i class="ri-checkbox-blank-circle-line"></i> Attribute Values
                                     </a>
                                 </li>

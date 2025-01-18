@@ -19,7 +19,7 @@ class AttributeValueController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.attribute.attribute-values');
     }
 
     /**

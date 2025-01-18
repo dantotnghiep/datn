@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AttributeController;
+use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -62,7 +64,8 @@ Route::put('admin/category/{id}',[CategoryController::class,'update'])->name('ad
 Route::delete('/admin/category/{id}',[CategoryController::class,'destroy'])->name('admin.category.destroy');
 
 //admin/attributes
-
+Route::get('/admin/attribute',[AttributeController::class,'create'])->name('admin.attribute.attribute');
+Route::get('/admin/attribute-values',[AttributeValueController::class,'create'])->name('admin.attribute.attribute-values');
 
 
 
