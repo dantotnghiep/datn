@@ -18,30 +18,35 @@
                                     class="ri-checkbox-blank-circle-line"></i>ecommerce</a></li>
                         <li><a href="{{ route('admin.product.product-list') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Product list</a></li>
-                        <li class="menu-item">
-                            <a href="" class="cr-page-link drop"
-                                onclick="toggleSubmenu(event)">
-                                <i class="ri-checkbox-blank-circle-line"></i> Add Product
-                            </a>
-                            <!-- Submenu -->
-                            <ul class="submenu" style="display: none;">
-                                <li>
-                                    <a href="{{ route('admin.product.add-product') }}">
-                                        <i class="ri-checkbox-blank-circle-line"></i> Add Product
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('admin.attribute.attribute') }}">
-                                        <i class="ri-checkbox-blank-circle-line"></i> Add Attribute
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('admin.attribute.attribute-values') }}">
-                                        <i class="ri-checkbox-blank-circle-line"></i> Attribute Values
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                       <li class="menu-item">
+    <a href="#" class="cr-page-link drop flex items-center justify-between px-4 py-2 text-gray-200 hover:bg-gray-700 rounded-md"
+       onclick="toggleSubmenu(event)">
+      
+         Add Product
+    </a>
+    <!-- Submenu -->
+    <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md p-2">
+        <li>
+            <a href="{{ route('admin.product.add-product') }}" 
+               class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                Add Product
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.attribute.attribute') }}" 
+               class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                Add Attribute
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.attribute.attribute-values') }}" 
+               class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                Attribute Values
+            </a>
+        </li>
+    </ul>
+</li>
+
 
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>

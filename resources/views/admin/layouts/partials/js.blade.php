@@ -17,6 +17,13 @@
 <script src="/be/assets/js/vendor/daterangepicker.js"></script>
 <script src="/be/assets/js/vendor/date-range.js"></script>
 
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+
+
+
+
 <!-- Main Custom -->
 <script src="/be/assets/js/main.js"></script>
 <script src="/be/assets/js/data/ecommerce-chart-data.js"></script>
@@ -40,4 +47,6 @@
             }
         });
     }
+    
 </script>
+
