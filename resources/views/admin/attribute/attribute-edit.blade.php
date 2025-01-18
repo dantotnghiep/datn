@@ -35,15 +35,16 @@
                             <div class="cr-cat-list cr-card card-default mb-24px">
                                 <div class="cr-card-content">
                                     <div class="cr-cat-form">
-                                        <h3>Add New Attribute</h3>
+                                        <h3>Edit Attribute</h3>
 
-                                        <form action="{{ route('admin.attribute.store') }}" method="POST">
+                                        <form action="{{ route('admin.attribute.update',$attribute->id) }}" method="POST">
                                             @csrf
+                                            @method('PUT')
                                             <div class="form-group">
                                                 <label>Attribute Name</label>
                                                 <div class="col-12">
                                                     <input id="name" name="name"
-                                                        class="form-control here slug-title" type="text">
+                                                        class="form-control here slug-title" type="text" value="{{ $attribute->name }}">
                                                 </div>
                                             </div>
 
@@ -51,13 +52,13 @@
                                                 <label>Slug</label>
                                                 <div class="col-12">
                                                     <input id="slug" name="slug" class="form-control here set-slug"
-                                                        type="text">
+                                                        type="text" value="{{ $attribute->slug }}">
                                                 </div>
                                             </div>
 
                                             <div class="row">
                                                 <div class="col-12 d-flex">
-                                                    <button type="submit" class="cr-btn-primary">Submit</button>
+                                                    <button type="submit" class="cr-btn-primary">Cập Nhập</button>
                                                 </div>
                                             </div>
 
@@ -107,7 +108,7 @@
 
                                                     <div class="dropdown-menu">
                                                         <!-- Nút Edit -->
-                                                        <a class="dropdown-item" href="{{ route('admin.attribute.edit',$attribute->id) }}">Edit</a>
+                                                        <a class="dropdown-item" href="#">Edit</a>
 
                                                         <!-- Nút Delete -->
                                                         <form action="{{ route('admin.attribute.destroy', $attribute->id) }}" method="POST" class="dropdown-item p-0 m-0">
