@@ -12,7 +12,7 @@ class AttributeController extends Controller
      */
     public function index()
     {
-        $attributes = Attribute::all();
+        $attributes = Attribute::with('values')->get();
         return view('admin.attribute.attribute', compact('attributes'));
     }
 

@@ -15,19 +15,19 @@
                 </div>
             </div>
             @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-        @endif
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <div class="row cr-category">
                 <div class="col-xl-4 col-lg-12">
                     <div class="team-sticky-bar">
@@ -83,46 +83,52 @@
                                     </thead>
 
                                     <tbody>
-                                        @foreach ( $attributes as $attribute )
-                                        <tr>
-                                            <td>{{ $attribute->name }}</td>
-                                            <td>
-                                                {{-- <span class="cr-sub-cat-list">
-                                                    <span class="cr-sub-cat-count"
-                                                        title="Total Number Attribute Values">5</span>
-                                                    <span class="cr-sub-cat-tag">T-shirt</span>
-                                                    <span class="cr-sub-cat-tag">Shirt</span>
-                                                    <span class="cr-sub-cat-tag">Dress</span>
-                                                    <span class="cr-sub-cat-tag">Jeans</span>
-                                                    <span class="cr-sub-cat-tag">Top</span>
-                                                </span> --}}
-                                            </td>
-                                            <td>
-                                                <div class="dropdown">
-                                                    <button type="button"
-                                                        class="btn btn-outline-success dropdown-toggle dropdown-toggle-split"
-                                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                        <span class="sr-only"><i class="ri-settings-3-line"></i></span>
-                                                    </button>
+                                        @foreach ($attributes as $attribute)
+                                            <tr>
+                                                <td>{{ $attribute->name }}</td>
+                                                <td>
+                                                    @if ($attribute->values->isEmpty())
+                                                        <span class="text-muted">No values available</span>
+                                                    @else
+                                                        <span class="cr-sub-cat-list">
+                                                            @foreach ($attribute->values as $value)
+                                                                <span class="cr-sub-cat-tag">{{ $value->value }}</span>
+                                                            @endforeach
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button type="button"
+                                                            class="btn btn-outline-success dropdown-toggle dropdown-toggle-split"
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false">
+                                                            <span class="sr-only"><i class="ri-settings-3-line"></i></span>
+                                                        </button>
 
-                                                    <div class="dropdown-menu">
-                                                        <!-- Nút Edit -->
-                                                        <a class="dropdown-item" href="{{ route('admin.attribute.edit',$attribute->id) }}">Edit</a>
+                                                        <div class="dropdown-menu">
+                                                            <!-- Nút Edit -->
+                                                            <a class="dropdown-item"
+                                                                href="{{ route('admin.attribute.edit', $attribute->id) }}">Edit</a>
 
-                                                        <!-- Nút Delete -->
-                                                        <form action="{{ route('admin.attribute.destroy', $attribute->id) }}" method="POST" class="dropdown-item p-0 m-0">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-link text-danger p-0 m-0" style="text-decoration: none;"
-                                                                onclick="return confirm('Bạn có chắc chắn muốn xóa thuộc tính này?')">
-                                                                Delete
-                                                            </button>
-                                                        </form>
+                                                            <!-- Nút Delete -->
+                                                            <form
+                                                                action="{{ route('admin.attribute.destroy', $attribute->id) }}"
+                                                                method="POST" class="dropdown-item p-0 m-0">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="btn btn-link text-danger p-0 m-0"
+                                                                    style="text-decoration: none;"
+                                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa thuộc tính này?')">
+                                                                    Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
+                                                </td>
 
-                                        </tr>
+                                            </tr>
                                         @endforeach
                                     </tbody>
                                 </table>

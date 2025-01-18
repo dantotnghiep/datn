@@ -71,7 +71,12 @@ Route::put('/admin/attribute/{id}',[AttributeController::class,'update'])->name(
 Route::delete('admin/attribute/{id}/delete',[AttributeController::class,'destroy'])->name('admin.attribute.destroy');
 
 //admin/attributesValues
-Route::get('/admin/attribute-values',[AttributeValueController::class,'create'])->name('admin.attribute.attribute-values');
+Route::get('/admin/attribute-values',[AttributeValueController::class,'index'])->name('admin.attribute-values');
+Route::get('/admin/attribute-values/create',[AttributeValueController::class,'create'])->name('admin.attribute-values.create');
+Route::post('/admin/attribute-values',[AttributeValueController::class,'store'])->name('admin.attribute-values.store');
+
+
+
 
 
 //admin/Product

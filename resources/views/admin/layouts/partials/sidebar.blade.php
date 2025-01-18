@@ -36,7 +36,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('admin.attribute.attribute-values') }}">
+                                    <a href="{{ route('admin.attribute-values') }}">
                                         <i class="ri-checkbox-blank-circle-line"></i> Attribute Values
                                     </a>
                                 </li>
