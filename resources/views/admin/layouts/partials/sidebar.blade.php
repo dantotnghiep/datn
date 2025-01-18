@@ -43,6 +43,7 @@
                             </ul>
                         </li>
 
+
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>
                         <li><a href="add-sub-category.html" class="cr-page-link drop"><i

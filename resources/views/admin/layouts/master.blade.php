@@ -17,8 +17,18 @@
     <meta name="keywords" content="admin, dashboard, ecommerce, panel" />
     <meta name="description" content="Carrot - Admin.">
     <meta name="author" content="ashishmaraviya">
+    
+
 
     <title>Carrot - Admin.</title>
+
+     <!-- Link Remix Icon -->
+     <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+
+
 
     @include('admin.layouts.partials.css')
 
