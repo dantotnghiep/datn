@@ -16,7 +16,7 @@
                     <ul class="cr-sb-drop condense">
                         <li><a href="index.html" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>ecommerce</a></li>
-                        <li><a href="{{ route('admin.products.product-list') }}" class="cr-page-link drop"><i
+                        <li><a href="{{ route('admin.product.product-list') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Product list</a></li>
                         <li class="menu-item">
                             <a href="" class="cr-page-link drop"
@@ -26,7 +26,7 @@
                             <!-- Submenu -->
                             <ul class="submenu" style="display: none;">
                                 <li>
-                                    <a href="{{ route('admin.products.add-product') }}">
+                                    <a href="{{ route('admin.product.add-product') }}">
                                         <i class="ri-checkbox-blank-circle-line"></i> Add Product
                                     </a>
                                 </li>

@@ -68,23 +68,10 @@ Route::get('/admin/attribute',[AttributeController::class,'create'])->name('admi
 Route::get('/admin/attribute-values',[AttributeValueController::class,'create'])->name('admin.attribute.attribute-values');
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 //admin/Product
 Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboard');
-Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.products.product-list');
-Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.products.add-product');
+Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.product.product-list');
+Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.product.add-product');
 
 
 
