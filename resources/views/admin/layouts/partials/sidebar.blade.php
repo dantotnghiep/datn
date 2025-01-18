@@ -23,9 +23,9 @@
        onclick="toggleSubmenu(event)">
       
          Add Product
-    </a>
+    </a>    
     <!-- Submenu -->
-    <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md p-2">
+    <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md ">
         <li>
             <a href="{{ route('admin.product.add-product') }}" 
                class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">

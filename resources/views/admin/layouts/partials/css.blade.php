@@ -34,7 +34,7 @@
     position: absolute;
     left: 0;
     top: 100%;
-    background-color: #cfcfcf;
+    /* background-color: #cfcfcf; */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 0;
     margin: 0;
@@ -59,7 +59,10 @@
 }
 
 .submenu a:hover {
-    background-color: #f1f1f1;
+    /* background-color: #ffc7c7; */
+    margin: 5px ;
+    
+    
 }
 .submenu {
     position: relative; /* Giữ nguyên submenu bên trong parent */
