@@ -74,6 +74,8 @@ Route::delete('admin/attribute/{id}/delete',[AttributeController::class,'destroy
 Route::get('/admin/attribute-values',[AttributeValueController::class,'index'])->name('admin.attribute-values');
 Route::get('/admin/attribute-values/create',[AttributeValueController::class,'create'])->name('admin.attribute-values.create');
 Route::post('/admin/attribute-values',[AttributeValueController::class,'store'])->name('admin.attribute-values.store');
+Route::delete('/admin/attribute-values/{id}/delete',[AttributeValueController::class,'destroy'])->name('admin.attribute-values.delete');
+
 
 
 
@@ -82,7 +84,9 @@ Route::post('/admin/attribute-values',[AttributeValueController::class,'store'])
 //admin/Product
 Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboard');
 Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.product.product-list');
-Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.product.add-product');
+
+Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.product.create');
+Route::post('/admin/product',[ProductController::class,'store'])->name('admin.product.store');
 
 
 

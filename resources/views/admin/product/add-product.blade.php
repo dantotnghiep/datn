@@ -3,222 +3,201 @@
 @section('content')
     <div class="cr-main-content">
         <div class="container-fluid">
-
             <div class="cr-page-title cr-page-title-2">
                 <div class="cr-breadcrumb">
                     <h5>Add Product</h5>
                     <ul>
-                        <li><a href="index.html">Carrot</a></li>
+                        <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                         <li>Add Product</li>
                     </ul>
                 </div>
             </div>
+
+           
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+         
+            @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+           
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="row">
                 <div class="col-md-12">
                     <div class="cr-card card-default">
                         <div class="cr-card-content">
-                            <div class="row cr-product-uploads">
-                                <div class="col-lg-4 mb-991">
-                                    <div class="cr-vendor-img-upload">
-                                        <div class="cr-vendor-main-img">
-                                            <div class="avatar-upload">
-                                                <div class="avatar-edit">
-                                                    <input type='file' id="product_main" class="cr-image-upload"
-                                                        accept=".png, .jpg, .jpeg">
-                                                    <label><i class="ri-pencil-line"></i></label>
+                            <form action="{{ route('admin.product.store') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="row cr-product-uploads">
+                                  
+                                    <div class="col-lg-4 mb-991">
+                                        <div class="cr-vendor-img-upload">
+                                            <label for="main_image">Main Image</label>
+                                            <input type="file" id="main_image" name="main_image" class="form-control" accept=".png, .jpg, .jpeg" required>
+                                        </div>
+                                    </div>
+
+                                    
+                                    <div class="col-lg-8">
+                                        <label for="additional_images">Additional Images</label>
+                                        <input type="file" id="additional_images" name="additional_images[]" class="form-control" accept=".png, .jpg, .jpeg" multiple>
+                                    </div>
+                                </div>
+
+                               
+                                <div class="row g-3 mt-4">
+                                    <div class="col-md-6">
+                                        <label for="name">Product Name</label>
+                                        <input type="text" name="name" class="form-control" id="name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="slug">Slug</label>
+                                        <input type="text" name="slug" class="form-control" id="slug" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="price">Price (USD)</label>
+                                        <input type="number" name="price" class="form-control" id="price" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="sale_price">Sale Price (USD)</label>
+                                        <input type="number" name="sale_price" class="form-control" id="sale_price">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="quantity">Quantity</label>
+                                        <input type="number" name="quantity" class="form-control" id="quantity" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="category_id">Category</label>
+                                        <select name="category_id" id="category_id" class="form-control" required>
+                                            <option value="">-- Select Category --</option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                               
+                                <div class="mt-4">
+                                    <h4>Attributes</h4>
+                                    <div id="attributes">
+                                        <div class="attribute-item">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label for="attribute_0">Choose Attribute</label>
+                                                    <select name="attributes[0][attribute_id]" class="form-control select-attribute" data-index="0" id="attribute_0" required>
+                                                        <option value="">-- Select Attribute --</option>
+                                                        @foreach ($attributes as $attribute)
+                                                            <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
-                                                <div class="avatar-preview cr-preview">
-                                                    <div class="imagePreview cr-div-preview">
-                                                        <img class="cr-image-preview" src="/be/assets/img/product/preview.jpg"
-                                                            alt="edit">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="thumb-upload-set colo-md-12">
-                                                <div class="thumb-upload">
-                                                    <div class="thumb-edit">
-                                                        <input type='file' id="thumbUpload01" class="cr-image-upload"
-                                                            accept=".png, .jpg, .jpeg">
-                                                        <label><i class="ri-pencil-line"></i></label>
-                                                    </div>
-                                                    <div class="thumb-preview cr-preview">
-                                                        <div class="image-thumb-preview">
-                                                            <img class="image-thumb-preview cr-image-preview"
-                                                                src="/be/assets/img/product/preview-2.jpg" alt="edit">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="thumb-upload">
-                                                    <div class="thumb-edit">
-                                                        <input type='file' id="thumbUpload02" class="cr-image-upload"
-                                                            accept=".png, .jpg, .jpeg">
-                                                        <label><i class="ri-pencil-line"></i></label>
-                                                    </div>
-                                                    <div class="thumb-preview cr-preview">
-                                                        <div class="image-thumb-preview">
-                                                            <img class="image-thumb-preview cr-image-preview"
-                                                                src="/be/assets/img/product/preview-2.jpg" alt="edit">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="thumb-upload">
-                                                    <div class="thumb-edit">
-                                                        <input type='file' id="thumbUpload03" class="cr-image-upload"
-                                                            accept=".png, .jpg, .jpeg">
-                                                        <label><i class="ri-pencil-line"></i></label>
-                                                    </div>
-                                                    <div class="thumb-preview cr-preview">
-                                                        <div class="image-thumb-preview">
-                                                            <img class="image-thumb-preview cr-image-preview"
-                                                                src="/be/assets/img/product/preview-2.jpg" alt="edit">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="thumb-upload">
-                                                    <div class="thumb-edit">
-                                                        <input type='file' id="thumbUpload04" class="cr-image-upload"
-                                                            accept=".png, .jpg, .jpeg">
-                                                        <label><i class="ri-pencil-line"></i></label>
-                                                    </div>
-                                                    <div class="thumb-preview cr-preview">
-                                                        <div class="image-thumb-preview">
-                                                            <img class="image-thumb-preview cr-image-preview"
-                                                                src="/be/assets/img/product/preview-2.jpg" alt="edit">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="thumb-upload">
-                                                    <div class="thumb-edit">
-                                                        <input type='file' id="thumbUpload05" class="cr-image-upload"
-                                                            accept=".png, .jpg, .jpeg">
-                                                        <label><i class="ri-pencil-line"></i></label>
-                                                    </div>
-                                                    <div class="thumb-preview cr-preview">
-                                                        <div class="image-thumb-preview">
-                                                            <img class="image-thumb-preview cr-image-preview"
-                                                                src="/be/assets/img/product/preview-2.jpg" alt="edit">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="thumb-upload">
-                                                    <div class="thumb-edit">
-                                                        <input type='file' id="thumbUpload06" class="cr-image-upload"
-                                                            accept=".png, .jpg, .jpeg">
-                                                        <label><i class="ri-pencil-line"></i></label>
-                                                    </div>
-                                                    <div class="thumb-preview cr-preview">
-                                                        <div class="image-thumb-preview">
-                                                            <img class="image-thumb-preview cr-image-preview"
-                                                                src="/be/assets/img/product/preview-2.jpg" alt="edit">
-                                                        </div>
-                                                    </div>
+                                                <div class="col-md-6 attribute-values-container" id="attribute-values-container-0">
+                                                    
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                    <button type="button" id="add-attribute" class="btn btn-secondary mt-3">Add Attribute</button>
                                 </div>
-                                <div class="col-lg-8">
-                                    <div class="cr-vendor-upload-detail">
-                                        <form class="row g-3">
-                                            <div class="col-md-6">
-                                                <label for="inputEmail4" class="form-label">Product name</label>
-                                                <input type="text" class="form-control slug-title" id="inputEmail4">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Select Categories</label>
-                                                <select class="form-control form-select">
-                                                    <optgroup label="Fashion">
-                                                        <option value="t-shirt">T-shirt</option>
-                                                        <option value="dress">Dress</option>
-                                                    </optgroup>
-                                                    <optgroup label="Furniture">
-                                                        <option value="table">Table</option>
-                                                        <option value="sofa">Sofa</option>
-                                                    </optgroup>
-                                                    <optgroup label="Electronic">
-                                                        <option value="phone">I Phone</option>
-                                                        <option value="laptop">Laptop</option>
-                                                    </optgroup>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <label for="slug" class="col-12 col-form-label">Slug</label>
-                                                <div class="col-12">
-                                                    <input id="slug" name="slug"
-                                                        class="form-control here set-slug" type="text">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <label class="form-label">Sort Description</label>
-                                                <textarea class="form-control" rows="2"></textarea>
-                                            </div>
-                                            <div class="col-md-4 mb-25">
-                                                <label class="form-label color-label">Colors</label>
-                                                <input type="color" class="form-control form-control-color"
-                                                    id="exampleColorInput1" value="#ff6191" title="Choose your color">
-                                                <input type="color" class="form-control form-control-color"
-                                                    id="exampleColorInput2" value="#33317d" title="Choose your color">
-                                                <input type="color" class="form-control form-control-color"
-                                                    id="exampleColorInput3" value="#56d4b7" title="Choose your color">
-                                                <input type="color" class="form-control form-control-color"
-                                                    id="exampleColorInput4" value="#009688" title="Choose your color">
-                                            </div>
-                                            <div class="col-md-8 mb-25">
-                                                <label class="form-label">Size</label>
-                                                <div class="form-checkbox-box">
-                                                    <div class="form-check form-check-inline">
-                                                        <input type="checkbox" name="size1" value="size">
-                                                        <label>S</label>
+                                
+                              
+                                <div class="col-md-12 mt-4">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                                
+                                <script>
+                                    const attributes = @json($attributes); 
+                                    let attributeIndex = 1;
+                                
+                                   
+                                    document.getElementById('add-attribute').addEventListener('click', function () {
+                                        const attributeHtml = `
+                                            <div class="attribute-item mt-3">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="attribute_${attributeIndex}">Choose Attribute</label>
+                                                        <select name="attributes[${attributeIndex}][attribute_id]" class="form-control select-attribute" data-index="${attributeIndex}" id="attribute_${attributeIndex}" required>
+                                                            <option value="">-- Select Attribute --</option>
+                                                            ${attributes.map(attr => `<option value="${attr.id}">${attr.name}</option>`).join('')}
+                                                        </select>
                                                     </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input type="checkbox" name="size1" value="size">
-                                                        <label>M</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input type="checkbox" name="size1" value="size">
-                                                        <label>L</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input type="checkbox" name="size1" value="size">
-                                                        <label>XL</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input type="checkbox" name="size1" value="size">
-                                                        <label>XXL</label>
+                                                    <div class="col-md-6 attribute-values-container" id="attribute-values-container-${attributeIndex}">
+                                                        <!-- Attribute values with delete buttons will appear here -->
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Price <span>( In USD
-                                                        )</span></label>
-                                                <input type="number" class="form-control" id="price1">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Quantity</label>
-                                                <input type="number" class="form-control" id="quantity1">
-                                            </div>
-                                            <div class="col-md-12">
-                                                <label class="form-label">Ful Detail</label>
-                                                <textarea class="form-control" rows="4"></textarea>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <label class="form-label">Product Tags <span>( Type and
-                                                        make comma to separate tags )</span></label>
-                                                <input type="text" class="form-control" id="group_tag"
-                                                    name="group_tag" value="" placeholder=""
-                                                    data-role="tagsinput">
-                                            </div>
-                                            <div class="col-md-12">
-                                                <button type="submit" class="btn cr-btn-primary">Submit</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                        `;
+                                        document.getElementById('attributes').insertAdjacentHTML('beforeend', attributeHtml);
+                                        attributeIndex++;
+                                    });
+                                
+                                   
+                                    document.getElementById('attributes').addEventListener('change', function (e) {
+                                        if (e.target.classList.contains('select-attribute')) {
+                                            const index = e.target.getAttribute('data-index');
+                                            const container = document.getElementById(`attribute-values-container-${index}`);
+                                            const attributeId = e.target.value;
+                                
+                                           
+                                            container.innerHTML = '';
+                                
+                                            
+                                            const selectedAttribute = attributes.find(attr => attr.id == attributeId);
+                                
+                                            if (selectedAttribute) {
+                                                if (selectedAttribute.values && selectedAttribute.values.length > 0) {
+                                                   
+                                                    const valueList = selectedAttribute.values.map(value => `
+                                                        <div class="attribute-value-item d-flex align-items-center">
+                                                            <input type="hidden" name="attributes[${index}][value_ids][]" value="${value.id}">
+                                                            <span class="mr-2">${value.value}</span>
+                                                            <button type="button" class="btn btn-sm btn-danger remove-value" data-value-id="${value.id}" data-index="${index}">X</button>
+                                                        </div>
+                                                    `).join('');
+                                                    container.innerHTML = `<label>Attribute Values:</label><div>${valueList}</div>`;
+                                                } else {
+                                                   
+                                                    container.innerHTML = `
+                                                        <label>Attribute Values:</label>
+                                                        <div>
+                                                            <span>No attribute values available.</span>
+                                                        </div>
+                                                    `;
+                                                }
+                                            }
+                                        }
+                                    });
+                                
+                                
+                                    document.getElementById('attributes').addEventListener('click', function (e) {
+                                        if (e.target.classList.contains('remove-value')) {
+                                            const valueId = e.target.getAttribute('data-value-id');
+                                            const index = e.target.getAttribute('data-index');
+                                
+                                            
+                                            const valueItem = e.target.closest('.attribute-value-item');
+                                            valueItem.remove();
+                                
+                                            
+                                            console.log(`Removed value ID: ${valueId} from attribute index: ${index}`);
+                                        }
+                                    });
+                                </script>
 @endsection

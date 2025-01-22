@@ -27,7 +27,7 @@
     <!-- Submenu -->
     <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md ">
         <li>
-            <a href="{{ route('admin.product.add-product') }}" 
+            <a href="{{ route('admin.product.create') }}" 
                class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
                 Add Product
             </a>
