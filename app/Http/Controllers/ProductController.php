@@ -76,6 +76,9 @@ class ProductController extends Controller
                 'attributes.*.attribute_id' => 'required|integer|exists:attributes,id',
                 'attributes.*.value_ids' => 'required|array|min:1',
                 'attributes.*.value_ids.*' => 'integer|exists:attribute_values,id',
+                'description' => 'nullable|string|max:2000',
+                'sale_start' => 'nullable|date|after: . now()->addHour()->toDateTimeString(),|before:sale_end',
+                'sale_end' => 'nullable|date|after:sale_start',
             ]);
 
             
@@ -86,6 +89,10 @@ class ProductController extends Controller
                 'sale_price' => $validatedData['sale_price'] ?? null,
                 'quantity' => $validatedData['quantity'],
                 'category_id' => $validatedData['category_id'],
+                'description' => $validatedData['description'],
+                'sale_start' => $validatedData['sale_start'],
+                'sale_end' => $validatedData['sale_end'],
+                
             ]);
 
             Log::info('Product Created:', $product->toArray());
