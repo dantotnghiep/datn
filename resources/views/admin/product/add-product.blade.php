@@ -109,6 +109,15 @@
                                     </div>
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <label for="status">Status</label>
+                                    <div class="col-12">
+                                        <select id="status" name="status" class="form-control">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
 

@@ -13,7 +13,14 @@ class Attribute extends Model
         'slug',
     ];
 
-    public function values(){
+    public function values()
+    {
         return $this->hasMany(AttributeValue::class);
+    }
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_attributes', 'attribute_id', 'product_id')
+            ->withPivot('attribute_value_id')
+            ->withTimestamps();
     }
 }

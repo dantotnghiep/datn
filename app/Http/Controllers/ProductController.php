@@ -7,13 +7,14 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductImage;
+use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
-   
+
     public function dashboard()
     {
         return view('admin.dashboard');
@@ -31,38 +32,39 @@ class ProductController extends Controller
 
     public function index()
     {
-        return view('admin.product.product-list');
+        $products = Product::with('mainImage')->get();
+        return view('admin.product.product-list', compact('products'));
     }
 
-  
+
     public function create()
     {
         $categories = Category::all();
         $attributes = Attribute::with('values')->get();
 
-        
+
         Log::info('Categories Loaded:', $categories->toArray());
         Log::info('Attributes Loaded:', $attributes->toArray());
 
         return view('admin.product.add-product', compact('categories', 'attributes'));
     }
 
-   
+
     public function store(Request $request)
     {
         try {
-            
+
             DB::beginTransaction();
 
-            
+
             Log::info('Request Data:', $request->all());
 
-            
+
             if ($request->has('attributes')) {
                 Log::info('Attributes from Request:', $request->input('attributes'));
             }
 
-            
+
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'slug' => 'required|string|max:255|unique:products',
@@ -79,9 +81,10 @@ class ProductController extends Controller
                 'description' => 'nullable|string|max:2000',
                 'sale_start' => 'nullable|date|after: . now()->addHour()->toDateTimeString(),|before:sale_end',
                 'sale_end' => 'nullable|date|after:sale_start',
+                'status' => 'required|in:active,inactive',
             ]);
 
-            
+
             $product = Product::create([
                 'name' => $validatedData['name'],
                 'slug' => $validatedData['slug'],
@@ -92,12 +95,13 @@ class ProductController extends Controller
                 'description' => $validatedData['description'],
                 'sale_start' => $validatedData['sale_start'],
                 'sale_end' => $validatedData['sale_end'],
-                
+                'status' => $validatedData['status'],
+
             ]);
 
             Log::info('Product Created:', $product->toArray());
 
-           
+
             if ($request->hasFile('main_image')) {
                 $mainImagePath = $request->file('main_image')->store('products', 'public');
                 ProductImage::create([
@@ -109,7 +113,7 @@ class ProductController extends Controller
                 Log::info('Main Image Saved:', ['url' => $mainImagePath]);
             }
 
-            
+
             if ($request->hasFile('additional_images')) {
                 foreach ($request->file('additional_images') as $image) {
                     $imagePath = $image->store('products', 'public');
@@ -123,7 +127,7 @@ class ProductController extends Controller
                 }
             }
 
-            
+
             if ($request->has('attributes')) {
                 foreach ($request->input('attributes') as $attribute) {
                     Log::info('Processing Attribute:', ['attribute_id' => $attribute['attribute_id']]);
@@ -135,7 +139,7 @@ class ProductController extends Controller
                             'attribute_value_id' => $valueId,
                         ];
 
-                       
+
                         Log::info('Inserting Product Attribute:', $data);
 
                         ProductAttribute::create($data);
@@ -143,26 +147,52 @@ class ProductController extends Controller
                 }
             }
 
-            
+
             DB::commit();
             Log::info('Transaction Committed Successfully.');
 
-            return redirect()->route('admin.dashboard')->with('success', 'Sản phẩm đã được thêm thành công!');
+            return redirect()->route('admin.product.product-list')->with('success', 'Sản phẩm đã được thêm thành công!');
         } catch (\Exception $e) {
-            
+
             DB::rollBack();
             Log::error('Error saving product: ' . $e->getMessage());
 
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
-
-    public function show(Product $product)
+    public function showVariations($id)
     {
+        $product = Product::with('productAttributes.attribute', 'productAttributes.attributeValue')->findOrFail($id);
+
         
+        $attributes = $product->productAttributes->groupBy('attribute_id');
+    
+        
+        $combinations = $this->generateCombinations($attributes);
+
+        return view('admin.variation.variation-list-of-product', compact('product', 'combinations'));
     }
 
+    private function generateCombinations($attributes)
+    {
+        $combinations = [[]];
     
+        foreach ($attributes as $attributeValues) {
+            $newCombinations = [];
+            foreach ($combinations as $combination) {
+                foreach ($attributeValues as $value) {
+                    $newCombinations[] = array_merge($combination, [$value]);
+                }
+            }
+            $combinations = $newCombinations;
+        }
+    
+        return $combinations;
+    }
+
+    public function show(Product $product) {}
+
+
     public function edit(Product $product)
     {
         //
@@ -179,8 +209,5 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
-    {
-        //
-    }
+    public function destroy(Product $product) {}
 }

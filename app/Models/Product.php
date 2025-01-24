@@ -24,15 +24,27 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function variations(){
+    public function variations()
+    {
         return $this->hasMany(ProductVariation::class);
     }
 
-    public function images(){
+    public function images()
+    {
         return $this->hasMany(ProductImage::class);
     }
     public function productAttributes()
-{
-    return $this->hasMany(ProductAttribute::class);
-}
+    {
+        return $this->hasMany(ProductAttribute::class);
+    }
+    public function mainImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_main', 1);
+    }
+    public function attributes()
+    {
+        return $this->belongsToMany(Attribute::class, 'product_attributes', 'product_id', 'attribute_id')
+            ->withPivot('attribute_value_id')
+            ->withTimestamps();
+    }
 }
