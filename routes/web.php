@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductVariationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -77,16 +78,14 @@ Route::post('/admin/attribute-values',[AttributeValueController::class,'store'])
 Route::delete('/admin/attribute-values/{id}/delete',[AttributeValueController::class,'destroy'])->name('admin.attribute-values.delete');
 
 
-
-
-
-
 //admin/Product
 Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboard');
 Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.product.product-list');
 Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.product.create');
 Route::post('/admin/product',[ProductController::class,'store'])->name('admin.product.store');
-Route::delete('admin/product/{id}/delete',[ProductController::class,'destroy'])->name('admin.product.destroy');
+Route::delete('/admin/product/{id}/delete',[ProductController::class,'destroy'])->name('admin.product.destroy');
 
 //admin/Variation
-Route::get('admin/products/{id}/variations',[ProductController::class,'showVariations'])->name('product.variations');
+Route::get('/admin/products/{id}/variations',[ProductController::class,'showVariations'])->name('product.variations');
+Route::get('/products/{id}/variations/create', [ProductVariationController::class, 'create'])->name('product-variations.create');
+Route::post('/product-variations/store', [ProductVariationController::class, 'store'])->name('product-variations.store');

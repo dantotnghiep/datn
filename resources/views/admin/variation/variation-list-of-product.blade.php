@@ -1,3 +1,4 @@
+
 @extends('admin.layouts.master')
 
 @section('content')
@@ -26,23 +27,27 @@
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
-                                
+
                                     <tbody>
                                         @foreach ($combinations as $combination)
                                             <tr>
                                                 <td>
                                                     @foreach ($combination as $item)
-                                                        <strong>{{ $item->attribute->name }}:</strong> {{ $item->attributeValue->value }}<br>
+                                                        <strong>{{ $item->attribute->name }}:</strong>
+                                                        {{ $item->attributeValue->value }}<br>
                                                     @endforeach
                                                 </td>
                                                 <td>
                                                     <div class="d-flex justify-content-center">
-                                                        <a href="#" class="btn btn-primary btn-sm">Add</a>
+                                                        <a href="{{ route('product-variations.create', ['id' => $product->id]) }}" class="btn btn-primary btn-sm">Add Information Variation</a>
+
+                                                       
                                                         <a href="#" class="btn btn-warning btn-sm">Edit</a>
                                                         <form action="#" method="POST" class="d-inline">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                            <button type="submit"
+                                                                class="btn btn-danger btn-sm">Delete</button>
                                                         </form>
                                                     </div>
                                                 </td>
@@ -50,13 +55,14 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                                
+
                                 </table>
                             </div>
                         </div>
 
                         <div class="cr-card-footer text-end">
-                            <a href="{{ route('admin.product.product-list') }}" class="btn btn-secondary">Back to Product List</a>
+                            <a href="{{ route('admin.product.product-list') }}" class="btn btn-secondary">Back to Product
+                                List</a>
                         </div>
                     </div>
                 </div>

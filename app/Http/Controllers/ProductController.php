@@ -169,6 +169,7 @@ class ProductController extends Controller
     
         
         $combinations = $this->generateCombinations($attributes);
+        
 
         return view('admin.variation.variation-list-of-product', compact('product', 'combinations'));
     }
