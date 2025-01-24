@@ -39,7 +39,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="d-flex justify-content-center">
-                                                        <a href="{{ route('product-variations.create', ['id' => $product->id]) }}" class="btn btn-primary btn-sm">Add Information Variation</a>
+                                                        <a href="{{ route('product-variations.create', ['id' => $product->id]) }}" class="btn btn-primary btn-sm">Edit</a>
 
                                                        
                                                         <a href="#" class="btn btn-warning btn-sm">Edit</a>

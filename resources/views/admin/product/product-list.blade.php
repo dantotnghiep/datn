@@ -13,6 +13,17 @@
                     </ul>
                 </div>
             </div>
+            @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
             <div class="row">
                 <div class="col-md-12">
                     <div class="cr-card card-default product-list">
@@ -36,12 +47,11 @@
                                             <tr>
                                                 <td>
                                                     @if ($product->mainImage)
-                                                        <img class="tbl-thumb" 
-                                                            src="{{ asset('storage/' . $product->mainImage->url) }}" 
+                                                        <img class="tbl-thumb"
+                                                            src="{{ asset('storage/' . $product->mainImage->url) }}"
                                                             alt="{{ $product->name }}">
                                                     @else
-                                                        <img class="tbl-thumb" 
-                                                            src="/be/assets/img/product/default.jpg" 
+                                                        <img class="tbl-thumb" src="/be/assets/img/product/default.jpg"
                                                             alt="No Image Available">
                                                     @endif
                                                 </td>
@@ -59,29 +69,34 @@
 
                                                 </td>
                                                 <td>
-                                                    <span class="{{ $product->status == 'active' ? 'active' : 'inactive' }}">
+                                                    <span
+                                                        class="{{ $product->status == 'active' ? 'active' : 'inactive' }}">
                                                         {{ ucfirst($product->status) }}
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <a href="{{ route('product.variations', $product->id) }}">Variation Of Product</a>
+                                                    <a href="{{ route('product.variations', $product->id) }}">Variation Of
+                                                        Product</a>
                                                 </td>
                                                 <td>
                                                     <div class="d-flex justify-content-center">
                                                         <button type="button"
                                                             class="btn btn-outline-success dropdown-toggle dropdown-toggle-split"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                                            data-display="static">
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false" data-display="static">
                                                             <span class="sr-only"><i class="ri-settings-3-line"></i></span>
                                                         </button>
                                                         <div class="dropdown-menu">
-                                                            <a class="dropdown-item" href="">Edit</a>
-                                                            <form action="" method="POST" style="display: inline;">
+                                                            <a class="dropdown-item" href="#">Edit</a>
+                                                            <form action="{{ route('products.destroy', $product->id) }}"
+                                                                method="POST" style="display: inline;">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button class="dropdown-item" type="submit">Delete</button>
+                                                                <button class="dropdown-item" type="submit"
+                                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">Delete</button>
                                                             </form>
                                                         </div>
+
                                                     </div>
                                                 </td>
                                             </tr>

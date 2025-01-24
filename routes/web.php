@@ -83,7 +83,7 @@ Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboa
 Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.product.product-list');
 Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.product.create');
 Route::post('/admin/product',[ProductController::class,'store'])->name('admin.product.store');
-Route::delete('/admin/product/{id}/delete',[ProductController::class,'destroy'])->name('admin.product.destroy');
+Route::delete('/admin/products/{id}/delete', [ProductController::class, 'destroy'])->name('products.destroy');
 
 //admin/Variation
 Route::get('/admin/products/{id}/variations',[ProductController::class,'showVariations'])->name('product.variations');

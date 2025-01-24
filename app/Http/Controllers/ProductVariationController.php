@@ -23,7 +23,7 @@ class ProductVariationController extends Controller
     public function create($productId)
     {
         $product = Product::findOrFail($productId);
-
+        
         
         $attributes = $product->productAttributes()
             ->with('attributeValue')
@@ -42,6 +42,9 @@ class ProductVariationController extends Controller
         'product_id' => 'required|exists:products,id',
         'sku' => 'required|string|max:255',
         'price' => 'required|numeric|min:0',
+        'sale_price' => 'nullable|numeric|min:0|lt:price',
+        'sale_start' => 'nullable|date',
+        'sale_end' => 'nullable|date|after_or_equal:sale_start',
         'stock' => 'required|integer|min:0',
         'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         'attributes' => 'required|array',
@@ -55,6 +58,9 @@ class ProductVariationController extends Controller
             'product_id' => $validated['product_id'],
             'sku' => $validated['sku'],
             'price' => $validated['price'],
+            'sale_price' => $validated['sale_price'] ?? null,
+            'sale_start' => $validated['sale_start'] ?? null,
+            'sale_end' => $validated['sale_end'] ?? null,
             'stock' => $validated['stock'],
         ]);
 

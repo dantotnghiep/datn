@@ -210,5 +210,23 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product) {}
+    public function destroy($id)
+    {
+        $product = Product::findOrFail($id);
+    
+        
+        $hasVariations = $product->variations()->exists();
+    
+        if ($hasVariations) {
+            
+            return redirect()->back()->with('error', 'Sản phẩm có biến thể. Không thể xóa trực tiếp! Cần Xóa Từ Các Biến Thể Trong Sản Phẩm');
+        }
+    
+        try {
+            $product->delete();
+            return redirect()->back()->with('success', 'Sản phẩm đã được xóa thành công!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
+    }
 }
