@@ -30,13 +30,11 @@
                             <ul class="sub-menu">
                                 <li><a href="index.html">EG Shop Fashion 1</a></li>
                                 <li>
-                                    <a
-                                        href="https://demo-egenslab.b-cdn.net/html/eg-shop-fashion/v2/index.html">EG
+                                    <a href="https://demo-egenslab.b-cdn.net/html/eg-shop-fashion/v2/index.html">EG
                                         Shop Fashion 2</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://demo-egenslab.b-cdn.net/html/eg-shop-fashion/v3/index.html">EG
+                                    <a href="https://demo-egenslab.b-cdn.net/html/eg-shop-fashion/v3/index.html">EG
                                         Shop Fashion 3</a>
                                 </li>
                             </ul>
@@ -80,7 +78,45 @@
                                 <li><a href="blog-details.html">Blog Details</a></li>
                             </ul>
                         </li>
-                        <li><a href="contact.html">Contact Us</a></li>
+                        {{-- <li><a href="contact.html">Contact Us</a></li> --}}
+                        {{-- <li class="has-child-menu">
+                            <a href="javascript:void(0)">Tài khoản</a>
+                            <i class="fl flaticon-plus">+</i>
+                            <ul class="sub-menu">
+                                <li><a href="blog-grid.html">Nguyễn Minh Đỗ</a></li>
+                                <li><a href="blog-sidebar.html">Thông tin cá nhân</a></li>
+                                <li><a href="blog-details.html">Lịch sử mua hàng</a></li>
+                                <li><a href="blog-details.html">Đăng xuất</a></li>
+                            </ul>
+                        </li> --}}
+                        @guest
+                            @if (Route::has('login'))
+                                <li><a href="{{ route('login') }}">{{ __('Đăng Nhập') }}</a></li>
+                                <li><a href="{{ route('register') }}">{{ __('Đăng Ký') }}</a></li>
+                                {{-- <a class="a-dndk" href="{{ route('login') }}">{{ __('Đăng Nhập') }}</a> --}}
+                            @endif
+                        @else
+                            <li class="has-child-menu">
+                                <a href="javascript:void(0)">Tài khoản</a>
+                                <i class="fl flaticon-plus">+</i>
+                                <ul class="sub-menu">
+                                    <li><a href="blog-grid.html">Xin chào: {{ Auth::user()->name }}</a></li>
+                                    <li><a href="blog-sidebar.html">Thông tin cá nhân</a></li>
+                                    <li><a href="blog-details.html">Lịch sử mua hàng</a></li>
+                                    <li>
+                                        <a href="{{ route('logout') }}"
+                                            onclick="event.preventDefault();
+                    document.getElementById('logout-form').submit();">
+                                            <i class="fa-solid fa-arrow-right-from-bracket"></i> {{ __('Đăng Xuất') }}
+                                        </a>
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
+
+                                    </li>
+                                </ul>
+                            </li>
+                        @endguest
                     </ul>
                     <div class="inner-top">
                         <div class="inner-mail">

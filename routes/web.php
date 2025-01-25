@@ -2,13 +2,14 @@
 
 use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\AttributeValueController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/',[CategoryController::class,'dashboard'])->name('client.index');
+Route::get('/', [CategoryController::class, 'dashboard'])->middleware('verified')->name('client.index');
 
 // Route::prefix('admin')
 //     ->group(function () {
@@ -34,8 +35,16 @@ Route::get('/',[CategoryController::class,'dashboard'])->name('client.index');
 
 
 //client/Auth
-Route::get('/login',[AuthController::class,'loginclient'])->name('client.auth.login');
-Route::get('/register',[AuthController::class,'register'])->name('clinet.auth.register');
+// Route::get('/login',[AuthController::class,'loginclient'])->name('client.auth.login');
+// Route::get('/register',[AuthController::class,'register'])->name('clinet.auth.register');
+//client/Auth
+Auth::routes(['verify' => true]);
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/verify', [App\Http\Controllers\HomeController::class, 'verify'])->name('verify');
+Route::get('/email/verify', [VerificationController::class, 'show'])->name('verification.notice');
+
+
 
 //client/cart
 Route::get('/cart',[CartController::class,'cart'])->name('client.cart.cart');
@@ -89,3 +98,5 @@ Route::delete('/admin/products/{id}/delete', [ProductController::class, 'destroy
 Route::get('/admin/products/{id}/variations',[ProductController::class,'showVariations'])->name('product.variations');
 Route::get('/products/{id}/variations/create', [ProductVariationController::class, 'create'])->name('product-variations.create');
 Route::post('/product-variations/store', [ProductVariationController::class, 'store'])->name('product-variations.store');
+
+
