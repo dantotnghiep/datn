@@ -4,7 +4,7 @@
             <div
                 class="col-xl-2 col-lg-12 col-md-12 col-sm-12 col-xs-12 d-xl-flex align-items-center justify-content-center">
                 <div class="main-logo d-flex justify-content-between align-items-center">
-                    <a href="index.html">
+                    <a href="{{route('client.index')}}">
                         <img src="/client/assets/images/Logo.png" alt="" />
                     </a>
 
@@ -21,35 +21,21 @@
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6 d-flex justify-content-center">
                 <nav class="main-nav">
                     <div class="inner-logo">
-                        <a href="index.html"><img src="/client/assets/images/logo-w.png" alt="" /></a>
+                        <a href="{{route('client.index')}}"><img src="/client/assets/images/logo-w.png" alt="" /></a>
                     </div>
                     <ul class="nav-item-list">
-                        <li class="has-child-menu">
-                            <a class="active" href="javascript:void(0)">Home</a>
+                        
+                            <a class="active" href="{{route('client.index')}}">Home</a>
                             <i class="fl flaticon-plus">+</i>
-                            <ul class="sub-menu">
-                                <li><a href="index.html">EG Shop Fashion 1</a></li>
-                                <li>
-                                    <a
-                                        href="https://demo-egenslab.b-cdn.net/html/eg-shop-fashion/v2/index.html">EG
-                                        Shop Fashion 2</a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="https://demo-egenslab.b-cdn.net/html/eg-shop-fashion/v3/index.html">EG
-                                        Shop Fashion 3</a>
-                                </li>
-                            </ul>
-                        </li>
 
                         <li><a href="about.html">About Us</a></li>
                         <li class="has-child-menu">
                             <a href="javascript:void(0)">Shop</a>
                             <i class="fl flaticon-plus">+</i>
                             <ul class="sub-menu">
-                                <li><a href="product.html">Products</a></li>
+                                <li><a href="{{route('client.product.list-product')}}">Products</a></li>
                                 <li>
-                                    <a href="product-details.html">Product Details</a>
+                                    <a href="{{route('client.product.product-details')}}">Product Details</a>
                                 </li>
                             </ul>
                         </li>

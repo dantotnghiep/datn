@@ -5,6 +5,8 @@ use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
+use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
 use Illuminate\Support\Facades\Route;
@@ -20,17 +22,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/',[CategoryController::class,'dashboard'])->name('client.index');
+Route::get('/',[HomeController::class,'dashboard'])->name('client.index');
+Route::get('/categories',[HomeController::class,'category'])->name('categories.index');
 
-// Route::prefix('admin')
-//     ->group(function () {
-//         Route::get('/', [ProductController::class, 'dashboard'])->name('dashboard');
-//         Route::get('/add-product', [ProductController::class, 'add-product'])->name('add-product');
 
-//     });
 
-//Route Admin code đây cho mình nhé iu anh emmmm
-//admin/Product
 
 
 //client/Auth
@@ -83,6 +79,8 @@ Route::get('/admin',[ProductController::class,'dashboard'])->name('admin.dashboa
 Route::get('/admin/product-list',[ProductController::class,'index'])->name('admin.product.product-list');
 Route::get('/admin/add-product',[ProductController::class,'create'])->name('admin.product.create');
 Route::post('/admin/product',[ProductController::class,'store'])->name('admin.product.store');
+Route::get('/admin/product/{product}/edit', [ProductController::class, 'edit'])->name('admin.product.edit');
+Route::put('/admin/product/{product}', [ProductController::class, 'update'])->name('admin.product.update');
 Route::delete('/admin/products/{id}/delete', [ProductController::class, 'destroy'])->name('products.destroy');
 
 //admin/Variation

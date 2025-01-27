@@ -21,7 +21,7 @@ class Product extends Model
     ];
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class,'category_id');
     }
 
     public function variations()
@@ -46,5 +46,10 @@ class Product extends Model
         return $this->belongsToMany(Attribute::class, 'product_attributes', 'product_id', 'attribute_id')
             ->withPivot('attribute_value_id')
             ->withTimestamps();
+    }
+    public function additionalImages()
+    {
+        return $this->hasMany(ProductImage::class, 'product_id')
+            ->where('is_main', false); // Giả sử `is_main` là cột để phân biệt ảnh chính
     }
 }

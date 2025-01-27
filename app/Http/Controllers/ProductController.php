@@ -11,6 +11,7 @@ use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -196,15 +197,106 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        //
+        $categories = Category::all();
+        $attributes = Attribute::with('values')->get(); // Lấy tất cả attributes và values
+        $productAttributes = $product->productAttributes()
+        ->with('attribute', 'attributeValues')
+        ->get();    
+        return view('admin.product.edit-product', compact('product','categories', 'productAttributes', 'attributes'));
     }
+    
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'sale_price' => 'nullable|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'sale_start' => 'nullable|date',
+            'sale_end' => 'nullable|date',
+            'status' => 'required|in:active,inactive',
+            'main_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'attributes' => 'nullable|array',
+            'attributes.*.attribute_id' => 'nullable|exists:attributes,id',
+            'attributes.*.value_ids' => 'nullable|array',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Update product details
+            $product = Product::findOrFail($id);
+            $product->update([
+                'name' => $validated['name'],
+                'slug' => $validated['slug'],
+                'price' => $validated['price'],
+                'sale_price' => $validated['sale_price'],
+                'quantity' => $validated['quantity'],
+                'category_id' => $validated['category_id'],
+                'description' => $validated['description'],
+                'sale_start' => $validated['sale_start'],
+                'sale_end' => $validated['sale_end'],
+                'status' => $validated['status'],
+            ]);
+
+            // Update main image if provided
+            if ($request->hasFile('main_image')) {
+                if ($product->main_image) {
+                    Storage::delete($product->main_image);
+                }
+                $product->main_image = $request->file('main_image')->store('products');
+                $product->save();
+            }
+
+            // Update additional images if provided
+            if ($request->hasFile('additional_images')) {
+                foreach ($product->additionalImages as $image) {
+                    Storage::delete($image->url);
+                    $image->delete();
+                }
+
+                foreach ($request->file('additional_images') as $additionalImage) {
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'url' => $additionalImage->store('products'),
+                    ]);
+                }
+            }
+
+            // Handle attributes
+            if (isset($validated['attributes'])) {
+                // Delete old attributes and values
+                $product->productAttributes()->delete();
+
+                // Add new attributes and values
+                foreach ($validated['attributes'] as $attributeData) {
+                    if (!empty($attributeData['attribute_id'])) {
+                        $productAttribute = ProductAttribute::create([
+                            'product_id' => $product->id,
+                            'attribute_id' => $attributeData['attribute_id'],
+                        ]);
+
+                        if (isset($attributeData['value_ids'])) {
+                            $productAttribute->attributeValue()->sync($attributeData['value_ids']);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('admin.product.product-list')->with('success', 'Product updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     /**

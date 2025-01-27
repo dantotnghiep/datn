@@ -87,7 +87,7 @@
                                                             <span class="sr-only"><i class="ri-settings-3-line"></i></span>
                                                         </button>
                                                         <div class="dropdown-menu">
-                                                            <a class="dropdown-item" href="#">Edit</a>
+                                                            <a class="dropdown-item" href="{{ route('admin.product.edit', $product->id) }}">Edit</a>
                                                             <form action="{{ route('products.destroy', $product->id) }}"
                                                                 method="POST" style="display: inline;">
                                                                 @csrf
