@@ -8,9 +8,10 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function index(){
-        $categories = Category::where('status','active')->get();
+    public function index()
+    {
+        $categories = Category::where('status', 'active')->get();
 
-        return view('client.index',compact('categories'));
+        return view('client.index', compact('categories'));
     }
 }

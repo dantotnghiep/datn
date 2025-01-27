@@ -5,8 +5,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6">
                     <div class="register-switcher text-center">
-                        <a href="#" class="resister-btn active">Account</a>
-                        <a href="login.html" class="login-btn">Login</a>
+                        <a href="{{ route('register') }}" class="resister-btn active">Register</a>
+                        <a href="{{ route('login') }}" class="login-btn">Login</a>
                     </div>
                 </div>
             </div>
@@ -17,27 +17,65 @@
                             Register Your Account
                         </h4>
 
-                        <form action="#" method="POST" id="register-form">
+                        <form method="POST" action="{{ route('register') }}">
+                            @csrf
                             <div class="reg-input-group">
-                                <label for="fname">First Name*</label>
-                                <input type="text" id="fname" placeholder="Your first name" required>
+                                <label for="fname">Full Name *</label>
+                                <input id="name" type="text"
+                                    class="form-control @error('name') is-invalid @enderror" name="name"
+                                    value="{{ old('name') }}" placeholder="Fullname " autocomplete="name">
+
+                                @error('name')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
-                            <div class="reg-input-group">
-                                <label for="lname">Last Name*</label>
-                                <input type="text" id="lname" placeholder="Your last name" required>
-                            </div>
+
                             <div class="reg-input-group">
                                 <label for="email">Email *</label>
-                                <input type="email" id="email" placeholder="Your email" required>
+                                <input id="email" type="email"
+                                    class="form-control @error('email') is-invalid @enderror" name="email"
+                                    value="{{ old('email') }}" autofocus placeholder="Your email" autocomplete="email">
+
+                                @error('email')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
                             <div class="reg-input-group">
                                 <label for="password">Password *</label>
-                                <input type="password" id="password" placeholder="Enter a password" required>
+                                <div class="position-relative auth-pass-inputgroup">
+                                    <input id="password" type="password"
+                                        class="form-control pe-5 password-input @error('password') is-invalid @enderror"
+                                        name="password" value="{{ old('password') }}" placeholder="Nhập mật khẩu"
+                                        autocomplete="new-password">
+
+                                    @error('password')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+
+                                    <button
+                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
+                                        type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
+                                </div>
                             </div>
+
                             <div class="reg-input-group">
                                 <label for="sure-pass">Confirm Password *</label>
-                                <input type="password" id="sure-pass" placeholder="Confirm password" required>
+                                <div class="position-relative auth-pass-inputgroup">
+                                    <input id="password-confirm" type="password" class="form-control pe-5 password-input"
+                                        name="password_confirmation" placeholder="Nhập lại mật khẩu"
+                                        autocomplete="new-password">
+                                    <button
+                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
+                                        type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
+                                </div>
                             </div>
+
                             <div class="reg-input-group reg-check-input d-flex align-items-center">
                                 <input type="checkbox" id="form-check" required>
                                 <label for="form-check">I agree to the <a href="#">Terms & Policy</a></label>

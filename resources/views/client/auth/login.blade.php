@@ -6,8 +6,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6">
                     <div class="register-switcher text-center">
-                        <a href="register.html" class="resister-btn">Account</a>
-                        <a href="#" class="login-btn active">Login</a>
+                        <a href="{{ route('register') }}" class="resister-btn">Account</a>
+                        <a href="{{ route('login') }}" class="login-btn active">Login</a>
                     </div>
                 </div>
             </div>
