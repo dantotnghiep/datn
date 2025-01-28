@@ -28,17 +28,7 @@
                             <a class="active" href="{{route('client.index')}}">Home</a>
                             <i class="fl flaticon-plus">+</i>
 
-                            <ul class="sub-menu">
-                                <li><a href="index.html">EG Shop Fashion 1</a></li>
-                                <li>
-                                    <a href="https://demo-egenslab.b-cdn.net/html/eg-shop-fashion/v2/index.html">EG
-                                        Shop Fashion 2</a>
-                                </li>
-                                <li>
-                                    <a href="https://demo-egenslab.b-cdn.net/html/eg-shop-fashion/v3/index.html">EG
-                                        Shop Fashion 3</a>
-                                </li>
-                            </ul>
+                           
                         </li>
 
 

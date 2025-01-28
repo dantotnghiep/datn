@@ -27,22 +27,7 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/',[HomeController::class,'dashboard'])->name('client.index');
 Route::get('/categories',[HomeController::class,'category'])->name('categories.index');
 
-Route::get('/', [CategoryController::class, 'dashboard'])->middleware('verified')->name('client.index');
 
-
-
-
-
-
-//client/Auth
-// Route::get('/login',[AuthController::class,'loginclient'])->name('client.auth.login');
-// Route::get('/register',[AuthController::class,'register'])->name('clinet.auth.register');
-//client/Auth
-Auth::routes(['verify' => true]);
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/verify', [App\Http\Controllers\HomeController::class, 'verify'])->name('verify');
-Route::get('/email/verify', [VerificationController::class, 'show'])->name('verification.notice');
 
 
 
