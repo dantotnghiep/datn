@@ -57,14 +57,14 @@
                                             <div class="form-group">
                                                 <label>Attribute Value</label>
                                                 <div class="col-12">
-                                                    <input name="value" class="form-control here slug-title" type="text" placeholder="Enter Attribute Value" required>
+                                                    <input name="value" id="slug" onkeyup="ChangeToSlug();" class="form-control here slug-title" type="text" placeholder="Enter Attribute Value" required>
                                                 </div>
                                             </div>
 
                                             <div class="form-group">
                                                 <label>Slug (Optional)</label>
                                                 <div class="col-12">
-                                                    <input name="slug" class="form-control here set-slug" type="text" placeholder="Enter Slug (Optional)">
+                                                    <input id="convert_slug" name="slug" class="form-control here set-slug" type="text" placeholder="Enter Slug (Optional)">
                                                 </div>
                                             </div>
 
@@ -93,6 +93,7 @@
                                             <th>Slug</th>
                                             <th>Attribute</th>
                                             <th>Action</th>
+                                            
                                         </tr>
                                     </thead>
 
@@ -104,10 +105,11 @@
                                                 <td>{{ $value->attribute->name }}</td>
                                                 <td>
                                                     <div>
-                                                        <button type="button"
-                                                            class="btn btn-outline-success dropdown-toggle dropdown-toggle-split"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <span class="sr-only"><i class="ri-settings-3-line"></i></span>
+                                                        <button type="button" class="ri-settings-3-line"
+                                                            style="border: none;padding: 15px 30px;font-size: 20px;background-color: white;"
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false" data-display="static">
+
                                                         </button>
                                                         <div class="dropdown-menu">
                                                             <a class="dropdown-item" href="#">Edit</a>

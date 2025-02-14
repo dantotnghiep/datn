@@ -42,7 +42,7 @@
                                             <div class="form-group">
                                                 <label>Attribute Name</label>
                                                 <div class="col-12">
-                                                    <input id="name" name="name"
+                                                    <input id="slug" onkeyup="ChangeToSlug();" name="name"
                                                         class="form-control here slug-title" type="text">
                                                 </div>
                                             </div>
@@ -50,8 +50,8 @@
                                             <div class="form-group">
                                                 <label>Slug</label>
                                                 <div class="col-12">
-                                                    <input id="slug" name="slug" class="form-control here set-slug"
-                                                        type="text">
+                                                    <input id="convert_slug" name="slug"
+                                                        class="form-control here set-slug" type="text">
                                                 </div>
                                             </div>
 
@@ -99,11 +99,11 @@
                                                 </td>
                                                 <td>
                                                     <div class="dropdown">
-                                                        <button type="button"
-                                                            class="btn btn-outline-success dropdown-toggle dropdown-toggle-split"
+                                                        <button type="button" class="ri-settings-3-line"
+                                                            style="border: none;padding: 15px 30px;font-size: 20px;background-color: white;"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false">
-                                                            <span class="sr-only"><i class="ri-settings-3-line"></i></span>
+                                                            aria-expanded="false" data-display="static">
+
                                                         </button>
 
                                                         <div class="dropdown-menu">
@@ -117,9 +117,7 @@
                                                                 method="POST" class="dropdown-item p-0 m-0">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="btn btn-link text-danger p-0 m-0"
-                                                                    style="text-decoration: none;"
+                                                                <button type="submit" class="dropdown-item"
                                                                     onclick="return confirm('Bạn có chắc chắn muốn xóa thuộc tính này?')">
                                                                     Delete
                                                                 </button>

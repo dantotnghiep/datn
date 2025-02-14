@@ -80,11 +80,11 @@
                                                 </td>
                                                 <td>
                                                     <div class="d-flex justify-content-center">
-                                                        <button type="button"
-                                                            class="btn btn-outline-success dropdown-toggle dropdown-toggle-split"
+                                                        <button type="button" class="ri-settings-3-line"
+                                                            style="border: none;padding: 15px 30px;font-size: 20px;"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false" data-display="static">
-                                                            <span class="sr-only"><i class="ri-settings-3-line"></i></span>
+
                                                         </button>
                                                         <div class="dropdown-menu">
                                                             <a class="dropdown-item" href="{{ route('admin.product.edit', $product->id) }}">Edit</a>

@@ -42,12 +42,12 @@
             <!-- Thông tin sản phẩm -->
             <div class="form-group">
                 <label for="name">Product Name</label>
-                <input type="text" name="name" value="{{ old('name', $product->name) }}" class="form-control" id="name" required>
+                <input type="text" name="name" value="{{ old('name', $product->name) }}" class="form-control" id="slug" onkeyup="ChangeToSlug();" required>
             </div>
 
             <div class="form-group">
                 <label for="slug">Slug</label>
-                <input type="text" name="slug" value="{{ old('slug', $product->slug) }}" class="form-control" id="slug" required>
+                <input type="text" name="slug" value="{{ old('slug', $product->slug) }}" class="form-control" id="convert_slug" required>
             </div>
 
             <div class="form-group">

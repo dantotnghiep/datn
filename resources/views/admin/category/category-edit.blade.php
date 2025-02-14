@@ -118,11 +118,11 @@
                                         <td>
                                             <div>
                                                 <button type="button"
-                                                    class="btn btn-outline-success dropdown-toggle dropdown-toggle-split"
+                                                    class="ri-settings-3-line"
+                                                    style="border: none;padding: 15px 30px;font-size: 20px;background-color: white;"
                                                     data-bs-toggle="dropdown" aria-haspopup="true"
                                                     aria-expanded="false" data-display="static">
-                                                    <span class="sr-only"><i
-                                                            class="ri-settings-3-line"></i></span>
+                                                    
                                                 </button>
 
                                                 <div class="dropdown-menu">

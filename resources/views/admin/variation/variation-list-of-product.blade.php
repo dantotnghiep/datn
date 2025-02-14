@@ -24,7 +24,8 @@
                                     <thead>
                                         <tr>
                                             <th>Attributes</th>
-                                            <th>Actions</th>
+                                            <th class="d-flex justify-content-center">Actions</th>
+                                            
                                         </tr>
                                     </thead>
 
@@ -39,16 +40,11 @@
                                                 </td>
                                                 <td>
                                                     <div class="d-flex justify-content-center">
-                                                        <a href="{{ route('product-variations.create', ['id' => $product->id]) }}" class="btn btn-primary btn-sm">Edit</a>
+                                                        <a href="{{ route('product-variations.create', ['id' => $product->id]) }}" class="btn btn-primary btn-sm">Add new</a>
 
                                                        
-                                                        <a href="#" class="btn btn-warning btn-sm">Edit</a>
-                                                        <form action="#" method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                class="btn btn-danger btn-sm">Delete</button>
-                                                        </form>
+                                                        <a href="#" class="btn btn-warning btn-sm ms-2">Edit</a>
+                                                        
                                                     </div>
                                                 </td>
                                             </tr>

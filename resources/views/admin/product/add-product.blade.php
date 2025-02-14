@@ -66,11 +66,11 @@
                                 <div class="row g-3 mt-4">
                                     <div class="col-md-6">
                                         <label for="name">Product Name</label>
-                                        <input type="text" name="name" class="form-control" id="name" required>
+                                        <input type="text" name="name" class="form-control" id="slug" onkeyup="ChangeToSlug();" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="slug">Slug</label>
-                                        <input type="text" name="slug" class="form-control" id="slug" required>
+                                        <input type="text" name="slug" class="form-control" id="convert_slug" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="price">Price (USD)</label>
