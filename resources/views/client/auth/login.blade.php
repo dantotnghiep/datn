@@ -42,7 +42,7 @@
                         </form>
 
                         <div class="reg-social-login">
-                            <h5>or login WITH</h5>
+                            <h5>Or login WITH</h5>
                             <ul class="social-login-options">
                                 <li><a href="#" class="facebook-login"><i class="flaticon-facebook-app-symbol"></i>
                                         Sign
