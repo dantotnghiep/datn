@@ -22,78 +22,32 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @foreach($cartItems as $key => $value)
                             <tr>
 
                                 <td class="image-col">
-                                    <img src="/client/assets/images/product/cart-p4.png" alt="">
+                                    <img src="" alt="">
                                 </td>
-                                <td class="product-col"><a href="product-details.html" class="product-title">Something
-                                        Yellow Party Dress</a></td>
-                                <td class="unite-col"><del><span class="unite-price-del">$32.36</span></del> <span
+                                <td class="product-col"><a href="product-details.html" class="product-title">{{$value['name']}}</a></td>
+                                <td class="unite-col"><del><span class="unite-price-del">{{number_format($value['price'])}}</span></del> <span
                                         class="unite-price"></span></td>
-                                <td class="discount-col"><span class="discount-price">$22.36</span></td>
+                                <td class="discount-col"><span class="discount-price"></span></td>
                                 <td class="quantity-col">
 
                                     <div class="quantity">
                                         <input type="number" min="1" max="90" step="10"
-                                            value="1">
+                                            value="{{$value['quantity']}}">
                                     </div>
                                 </td>
-                                <td class="total-col">$22.36</td>
+                                <td class="total-col">{{number_format($value['price'] * $value['quantity'])}}</td>
                                 <td class="delete-col">
                                     <div class="delete-icon">
                                         <a href="#"><i class="flaticon-letter-x"></i></a>
                                     </div>
                                 </td>
                             </tr>
-                            <tr>
-
-                                <td class="image-col">
-                                    <img src="/client/assets/images/product/cart-p6.png" alt="">
-                                </td>
-                                <td class="product-col"><a href="product-details.html" class="product-title">Woamn
-                                        Something Navy Jens</a></td>
-                                <td class="unite-col"><del><span class="unite-price-del">$32.36</span></del> <span
-                                        class="unite-price"></span></td>
-                                <td class="discount-col"><span class="discount-price">$22.36</span></td>
-                                <td class="quantity-col">
-
-                                    <div class="quantity">
-                                        <input type="number" min="1" max="90" step="10"
-                                            value="1">
-                                    </div>
-                                </td>
-                                <td class="total-col">$22.36</td>
-                                <td class="delete-col">
-                                    <div class="delete-icon">
-                                        <a href="#"><i class="flaticon-letter-x"></i></a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-
-                                <td class="image-col">
-                                    <img src="/client/assets/images/product/cart-p5.png" alt="">
-                                </td>
-                                <td class="product-col"><a href="product-details.html" class="product-title">Men Casual
-                                        Summer Sale</a></td>
-                                <td class="unite-col"><del><span class="unite-price-del"></span></del> <span
-                                        class="unite-price">$32.36</span></td>
-                                <td class="discount-col"><span class="discount-price">$22.36</span></td>
-                                <td class="quantity-col">
-
-                                    <div class="quantity">
-                                        <input type="number" min="1" max="90" step="10"
-                                            value="1">
-                                    </div>
-                                </td>
-                                <td class="total-col">$22.36</td>
-                                <td class="delete-col">
-                                    <div class="delete-icon">
-                                        <a href="#"><i class="flaticon-letter-x"></i></a>
-                                    </div>
-                                </td>
-                            </tr>
+                            @endforeach
+                            
 
 
                         </tbody>

@@ -32,7 +32,8 @@ Route::get('/categories',[HomeController::class,'category'])->name('categories.i
 
 
 //client/cart
-Route::get('/cart',[CartController::class,'cart'])->name('client.cart.cart');
+Route::post('/add-cart',[CartController::class,'add'])->name('cart.add');
+Route::get('/cart',[CartController::class,'index'])->name('cart.index');
 Route::get('/order',[CartController::class,'order'])->name('client.cart.order');
 Route::get('/checkout',[CartController::class,'checkout'])->name('client.cart.checkout');
 

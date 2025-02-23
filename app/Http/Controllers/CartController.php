@@ -3,12 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Helper\Cart;
+use App\Models\Product;
 
 class CartController extends Controller
 {
-    public function cart()
+    public function index(Cart $cart)
     {
-        return view('client.cart.cart');
+        $cartItems = $cart->list();
+        
+        return view("client.cart.cart", compact('cartItems'));
+    }
+    public function add(Request $request,Cart $cart)
+    {
+        $product = Product::find($request->id);
+        $quantity = $request->quantity;
+        $cart->add($product,$quantity);
+        return redirect()->route('cart.index');
     }
 
     public function checkout()
