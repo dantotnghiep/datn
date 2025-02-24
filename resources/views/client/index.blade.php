@@ -264,14 +264,7 @@
                                                                     alt="{{ $product->name }}">
                                                             </a>
                                                             <div class="product-cart-icon">
-                                                                <form action="{{route('cart.add')}}" method="post">
-                                                                    @csrf
-                                                                    <input type="hidden" name="id" value="{{$product->id}}">
-                                                                    <div class="quantity">
-                                                                        <input type="number" name="quantity"  value="1">
-                                                                    </div>
-                                                                    <button type="submit"><i class="flaticon-shopping-cart"></i></button>
-                                                                </form>
+                                                                <button type="submit"><i class="flaticon-shopping-cart"></i></button>
                                                             </div>
                                                         </div>
                                                         <div class="product-details-m">
@@ -313,57 +306,51 @@
             </div>
             <div class="row">
                 <div class="swiper-tranding-container overflow-hidden pb-30">
-                    <!-- hero slider slides -->
-                    @foreach ($category->products as $product)
-                    <div class="swiper-wrapper">
-                        <div>
-                            <div class="product-card-xl">
-                                <div class="product-img-xl">
-                                    <a href="product-details.html"><img src="/client/assets/images/product/pxl-1.png"
-                                            alt="" class="img-fluid" /></a>
-                                    <div class="product-actions-xl">
-                                        <a href="#"><i class="flaticon-heart"></i></a>
-                                        <a href="product-details.html"><i class="flaticon-search"></i></a>
-                                        <form action="{{route('cart.add')}}" method="post">
-                                            @csrf
-                                            <input type="hidden" name="id" value="{{$product->id}}">
-                                            <div class="quantity">
-                                                <input type="number" name="quantity"  value="1">
-                                            </div>
-                                            <button type="submit"><i class="flaticon-shopping-cart"></i></button>
-                                        </form>
-                                    </div>
-                                </div>
-                                <div class="product-content-xl text-center">
-                                    <ul class="d-flex product-rating-xl">
-                                        <li><i class="bi bi-star-fill"></i></li>
-                                        <li><i class="bi bi-star-fill"></i></li>
-                                        <li><i class="bi bi-star-fill"></i></li>
-                                        <li><i class="bi bi-star-fill"></i></li>
-                                        <li><i class="bi bi-star"></i></li>
-                                    </ul>
-                                    <a href="product-details.html" class="product-title">{{ $product->name }}</a>
-                                    <div class="product-price">
-                                        <del class="old-price">$302.74</del><ins class="new-price">$290.05</ins>
-                                    </div>
-                                </div>
+                  <!-- hero slider slides -->
+                  <div class="swiper-wrapper">
+                    @foreach ($products as $prd)
+                    <div class="">
+                        <div class="product-card-xl">
+                          <div class="product-img-xl">
+                            <a href="product-details.html"><img src="/client/assets/images/product/pxl-1.png" alt=""
+                                class="img-fluid" /></a>
+                            <div class="product-actions-xl">
+                              <a href="#"><i class="flaticon-heart"></i></a>
+                              <a href="product-details.html"><i class="flaticon-search"></i></a>
+                              <a onclick="AddCart({{$prd->id}})" href="javascript:"><i class="flaticon-shopping-cart"></i></a>
                             </div>
+                          </div>
+                          <div class="product-content-xl text-center">
+                            <ul class="d-flex product-rating-xl">
+                              <li><i class="bi bi-star-fill"></i></li>
+                              <li><i class="bi bi-star-fill"></i></li>
+                              <li><i class="bi bi-star-fill"></i></li>
+                              <li><i class="bi bi-star-fill"></i></li>
+                              <li><i class="bi bi-star"></i></li>
+                            </ul>
+                            <a href="product-details.html" class="product-title">{{$prd->name}}</a>
+                            <div class="product-price">
+                              <del class="old-price">{{number_format($prd->price)}}</del><ins class="new-price">{{number_format($prd->sale_price)}}</ins>
+                            </div>
+                          </div>
                         </div>
-
-                    </div>
+                      </div>
                     @endforeach
-                    <!-- !swiper slides -->
-
-                    <!-- next / prev arrows -->
-                    <div class="swiper-button-next">
-                        <i class="flaticon-arrow-pointing-to-right"></i>
-                    </div>
-                    <div class="swiper-button-prev">
-                        <i class="flaticon-arrow-pointing-to-left"></i>
-                    </div>
-                    <!-- !next / prev arrows -->
+                    
+                    
+                  </div>
+                  <!-- !swiper slides -->
+      
+                  <!-- next / prev arrows -->
+                  <div class="swiper-button-next">
+                    <i class="flaticon-arrow-pointing-to-right"></i>
+                  </div>
+                  <div class="swiper-button-prev">
+                    <i class="flaticon-arrow-pointing-to-left"></i>
+                  </div>
+                  <!-- !next / prev arrows -->
                 </div>
-            </div>
+              </div>
         </div>
     </div>
     <!-- ===============  tranding product area end =============== -->

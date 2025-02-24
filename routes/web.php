@@ -25,6 +25,8 @@ use Illuminate\Support\Facades\Auth;
 
 
 Route::get('/',[HomeController::class,'dashboard'])->name('client.index');
+// Route::get('/add-new',[CartController::class,'index'])->name('cart.addnew');
+
 Route::get('/categories',[HomeController::class,'category'])->name('categories.index');
 
 
@@ -32,8 +34,10 @@ Route::get('/categories',[HomeController::class,'category'])->name('categories.i
 
 
 //client/cart
-Route::post('/add-cart',[CartController::class,'add'])->name('cart.add');
+Route::get('/Add-Cart/{id}',[CartController::class,'AddCart']);
+Route::get('/Delete-Item-Cart/{id}',[CartController::class,'DeleteItemCart']);
 Route::get('/cart',[CartController::class,'index'])->name('cart.index');
+Route::get('/model-cart',[CartController::class,'AddCart']);
 Route::get('/order',[CartController::class,'order'])->name('client.cart.order');
 Route::get('/checkout',[CartController::class,'checkout'])->name('client.cart.checkout');
 

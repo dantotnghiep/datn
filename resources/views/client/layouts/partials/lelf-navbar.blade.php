@@ -14,8 +14,13 @@
                             <li><a href="dashboard.html"><i class="flaticon-user"></i></a></li>
                             <li><a href="product.html"><i class="flaticon-heart"></i></a></li>
                             <li class="cart-icon">
-                                <i class="flaticon-shopping-cart"></i>
-                                <div class="cart-count"><span>10</span></div>
+                                    <i class="flaticon-shopping-cart"></i>
+                                    @if (Session::has('Cart') != null)
+                                        <span id="total-quanty-show">{{ Session::get('Cart')->totalQuanty }}</span>
+                                    @else
+                                        <span id="total-quanty-show">0</span>
+                                    @endif
+                                
                             </li>
                         </ul>
                     </div>
@@ -33,7 +38,7 @@
 
         <li class="cart-icon">
             <a href="cart.html"><i class="flaticon-shopping-cart"></i></a>
-            <div class="cart-count"><span>10</span></div>
+            <div class="cart-count"><span></span></div>
         </li>
     </ul>
 </div>
@@ -42,90 +47,51 @@
 <!-- =============== cart sidebar start=============== -->
 <div class="cart-sidebar-wrappper">
     <div class="main-cart-sidebar">
-        <div class="cart-top">
-            <div class="cart-close-icon">
-                <i class="flaticon-letter-x"></i>
-            </div>
-            <ul class="cart-product-grid">
-                <li class="single-cart-product">
-                    <div class="cart-product-info d-flex align-items-center">
-                        <div class="product-img"><img src="/client/assets/images/product/cart-p1.png" alt=""
-                                class="img-fluid"></div>
-                        <div class="product-info">
-                            <a href="product-details.html">
-                                <h5 class="product-title">Men Casual Summer Sale</h5>
-                            </a>
-                            <ul class="product-rating d-flex">
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star"></i></li>
-                            </ul>
-                            <p class="product-price"><span>1</span>x <span class="p-price">$10.32</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="cart-product-delete-btn">
-                        <a href="javascript:void(0)"><i class="flaticon-letter-x"></i></a>
-                    </div>
+        <div id="change-item-cart">
+            @if (Session::has('Cart') != null)
+                <div class="cart-top">
 
-                </li>
-                <li class="single-cart-product">
-                    <div class="cart-product-info d-flex align-items-center">
-                        <div class="product-img"><img src="/client/assets/images/product/cart-p3.png" alt=""
-                                class="img-fluid"></div>
-                        <div class="product-info">
-                            <a href="product-details.html">
-                                <h5 class="product-title">Something Yellow Jens</h5>
-                            </a>
-                            <ul class="product-rating d-flex">
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star"></i></li>
-                            </ul>
-                            <p class="product-price"><span>1</span>x <span class="p-price">$10.32</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="cart-product-delete-btn">
-                        <a href="javascript:void(0)"><i class="flaticon-letter-x"></i></a>
-                    </div>
+                    <ul class="cart-product-grid">
+                        @foreach (Session::get('Cart')->products as $item)
+                            <li class="single-cart-product">
+                                <div class="cart-product-info d-flex align-items-center">
+                                    <div class="product-img"><img src="assets/images/product/cart-p1.png" alt=""
+                                            class="img-fluid"></div>
+                                    <div class="product-info">
+                                        <a href="product-details.html">
+                                            <h5 class="product-title">{{ $item['productInfo']->name }}</h5>
+                                        </a>
+                                        <ul class="product-rating d-flex">
+                                            <li><i class="bi bi-star-fill"></i></li>
+                                            <li><i class="bi bi-star-fill"></i></li>
+                                            <li><i class="bi bi-star-fill"></i></li>
+                                            <li><i class="bi bi-star-fill"></i></li>
+                                            <li><i class="bi bi-star"></i></li>
+                                        </ul>
+                                        <p class="product-price"><span>{{ $item['quanty'] }}</span>x <span
+                                                class="p-price">{{ number_format($item['productInfo']->price) }}VND</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="cart-product-delete-btn">
+                                    <i class="flaticon-letter-x" data-id="{{ $item['productInfo']->id }}"></i>
+                                </div>
 
-                </li>
-                <li class="single-cart-product">
-                    <div class="cart-product-info d-flex align-items-center">
-                        <div class="product-img"><img src="/client/assets/images/product/cart-p2.png" alt=""
-                                class="img-fluid"></div>
-                        <div class="product-info">
-                            <a href="product-details.html">
-                                <h5 class="product-title">Woman Something Navy Top</h5>
-                            </a>
-                            <ul class="product-rating d-flex">
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star"></i></li>
-                            </ul>
-                            <p class="product-price"><span>1</span>x <span class="p-price">$10.32</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="cart-product-delete-btn">
-                        <a href="javascript:void(0)"><i class="flaticon-letter-x"></i></a>
-                    </div>
+                            </li>
+                        @endforeach
 
-                </li>
-            </ul>
+                    </ul>
+                </div>
+                <div class="cart-total d-flex justify-content-between">
+                    <label>Subtotal :</label>
+                    <span>{{ number_format(Session::get('Cart')->totalPrice) }}VND</span>
+
+                </div>
+            @endif
+
         </div>
         <div class="cart-bottom">
-            <div class="cart-total d-flex justify-content-between">
-                <label>Subtotal :</label>
-                <span>$64.08</span>
-            </div>
+
             <div class="cart-btns">
                 <a href="checkout.html" class="cart-btn checkout">CHECKOUT</a>
                 <a href="cart.html" class="cart-btn cart">VIEW CART</a>

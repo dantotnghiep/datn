@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -14,7 +15,12 @@ class HomeController extends Controller
             $query->where('status', 'active'); 
         }])->where('status', 'active') 
         ->get();
-        return view('client.index',compact('categories'));
+        $products = DB::table('products')->get();
+        return view('client.index',compact('categories','products'));
+
+        
+        
+        
     }
    
 }
