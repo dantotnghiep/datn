@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attribute;
+use App\Models\VariationAttributeValue;
 use Illuminate\Http\Request;
 
 class AttributeController extends Controller
@@ -13,7 +14,8 @@ class AttributeController extends Controller
     public function index()
     {
         $attributes = Attribute::with('values')->get();
-        return view('admin.attribute.attribute', compact('attributes'));
+        $variationAttributeValues = VariationAttributeValue::all();
+        return view('admin.attribute.attribute', compact('attributes','variationAttributeValues'));
     }
 
     /**
