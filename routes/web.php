@@ -41,6 +41,23 @@ Route::get('/checkout', [CartController::class, 'checkout'])->name('client.cart.
 Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
 Route::get('/product-details', [ProductController::class, 'productdetails'])->name('client.product.product-details');
 
+// Auth
+Route::get('/login', [App\Http\Controllers\Client\AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [App\Http\Controllers\Client\AuthController::class, 'login'])->name('login.post');
+Route::get('/register', [App\Http\Controllers\Client\AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [App\Http\Controllers\Client\AuthController::class, 'register'])->name('register.post');
+Route::get('/forgot-password', [App\Http\Controllers\Client\AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
+Route::post('/forgot-password', [App\Http\Controllers\Client\AuthController::class, 'sendResetLinkEmail'])->name('forgot-password.post');
+Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthController::class, 'showResetPasswordForm'])->name('reset-password');
+Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
+    Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
+});
+
 
 //ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
 
@@ -88,21 +105,3 @@ Route::get('/products/{id}/variations/create', [ProductVariationController::clas
 Route::post('/product-variations/store', [ProductVariationController::class, 'store'])->name('product-variations.store');
 
 
-// Auth Routes
-Route::get('/login', [App\Http\Controllers\Client\AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [App\Http\Controllers\Client\AuthController::class, 'login'])->name('login.post');
-Route::get('/register', [App\Http\Controllers\Client\AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [App\Http\Controllers\Client\AuthController::class, 'register'])->name('register.post');
-Route::get('/forgot-password', [App\Http\Controllers\Client\AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
-Route::post('/forgot-password', [App\Http\Controllers\Client\AuthController::class, 'sendResetLinkEmail'])->name('forgot-password.post');
-Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthController::class, 'showResetPasswordForm'])->name('reset-password');
-Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
-
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-
-    // Profile routes
-    Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
-    Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
-});

@@ -24,7 +24,6 @@ class ProfileController extends Controller
         try {
             $validated = $request->validated();
             
-            // Update user information
             User::where('id', Auth::id())->update([
                 'name' => $validated['name'],
                 'phone' => $validated['phone'],
