@@ -34,12 +34,18 @@ Route::get('/categories',[HomeController::class,'category'])->name('categories.i
 
 
 //client/cart
-Route::get('/Add-Cart/{id}',[CartController::class,'AddCart']);
-Route::get('/Delete-Item-Cart/{id}',[CartController::class,'DeleteItemCart']);
-Route::get('/cart',[CartController::class,'index'])->name('cart.index');
-Route::get('/model-cart',[CartController::class,'AddCart']);
-Route::get('/order',[CartController::class,'order'])->name('client.cart.order');
-Route::get('/checkout',[CartController::class,'checkout'])->name('client.cart.checkout');
+// Route::get('/Add-Cart/{id}',[CartController::class,'AddCart']);
+// Route::get('/Delete-Item-Cart/{id}',[CartController::class,'DeleteItemCart']);
+// Route::get('/cart',[CartController::class,'index'])->name('cart.index');
+// Route::get('/model-cart',[CartController::class,'AddCart']);
+// Route::get('/order',[CartController::class,'order'])->name('client.cart.order');
+// Route::get('/checkout',[CartController::class,'checkout'])->name('client.cart.checkout');
+Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/add/{id}', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::delete('/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    Route::put('/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
+});
 
 //client/product
 Route::get('/list-product',[ProductController::class,'listproduct'])->name('client.product.list-product');
