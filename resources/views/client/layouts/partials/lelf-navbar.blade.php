@@ -11,7 +11,26 @@
                     </div>
                     <div class="sidebar-bottom">
                         <ul class="sidebar-icons">
-                            <li><a href="dashboard.html"><i class="flaticon-user"></i></a></li>
+                            <li class="user-menu-wrapper">
+                                <a href="#"><i class="flaticon-user"></i></a>
+                                <div class="submenu-right">
+                                    @if (Auth::check())
+                                        <a href="{{ route('profile') }}" class="submenu-item">
+                                            <i class="bi bi-person me-2"></i>Profile</a>
+                                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="submenu-item border-0 bg-transparent w-100 text-start">
+                                                <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                            </button>
+                                        </form>
+                                    @else
+                                        <a href="{{ route('login') }}" class="submenu-item">
+                                            <i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+                                        <a href="{{ route('register') }}" class="submenu-item">
+                                            <i class="bi bi-person-plus me-2"></i>Register</a>
+                                    @endif
+                                </div>
+                            </li>
                             <li><a href="product.html"><i class="flaticon-heart"></i></a></li>
                             <li class="cart-icon">
                                 <i class="flaticon-shopping-cart"></i>
@@ -152,7 +171,7 @@
                     <i class="flaticon-man"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title"> Men’s <i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title"> Men's <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -247,3 +266,45 @@
     </div>
 </div>
 <!-- =============== category wrapper end=============== -->
+
+<style>
+    .user-menu-wrapper {
+        position: relative;
+    }
+
+    .submenu-right {
+        display: none;
+        position: absolute;
+        left: 85px;
+        top: -10px;
+        background: white;
+        min-width: 200px;
+        border-radius: 12px;
+        padding: 15px 0;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    .user-menu-wrapper:hover .submenu-right {
+        display: block;
+    }
+
+    .submenu-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #333;
+        text-decoration: none;
+        transition: background 0.3s;
+        font-size: 14px;
+    }
+
+    .submenu-item i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+    }
+
+    .submenu-item:hover {
+        background: #f5f5f5;
+    }
+</style>

@@ -14,17 +14,21 @@
                 <div class="col-xxl-6 col-xl-6 col-lg-8 col-md-10">
                     <div class="reg-login-forms">
                         <h4 class="reg-login-title text-center">
-                            Register Your Account
+                            Create Your Account
                         </h4>
 
-                        <form method="POST" action="{{ route('register') }}">
+                        @if(session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        <form action="{{ route('register.post') }}" method="POST">
                             @csrf
                             <div class="reg-input-group">
-                                <label for="fname">Full Name *</label>
-                                <input id="name" type="text"
-                                    class="form-control @error('name') is-invalid @enderror" name="name"
-                                    value="{{ old('name') }}" placeholder="Fullname " autocomplete="name">
-
+                                <label for="name">Full Name *</label>
+                                <input type="text" id="name" name="name" value="{{ old('name') }}" 
+                                       class="@error('name') is-invalid @enderror" >
                                 @error('name')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -34,64 +38,64 @@
 
                             <div class="reg-input-group">
                                 <label for="email">Email *</label>
-                                <input id="email" type="email"
-                                    class="form-control @error('email') is-invalid @enderror" name="email"
-                                    value="{{ old('email') }}" autofocus placeholder="Your email" autocomplete="email">
-
+                                <input type="text" id="email" name="email" value="{{ old('email') }}" 
+                                       class="@error('email') is-invalid @enderror" >
                                 @error('email')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
                             </div>
+
                             <div class="reg-input-group">
                                 <label for="password">Password *</label>
-                                <div class="position-relative auth-pass-inputgroup">
-                                    <input id="password" type="password"
-                                        class="form-control pe-5 password-input @error('password') is-invalid @enderror"
-                                        name="password" value="{{ old('password') }}" placeholder="Nhập mật khẩu"
-                                        autocomplete="new-password">
-
-                                    @error('password')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-
-                                    <button
-                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
-                                        type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
-                                </div>
+                                <input type="password" id="password" name="password" 
+                                       class="@error('password') is-invalid @enderror" >
+                                @error('password')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
 
                             <div class="reg-input-group">
-                                <label for="sure-pass">Confirm Password *</label>
-                                <div class="position-relative auth-pass-inputgroup">
-                                    <input id="password-confirm" type="password" class="form-control pe-5 password-input"
-                                        name="password_confirmation" placeholder="Nhập lại mật khẩu"
-                                        autocomplete="new-password">
-                                    <button
-                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
-                                        type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
-                                </div>
+                                <label for="password_confirmation">Confirm Password *</label>
+                                <input type="password" id="password_confirmation" name="password_confirmation" >
                             </div>
 
-                            <div class="reg-input-group reg-check-input d-flex align-items-center">
-                                <input type="checkbox" id="form-check" required>
-                                <label for="form-check">I agree to the <a href="#">Terms & Policy</a></label>
+                            <div class="reg-input-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="text" id="phone" name="phone" value="{{ old('phone') }}" 
+                                       class="@error('phone') is-invalid @enderror">
+                                @error('phone')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
+
+                            <div class="reg-input-group">
+                                <label for="address">Address</label>
+                                <input type="text" id="address" name="address" value="{{ old('address') }}" 
+                                       class="@error('address') is-invalid @enderror">
+                                @error('address')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+
                             <div class="reg-input-group reg-submit-input d-flex align-items-center">
-                                <input type="submit" id="submite-btn" value="CREATE AN ACCOUNT">
+                                <button type="submit" class="btn btn-primary w-100">REGISTER</button>
                             </div>
                         </form>
 
                         <div class="reg-social-login">
-                            <h5>or Signup WITH</h5>
+                            <h5>Or register WITH</h5>
                             <ul class="social-login-options">
                                 <li><a href="#" class="facebook-login"><i class="flaticon-facebook-app-symbol"></i>
-                                        Sign
-                                        up whit facebook</a></li>
-                                <li><a href="#" class="google-login"><i class="flaticon-pinterest-1"></i> Signup whit
+                                        Sign up with facebook</a></li>
+                                <li><a href="#" class="google-login"><i class="flaticon-pinterest-1"></i> Sign up with
                                         google</a></li>
                             </ul>
                         </div>

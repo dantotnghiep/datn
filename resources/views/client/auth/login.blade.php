@@ -6,7 +6,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6">
                     <div class="register-switcher text-center">
-                        <a href="{{ route('register') }}" class="resister-btn">Account</a>
+                        <a href="{{ route('register') }}" class="resister-btn">Register</a>
                         <a href="{{ route('login') }}" class="login-btn active">Login</a>
                     </div>
                 </div>
@@ -18,26 +18,45 @@
                             Login Your Account
                         </h4>
 
-                        <form action="#" method="POST" id="login-form">
+                        @if(session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        <form action="{{ route('login.post') }}" method="POST">
+                            @csrf
                             <div class="reg-input-group">
-                                <label for="fname">User Name *</label>
-                                <input type="text" id="fname" placeholder="Your first name" required>
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" value="{{ old('email') }}" 
+                                       class="@error('email') is-invalid @enderror">
+                                @error('email')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
                             <div class="reg-input-group">
                                 <label for="password">Password *</label>
-                                <input type="password" id="password" placeholder="Enter your password" required>
+                                <input type="password" id="password" name="password" 
+                                       class="@error('password') is-invalid @enderror">
+                                @error('password')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
                             <div class="password-recover-group d-flex justify-content-between">
                                 <div class="reg-input-group reg-check-input d-flex align-items-center">
-                                    <input type="checkbox" id="form-check" required>
-                                    <label for="form-check">Remember Me</label>
+                                    <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                    <label for="remember">Remember Me</label>
                                 </div>
                                 <div class="forgot-password-link">
-                                    <a href="#">Forgot Password?</a>
+                                    <a href="{{ route('forgot-password') }}">Forgot Password?</a>
                                 </div>
                             </div>
                             <div class="reg-input-group reg-submit-input d-flex align-items-center">
-                                <input type="submit" id="submite-btn" value="LOG IN">
+                                <button type="submit" class="btn btn-primary w-100">LOG IN</button>
                             </div>
                         </form>
 
@@ -45,9 +64,8 @@
                             <h5>Or login WITH</h5>
                             <ul class="social-login-options">
                                 <li><a href="#" class="facebook-login"><i class="flaticon-facebook-app-symbol"></i>
-                                        Sign
-                                        up whit facebook</a></li>
-                                <li><a href="#" class="google-login"><i class="flaticon-pinterest-1"></i> Signup whit
+                                        Sign up with facebook</a></li>
+                                <li><a href="#" class="google-login"><i class="flaticon-pinterest-1"></i> Sign up with
                                         google</a></li>
                             </ul>
                         </div>
