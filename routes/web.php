@@ -45,6 +45,7 @@ Route::prefix('cart')->group(function () {
     Route::post('/add/{id}', [CartController::class, 'addToCart'])->name('cart.add');
     Route::delete('/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
     Route::put('/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
+    // Route::get('/sidebar', [CartController::class, 'getCartSidebar'])->name('cart.sidebar');
 });
 
 //client/product

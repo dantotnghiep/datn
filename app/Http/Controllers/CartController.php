@@ -143,4 +143,25 @@ class CartController extends Controller
             ], 500);
         }
     }
+
+    public function getCartSidebar()
+    {
+        try {
+            $cartItems = Cart::all();
+            $cartTotal = $cartItems->sum(function ($item) {
+                return $item->price * $item->quantity;
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'html' => view('client.cart.cart-sidebar', compact('cartItems', 'cartTotal'))->render(),
+                'cart_count' => Cart::sum('quantity')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi tải giỏ hàng'
+            ], 500);
+        }
+    }
 }
