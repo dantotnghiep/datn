@@ -36,10 +36,6 @@ class Product extends Model
         return $this->hasOne(Variation::class)->oldest();
     }
 
-    public function mainImage()
-    {
-        return $this->defaultVariation()->with('mainImage');
-    }
 
     public function additionalImages()
     {
@@ -50,7 +46,7 @@ class Product extends Model
 
     public function images()
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->hasMany(Product_image::class);
     }
 
 }

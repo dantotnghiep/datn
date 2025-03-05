@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductImage extends Model
+class Product_image extends Model
 {
     use HasFactory;
 
@@ -19,8 +19,8 @@ class ProductImage extends Model
         'is_main' => 'boolean'
     ];
 
-    public function variation()
+    public function product()
     {
-        return $this->belongsTo(Variation::class);
+        return $this->belongsTo(Product::class);
     }
 }

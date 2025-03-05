@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreProductRequest;
+use App\Models\Attribute_value;
+use App\Models\Product_image;
 
 class ProductController extends Controller
 {
@@ -34,7 +36,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = Product::with('mainImage')->get();
+        $products = Product::get();
         return view('admin.product.product-list', compact('products'));
     }
 
@@ -52,43 +54,50 @@ class ProductController extends Controller
     {
         try {
             DB::transaction(function () use ($request) {
-                // Create the product
+                // Tạo sản phẩm
                 $product = Product::create($request->validated());
+                // Xử lý upload hình ảnh chính
+                if ($request->hasFile('main_image')) {
+                    $mainImage = new Product_image();
+                    $mainImage->product_id = $product->id; // Liên kết với sản phẩm
+                    $mainImage->url = $request->file('main_image')->store('products');
+                    $mainImage->is_main = true; // Đánh dấu là hình chính
+                    $mainImage->save();
+                }
 
-
-                // Handle main image upload
-
-                // Handle variations
+                // Xử lý biến thể
                 if ($request->has('variations')) {
                     foreach ($request->variations as $variationData) {
-                        $variation = new Variation();
-                        $variation->product_id = $product->id; // Assign product ID
-                        $variation->sku = $variationData['sku'];
-                        $variation->price = $variationData['price'];
-                        $variation->stock = $variationData['stock'];
-                        $variation->save();
-
-                        // Assign attribute values to the variation
-                        if (isset($variationData['attribute_values'])) {
-                            $variation->attributeValues()->sync($variationData['attribute_values']);
+                        $variation = Variation::create([
+                            'product_id' => $product->id, 
+                            'sku' => $variationData['sku'],
+                            'price' => $variationData['price'],
+                            'stock' => $variationData['stock'],
+                            'sale_price' => !empty($variationData['sale_price']) ? $variationData['sale_price'] : null,
+                            'sale_start' => !empty($variationData['sale_start']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_start'])) : null,
+                            'sale_end' => !empty($variationData['sale_end']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_end'])) : null,
+                        ]);
+                        if (isset($variationData['attribute_values']) && is_array($variationData['attribute_values'])) {
+                            $validIds = Attribute_value::whereIn('id', $variationData['attribute_values'])->pluck('id')->toArray();
+                            foreach ($variationData['attribute_values'] as $attributeValueId) {
+                                if (in_array($attributeValueId, $validIds)) {
+                                    try {
+                                        $variation->attributeValues()->attach($attributeValueId);
+                                    } catch (\Exception $e) {
+                                        Log::error('Error attaching attribute value:', ['error' => $e->getMessage()]);
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-                // Handle main image upload
-                if ($request->hasFile('main_image')) {
-                    $mainImage = new ProductImage();
-                    $mainImage->variation_id = $variation->id; // Assuming you want to associate it with the last variation created
-                    $mainImage->url = $request->file('main_image')->store('products');
-                    $mainImage->is_main = true; // Set as main image
-                    $mainImage->save();
                 }
             });
 
             return redirect()->route('admin.product.product-list')
-                ->with('success', 'Product and variations added successfully!');
+                ->with('success', 'Sản phẩm và biến thể đã được thêm thành công!');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'An error occurred: ' . $e->getMessage())
+                ->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -96,16 +105,8 @@ class ProductController extends Controller
 
     public function showVariations($id)
     {
-        $product = Product::with('productAttributes.attribute', 'productAttributes.attributeValue')->findOrFail($id);
-
-
-        $attributes = $product->productAttributes->groupBy('attribute_id');
-
-
-        $combinations = $this->generateCombinations($attributes);
-
-
-        return view('admin.variation.variation-list-of-product', compact('product', 'combinations'));
+        $product = Product::with(['variations.attributeValues'])->findOrFail($id);
+        return view('admin.variation.variation-list-of-product', compact('product'));
     }
 
     private function generateCombinations($attributes)

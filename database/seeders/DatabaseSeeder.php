@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Attribute;
-use App\Models\AttributeValue;
+use App\Models\Attribute_value;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -126,7 +126,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($attributeValues as $value) {
-            AttributeValue::create($value);
+            Attribute_value::create($value);
         }
     }
 }

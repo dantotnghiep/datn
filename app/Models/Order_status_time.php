@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class OrderItem extends Model
+class Order_status_time extends Model
 {
     use HasFactory;
 
-    protected $table = 'order_items';
-    protected $fillable = ['order_id', 'product_id', 'quantity', 'price'];
+    protected $table = 'order_status_times';
+    protected $fillable = ['order_id', 'status_id', 'created_at'];
 
     public function order() {
         return $this->belongsTo(Order::class);
     }
 
-    public function product() {
-        return $this->belongsTo(Product::class);
+    public function status() {
+        return $this->belongsTo(Order_status::class);
     }
 } 

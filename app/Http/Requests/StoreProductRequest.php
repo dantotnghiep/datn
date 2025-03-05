@@ -15,7 +15,6 @@ class StoreProductRequest extends FormRequest
     {
         $productId = $this->route('product'); // Assuming you're passing the product ID in the route
 
-        // dd($this->all());
         return [
             'name' => 'required|string|max:255|unique:products,name,' . $productId,
             'slug' => 'required|string|max:255|unique:products,slug',

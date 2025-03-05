@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AttributeValue extends Model
+class Attribute_value extends Model
 {
     use HasFactory;
 
@@ -22,6 +22,6 @@ class AttributeValue extends Model
 
     public function variations()
     {
-        return $this->belongsToMany(Variation::class, 'attribute_values_variations');
+        return $this->belongsToMany(Variation::class);
     }
 }

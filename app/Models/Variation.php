@@ -9,6 +9,7 @@ class Variation extends Model
 {
     use HasFactory;
 
+    
     protected $fillable = [
         'product_id',
         'sku',
@@ -31,28 +32,15 @@ class Variation extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function images()
-    {
-        return $this->hasMany(ProductImage::class, 'variation_id');
-    }
 
     public function mainImage()
     {
-        return $this->hasOne(ProductImage::class, 'variation_id')->where('is_main', true);
+        return $this->hasOne(Product_image::class, 'variation_id')->where('is_main', true);
     }
 
     public function attributeValues()
     {
-        return $this->belongsToMany(AttributeValue::class, 'attribute_values_variations', 'variation_id', 'attribute_value_id');
+        return $this->belongsToMany(Attribute_value::class);
     }
 
-    // Helper method để lấy giá trị của một attribute cụ thể
-    public function getAttributeValue($attributeName)
-    {
-        return $this->attributeValues()
-                    ->whereHas('attribute', function($query) use ($attributeName) {
-                        $query->where('name', $attributeName);
-                    })
-                    ->first();
-    }
 } 
