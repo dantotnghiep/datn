@@ -61,13 +61,6 @@
                                                 </div>
                                             </div>
 
-                                            <div class="form-group">
-                                                <label>Slug (Optional)</label>
-                                                <div class="col-12">
-                                                    <input name="slug" class="form-control here set-slug" type="text" placeholder="Enter Slug (Optional)">
-                                                </div>
-                                            </div>
-
                                             <div class="row">
                                                 <div class="col-12 d-flex">
                                                     <button type="submit" class="cr-btn-primary">Submit</button>

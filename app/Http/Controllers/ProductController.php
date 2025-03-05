@@ -36,7 +36,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = Product::get();
+        $products = Product::with(['variations', 'images', 'category'])->orderBy('created_at', 'desc')->get();
         return view('admin.product.product-list', compact('products'));
     }
 
@@ -63,6 +63,17 @@ class ProductController extends Controller
                     $mainImage->url = $request->file('main_image')->store('products');
                     $mainImage->is_main = true; // Đánh dấu là hình chính
                     $mainImage->save();
+                }
+
+                // Xử lý ảnh phụ
+                if ($request->hasFile('additional_images')) {
+                    foreach ($request->file('additional_images') as $image) {
+                        $additionalImage = new Product_image();
+                        $additionalImage->product_id = $product->id;
+                        $additionalImage->url = $image->store('products');
+                        $additionalImage->is_main = false; // Đánh dấu là hình phụ
+                        $additionalImage->save();
+                    }
                 }
 
                 // Xử lý biến thể
@@ -108,25 +119,6 @@ class ProductController extends Controller
         $product = Product::with(['variations.attributeValues'])->findOrFail($id);
         return view('admin.variation.variation-list-of-product', compact('product'));
     }
-
-    private function generateCombinations($attributes)
-    {
-        $combinations = [[]];
-
-        foreach ($attributes as $attributeValues) {
-            $newCombinations = [];
-            foreach ($combinations as $combination) {
-                foreach ($attributeValues as $value) {
-                    $newCombinations[] = array_merge($combination, [$value]);
-                }
-            }
-            $combinations = $newCombinations;
-        }
-
-        return $combinations;
-    }
-
-    public function show(Product $product) {}
 
 
     public function edit(Product $product)
@@ -198,7 +190,7 @@ class ProductController extends Controller
                 }
 
                 foreach ($request->file('additional_images') as $additionalImage) {
-                    ProductImage::create([
+                    Product_image::create([
                         'product_id' => $product->id,
                         'url' => $additionalImage->store('products'),
                     ]);
@@ -211,18 +203,6 @@ class ProductController extends Controller
                 $product->productAttributes()->delete();
 
                 // Add new attributes and values
-                foreach ($validated['attributes'] as $attributeData) {
-                    if (!empty($attributeData['attribute_id'])) {
-                        $productAttribute = ProductAttribute::create([
-                            'product_id' => $product->id,
-                            'attribute_id' => $attributeData['attribute_id'],
-                        ]);
-
-                        if (isset($attributeData['value_ids'])) {
-                            $productAttribute->attributeValue()->sync($attributeData['value_ids']);
-                        }
-                    }
-                }
             }
 
             DB::commit();

@@ -45,8 +45,8 @@
                                                     @endif
                                                 </td>
                                                 <td><span class="variation-sku">{{ $variation->sku }}</span></td>
-                                                <td>{{ number_format($variation->price, 2) }} VNĐ</td>
-                                                <td>{{ $variation->sale_price ? number_format($variation->sale_price, 2) . ' VNĐ' : '0.00 VNĐ' }}</td>
+                                                <td>{{ number_format($variation->price) }} VNĐ</td>
+                                                <td>{{ $variation->sale_price ? number_format($variation->sale_price) . ' VNĐ' : '0 VNĐ' }}</td>
                                                 <td>{{ $variation->stock }}</td>
                                                 <td>{{ $variation->sale_start ? $variation->sale_start->format('d/m/Y') : 'N/A' }} - {{ $variation->sale_end ? $variation->sale_end->format('d/m/Y') : 'N/A' }}</td>
                                                 <td class="text-center">

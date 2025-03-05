@@ -10,6 +10,7 @@ use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
+use App\Http\Controllers\VariationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -76,19 +77,10 @@ Route::prefix('admin')->group(function () {
     Route::put('/category/{id}', [CategoryController::class, 'update'])->name('admin.category.update');
     Route::delete('/category/{id}', [CategoryController::class, 'destroy'])->name('admin.category.destroy');
 
-    //admin/attributes
-    Route::get('/attribute', [AttributeController::class, 'index'])->name('admin.attribute.attribute');
-    Route::get('/attribute/create', [AttributeController::class, 'create'])->name('admin.attribute.create');
-    Route::post('/attribute', [AttributeController::class, 'store'])->name('admin.attribute.store');
-    Route::get('/attribute/{id}/edit', [AttributeController::class, 'edit'])->name('admin.attribute.edit');
-    Route::put('/attribute/{id}', [AttributeController::class, 'update'])->name('admin.attribute.update');
-    Route::delete('/attribute/{id}/delete', [AttributeController::class, 'destroy'])->name('admin.attribute.destroy');
-
     //admin/attributesValues
     Route::get('/attribute-values', [AttributeValueController::class, 'index'])->name('admin.attribute-values');
     Route::get('/attribute-values/create', [AttributeValueController::class, 'create'])->name('admin.attribute-values.create');
     Route::post('/attribute-values', [AttributeValueController::class, 'store'])->name('admin.attribute-values.store');
-    Route::delete('/attribute-values/{id}/delete', [AttributeValueController::class, 'destroy'])->name('admin.attribute-values.delete1');
 
     //admin/Product
     Route::get('/product-list', [ProductController::class, 'index'])->name('admin.product.product-list');
@@ -103,7 +95,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/products/{id}/variations/create', [ProductVariationController::class, 'create'])->name('product-variations.create');
     Route::post('/product-variations/store', [ProductVariationController::class, 'store'])->name('product-variations.store');
 
-    Route::put('/variation/{id}', [ProductVariationController::class, 'update'])->name('admin.variation.update');
+    Route::put('/variation/{id}', [VariationController::class, 'update'])->name('admin.variation.update');
 
 
 });

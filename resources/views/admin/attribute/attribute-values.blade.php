@@ -90,10 +90,7 @@
                                     <thead>
                                         <tr>
                                             <th>Attribute Value</th>
-                                            <th>Slug</th>
                                             <th>Attribute</th>
-                                            <th>Action</th>
-                                            
                                         </tr>
                                     </thead>
 
@@ -101,22 +98,7 @@
                                         @foreach ($attributeValues as $value)
                                             <tr>
                                                 <td>{{ $value->value }}</td>
-                                                <td>{{ $value->slug }}</td>
                                                 <td>{{ $value->attribute->name }}</td>
-                                                <td>
-                                                    <div>
-                                                        <button type="button" class="ri-settings-3-line"
-                                                            style="border: none;padding: 15px 30px;font-size: 20px;background-color: white;"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false" data-display="static">
-
-                                                        </button>
-                                                        <div class="dropdown-menu">
-                                                            <a class="dropdown-item" href="#">Edit</a>
-                                                            <a class="dropdown-item" href="#">Delete</a>
-                                                        </div>
-                                                    </div>
-                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
