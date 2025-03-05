@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_images', function (Blueprint $table) {
-            $table->id();
+        Schema::create('attribute_values_variations', function (Blueprint $table) {
+            $table->foreignId('attribute_value_id')->constrained('attribute_values')->onDelete('cascade');
             $table->foreignId('variation_id')->constrained('variations')->onDelete('cascade');
-            $table->text('url');
-            $table->boolean('is_main')->default(false);
-            $table->timestamps();
-        });   
+            $table->primary(['attribute_value_id', 'variation_id']);
+        });
     }
 
     /**
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_images');
+        Schema::dropIfExists('attribute_values_variations');
     }
-};
+}; 

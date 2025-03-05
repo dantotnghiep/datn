@@ -8,18 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class ProductImage extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'product_id',
         'variation_id',
         'url',
-        'is_main',
+        'is_main'
     ];
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
-    }
+
+    protected $casts = [
+        'is_main' => 'boolean'
+    ];
+
     public function variation()
     {
-        return $this->belongsTo(ProductVariation::class,'variation_id');
+        return $this->belongsTo(Variation::class);
     }
 }

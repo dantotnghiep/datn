@@ -17,6 +17,8 @@
                                     @if (Auth::check())
                                         <a href="{{ route('profile') }}" class="submenu-item">
                                             <i class="bi bi-person me-2"></i>Profile</a>
+                                        <a href="{{ route('profile') }}" class="submenu-item">
+                                            <i class="bi bi-bag me-2"></i>Orders</a>
                                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="submenu-item border-0 bg-transparent w-100 text-start">

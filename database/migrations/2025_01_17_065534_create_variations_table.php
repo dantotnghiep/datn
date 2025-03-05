@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_variations', function (Blueprint $table) {
+        Schema::create('variations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('product_id');
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->string('sku',255)->unique();
             $table->decimal('price',10,2);
             $table->decimal('sale_price',10,2)->nullable();
@@ -21,7 +21,6 @@ return new class extends Migration
             $table->dateTime('sale_end')->nullable();
             $table->integer('stock');
             $table->timestamps();
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }
 
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_variations');
+        Schema::dropIfExists('variations');
     }
 };

@@ -1,253 +1,311 @@
 @extends('admin.layouts.master')
 
 @section('content')
-<div class="cr-main-content">
-    <div class="container-fluid">
-        <div class="cr-page-title cr-page-title-2">
-            <div class="cr-breadcrumb">
-                <h5>Add Product</h5>
-                <ul>
-                    <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    <li>Add Product</li>
-                </ul>
+    <div class="cr-main-content">
+        <div class="container-fluid">
+            <div class="cr-page-title cr-page-title-2">
+                <div class="cr-breadcrumb">
+                    <h5>Add Product</h5>
+                    <ul>
+                        <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                        <li>Add Product</li>
+                    </ul>
+                </div>
             </div>
-        </div>
 
 
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
 
-        @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-        @endif
+            @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
 
 
-        @if (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-        @endif
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="cr-card card-default">
-                    <div class="cr-card-content">
-                        <form action="{{ route('admin.product.store') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <div class="row cr-product-uploads">
-
-                                <div class="col-lg-4 mb-991">
-                                    <div class="cr-vendor-img-upload">
-                                        <label for="main_image">Main Image</label>
-                                        <input type="file" id="main_image" name="main_image" class="form-control"
-                                            accept=".png, .jpg, .jpeg" required>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="cr-card card-default">
+                        <div class="cr-card-content">
+                            <form action="{{ route('admin.product.store') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="row g-3 mt-4">
+                                    <div class="col-md-6">
+                                        <label for="name">Product Name</label>
+                                        <input type="text" name="name" class="form-control" id="slug"
+                                            onkeyup="ChangeToSlug();" required>
                                     </div>
-                                </div>
-
-
-                                <div class="col-lg-8">
-                                    <label for="additional_images">Additional Images</label>
-                                    <input type="file" id="additional_images" name="additional_images[]"
-                                        class="form-control" accept=".png, .jpg, .jpeg" multiple>
-                                </div>
-                            </div>
-
-
-                            <div class="row g-3 mt-4">
-                                <div class="col-md-6">
-                                    <label for="name">Product Name</label>
-                                    <input type="text" name="name" class="form-control" id="slug" onkeyup="ChangeToSlug();" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="slug">Slug</label>
-                                    <input type="text" name="slug" class="form-control" id="convert_slug" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="price">Price (USD)</label>
-                                    <input type="number" name="price" class="form-control" id="price" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="sale_price">Sale Price (USD)</label>
-                                    <input type="number" name="sale_price" class="form-control" id="sale_price">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="quantity">Quantity</label>
-                                    <input type="number" name="quantity" class="form-control" id="quantity" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="category_id">Category</label>
-                                    <select name="category_id" id="category_id" class="form-control" required>
-                                        <option value="">-- Select Category --</option>
-                                        @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="description">Description</label>
-                                    <textarea name="description" id="description" class="form-control" require></textarea>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <label for="sale_start">Sale start</label>
-                                            <input type="datetime-local" name="sale_start" id="sale_start"
-                                                class="form-control">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="sale_end">Sale end</label>
-                                            <input type="datetime-local" name="sale_end" id="sale_end"
-                                                class="form-control">
-                                        </div>
+                                    <div class="col-md-6">
+                                        <label for="slug">Slug</label>
+                                        <input type="text" name="slug" class="form-control" id="convert_slug"
+                                            required>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="status">Status</label>
-                                    <div class="col-12">
-                                        <select id="status" name="status" class="form-control">
+                                    <div class="col-md-6">
+                                        <label for="category_id">Category</label>
+                                        <select name="category_id" id="category_id" class="form-control" required>
+                                            <option value="">-- Select Category --</option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="status">Status</label>
+                                        <select name="status" id="status" class="form-control" required>
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
                                         </select>
                                     </div>
-                                </div>
-                            </div>
+                                    <div class="col-md-12">
+                                        <label for="description">Description</label>
+                                        <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+                                    </div>
 
+                                    <hr class="my-4">
+                                    <h4>Images</h4>
 
-                            <div class="mt-4">
-                                <h4>Attributes</h4>
-                                <div id="attributes">
-                                    <div class="attribute-item">
-                                        <div class="row">
-                                            <div class="col-md-5">
-                                                <label for="attribute_0">Choose Attribute</label>
-                                                <select name="attributes[0][attribute_id]" class="form-control select-attribute" data-index="0" id="attribute_0" required>
-                                                    <option value="">-- Select Attribute --</option>
-                                                    @foreach ($attributes as $attribute)
-                                                    <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-md-5 attribute-values-container" id="attribute-values-container-0"></div>
-                                            <div class="col-md-2 d-flex align-items-end">
-                                                <button type="button" class="btn btn-danger remove-attribute" data-index="0">X</button>
-                                            </div>
+                                    <div class="col-md-6">
+                                        <label for="main_image">Main Image</label>
+                                        <input type="file" name="main_image" class="form-control" accept="image/*"
+                                            required>
+                                        <div class="mt-2" id="main_image_preview"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="additional_images">Additional Images</label>
+                                        <input type="file" name="additional_images[]" class="form-control"
+                                            accept="image/*" multiple>
+                                        <div class="mt-2" id="additional_images_preview"></div>
+                                    </div>
+
+                                    <hr class="my-4">
+                                    <h4>Attributes</h4>
+
+                                    @foreach ($attributes as $attribute)
+                                        <div class="col-md-6">
+                                            <label>{{ $attribute->name }}</label>
+                                            <select name="selected_attributes[]" class="form-control attribute-select"
+                                                data-attribute-id="{{ $attribute->id }}" multiple>
+                                                @foreach ($attribute->values as $value)
+                                                    <option value="{{ $value->id }}"
+                                                        data-value-name="{{ $value->value }}">{{ $value->value }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endforeach
+
+                                    <hr class="my-4">
+                                    <h4>Variations</h4>
+                                    <div class="col-12">
+                                        <button type="button" class="btn btn-secondary mb-3"
+                                            id="generate-variations">Generate Variations</button>
+                                        <div id="variations-container">
+                                            <!-- Variations will be dynamically added here -->
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" id="add-attribute" class="btn btn-secondary mt-3">Add Attribute</button>
-                            </div>
 
-                            <div class="col-md-12 mt-4">
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </div>
-
-
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function() {
-                                    const attributes = @json($attributes);
-                                    let attributeIndex = 1;
-                                    const selectedAttributes = new Set();
-
-                                    function getAvailableAttributesOptions(selectedId = "") {
-                                        return attributes
-                                            .map(attr => `<option value="${attr.id}" ${attr.id == selectedId ? "selected" : ""}>${attr.name}</option>`)
-                                            .filter(option => !selectedAttributes.has(option.match(/value="(\d+)"/)[1]) || option.includes(`value="${selectedId}"`))
-                                            .join('');
-                                    }
-
-                                    function loadAttributeValues(attributeId, index) {
-                                        const container = document.getElementById(`attribute-values-container-${index}`);
-                                        container.innerHTML = '';
-
-                                        // Giả lập AJAX request
-                                        const selectedAttribute = attributes.find(attr => attr.id == attributeId);
-
-                                        if (selectedAttribute && selectedAttribute.values.length > 0) {
-                                            const valueList = selectedAttribute.values.map(value => `
-                <div class="attribute-value-item d-flex align-items-center">
-                    <input type="hidden" name="attributes[${index}][value_ids][]" value="${value.id}">
-                    <span class="mr-2">${value.value}</span>
-                    <button type="button" class="btn btn-sm btn-danger remove-value" data-value-id="${value.id}" data-index="${index}">X</button>
-                </div>
-            `).join('');
-                                            container.innerHTML = `<label>Attribute Values:</label><div>${valueList}</div>`;
-                                        } else {
-                                            container.innerHTML = `<label>Attribute Values:</label><div><span>No attribute values available.</span></div>`;
-                                        }
-                                    }
-
-                                    document.getElementById("add-attribute").addEventListener("click", function() {
-                                        if (selectedAttributes.size >= attributes.length) {
-                                            alert("All available attributes have been added.");
-                                            return;
-                                        }
-
-                                        const attributeHtml = `
-            <div class="attribute-item mt-3">
-                <div class="row">
-                    <div class="col-md-5">
-                        <label for="attribute_${attributeIndex}">Choose Attribute</label>
-                        <select name="attributes[${attributeIndex}][attribute_id]" class="form-control select-attribute" data-index="${attributeIndex}" id="attribute_${attributeIndex}" required>
-                            <option value="">-- Select Attribute --</option>
-                            ${getAvailableAttributesOptions()}
-                        </select>
-                    </div>
-                    <div class="col-md-5 attribute-values-container" id="attribute-values-container-${attributeIndex}"></div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="button" class="btn btn-danger remove-attribute" data-index="${attributeIndex}">X</button>
+                                <div class="col-md-12 mt-4">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        `;
-                                        document.getElementById("attributes").insertAdjacentHTML("beforeend", attributeHtml);
-                                        attributeIndex++;
-                                    });
+        </div>
+    </div>
 
-                                    document.getElementById("attributes").addEventListener("change", function(e) {
-                                        if (e.target.classList.contains("select-attribute")) {
-                                            const index = e.target.getAttribute("data-index");
-                                            const attributeId = e.target.value;
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Image preview functionality
+            const mainImageInput = document.querySelector('input[name="main_image"]');
+            const additionalImagesInput = document.querySelector('input[name="additional_images[]"]');
+            const mainImagePreview = document.getElementById('main_image_preview');
+            const additionalImagesPreview = document.getElementById('additional_images_preview');
 
-                                            if (selectedAttributes.has(attributeId)) {
-                                                alert("This attribute is already selected!");
-                                                e.target.value = "";
-                                                return;
-                                            }
+            mainImageInput.addEventListener('change', function(e) {
+                mainImagePreview.innerHTML = '';
+                if (this.files && this.files[0]) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(this.files[0]);
+                    img.style.maxWidth = '200px';
+                    img.style.marginTop = '10px';
+                    mainImagePreview.appendChild(img);
+                }
+            });
 
-                                            selectedAttributes.add(attributeId);
-                                            loadAttributeValues(attributeId, index);
-                                        }
-                                    });
+            additionalImagesInput.addEventListener('change', function(e) {
+                additionalImagesPreview.innerHTML = '';
+                if (this.files) {
+                    Array.from(this.files).forEach(file => {
+                        const img = document.createElement('img');
+                        img.src = URL.createObjectURL(file);
+                        img.style.maxWidth = '150px';
+                        img.style.marginRight = '10px';
+                        img.style.marginTop = '10px';
+                        additionalImagesPreview.appendChild(img);
+                    });
+                }
+            });
 
-                                    document.getElementById("attributes").addEventListener("click", function(e) {
-                                        if (e.target.classList.contains("remove-attribute")) {
-                                            const index = e.target.getAttribute("data-index");
-                                            const attributeItem = e.target.closest(".attribute-item");
-                                            const selectBox = attributeItem.querySelector(".select-attribute");
-                                            const attributeId = selectBox ? selectBox.value : null;
+            // Existing variations functionality
+            const generateVariationsBtn = document.getElementById('generate-variations');
+            const variationsContainer = document.getElementById('variations-container');
+            const attributeSelects = document.querySelectorAll('.attribute-select');
 
-                                            if (attributeId) selectedAttributes.delete(attributeId);
+            generateVariationsBtn.addEventListener('click', function() {
+                generateVariations();
+            });
 
-                                            attributeItem.remove();
-                                        }
+            function generateVariations() {
+                const attributeSelects = document.querySelectorAll('.attribute-select');
+                let selectedAttributes = [];
 
-                                        if (e.target.classList.contains("remove-value")) {
-                                            e.target.closest(".attribute-value-item").remove();
-                                        }
-                                    });
-                                });
-                            </script>
+                attributeSelects.forEach(select => {
+                    let selectedOptions = Array.from(select.selectedOptions);
+                    if (selectedOptions.length > 0) {
+                        selectedAttributes.push({
+                            attributeId: select.dataset.attributeId,
+                            values: selectedOptions.map(option => ({
+                                id: option.value,
+                                name: option.dataset.valueName
+                            }))
+                        });
+                    }
+                });
 
-                            @endsection
+                let combinations = generateCombinations(selectedAttributes);
+                const variationsContainer = document.getElementById('variations-container');
+                variationsContainer.innerHTML = '';
+
+                combinations.forEach((combination, index) => {
+                    let variationHtml = `<div class='variation-item border rounded p-3 mb-3'>
+                        <div class='d-flex justify-content-between align-items-center mb-3'>
+                            <h5 class='mb-0'>Variation ${index + 1}</h5>
+                            <button type='button' class='btn btn-danger btn-sm delete-variation'>
+                                <i class='bi bi-trash'></i> Delete
+                            </button>
+                        </div>
+                        <div class='row'>
+                            <div class='col-md-12 mb-2'>
+                                <strong>Attributes:</strong> ${combination.map(attr => `${attr.value}`).join(' / ')}
+                            </div>
+                            <div class='col-md-6 mb-2'>
+                                <label>SKU</label>
+                                <input type='text' name='variations[${index}][sku]' class='form-control' required>
+                            </div>
+                            <div class='col-md-6 mb-2'>
+                                <label>Stock</label>
+                                <input type='number' name='variations[${index}][stock]' class='form-control' required min='0'>
+                            </div>
+                            <div class='col-md-6 mb-2'>
+                                <label>Price</label>
+                                <input type='number' name='variations[${index}][price]' class='form-control' step='0.01' required min='0'>
+                            </div>
+                            <div class='col-md-6 mb-2'>
+                                <label>Sale Price</label>
+                                <input type='number' name='variations[${index}][sale_price]' class='form-control' step='0.01' min='0'>
+                            </div>
+                            <div class='col-md-6 mb-2'>
+                                <label>Sale Start</label>
+                                <input type='datetime-local' name='variations[${index}][sale_start]' class='form-control'>
+                            </div>
+                            <div class='col-md-6 mb-2'>
+                                <label>Sale End</label>
+                                <input type='datetime-local' name='variations[${index}][sale_end]' class='form-control'>
+                            </div>
+                        </div>
+                        ${combination.map(attr => `<input type='hidden' name='variations[${index}][attribute_values][]' value='${attr.id}'>`).join('')}
+                    </div>`;
+                    variationsContainer.insertAdjacentHTML('beforeend', variationHtml);
+                });
+
+                // Add event listeners for delete buttons
+                document.querySelectorAll('.delete-variation').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const variationItem = this.closest('.variation-item');
+                        variationItem.remove();
+                        reindexVariations();
+                    });
+                });
+            }
+
+            // Function to reindex variations after deletion
+            function reindexVariations() {
+                const variations = document.querySelectorAll('.variation-item');
+                variations.forEach((variation, index) => {
+                    // Update variation title
+                    variation.querySelector('h5').textContent = `Variation ${index + 1}`;
+
+                    // Update input names
+                    variation.querySelectorAll('input').forEach(input => {
+                        const name = input.getAttribute('name');
+                        if (name) {
+                            input.setAttribute('name', name.replace(/variations\[\d+\]/,
+                                `variations[${index}]`));
+                        }
+                    });
+                });
+            }
+
+            function generateCombinations(attributes) {
+                if (attributes.length === 0) return [];
+
+                let combinations = attributes[0].values.map(value => [{
+                    id: value.id,
+                    value: value.name
+                }]);
+
+                for (let i = 1; i < attributes.length; i++) {
+                    const temp = [];
+                    for (let combination of combinations) {
+                        for (let value of attributes[i].values) {
+                            temp.push([...combination, {
+                                id: value.id,
+                                value: value.name
+                            }]);
+                        }
+                    }
+                    combinations = temp;
+                }
+
+                return combinations;
+            }
+        });
+    </script>
+    <style>
+        #main_image_preview img {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        #additional_images_preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #additional_images_preview img {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
+    </style>
+
+@endsection

@@ -7,11 +7,12 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductImage;
-use App\Models\ProductVariation;
+use App\Models\Variation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreProductRequest;
 
 class ProductController extends Controller
 {
@@ -43,134 +44,66 @@ class ProductController extends Controller
         $categories = Category::all();
         $attributes = Attribute::with('values')->get();
 
-
-        Log::info('Categories Loaded:', $categories->toArray());
-        Log::info('Attributes Loaded:', $attributes->toArray());
-
         return view('admin.product.add-product', compact('categories', 'attributes'));
     }
 
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
         try {
-
-            DB::beginTransaction();
-
-
-            Log::info('Request Data:', $request->all());
+            DB::transaction(function () use ($request) {
+                // Create the product
+                $product = Product::create($request->validated());
 
 
-            if ($request->has('attributes')) {
-                Log::info('Attributes from Request:', $request->input('attributes'));
-            }
+                // Handle main image upload
 
+                // Handle variations
+                if ($request->has('variations')) {
+                    foreach ($request->variations as $variationData) {
+                        $variation = new Variation();
+                        $variation->product_id = $product->id; // Assign product ID
+                        $variation->sku = $variationData['sku'];
+                        $variation->price = $variationData['price'];
+                        $variation->stock = $variationData['stock'];
+                        $variation->save();
 
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'slug' => 'required|string|max:255|unique:products',
-                'price' => 'required|numeric|min:0',
-                'sale_price' => 'nullable|numeric|min:0',
-                'quantity' => 'required|integer|min:0',
-                'category_id' => 'required|integer|exists:categories,id',
-                'main_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-                'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-                'attributes' => 'required|array|min:1',
-                'attributes.*.attribute_id' => 'required|integer|exists:attributes,id',
-                'attributes.*.value_ids' => 'required|array|min:1',
-                'attributes.*.value_ids.*' => 'integer|exists:attribute_values,id',
-                'description' => 'nullable|string|max:2000',
-                'sale_start' => 'nullable|date|after: . now()->addHour()->toDateTimeString(),|before:sale_end',
-                'sale_end' => 'nullable|date|after:sale_start',
-                'status' => 'required|in:active,inactive',
-            ]);
-
-
-            $product = Product::create([
-                'name' => $validatedData['name'],
-                'slug' => $validatedData['slug'],
-                'price' => $validatedData['price'],
-                'sale_price' => $validatedData['sale_price'] ?? null,
-                'quantity' => $validatedData['quantity'],
-                'category_id' => $validatedData['category_id'],
-                'description' => $validatedData['description'],
-                'sale_start' => $validatedData['sale_start'],
-                'sale_end' => $validatedData['sale_end'],
-                'status' => $validatedData['status'],
-
-            ]);
-
-            Log::info('Product Created:', $product->toArray());
-
-
-            if ($request->hasFile('main_image')) {
-                $mainImagePath = $request->file('main_image')->store('products', 'public');
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'variation_id' => null,
-                    'url' => $mainImagePath,
-                    'is_main' => true,
-                ]);
-                Log::info('Main Image Saved:', ['url' => $mainImagePath]);
-            }
-
-
-            if ($request->hasFile('additional_images')) {
-                foreach ($request->file('additional_images') as $image) {
-                    $imagePath = $image->store('products', 'public');
-                    ProductImage::create([
-                        'product_id' => $product->id,
-                        'variation_id' => null,
-                        'url' => $imagePath,
-                        'is_main' => false,
-                    ]);
-                    Log::info('Additional Image Saved:', ['url' => $imagePath]);
-                }
-            }
-
-
-            if ($request->has('attributes')) {
-                foreach ($request->input('attributes') as $attribute) {
-                    Log::info('Processing Attribute:', ['attribute_id' => $attribute['attribute_id']]);
-
-                    foreach ($attribute['value_ids'] as $valueId) {
-                        $data = [
-                            'product_id' => $product->id,
-                            'attribute_id' => $attribute['attribute_id'],
-                            'attribute_value_id' => $valueId,
-                        ];
-
-
-                        Log::info('Inserting Product Attribute:', $data);
-
-                        ProductAttribute::create($data);
+                        // Assign attribute values to the variation
+                        if (isset($variationData['attribute_values'])) {
+                            $variation->attributeValues()->sync($variationData['attribute_values']);
+                        }
                     }
                 }
-            }
+                // Handle main image upload
+                if ($request->hasFile('main_image')) {
+                    $mainImage = new ProductImage();
+                    $mainImage->variation_id = $variation->id; // Assuming you want to associate it with the last variation created
+                    $mainImage->url = $request->file('main_image')->store('products');
+                    $mainImage->is_main = true; // Set as main image
+                    $mainImage->save();
+                }
+            });
 
-
-            DB::commit();
-            Log::info('Transaction Committed Successfully.');
-
-            return redirect()->route('admin.product.product-list')->with('success', 'Sản phẩm đã được thêm thành công!');
+            return redirect()->route('admin.product.product-list')
+                ->with('success', 'Product and variations added successfully!');
         } catch (\Exception $e) {
-
-            DB::rollBack();
-            Log::error('Error saving product: ' . $e->getMessage());
-
-            return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'An error occurred: ' . $e->getMessage())
+                ->withInput();
         }
     }
+
+
     public function showVariations($id)
     {
         $product = Product::with('productAttributes.attribute', 'productAttributes.attributeValue')->findOrFail($id);
 
-        
+
         $attributes = $product->productAttributes->groupBy('attribute_id');
-    
-        
+
+
         $combinations = $this->generateCombinations($attributes);
-        
+
 
         return view('admin.variation.variation-list-of-product', compact('product', 'combinations'));
     }
@@ -178,7 +111,7 @@ class ProductController extends Controller
     private function generateCombinations($attributes)
     {
         $combinations = [[]];
-    
+
         foreach ($attributes as $attributeValues) {
             $newCombinations = [];
             foreach ($combinations as $combination) {
@@ -188,7 +121,7 @@ class ProductController extends Controller
             }
             $combinations = $newCombinations;
         }
-    
+
         return $combinations;
     }
 
@@ -200,11 +133,11 @@ class ProductController extends Controller
         $categories = Category::all();
         $attributes = Attribute::with('values')->get(); // Lấy tất cả attributes và values
         $productAttributes = $product->productAttributes()
-        ->with('attribute', 'attributeValues')
-        ->get();    
-        return view('admin.product.edit-product', compact('product','categories', 'productAttributes', 'attributes'));
+            ->with('attribute', 'attributeValues')
+            ->get();
+        return view('admin.product.edit-product', compact('product', 'categories', 'productAttributes', 'attributes'));
     }
-    
+
 
     /**
      * Update the specified resource in storage.
@@ -305,15 +238,15 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
-    
-        
+
+
         $hasVariations = $product->variations()->exists();
-    
+
         if ($hasVariations) {
-            
+
             return redirect()->back()->with('error', 'Sản phẩm có biến thể. Không thể xóa trực tiếp! Cần Xóa Từ Các Biến Thể Trong Sản Phẩm');
         }
-    
+
         try {
             $product->delete();
             return redirect()->back()->with('success', 'Sản phẩm đã được xóa thành công!');

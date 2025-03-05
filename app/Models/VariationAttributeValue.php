@@ -15,7 +15,7 @@ class VariationAttributeValue extends Model
 
     public function variation()
     {
-        return $this->belongsTo(ProductVariation::class,'variation_id');
+        return $this->belongsTo(Variation::class,'variation_id');
     }
 
     public function attributeValue()
