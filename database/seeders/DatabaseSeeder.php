@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Attribute;
-use App\Models\AttributeValue;
+use App\Models\Attribute_value;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -61,18 +61,6 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Màu Sắc',
                 'slug' => 'mau-sac',
-            ],
-            [
-                'name' => 'Chất Liệu',
-                'slug' => 'chat-lieu',
-            ],
-            [
-                'name' => 'Kiểu Dáng',
-                'slug' => 'kieu-dang',
-            ],
-            [
-                'name' => 'Mùa',
-                'slug' => 'mua',
             ],
         ];
 
@@ -135,91 +123,10 @@ class DatabaseSeeder extends Seeder
                 'value' => 'Vàng',
                 'slug' => 'vang'
             ],
-
-// Chất Liệu (ID: 3)
-            [
-                'attribute_id' => 3,
-                'value' => 'Cotton',
-                'slug' => 'cotton'
-            ],
-            [
-                'attribute_id' => 3,
-                'value' => 'Len',
-                'slug' => 'len'
-            ],
-            [
-                'attribute_id' => 3,
-                'value' => 'Lụa',
-                'slug' => 'lua'
-            ],
-            [
-                'attribute_id' => 3,
-                'value' => 'Jeans',
-                'slug' => 'jeans'
-            ],
-            [
-                'attribute_id' => 3,
-                'value' => 'Kaki',
-                'slug' => 'kaki'
-            ],
-
-            // Kiểu Dáng (ID: 4)
-            [
-                'attribute_id' => 4,
-                'value' => 'Ôm',
-                'slug' => 'om'
-            ],
-            [
-                'attribute_id' => 4,
-                'value' => 'Suông',
-                'slug' => 'suong'
-            ],
-            [
-                'attribute_id' => 4,
-                'value' => 'Rộng',
-                'slug' => 'rong'
-            ],
-            [
-                'attribute_id' => 4,
-                'value' => 'Cơ Bản',
-                'slug' => 'co-ban'
-            ],
-            [
-                'attribute_id' => 4,
-                'value' => 'Oversize',
-                'slug' => 'oversize'
-            ],
-
-            // Mùa (ID: 5)
-            [
-                'attribute_id' => 5,
-                'value' => 'Xuân',
-                'slug' => 'xuan'
-            ],
-            [
-                'attribute_id' => 5,
-                'value' => 'Hạ',
-                'slug' => 'ha'
-            ],
-            [
-                'attribute_id' => 5,
-                'value' => 'Thu',
-                'slug' => 'thu'
-            ],
-            [
-                'attribute_id' => 5,
-                'value' => 'Đông',
-                'slug' => 'dong'
-            ],
-            [
-                'attribute_id' => 5,
-                'value' => '4 Mùa',
-                'slug' => '4-mua'
-            ],
         ];
 
         foreach ($attributeValues as $value) {
-            AttributeValue::create($value);
+            Attribute_value::create($value);
         }
     }
 }

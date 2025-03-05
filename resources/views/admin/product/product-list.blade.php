@@ -29,45 +29,50 @@
                     <div class="cr-card card-default product-list">
                         <div class="cr-card-content">
                             <div class="table-responsive">
-                                <table id="product_list" class="table table-striped" style="width:100%">
+                                <table id="product_list" class="table" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Product</th>
                                             <th>Name</th>
-                                            <th>Price</th>
-                                            <th>Sale Price</th>
-                                            <th>Sale End</th>
+                                            <th>Description</th>
+                                            <th>Price Range</th>
+                                            <th>Total Stock</th>
                                             <th>Status</th>
                                             <th>Variation Of Product</th>
-                                            <th>Action</th>
+                                            <th class="text-center">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse ($products as $product)
                                             <tr>
                                                 <td>
-                                                    @if ($product->mainImage)
-                                                        <img class="tbl-thumb"
-                                                            src="{{ asset('storage/' . $product->mainImage->url) }}"
-                                                            alt="{{ $product->name }}">
+                                                    @if ($product->images)
+                                                        @foreach ($product->images as $image)
+                                                            @if ($image->is_main)
+                                                            <img class="tbl-thumb"
+                                                                src="{{ asset('storage/' . $image->url) }}"
+                                                                alt="{{ $product->name }}"
+                                                                style="width: 100px; height: 100px; object-fit: cover;"
+                                                                onerror="this.src='/be/assets/img/product/default.jpg'">
+                                                            @endif
+                                                        @endforeach
                                                     @else
                                                         <img class="tbl-thumb" src="/be/assets/img/product/default.jpg"
-                                                            alt="No Image Available">
+                                                            alt="No Image Available"
+                                                            style="width: 100px; height: 100px; object-fit: cover;">
                                                     @endif
                                                 </td>
                                                 <td>{{ $product->name }}</td>
-                                                <td>${{ $product->price }}</td>
+                                                <td>{{ Str::limit($product->description, 50) }}</td>
                                                 <td>
-                                                    @if ($product->sale_price)
-                                                        ${{ $product->sale_price }}
-                                                    @else
-                                                        N/A
-                                                    @endif
+                                                    @php
+                                                        $minPrice = $product->variations->min('price');
+                                                        $maxPrice = $product->variations->max('price');
+                                                    @endphp
+                                                    {{ number_format($minPrice, 0, ',', '.') }} VNĐ -
+                                                    {{ number_format($maxPrice, 0, ',', '.') }} VNĐ
                                                 </td>
-                                                <td>
-                                                    {{ $product->sale_end ? \Carbon\Carbon::parse($product->sale_end)->format('Y-m-d') : 'No End Date' }}
-
-                                                </td>
+                                                <td>{{ $product->variations->sum('stock') }}</td>
                                                 <td>
                                                     <span
                                                         class="{{ $product->status == 'active' ? 'active' : 'inactive' }}">
@@ -87,7 +92,8 @@
 
                                                         </button>
                                                         <div class="dropdown-menu">
-                                                            <a class="dropdown-item" href="{{ route('admin.product.edit', $product->id) }}">Edit</a>
+                                                            <a class="dropdown-item"
+                                                                href="{{ route('admin.product.edit', $product->id) }}">Edit</a>
                                                             <form action="{{ route('products.destroy', $product->id) }}"
                                                                 method="POST" style="display: inline;">
                                                                 @csrf
@@ -102,7 +108,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="text-center">No products available</td>
+                                                <td colspan="8" class="text-center">No products available</td>
                                             </tr>
                                         @endforelse
                                     </tbody>

@@ -169,7 +169,7 @@
                             <div class="banner-md-content position-absolute">
                                 <div class="banner-md-content-wrap">
                                     <div class="banner-lavel">New Arrivals</div>
-                                    <h3 class="banner-title">Woman's Winter Sale 2021</h3>
+                                    <h3 class="banner-title">Woman’s Winter Sale 2021</h3>
                                     <div class="banner-btn">
                                         <a href="product.html">Shop Now</a>
                                     </div>
@@ -208,7 +208,7 @@
                             <div class="banner-md-content position-absolute">
                                 <div class="banner-md-content-wrap">
                                     <div class="banner-lavel">New Arrivals</div>
-                                    <h3 class="banner-title">Men's Casul Summer 2021</h3>
+                                    <h3 class="banner-title">Men’s Casul Summer 2021</h3>
                                     <div class="banner-btn">
                                         <a href="product.html">Shop Now</a>
                                     </div>
@@ -264,11 +264,14 @@
                                                                     alt="{{ $product->name }}">
                                                             </a>
                                                             <div class="product-cart-icon">
-                                                                <a href="javascript:void(0)"
-                                                                    onclick="AddCart({{ $product->id }})"
-                                                                    class="add-to-cart">
-                                                                    <i class="flaticon-shopping-cart"></i>
-                                                                </a>
+                                                                <form action="{{route('cart.add')}}" method="post">
+                                                                    @csrf
+                                                                    <input type="hidden" name="id" value="{{$product->id}}">
+                                                                    <div class="quantity">
+                                                                        <input type="number" name="quantity"  value="1">
+                                                                    </div>
+                                                                    <button type="submit"><i class="flaticon-shopping-cart"></i></button>
+                                                                </form>
                                                             </div>
                                                         </div>
                                                         <div class="product-details-m">
@@ -311,42 +314,44 @@
             <div class="row">
                 <div class="swiper-tranding-container overflow-hidden pb-30">
                     <!-- hero slider slides -->
+                    @foreach ($category->products as $product)
                     <div class="swiper-wrapper">
-                        @foreach ($products as $prd)
-                            <div class="">
-                                <div class="product-card-xl">
-                                    <div class="product-img-xl">
-                                        <a href="product-details.html"><img src="/client/assets/images/product/pxl-1.png"
-                                                alt="" class="img-fluid" /></a>
-                                        <div class="product-actions-xl">
-                                            <a href="#"><i class="flaticon-heart"></i></a>
-                                            <a href="product-details.html"><i class="flaticon-search"></i></a>
-                                            <a href="javascript:void(0)" onclick="addToCart({{ $prd->id }})"
-                                                class="add-to-cart">
-                                                <i class="flaticon-shopping-cart"></i>
-                                            </a>
-                                        </div>
+                        <div>
+                            <div class="product-card-xl">
+                                <div class="product-img-xl">
+                                    <a href="product-details.html"><img src="/client/assets/images/product/pxl-1.png"
+                                            alt="" class="img-fluid" /></a>
+                                    <div class="product-actions-xl">
+                                        <a href="#"><i class="flaticon-heart"></i></a>
+                                        <a href="product-details.html"><i class="flaticon-search"></i></a>
+                                        <form action="{{route('cart.add')}}" method="post">
+                                            @csrf
+                                            <input type="hidden" name="id" value="{{$product->id}}">
+                                            <div class="quantity">
+                                                <input type="number" name="quantity"  value="1">
+                                            </div>
+                                            <button type="submit"><i class="flaticon-shopping-cart"></i></button>
+                                        </form>
                                     </div>
-                                    <div class="product-content-xl text-center">
-                                        <ul class="d-flex product-rating-xl">
-                                            <li><i class="bi bi-star-fill"></i></li>
-                                            <li><i class="bi bi-star-fill"></i></li>
-                                            <li><i class="bi bi-star-fill"></i></li>
-                                            <li><i class="bi bi-star-fill"></i></li>
-                                            <li><i class="bi bi-star"></i></li>
-                                        </ul>
-                                        <a href="product-details.html" class="product-title">{{ $prd->name }}</a>
-                                        <div class="product-price">
-                                            <del class="old-price">{{ number_format($prd->price) }}</del><ins
-                                                class="new-price">{{ number_format($prd->sale_price) }}</ins>
-                                        </div>
+                                </div>
+                                <div class="product-content-xl text-center">
+                                    <ul class="d-flex product-rating-xl">
+                                        <li><i class="bi bi-star-fill"></i></li>
+                                        <li><i class="bi bi-star-fill"></i></li>
+                                        <li><i class="bi bi-star-fill"></i></li>
+                                        <li><i class="bi bi-star-fill"></i></li>
+                                        <li><i class="bi bi-star"></i></li>
+                                    </ul>
+                                    <a href="product-details.html" class="product-title">{{ $product->name }}</a>
+                                    <div class="product-price">
+                                        <del class="old-price">$302.74</del><ins class="new-price">$290.05</ins>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
-
+                        </div>
 
                     </div>
+                    @endforeach
                     <!-- !swiper slides -->
 
                     <!-- next / prev arrows -->
@@ -427,8 +432,8 @@
                         </button>
 
                         <button class="nav-link category-tab" id="eg-pills-33" data-bs-toggle="pill"
-                            data-bs-target="#eg-pills-three3" type="button" aria-controls="eg-pills-three3"
-                            aria-selected="false">
+                            data-bs-target="#eg-pills-three3" type="button" role="tab"
+                            aria-controls="eg-pills-three3" aria-selected="false">
                             Women Collection
                         </button>
 
@@ -2310,32 +2315,3 @@
     <!-- ===============  footer area start  =============== -->
     </div>
 @endsection
-@push('scripts')
-    <script>
-        function addToCart(productId) {
-            $.ajax({
-                url: `/cart/add/${productId}`,
-                type: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        // Cập nhật số lượng giỏ hàng trên UI
-                        updateCartCount(response.cart_count);
-                        // Hiển thị thông báo thành công
-                        toastr.success(response.message);
-                    }
-                },
-                error: function(xhr) {
-                    toastr.error('Có lỗi xảy ra khi thêm vào giỏ hàng');
-                }
-            });
-        }
-
-        function updateCartCount(count) {
-            // Cập nhật số lượng hiển thị trên icon giỏ hàng
-            $('.cart-count').text(count);
-        }
-    </script>
-@endpush

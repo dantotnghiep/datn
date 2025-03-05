@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Attribute extends Model
 {
     use HasFactory;
+    protected $table = 'attributes';
     protected $fillable = [
         'name',
         'slug',
@@ -15,7 +16,7 @@ class Attribute extends Model
 
     public function values()
     {
-        return $this->hasMany(AttributeValue::class);
+        return $this->hasMany(Attribute_value::class);
     }
     public function products()
     {

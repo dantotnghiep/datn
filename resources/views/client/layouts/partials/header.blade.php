@@ -4,7 +4,7 @@
             <div
                 class="col-xl-2 col-lg-12 col-md-12 col-sm-12 col-xs-12 d-xl-flex align-items-center justify-content-center">
                 <div class="main-logo d-flex justify-content-between align-items-center">
-                    <a href="{{route('client.index')}}">
+                    <a href="{{ route('client.index') }}">
                         <img src="/client/assets/images/Logo.png" alt="" />
                     </a>
 
@@ -21,14 +21,15 @@
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6 d-flex justify-content-center">
                 <nav class="main-nav">
                     <div class="inner-logo">
-                        <a href="{{route('client.index')}}"><img src="/client/assets/images/logo-w.png" alt="" /></a>
+                        <a href="{{ route('client.index') }}"><img src="/client/assets/images/logo-w.png"
+                                alt="" /></a>
                     </div>
                     <ul class="nav-item-list">
-                        
-                            <a class="active" href="{{route('client.index')}}">Home</a>
-                            <i class="fl flaticon-plus">+</i>
 
-                           
+                        <a class="active" href="{{ route('client.index') }}">Home</a>
+                        <i class="fl flaticon-plus">+</i>
+
+
                         </li>
 
 
@@ -37,9 +38,9 @@
                             <a href="javascript:void(0)">Shop</a>
                             <i class="fl flaticon-plus">+</i>
                             <ul class="sub-menu">
-                                <li><a href="{{route('client.product.list-product')}}">Products</a></li>
+                                <li><a href="{{ route('client.product.list-product') }}">Products</a></li>
                                 <li>
-                                    <a href="{{route('client.product.product-details')}}">Product Details</a>
+                                    <a href="{{ route('client.product.product-details') }}">Product Details</a>
                                 </li>
                             </ul>
                         </li>
@@ -81,34 +82,6 @@
                                 <li><a href="blog-details.html">Đăng xuất</a></li>
                             </ul>
                         </li> --}}
-                        @guest
-                            @if (Route::has('login'))
-                                <li><a href="{{ route('login') }}">{{ __('Đăng Nhập') }}</a></li>
-                                <li><a href="{{ route('register') }}">{{ __('Đăng Ký') }}</a></li>
-                                {{-- <a class="a-dndk" href="{{ route('login') }}">{{ __('Đăng Nhập') }}</a> --}}
-                            @endif
-                        @else
-                            <li class="has-child-menu">
-                                <a href="javascript:void(0)">Tài khoản</a>
-                                <i class="fl flaticon-plus">+</i>
-                                <ul class="sub-menu">
-                                    <li><a href="blog-grid.html">Xin chào: {{ Auth::user()->name }}</a></li>
-                                    <li><a href="blog-sidebar.html">Thông tin cá nhân</a></li>
-                                    <li><a href="blog-details.html">Lịch sử mua hàng</a></li>
-                                    <li>
-                                        <a href="{{ route('logout') }}"
-                                            onclick="event.preventDefault();
-                    document.getElementById('logout-form').submit();">
-                                            <i class="fa-solid fa-arrow-right-from-bracket"></i> {{ __('Đăng Xuất') }}
-                                        </a>
-                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                            @csrf
-                                        </form>
-
-                                    </li>
-                                </ul>
-                            </li>
-                        @endguest
                     </ul>
                     <div class="inner-top">
                         <div class="inner-mail">

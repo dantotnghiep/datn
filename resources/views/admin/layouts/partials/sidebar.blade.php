@@ -18,34 +18,29 @@
                                     class="ri-checkbox-blank-circle-line"></i>ecommerce</a></li>
                         <li><a href="{{ route('admin.product.product-list') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Product list</a></li>
-                       <li class="menu-item">
-    <a href="#" class="cr-page-link drop flex items-center justify-between px-4 py-2 text-gray-200 hover:bg-gray-700 rounded-md"
-       onclick="toggleSubmenu(event)">
-      
-         Add Product
-    </a>
-    <!-- Submenu -->
-    <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md ">
-        <li>
-            <a href="{{ route('admin.product.create') }}" 
-               class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
-                Add Product
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('admin.attribute.attribute') }}" 
-               class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
-                Add Attribute
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('admin.attribute-values') }}" 
-               class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
-                Attribute Values
-            </a>
-        </li>
-    </ul>
-</li>
+                        <li class="menu-item">
+                            <a href="#"
+                                class="cr-page-link drop flex items-center justify-between px-4 py-2 text-gray-200 hover:bg-gray-700 rounded-md"
+                                onclick="toggleSubmenu(event)">
+
+                                Add Product
+                            </a>
+                            <!-- Submenu -->
+                            <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md ">
+                                <li>
+                                    <a href="{{ route('admin.product.create') }}"
+                                        class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                                        Add Product
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.attribute-values') }}"
+                                        class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                                        Attribute Values
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
 
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
@@ -143,7 +138,7 @@
     }
 
     // Đóng tất cả menu con khi click bên ngoài
-    document.addEventListener('click', function (event) {
+    document.addEventListener('click', function(event) {
         const menus = document.querySelectorAll('.submenu');
         menus.forEach(menu => {
             if (!menu.contains(event.target) && !menu.previousElementSibling.contains(event.target)) {
@@ -152,4 +147,3 @@
         });
     });
 </script>
-

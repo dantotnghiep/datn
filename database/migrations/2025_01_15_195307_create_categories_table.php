@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name',250);
             $table->string('slug',250)->unique();
             $table->text('description')->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
     }
