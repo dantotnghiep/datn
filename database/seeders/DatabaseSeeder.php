@@ -74,54 +74,44 @@ class DatabaseSeeder extends Seeder
             [
                 'attribute_id' => 1,
                 'value' => 'S',
-                'slug' => 's'
             ],
             [
                 'attribute_id' => 1,
                 'value' => 'M',
-                'slug' => 'm'
             ],
             [
                 'attribute_id' => 1,
                 'value' => 'L',
-                'slug' => 'l'
             ],
             [
                 'attribute_id' => 1,
                 'value' => 'XL',
-                'slug' => 'xl'
             ],
             [
                 'attribute_id' => 1,
                 'value' => 'XXL',
-                'slug' => 'xxl'
             ],
 
             // Màu Sắc (ID: 2)
             [
                 'attribute_id' => 2,
                 'value' => 'Đen',
-                'slug' => 'den'
             ],
             [
                 'attribute_id' => 2,
                 'value' => 'Trắng',
-                'slug' => 'trang'
             ],
             [
                 'attribute_id' => 2,
                 'value' => 'Đỏ',
-                'slug' => 'do'
             ],
             [
                 'attribute_id' => 2,
                 'value' => 'Xanh',
-                'slug' => 'xanh'
             ],
             [
                 'attribute_id' => 2,
                 'value' => 'Vàng',
-                'slug' => 'vang'
             ],
         ];
 
