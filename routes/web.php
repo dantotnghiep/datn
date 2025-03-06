@@ -98,6 +98,6 @@ Route::prefix('admin')->group(function () {
     Route::put('/variation/{id}', [VariationController::class, 'update'])->name('admin.variation.update');
 
 
-});aaaa
+});
 
 
