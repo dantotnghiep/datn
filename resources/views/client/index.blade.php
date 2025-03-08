@@ -337,8 +337,7 @@
                                         </ul>
                                         <a href="product-details.html" class="product-title">{{ $prd->name }}</a>
                                         <div class="product-price">
-                                            <del class="old-price">{{ number_format($prd->price) }}</del><ins
-                                                class="new-price">{{ number_format($prd->sale_price) }}</ins>
+                                                <ins class="new-price">{{ number_format($prd->variations()->min('price')) }} - {{ number_format($prd->variations()->max('price')) }}</ins>
                                         </div>
                                     </div>
                                 </div>
