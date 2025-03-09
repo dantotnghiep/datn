@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attribute;
-use App\Models\Attribute_value;
+use App\Models\AttributeValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -15,7 +15,7 @@ class AttributeValueController extends Controller
      */
     public function index()
     {
-        $attributeValues = Attribute_value::with('attribute')->get();
+        $attributeValues = AttributeValue::with('attribute')->get();
         $attributes = Attribute::all(); // Lấy tất cả AttributeValues kèm Attribute liên kết
         return view('admin.attribute.attribute-values', compact('attributeValues','attributes'));
     }
@@ -38,7 +38,7 @@ class AttributeValueController extends Controller
             'attribute_id' => 'required|exists:attributes,id',
             'value' => 'required|string|max:255',
         ]);
-        Attribute_value::create([
+        AttributeValue::create([
             'attribute_id' => $request->attribute_id,
             'value' => $request->value,
         ]);
@@ -58,8 +58,8 @@ class AttributeValueController extends Controller
      */
     public function edit(string $id)
     {
-        $attributeValues = Attribute_value::with('attribute')->get();
-        $attribute_value = Attribute_value::findOrFail($id);
+        $attributeValues = AttributeValue::with('attribute')->get();
+        $attribute_value = AttributeValue::findOrFail($id);
         $attributes = Attribute::all();
         return view('admin.attribute.attribute-values-edit',compact('attributeValues','attributes'));
     }
@@ -87,7 +87,7 @@ class AttributeValueController extends Controller
      */
     public function destroy(string $id)
     {
-        $attributeValues = Attribute_value::fineOrFail($id);
+        $attributeValues = AttributeValue::fineOrFail($id);
         $attributeValues->delete();
         return redirect()->route('admin.attribute.attribute-value')->with('success',"Xóa Thành Công Thuộc Tính Danh Mục");
     }
