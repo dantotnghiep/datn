@@ -35,12 +35,12 @@ class Variation extends Model
 
     public function mainImage()
     {
-        return $this->hasOne(Product_image::class, 'variation_id')->where('is_main', true);
+        return $this->hasOne(ProductImage::class, 'product_id', 'product_id')->where('is_main', true);
     }
 
     public function attributeValues()
     {
-        return $this->belongsToMany(Attribute_value::class);
+        return $this->belongsToMany(AttributeValue::class);
     }
 
-} 
+}

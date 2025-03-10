@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'name',
         'slug',
@@ -39,14 +39,15 @@ class Product extends Model
 
     public function additionalImages()
     {
-        return $this->defaultVariation()->with(['images' => function($query) {
-            $query->where('is_main', false);
-        }]);
+        return $this->images()->where('is_main', false);
     }
 
     public function images()
     {
-        return $this->hasMany(Product_image::class);
+        return $this->hasMany(ProductImage::class, 'product_id', 'id');
     }
+
+    
+    
 
 }
