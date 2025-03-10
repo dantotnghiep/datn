@@ -48,17 +48,17 @@
                             <a href="javascript:void(0)">Pages</a>
                             <i class="fl flaticon-plus">+</i>
                             <ul class="sub-menu">
-                                <li><a href="cart.html">Cart</a></li>
-                                <li><a href="checkout.html">Checkout</a></li>
-                                <li><a href="login.html">Login</a></li>
-                                <li><a href="register.html">Register</a></li>
-                                <li><a href="profile.html">Profile</a></li>
-                                <li><a href="dashboard.html">Dashboard</a></li>
-                                <li><a href="order.html">Orders</a></li>
-                                <li><a href="setting.html">Setting</a></li>
-                                <li><a href="coming-soon.html">Comming Soon</a></li>
-                                <li><a href="faq.html">FAQ</a></li>
-                                <li><a href="404.html">404</a></li>
+                                <li><a href="cart">Cart</a></li>
+                                <li><a href="checkout">Checkout</a></li>
+                                <li><a href="login">Login</a></li>
+                                <li><a href="register">Register</a></li>
+                                <li><a href="profile">Profile</a></li>
+                                <li><a href="dashboard">Dashboard</a></li>
+                                <li><a href="order">Orders</a></li>
+                                <li><a href="setting">Setting</a></li>
+                                <li><a href="coming-soon">Comming Soon</a></li>
+                                <li><a href="faq">FAQ</a></li>
+                                <li><a href="404">404</a></li>
                             </ul>
                         </li>
 
@@ -66,9 +66,9 @@
                             <a href="javascript:void(0)">Blogs</a>
                             <i class="fl flaticon-plus">+</i>
                             <ul class="sub-menu">
-                                <li><a href="blog-grid.html">Blog Grid</a></li>
-                                <li><a href="blog-sidebar.html">Blog Sidebar</a></li>
-                                <li><a href="blog-details.html">Blog Details</a></li>
+                                <li><a href="blog-grid">Blog Grid</a></li>
+                                <li><a href="blog-sidebar">Blog Sidebar</a></li>
+                                <li><a href="blog-details">Blog Details</a></li>
                             </ul>
                         </li>
                         {{-- <li><a href="contact.html">Contact Us</a></li> --}}
