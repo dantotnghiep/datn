@@ -2,20 +2,16 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Product;
-use App\Models\Variation;
 
 class ProductSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        Product::factory(10)->create()->each(function ($product) {
-            // Mỗi sản phẩm có 3 biến thể
-            Variation::factory(3)->create([
-                'product_id' => $product->id
-            ]);
-        });
+        //
     }
 }
-
