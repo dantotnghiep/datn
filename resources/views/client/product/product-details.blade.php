@@ -3,22 +3,42 @@
 @include('client.layouts.partials.lelf-navbar')
 <style>
     .old-price {
-    text-decoration: line-through;
-    color: gray;
-}
+        text-decoration: line-through;
+        color: gray;
+    }
 
-.sale-price {
-    color: red;
-    font-weight: bold;
-}
+    .sale-price {
+        color: red;
+        font-weight: bold;
+    }
 
-.sale-label {
-    background-color: yellow;
-    padding: 0 5px;
-    color: red;
-    font-weight: bold;
-}
+    .sale-label {
+        background-color: yellow;
+        padding: 0 5px;
+        color: red;
+        font-weight: bold;
+    }
 
+    .color-option input[type="radio"] {
+        display: none;
+    }
+
+    .color-option label {
+        margin-right: 8px;
+        cursor: pointer;
+    }
+
+    .color-option .p-color {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+
+    .color-option input[type="radio"]:checked + label .p-color {
+        box-shadow: 0 0 0 2px #007bff;
+    }
 </style>
 <div class="product-details-area mt-100 ml-110">
     <div class="container">
@@ -79,33 +99,49 @@
                     </div>
                     <div class="pd-quick-discription">
                         <ul>
-                            <li class="d-flex align-items-center">
-                                <span>Color :</span>
-                                <div class="color-option d-flex align-items-center">
-                                    @foreach ($product->variations as $variation)
-                                        @foreach ($variation->attributes as $attribute)
-                                            @if ($attribute->name === 'Màu Sắc')
-                                                <input type="radio" name="color" id="color{{ $attribute->id }}" value="{{ $attribute->value }}" {{ $loop->first ? 'checked' : '' }}>
-                                                <label for="color{{ $attribute->id }}"><span class="c1 p-color" style="background-color: {{ $attribute->value }}"></span></label>
-                                            @endif
-                                        @endforeach
-                                    @endforeach
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center">
-                                <span>Size :</span>
-                                <div class="size-option d-flex align-items-center">
-                                    @foreach ($product->variations as $variation)
-                                        @foreach ($variation->attributes as $attribute)
-                                            @if ($attribute->name === 'Kích Thước')
-                                                <input type="radio" name="size" id="size{{ $attribute->id }}" value="{{ $attribute->value }}" {{ $loop->first ? 'checked' : '' }}>
-                                                <label for="size{{ $attribute->id }}"><span class="p-size">{{ $attribute->value }}</span></label>
-                                            @endif
-                                        @endforeach
-                                    @endforeach
-                                </div>
-                            </li>
+                        @php
+                            $colorMap = [
+                                'Đen' => '#000000',
+                                'Trắng' => '#FFFFFF',
+                                'Đỏ' => '#FF0000',
+                                'Xanh' => '#0000FF',
+                                'Vàng' => '#FFFF00',
+                            ];
+                        @endphp
 
+                        <style>
+                         
+                        </style>
+
+                        <li class="d-flex align-items-center">
+                            <span>Color :</span>
+                            <div class="color-option d-flex align-items-center">
+                                @foreach ($attributeValues->where('attribute_id', 2) as $color)
+                                    @php
+                                        $bgColor = $colorMap[$color->value] ?? '#ccc';
+                                        $isWhite = strtolower($color->value) === 'trắng';
+                                        $borderColor = $isWhite ? '#ccc' : 'transparent';
+                                    @endphp
+
+                                    <input type="radio" name="color" id="color{{ $color->id }}" value="{{ $color->value }}" {{ $loop->first ? 'checked' : '' }}>
+                                    <label for="color{{ $color->id }}">
+                                        <span class="c1 p-color"
+                                            style="background-color: {{ $bgColor }}; border: 1px solid {{ $borderColor }};"
+                                            title="{{ $color->value }}">
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <span>Size :</span>
+                            <div class="size-option d-flex align-items-center">
+                                @foreach ($attributeValues->where('attribute_id', 1) as $size)
+                                    <input type="radio" name="size" id="size{{ $size->id }}" value="{{ $size->value }}" {{ $loop->first ? 'checked' : '' }}>
+                                    <label for="size{{ $size->id }}"><span class="p-size">{{ $size->value }}</span></label>
+                                @endforeach
+                            </div>
+                        </li>
                             <li class="d-flex align-items-center pd-cart-btns">
                                 <div class="quantity">
                                     <input type="number" min="1" max="{{ $product->variations->first()->stock }}" step="1" value="1">

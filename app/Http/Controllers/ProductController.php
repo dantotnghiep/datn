@@ -28,17 +28,19 @@ class ProductController extends Controller
     {
         return view('client.product.list-product');
     }
-
     public function show($id)
     {
         $product = Product::with(['category', 'images', 'variations.attributes', 'variations.attributeValues'])->find($id);
-
+    
         if (!$product) {
             abort(404);
         }
-        return view('client.product.product-details', compact('product'));
+    
+        $attributeValues = Attribute_value::all(); // Lấy toàn bộ dữ liệu từ bảng attribute_values
+    
+        return view('client.product.product-details', compact('product', 'attributeValues'));
     }
-
+    
     public function index()
     {
         $products = Product::with(['variations', 'images', 'category'])->orderBy('created_at', 'desc')->get();
