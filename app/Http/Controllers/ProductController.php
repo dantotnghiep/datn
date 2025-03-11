@@ -29,9 +29,14 @@ class ProductController extends Controller
         return view('client.product.list-product');
     }
 
-    public function productdetails()
+    public function show($id)
     {
-        return view('client.product.product-details');
+        $product = Product::with(['category', 'images', 'variations.attributes', 'variations.attributeValues'])->find($id);
+
+        if (!$product) {
+            abort(404);
+        }
+        return view('client.product.product-details', compact('product'));
     }
 
     public function index()

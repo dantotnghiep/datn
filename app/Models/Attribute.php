@@ -24,4 +24,5 @@ class Attribute extends Model
             ->withPivot('attribute_value_id')
             ->withTimestamps();
     }
+    
 }

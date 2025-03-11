@@ -259,7 +259,7 @@
                                                 <div class="col-xxl-3 col-xl-4 col-lg-4 col-md-4 col-sm-6">
                                                     <div class="product-card-m d-flex align-items-center">
                                                         <div class="product-img-m">
-                                                            <a href="product-details.html">
+                                                            <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}">
                                                                 <img src="{{ $product->mainImage ? asset('storage/' . $product->mainImage->url) : asset('storage/products/default.jpg') }}"
                                                                     alt="{{ $product->name }}">
                                                             </a>
@@ -273,10 +273,10 @@
                                                         </div>
                                                         <div class="product-details-m">
                                                             <a class="product-title-m"
-                                                                href="product-details.html">{{ $product->name }}</a>
+                                                                href="{{ route('client.product.product-details', ['id' => $product->id]) }}">{{ $product->name }}</a>
                                                             <div class="product-price">
-                                                                <del class="old-price">${{ $product->sale_price }}</del>
-                                                                <ins class="new-price">${{ $product->price }}</ins>
+                                                                {{-- <del class="old-price">${{ $product->sale_price }}</del> --}}
+                                                                {{-- <ins class="new-price">${{ $product->price }}</ins> --}}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -335,10 +335,12 @@
                                             <li><i class="bi bi-star-fill"></i></li>
                                             <li><i class="bi bi-star"></i></li>
                                         </ul>
-                                        <a href="product-details.html" class="product-title">{{ $prd->name }}</a>
+                                        <a href="{{ route('client.product.product-details', ['id' => $prd->id]) }}" class="product-title">
+                                            {{ $prd->name }}
+                                        </a>                                        
                                         <div class="product-price">
-                                            <del class="old-price">{{ number_format($prd->price) }}</del><ins
-                                                class="new-price">{{ number_format($prd->sale_price) }}</ins>
+                                            {{-- <del class="old-price">{{ number_format($prd->price) }}</del><ins
+                                                class="new-price">{{ number_format($prd->sale_price) }}</ins> --}}
                                         </div>
                                     </div>
                                 </div>

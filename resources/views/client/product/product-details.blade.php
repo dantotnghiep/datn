@@ -1,7 +1,25 @@
 @extends('client.layouts.master')
 @section('content')
 @include('client.layouts.partials.lelf-navbar')
+<style>
+    .old-price {
+    text-decoration: line-through;
+    color: gray;
+}
 
+.sale-price {
+    color: red;
+    font-weight: bold;
+}
+
+.sale-label {
+    background-color: yellow;
+    padding: 0 5px;
+    color: red;
+    font-weight: bold;
+}
+
+</style>
 <div class="product-details-area mt-100 ml-110">
     <div class="container">
         <div class="product-details-wrapper">
@@ -9,123 +27,94 @@
                 <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-8">
                     <div class="product-switcher-wrap">
                         <div class="nav product-tab" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                            <div class="product-variation active" id="v-pills-home-tab" data-bs-toggle="pill"
+                            @foreach ($product->images as $image)
+                            <div class="product-variation" id="v-pills-home-tab" data-bs-toggle="pill"
                                 data-bs-target="#v-pills-home" role="tab" aria-controls="v-pills-home">
                                 <div class="pd-showcase-img">
-                                    <img src="/client/assets/images/product/pd-sm1.png" alt="">
+                                    <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
                                 </div>
                             </div>
-                            <div class="product-variation" id="v-pills-profile-tab" data-bs-toggle="pill"
-                                data-bs-target="#v-pills-profile" role="tab" aria-controls="v-pills-profile">
-                                <div class="pd-showcase-img">
-                                    <img src="/client/assets/images/product/pd-sm2.png" alt="">
-                                </div>
-                            </div>
-                            <div class="product-variation" id="v-pills-messages-tab" data-bs-toggle="pill"
-                                data-bs-target="#v-pills-messages" role="tab" aria-controls="v-pills-messages">
-                                <div class="pd-showcase-img">
-                                    <img src="/client/assets/images/product/pd-sm3.png" alt="">
-                                </div>
-                            </div>
-                            <div class="product-variation" id="v-pills-settings-tab" data-bs-toggle="pill"
-                                data-bs-target="#v-pills-settings" role="tab" aria-controls="v-pills-settings">
-                                <div class="pd-showcase-img">
-                                    <img src="/client/assets/images/product/pd-sm4.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-content" id="v-pills-tabContent">
+                        @endforeach
+                    </div>
+                    <div class="tab-content" id="v-pills-tabContent">
+                        @foreach ($product->images as $image)
                             <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
                                 aria-labelledby="v-pills-home-tab">
                                 <div class="pd-preview-img">
-                                    <img src="/client/assets/images/product/pd-xl2.png" alt="">
+                                    <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
                                 </div>
                             </div>
-                            <div class="tab-pane fade" id="v-pills-profile" role="tabpanel"
-                                aria-labelledby="v-pills-profile-tab">
-                                <div class="pd-preview-img">
-                                    <img src="/client/assets/images/product/pd-xl3.png" alt="">
-                                </div>
-                            </div>
-                            <div class="tab-pane fade" id="v-pills-messages" role="tabpanel"
-                                aria-labelledby="v-pills-messages-tab">
-                                <div class="pd-preview-img">
-                                    <img src="/client/assets/images/product/pd-xl14.png" alt="">
-                                </div>
-                            </div>
-                            <div class="tab-pane fade" id="v-pills-settings" role="tabpanel"
-                                aria-labelledby="v-pills-settings-tab">
-                                <div class="pd-preview-img">
-                                    <img src="/client/assets/images/product/pd-xl1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
-                <div class="col-xxl-6 col-xl-6 col-lg-6">
-                    <div class="product-details-wrap">
-                        <div class="pd-top">
-                            <ul class="product-rating d-flex align-items-center">
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star"></i></li>
+            </div>
+            <div class="col-xxl-6 col-xl-6 col-lg-6">
+                <div class="product-details-wrap">
+                    <div class="pd-top">
+                        <ul class="product-rating d-flex align-items-center">
+                            <li><i class="bi bi-star-fill"></i></li>
+                            <li><i class="bi bi-star-fill"></i></li>
+                            <li><i class="bi bi-star-fill"></i></li>
+                            <li><i class="bi bi-star-fill"></i></li>
+                            <li><i class="bi bi-star"></i></li>
 
-                                <li class="count-review">(<span>23</span> Review)</li>
-                            </ul>
-                            <h3 class="pd-title">Ghost Mannequin Winter Dress</h3>
-                            <h5 class="pd-price">$41.36</h5>
-                            <p class="pd-small-info"><strong>RIBCAGE STR ANK RAINBOW -</strong> B lue High-rise
-                                straight-leg jeans Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                                eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                        </div>
-                        <div class="pd-quick-discription">
-                            <ul>
-                                <li class="d-flex align-items-center">
-                                    <span>Color :</span>
-                                    <div class="color-option d-flex align-items-center">
-                                        <input type="radio" name="color" id="color1" value="red" checked>
-                                        <label for="color1"><span class="c1 p-color"></span></label>
-                                        <input type="radio" name="color" id="color2" value="red">
-                                        <label for="color2"><span class="c2 p-color"></span></label>
-                                        <input type="radio" name="color" id="color4" value="red">
-                                        <label for="color4"><span class="c4 p-color"></span></label>
-                                    </div>
-                                </li>
-                                <li class="d-flex align-items-center">
-                                    <span>Size :</span>
-                                    <div class="size-option d-flex align-items-center">
-                                        <input type="radio" name="size" id="size1" value="red" checked>
-                                        <label for="size1">
-                                            <span class="p-size">M</span>
-                                        </label>
-                                        <input type="radio" name="size" id="size2" value="red">
-                                        <label for="size2">
-                                            <span class="p-size">L</span>
-                                        </label>
-                                        <input type="radio" name="size" id="size3" value="red">
-                                        <label for="size3">
-                                            <span class="p-size">XL</span>
-                                        </label>
-                                        <input type="radio" name="size" id="size4" value="red">
-                                        <label for="size4">
-                                            <span class="p-size">XXL</span>
-                                        </label>
-                                    </div>
-                                </li>
+                            <li class="count-review">(<span>{{ $product->reviews_count ?? 0 }}</span> Review)</li>
+                        </ul>
+                        <h3 class="pd-title">{{ $product->name }}</h3>
+                        <h5 class="pd-price">
+                            @if ($product->variations->first()->sale_price)
+                                <span class="old-price">{{ number_format($product->variations->first()->price, 2) }} VND</span>
+                                <span class="sale-price">{{ number_format($product->variations->first()->sale_price, 2) }} VND</span>
+                                <span class="sale-label">Sale</span>
+                            @else
+                                <span>{{ number_format($product->variations->first()->price, 2) }} VND</span>
+                            @endif
+                        </h5>
+                        
+                        <p class="pd-small-info">
+                            <strong>{{ $product->category->name }} -</strong> {!! $product->description !!}
+                        </p>
+                    </div>
+                    <div class="pd-quick-discription">
+                        <ul>
+                            <li class="d-flex align-items-center">
+                                <span>Color :</span>
+                                <div class="color-option d-flex align-items-center">
+                                    @foreach ($product->variations as $variation)
+                                        @foreach ($variation->attributes as $attribute)
+                                            @if ($attribute->name === 'Màu Sắc')
+                                                <input type="radio" name="color" id="color{{ $attribute->id }}" value="{{ $attribute->value }}" {{ $loop->first ? 'checked' : '' }}>
+                                                <label for="color{{ $attribute->id }}"><span class="c1 p-color" style="background-color: {{ $attribute->value }}"></span></label>
+                                            @endif
+                                        @endforeach
+                                    @endforeach
+                                </div>
+                            </li>
+                            <li class="d-flex align-items-center">
+                                <span>Size :</span>
+                                <div class="size-option d-flex align-items-center">
+                                    @foreach ($product->variations as $variation)
+                                        @foreach ($variation->attributes as $attribute)
+                                            @if ($attribute->name === 'Kích Thước')
+                                                <input type="radio" name="size" id="size{{ $attribute->id }}" value="{{ $attribute->value }}" {{ $loop->first ? 'checked' : '' }}>
+                                                <label for="size{{ $attribute->id }}"><span class="p-size">{{ $attribute->value }}</span></label>
+                                            @endif
+                                        @endforeach
+                                    @endforeach
+                                </div>
+                            </li>
 
-                                <li class="d-flex align-items-center pd-cart-btns">
-                                    <div class="quantity">
-                                        <input type="number" min="1" max="90" step="10" value="1">
-                                    </div>
-                                    <button type="submit" class="pd-add-cart">Add to cart</button>
-                                </li>
-                                <li class="pd-type">Product Type: <span>Woman Winter Dress</span></li>
-                                <li class="pd-type">Catagories: <span> Clothing, Hoodies</span></li>
-                                <li class="pd-type">Availabile: <span>89</span> </li>
-                                <li class="pd-type">Material : <span>100% Cotton, Jens</span> </li>
-                            </ul>
+                            <li class="d-flex align-items-center pd-cart-btns">
+                                <div class="quantity">
+                                    <input type="number" min="1" max="{{ $product->variations->first()->stock }}" step="1" value="1">
+                                </div>
+                                <button type="submit" class="pd-add-cart">Add to cart</button>
+                            </li>
+                            <li class="pd-type">Product Type: <span>{{ $product->category->name }}</span></li>
+                            <li class="pd-type">Categories: <span>{{ $product->category->name }}</span></li>
+                            <li class="pd-type">Available: <span>{{ $product->variations->first()->stock }}</span></li>
+                            <li class="pd-type">Material : <span>100% Cotton, Jens</span></li>
+                        </ul>
                         </div>
                     </div>
                 </div>
