@@ -32,6 +32,7 @@
                                 data-bs-target="#v-pills-home" role="tab" aria-controls="v-pills-home">
                                 <div class="pd-showcase-img">
                                     <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
+                                    {{-- <img src="{{ asset('storage/' . $image->url) }}" alt="{{ $product->name }}"> --}}
                                 </div>
                             </div>
                         @endforeach
@@ -42,6 +43,7 @@
                                 aria-labelledby="v-pills-home-tab">
                                 <div class="pd-preview-img">
                                     <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
+                                    {{-- <img src="{{ asset('storage/' . $image->url) }}" alt="{{ $product->name }}"> --}}
                                 </div>
                             </div>
                         @endforeach
