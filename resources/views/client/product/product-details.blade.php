@@ -63,11 +63,11 @@
                         <h3 class="pd-title">{{ $product->name }}</h3>
                         <h5 class="pd-price">
                             @if ($product->variations->first()->sale_price)
-                                <span class="old-price">{{ number_format($product->variations->first()->price, 2) }} VND</span>
-                                <span class="sale-price">{{ number_format($product->variations->first()->sale_price, 2) }} VND</span>
+                                <span class="old-price">{{ number_format($product->variations->first()->price) }} VND</span>
+                                <span class="sale-price">{{ number_format($product->variations->first()->sale_price) }} VND</span>
                                 <span class="sale-label">Sale</span>
                             @else
-                                <span>{{ number_format($product->variations->first()->price, 2) }} VND</span>
+                                <span>{{ number_format($product->variations->first()->price) }} VND</span>
                             @endif
                         </h5>
                         
