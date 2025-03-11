@@ -42,6 +42,8 @@
                             </ul>
                         </li>
 
+                        <li><a href="{{ route('hot-products.index') }}" class="cr-page-link drop"><i
+                            class="ri-checkbox-blank-circle-line"></i>Home setting</a></li>
 
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>
