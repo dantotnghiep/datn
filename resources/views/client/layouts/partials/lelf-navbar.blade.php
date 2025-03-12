@@ -15,21 +15,21 @@
                                 <a href="#"><i class="flaticon-user"></i></a>
                                 <div class="submenu-right">
                                     @if (Auth::check())
-                                        <a href="{{ route('profile') }}" class="submenu-item">
-                                            <i class="bi bi-person me-2"></i>Profile</a>
-                                        <a href="{{ route('profile') }}" class="submenu-item">
-                                            <i class="bi bi-bag me-2"></i>Orders</a>
-                                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="submenu-item border-0 bg-transparent w-100 text-start">
-                                                <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                            </button>
-                                        </form>
+                                    <a href="{{ route('profile') }}" class="submenu-item">
+                                        <i class="bi bi-person me-2"></i>Profile</a>
+                                    <a href="{{ route('profile') }}" class="submenu-item">
+                                        <i class="bi bi-bag me-2"></i>Orders</a>
+                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="submenu-item border-0 bg-transparent w-100 text-start">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                        </button>
+                                    </form>
                                     @else
-                                        <a href="{{ route('login') }}" class="submenu-item">
-                                            <i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
-                                        <a href="{{ route('register') }}" class="submenu-item">
-                                            <i class="bi bi-person-plus me-2"></i>Register</a>
+                                    <a href="{{ route('login') }}" class="submenu-item">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+                                    <a href="{{ route('register') }}" class="submenu-item">
+                                        <i class="bi bi-person-plus me-2"></i>Register</a>
                                     @endif
                                 </div>
                             </li>
@@ -148,8 +148,8 @@
                 <span>$64.08</span>
             </div>
             <div class="cart-btns">
-                <a href="checkout.html" class="cart-btn checkout">CHECKOUT</a>
-                <a href="cart.html" class="cart-btn cart">VIEW CART</a>
+                <a href="checkout" class="cart-btn checkout">CHECKOUT</a>
+                <a href="cart" class="cart-btn cart">VIEW CART</a>
             </div>
 
             <p class="cart-shipping-text"><strong>SHIPPING:</strong> Continue shopping up to $64.08 and receive free
@@ -283,7 +283,7 @@
         min-width: 200px;
         border-radius: 12px;
         padding: 15px 0;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     }
 
     .user-menu-wrapper:hover .submenu-right {

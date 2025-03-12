@@ -33,7 +33,7 @@
                         </li>
 
 
-                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="about">About Us</a></li>
                         <li class="has-child-menu">
                             <a href="javascript:void(0)">Shop</a>
                             <i class="fl flaticon-plus">+</i>

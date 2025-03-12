@@ -105,11 +105,4 @@ Route::prefix('admin')->group(function () {
     Route::post('/homesetting/hot-products', [HotProductController::class, 'store'])->name('hot-products.store');
     Route::delete('/homesetting/hot-products/{id}', [HotProductController::class, 'destroy'])->name('hot-products.destroy');
     Route::get('/homesetting/hot-products/search', [HotProductController::class, 'search'])->name('hot_products.search');
-
-
-
 });
-
-
-
-
