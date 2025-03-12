@@ -58,7 +58,7 @@ class Variation extends Model
     {
         // Cập nhật quan hệ sử dụng belongsToMany để liên kết với bảng pivot attribute_values_variations
         return $this->belongsToMany(
-            Attribute_value::class, // Mô hình liên kết
+            AttributeValue::class, // Mô hình liên kết
             'attribute_values_variations', // Bảng pivot
             'variation_id', // Khóa ngoại trong bảng pivot
             'attribute_value_id' // Khóa ngoại trong bảng pivot

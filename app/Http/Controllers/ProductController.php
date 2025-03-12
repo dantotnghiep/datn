@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreProductRequest;
-use App\Models\Attribute_value;
 use App\Models\AttributeValue;
 use App\Models\Product_image;
 
@@ -37,7 +36,7 @@ class ProductController extends Controller
             abort(404);
         }
     
-        $attributeValues = Attribute_value::all(); // Lấy toàn bộ dữ liệu từ bảng attribute_values
+        $attributeValues = AttributeValue::all(); // Lấy toàn bộ dữ liệu từ bảng attribute_values
     
         return view('client.product.product-details', compact('product', 'attributeValues'));
     }
