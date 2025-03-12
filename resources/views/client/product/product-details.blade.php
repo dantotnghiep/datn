@@ -52,22 +52,21 @@
                                 data-bs-target="#v-pills-home" role="tab" aria-controls="v-pills-home">
                                 <div class="pd-showcase-img">
                                     <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
-                                    {{-- <img src="{{ asset('storage/' . $image->url) }}" alt="{{ $product->name }}"> --}}
                                 </div>
                             </div>
                         @endforeach
                     </div>
                     <div class="tab-content" id="v-pills-tabContent">
                         @foreach ($product->images as $image)
-                            <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
-                                aria-labelledby="v-pills-home-tab">
-                                <div class="pd-preview-img">
-                                    <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
-                                    {{-- <img src="{{ asset('storage/' . $image->url) }}" alt="{{ $product->name }}"> --}}
+                            @if ($image->is_main == 1) 
+                                <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                                    <div class="pd-preview-img">
+                                        <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
                         @endforeach
-                    </div>
+                    </div>                    
                 </div>
             </div>
             <div class="col-xxl-6 col-xl-6 col-lg-6">
@@ -94,7 +93,7 @@
                         </h5>
                         
                         <p class="pd-small-info">
-                            <strong>{{ $product->category->name }} -</strong> {!! $product->description !!}
+                            <strong>{{ $product->category->name }} </strong>
                         </p>
                     </div>
                     <div class="pd-quick-discription">
@@ -182,25 +181,9 @@
                         <div class="tab-pane fade show active" id="pd-discription-pill3" role="tabpanel"
                             aria-labelledby="pd-discription3">
                             <div class="discription-texts">
-                                <p>Aenean dolor massa, rhoncus ut tortor in, pretium tempus neque. Vestibulum
-                                    venenatis leo et dictum finibus. Nulla vulputate dolor sit amet tristique
-                                    dapibus. Maecenas posuere luctus leo, non consequat felis ullamcorper non.
-                                    Aliquam erat volutpat. Donec vitae porta enim. Cras eu volutpat dolor, vitae
-                                    accumsan tellus. Donec pulvinar auctor nunc, et gravida elit porta non. Aliquam
-                                    erat volutpat. Proin facilisis interdum felis, sit amet pretium purus feugiat
-                                    ac. Donec in leo metus. Sed quis dui nec justo ullamcorper molestie. Mauris
-                                    consequat lacinia est, eget tincidunt leo ornare sed. Sed sagittis, neque ac
-                                    euismod sollicitudin, mauris orci semper sem, a molestie nisi mi sit amet magna.
+                                <p>
+                                    {!! $product->description !!}
                                 </p>
-
-                                <p>Aenean dolor massa, rhoncus ut tortor in, pretium tempus neque. Vestibulum
-                                    venenatis leo et dictum finibus. Nulla vulputate dolor sit amet tristique
-                                    dapibus. Maecenas posuere luctus leo, non consequat felis ullamcorper non.
-                                    Aliquam erat volutpat. Donec vitae porta enim. Cras eu volutpat dolor, vitae
-                                    accumsan tellus. Donec pulvinar auctor nunc, et gravida elit porta non. Aliquam
-                                    erat volutpat.</p>
-                                <p>Aenean dolor massa, rhoncus ut tortor in, pretium tempus neque. Vestibulum
-                                    venenatis leo et dictum finibus. Nulla vulputate dolor sit amet tristique</p>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="pd-discription-pill2" role="tabpanel"
