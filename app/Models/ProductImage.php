@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Product_image extends Model
+class ProductImage extends Model
 {
     use HasFactory;
 
+    protected $table = 'product_images';
+
     protected $fillable = [
-        'variation_id',
+        'product_id',
         'url',
         'is_main'
     ];
@@ -22,5 +24,10 @@ class Product_image extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function getUrlAttribute($value)
+    {
+        return asset('storage/' . $value);
     }
 }

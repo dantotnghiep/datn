@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Attribute_value;
+use App\Models\AttributeValue;
 use App\Models\Product_image;
 
 class ProductController extends Controller
@@ -65,7 +66,7 @@ class ProductController extends Controller
                 $product = Product::create($request->validated());
                 // Xử lý upload hình ảnh chính
                 if ($request->hasFile('main_image')) {
-                    $mainImage = new Product_image();
+                    $mainImage = new ProductImage();
                     $mainImage->product_id = $product->id; // Liên kết với sản phẩm
                     $mainImage->url = $request->file('main_image')->store('products');
                     $mainImage->is_main = true; // Đánh dấu là hình chính
@@ -75,7 +76,7 @@ class ProductController extends Controller
                 // Xử lý ảnh phụ
                 if ($request->hasFile('additional_images')) {
                     foreach ($request->file('additional_images') as $image) {
-                        $additionalImage = new Product_image();
+                        $additionalImage = new ProductImage();
                         $additionalImage->product_id = $product->id;
                         $additionalImage->url = $image->store('products');
                         $additionalImage->is_main = false; // Đánh dấu là hình phụ
@@ -96,7 +97,7 @@ class ProductController extends Controller
                             'sale_end' => !empty($variationData['sale_end']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_end'])) : null,
                         ]);
                         if (isset($variationData['attribute_values']) && is_array($variationData['attribute_values'])) {
-                            $validIds = Attribute_value::whereIn('id', $variationData['attribute_values'])->pluck('id')->toArray();
+                            $validIds = AttributeValue::whereIn('id', $variationData['attribute_values'])->pluck('id')->toArray();
                             foreach ($variationData['attribute_values'] as $attributeValueId) {
                                 if (in_array($attributeValueId, $validIds)) {
                                     try {
@@ -197,7 +198,7 @@ class ProductController extends Controller
                 }
 
                 foreach ($request->file('additional_images') as $additionalImage) {
-                    Product_image::create([
+                    ProductImage::create([
                         'product_id' => $product->id,
                         'url' => $additionalImage->store('products'),
                     ]);
