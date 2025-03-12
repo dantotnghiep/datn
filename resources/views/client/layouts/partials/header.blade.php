@@ -40,7 +40,7 @@
                             <ul class="sub-menu">
                                 <li><a href="{{ route('client.product.list-product') }}">Products</a></li>
                                 <li>
-                                    <a href="{{ route('client.product.product-details') }}">Product Details</a>
+                                    {{-- <a href="{{ route('client.product.product-details') }}">Product Details</a> --}}
                                 </li>
                             </ul>
                         </li>
