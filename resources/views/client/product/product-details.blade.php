@@ -92,9 +92,12 @@
                             @endif
                         </h5>
                         
-                        <p class="pd-small-info">
-                            <strong>{{ $product->category->name }} </strong>
+                        <p class="pd-small-info" style="font-weight: bold; font-size: 18px;">
+                            <strong style="color: #000000;">Category: </strong>
+                            <strong style="color: #078e10;">{{ $product->category->name }}</strong> 
                         </p>
+                        
+                        
                     </div>
                     <div class="pd-quick-discription">
                         <ul>
