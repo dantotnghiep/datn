@@ -44,7 +44,7 @@ Route::get('/checkout', [CartController::class, 'checkout'])->name('client.cart.
 
 //client/product
 Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
-Route::get('/product-details', [ProductController::class, 'productdetails'])->name('client.product.product-details');
+Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('client.product.product-details');
 
 // Auth
 Route::get('/login', [App\Http\Controllers\Client\AuthController::class, 'showLoginForm'])->name('login');

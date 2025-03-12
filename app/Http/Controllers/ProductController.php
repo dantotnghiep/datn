@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreProductRequest;
-use App\Models\Attribute_value;
 use App\Models\AttributeValue;
 use App\Models\Product_image;
 
@@ -29,12 +28,19 @@ class ProductController extends Controller
     {
         return view('client.product.list-product');
     }
-
-    public function productdetails()
+    public function show($id)
     {
-        return view('client.product.product-details');
+        $product = Product::with(['category', 'images', 'variations.attributes', 'variations.attributeValues'])->find($id);
+    
+        if (!$product) {
+            abort(404);
+        }
+    
+        $attributeValues = AttributeValue::all(); // Lấy toàn bộ dữ liệu từ bảng attribute_values
+    
+        return view('client.product.product-details', compact('product', 'attributeValues'));
     }
-
+    
     public function index()
     {
         $products = Product::with(['variations', 'images', 'category'])->orderBy('created_at', 'desc')->get();
