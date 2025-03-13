@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\HomeCustomizationController;
+use App\Http\Controllers\Admin\HotProductController;
 use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
@@ -32,6 +35,7 @@ Route::get('/categories', [HomeController::class, 'category'])->name('categories
 
 
 
+
 //client/cart
 Route::post('/add-cart', [CartController::class, 'add'])->name('cart.add');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -40,7 +44,7 @@ Route::get('/checkout', [CartController::class, 'checkout'])->name('client.cart.
 
 //client/product
 Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
-Route::get('/product-details', [ProductController::class, 'productdetails'])->name('client.product.product-details');
+Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('client.product.product-details');
 
 // Auth
 Route::get('/login', [App\Http\Controllers\Client\AuthController::class, 'showLoginForm'])->name('login');
@@ -64,12 +68,12 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->group(function () {
     Route::get('/', [ProductController::class, 'dashboard'])->name('admin.dashboard');
-    
+
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
-    //admin/Category 
+    //admin/Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
     Route::get('/category/create', [CategoryController::class, 'create'])->name('admin.category.create');
     Route::post('/category', [CategoryController::class, 'store'])->name('admin.category.store');
@@ -97,7 +101,15 @@ Route::prefix('admin')->group(function () {
 
     Route::put('/variation/{id}', [VariationController::class, 'update'])->name('admin.variation.update');
 
+    Route::get('/homesetting/hot-products', [HotProductController::class, 'index'])->name('hot-products.index');
+    Route::post('/homesetting/hot-products', [HotProductController::class, 'store'])->name('hot-products.store');
+    Route::delete('/homesetting/hot-products/{id}', [HotProductController::class, 'destroy'])->name('hot-products.destroy');
+    Route::get('/homesetting/hot-products/search', [HotProductController::class, 'search'])->name('hot_products.search');
+
+
 
 });
+
+
 
 
