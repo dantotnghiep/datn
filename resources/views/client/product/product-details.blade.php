@@ -88,17 +88,12 @@
                                 </ul>
                                 <h3 class="pd-title">{{ $product->name }}</h3>
                                 <h5 class="pd-price">
-                                    @if ($product->variations->first()->sale_price)
-                                        <span class="old-price">{{ number_format($product->variations->first()->price) }}
-                                            VND</span>
-                                        <span
-                                            class="sale-price">{{ number_format($product->variations->first()->sale_price) }}
-                                            VND</span>
-                                        <span class="sale-label">Sale</span>
-                                    @else
-                                        <span>{{ number_format($product->variations->first()->price) }} VND</span>
-                                    @endif
+                                    <span id="js-old-price" class="old-price d-none"></span>
+                                    <span id="js-sale-price" class="sale-price d-none"></span>
+                                    <span id="js-regular-price"></span>
+                                    <span id="js-sale-label" class="sale-label d-none">Sale</span>
                                 </h5>
+
 
                                 <p class="pd-small-info">
                                     <strong>{{ $product->category->name }} -</strong> {!! $product->description !!}
@@ -421,5 +416,84 @@
             </div>
         </div>
     </div>
+    @php
+        $variations = $product->variations
+            ->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'price' => $v->price,
+                    'sale_price' => $v->sale_price,
+                    'stock' => $v->stock,
+                    'attributes' => $v->attributeValues
+                        ->map(function ($av) {
+                            return [
+                                'attribute_id' => $av->attribute_id,
+                                'value' => $av->value,
+                            ];
+                        })
+                        ->values()
+                        ->toArray(),
+                ];
+            })
+            ->values()
+            ->toArray();
+    @endphp
+
     <!-- ===============  newslatter area end  =============== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formatCurrency = (value) => {
+                return Number(value).toLocaleString('vi-VN') + ' VND';
+            };
+
+            const variations = @json($variations);
+
+            function updatePrice() {
+                const selectedColor = document.querySelector('input[name="color"]:checked')?.value;
+                const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
+
+                if (!selectedColor || !selectedSize) return;
+
+                const matchedVariation = variations.find(v => {
+                    const colorMatch = v.attributes.some(attr => attr.attribute_id === 2 && attr.value ===
+                        selectedColor);
+                    const sizeMatch = v.attributes.some(attr => attr.attribute_id === 1 && attr.value ===
+                        selectedSize);
+                    return colorMatch && sizeMatch;
+                });
+
+                const oldPrice = document.getElementById('js-old-price');
+                const salePrice = document.getElementById('js-sale-price');
+                const regularPrice = document.getElementById('js-regular-price');
+                const saleLabel = document.getElementById('js-sale-label');
+
+                if (matchedVariation) {
+                    const {
+                        price,
+                        sale_price
+                    } = matchedVariation;
+
+                    if (sale_price) {
+                        oldPrice.textContent = formatCurrency(price);
+                        salePrice.textContent = formatCurrency(sale_price);
+                        regularPrice.textContent = '';
+                        oldPrice.classList.remove('d-none');
+                        salePrice.classList.remove('d-none');
+                        saleLabel.classList.remove('d-none');
+                    } else {
+                        regularPrice.textContent = formatCurrency(price);
+                        oldPrice.classList.add('d-none');
+                        salePrice.classList.add('d-none');
+                        saleLabel.classList.add('d-none');
+                    }
+                }
+            }
+
+            document.querySelectorAll('input[name="color"], input[name="size"]').forEach(input => {
+                input.addEventListener('change', updatePrice);
+            });
+
+            updatePrice(); // Load lần đầu
+        });
+    </script>
 @endsection
