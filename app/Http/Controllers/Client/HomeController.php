@@ -5,11 +5,8 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\Category;
-<<<<<<< HEAD
-=======
 use App\Models\HomeCustomization;
 use App\Models\HotProduct;
->>>>>>> 4a2ffeac1549747c55245f19491d7f705b2cf196
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,20 +15,12 @@ class HomeController extends Controller
 {
     public function dashboard(Request $request)
     {
-<<<<<<< HEAD
-        $categories = Category::with(['products' => function ($query) {
-            $query->where('status', 'active'); 
-        }])->where('status', 'active') 
-        ->get();
-        $products = Product::with(['variations', 'images', 'category'])->orderBy('created_at', 'desc')->get();
-        return view('client.index',compact('categories','products'));
-=======
         $categories = Category::all(); // Lấy tất cả danh mục
 
         $hotProducts = HotProduct::with(['product.images', 'product.variations'])
         ->take(8)
         ->get();
-        
+
         // Lấy 8 sản phẩm mới nhất
         $products = Product::with([
             'images' => function ($query) {
@@ -67,12 +56,11 @@ class HomeController extends Controller
             ->get();
 
         return view('client.index', compact('categories','hotProducts', 'products', 'discountedProducts', 'selectedCategory'));
->>>>>>> 4a2ffeac1549747c55245f19491d7f705b2cf196
     }
 
     public function category()
     {
-        // Hiển thị danh sách danh mục 
+        // Hiển thị danh sách danh mục
         return view('client.categories');
     }
 

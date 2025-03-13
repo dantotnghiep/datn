@@ -58,7 +58,7 @@
                     </div>
                     <div class="tab-content" id="v-pills-tabContent">
                         @foreach ($product->images as $image)
-                            @if ($image->is_main == 1) 
+                            @if ($image->is_main == 1)
                                 <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
                                     <div class="pd-preview-img">
                                         <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
@@ -66,7 +66,7 @@
                                 </div>
                             @endif
                         @endforeach
-                    </div>                    
+                    </div>
                 </div>
             </div>
             <div class="col-xxl-6 col-xl-6 col-lg-6">
@@ -91,13 +91,13 @@
                                 <span>{{ number_format($product->variations->first()->price) }} VND</span>
                             @endif
                         </h5>
-                        
+
                         <p class="pd-small-info" style="font-weight: bold; font-size: 18px;">
                             <strong style="color: #000000;">Category: </strong>
-                            <strong style="color: #078e10;">{{ $product->category->name }}</strong> 
+                            <strong style="color: #078e10;">{{ $product->category->name }}</strong>
                         </p>
-                        
-                        
+
+
                     </div>
                     <div class="pd-quick-discription">
                         <ul>
@@ -112,41 +112,43 @@
                         @endphp
 
                         <style>
-                         
+
                         </style>
 
-                        <li class="d-flex align-items-center">
-                            <span>Color :</span>
-                            <div class="color-option d-flex align-items-center">
-                                @foreach ($attributeValues->where('attribute_id', 2) as $color)
-                                    @php
-                                        $bgColor = $colorMap[$color->value] ?? '#ccc';
-                                        $isWhite = strtolower($color->value) === 'trắng';
-                                        $borderColor = $isWhite ? '#ccc' : 'transparent';
-                                    @endphp
+                        <form action="{{ route('cart.add') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="variation_id" value="{{ $product->variations->first()->id }}">
+                            <input type="hidden" name="product_name" value="{{ $product->name }}">
+                            <input type="hidden" name="price" value="{{ $product->variations->first()->sale_price ?? $product->variations->first()->price }}">
 
-                                    <input type="radio" name="color" id="color{{ $color->id }}" value="{{ $color->value }}" {{ $loop->first ? 'checked' : '' }}>
-                                    <label for="color{{ $color->id }}">
-                                        <span class="c1 p-color"
-                                            style="background-color: {{ $bgColor }}; border: 1px solid {{ $borderColor }};"
-                                            title="{{ $color->value }}">
-                                        </span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </li>
-                        <li class="d-flex align-items-center">
-                            <span>Size :</span>
-                            <div class="size-option d-flex align-items-center">
-                                @foreach ($attributeValues->where('attribute_id', 1) as $size)
-                                    <input type="radio" name="size" id="size{{ $size->id }}" value="{{ $size->value }}" {{ $loop->first ? 'checked' : '' }}>
-                                    <label for="size{{ $size->id }}"><span class="p-size">{{ $size->value }}</span></label>
-                                @endforeach
-                            </div>
-                        </li>
+                            <li class="d-flex align-items-center">
+                                <span>Color :</span>
+                                <div class="color-option d-flex align-items-center">
+                                    @foreach ($attributeValues->where('attribute_id', 2) as $color)
+                                        @php
+                                            $bgColor = $colorMap[$color->value] ?? '#ccc';
+                                            $isWhite = strtolower($color->value) === 'trắng';
+                                            $borderColor = $isWhite ? '#ccc' : 'transparent';
+                                        @endphp
+                                        <input type="radio" name="color" id="color{{ $color->id }}" value="{{ $color->value }}" {{ $loop->first ? 'checked' : '' }}>
+                                        <label for="color{{ $color->id }}">
+                                            <span class="c1 p-color" style="background-color: {{ $bgColor }}; border: 1px solid {{ $borderColor }};" title="{{ $color->value }}"></span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </li>
+                            <li class="d-flex align-items-center">
+                                <span>Size :</span>
+                                <div class="size-option d-flex align-items-center">
+                                    @foreach ($attributeValues->where('attribute_id', 1) as $size)
+                                        <input type="radio" name="size" id="size{{ $size->id }}" value="{{ $size->value }}" {{ $loop->first ? 'checked' : '' }}>
+                                        <label for="size{{ $size->id }}"><span class="p-size">{{ $size->value }}</span></label>
+                                    @endforeach
+                                </div>
+                            </li>
                             <li class="d-flex align-items-center pd-cart-btns">
                                 <div class="quantity">
-                                    <input type="number" min="1" max="{{ $product->variations->first()->stock }}" step="1" value="1">
+                                    <input type="number" name="quantity" min="1" max="{{ $product->variations->first()->stock }}" step="1" value="1">
                                 </div>
                                 <button type="submit" class="pd-add-cart">Add to cart</button>
                             </li>
@@ -155,7 +157,7 @@
                             <li class="pd-type">Available: <span>{{ $product->variations->first()->stock }}</span></li>
                             <li class="pd-type">Material : <span>100% Cotton, Jens</span></li>
                         </ul>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
