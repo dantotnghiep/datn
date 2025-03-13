@@ -173,9 +173,11 @@
                                     </li>
                                     <li class="pd-type">Product Type: <span>{{ $product->category->name }}</span></li>
                                     <li class="pd-type">Categories: <span>{{ $product->category->name }}</span></li>
-                                    <li class="pd-type">Available: <span id="js-stock">{{ $product->variations->first()->stock }}</span></li>
-                                    <input type="hidden" id="js-qty" min="1" max="{{ $product->variations->first()->stock }}" step="1" value="1">
-                              <li class="pd-type">Material : <span>100% Cotton, Jens</span></li>
+                                    <li class="pd-type">Available: <span
+                                            id="js-stock">{{ $product->variations->first()->stock }}</span></li>
+                                    <input type="hidden" id="js-qty" min="1"
+                                        max="{{ $product->variations->first()->stock }}" step="1" value="1">
+                                    <li class="pd-type">Material : <span>100% Cotton, Jens</span></li>
                                 </ul>
                             </div>
                         </div>
@@ -189,7 +191,8 @@
                         <div class="nav flex-column nav-pills discription-bar" id="v-pills-tab2" role="tablist"
                             aria-orientation="vertical">
                             <button class="nav-link active" id="pd-discription3" data-bs-toggle="pill"
-                                data-bs-target="#pd-discription-pill3" role="tab" aria-controls="pd-discription-pill3">
+                                data-bs-target="#pd-discription-pill3" role="tab"
+                                aria-controls="pd-discription-pill3">
                                 Discription
                             </button>
                             <button class="nav-link" id="pd-discription2" data-bs-toggle="pill"
@@ -440,61 +443,67 @@
     @endphp
 
     <!-- ===============  newslatter area end  =============== -->
-       <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const formatCurrency = (value) => {
-            return Number(value).toLocaleString('vi-VN') + ' VND';
-        };
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formatCurrency = (value) => {
+                return Number(value).toLocaleString('vi-VN') + ' VND';
+            };
 
-        const variations = @json($variations);
+            const variations = @json($variations);
 
-        function updatePrice() {
-            const selectedColor = document.querySelector('input[name="color"]:checked')?.value;
-            const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
+            function updatePrice() {
+                const selectedColor = document.querySelector('input[name="color"]:checked')?.value;
+                const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
 
-            if (!selectedColor || !selectedSize) return;
+                if (!selectedColor || !selectedSize) return;
 
-            const matchedVariation = variations.find(v => {
-                const colorMatch = v.attributes.some(attr => attr.attribute_id === 2 && attr.value === selectedColor);
-                const sizeMatch = v.attributes.some(attr => attr.attribute_id === 1 && attr.value === selectedSize);
-                return colorMatch && sizeMatch;
-            });
+                const matchedVariation = variations.find(v => {
+                    const colorMatch = v.attributes.some(attr => attr.attribute_id === 2 && attr.value ===
+                        selectedColor);
+                    const sizeMatch = v.attributes.some(attr => attr.attribute_id === 1 && attr.value ===
+                        selectedSize);
+                    return colorMatch && sizeMatch;
+                });
 
-            const oldPrice = document.getElementById('js-old-price');
-            const salePrice = document.getElementById('js-sale-price');
-            const regularPrice = document.getElementById('js-regular-price');
-            const saleLabel = document.getElementById('js-sale-label');
-            const stockElement = document.getElementById('js-stock');
-            const qtyInput = document.getElementById('js-qty'); // nếu có input số lượng
+                const oldPrice = document.getElementById('js-old-price');
+                const salePrice = document.getElementById('js-sale-price');
+                const regularPrice = document.getElementById('js-regular-price');
+                const saleLabel = document.getElementById('js-sale-label');
+                const stockElement = document.getElementById('js-stock');
+                const qtyInput = document.getElementById('js-qty'); // nếu có input số lượng
 
-            if (matchedVariation) {
-                const { price, sale_price, stock } = matchedVariation;
+                if (matchedVariation) {
+                    const {
+                        price,
+                        sale_price,
+                        stock
+                    } = matchedVariation;
 
-                // ✅ Cập nhật tồn kho
-                if (stockElement) stockElement.textContent = stock;
-                if (qtyInput) qtyInput.max = stock;
+                    // ✅ Cập nhật tồn kho
+                    if (stockElement) stockElement.textContent = stock;
+                    if (qtyInput) qtyInput.max = stock;
 
-                if (sale_price) {
-                    oldPrice.textContent = formatCurrency(price);
-                    salePrice.textContent = formatCurrency(sale_price);
-                    regularPrice.textContent = '';
-                    oldPrice.classList.remove('d-none');
-                    salePrice.classList.remove('d-none');
-                    saleLabel.classList.remove('d-none');
-                } else {
-                    regularPrice.textContent = formatCurrency(price);
-                    oldPrice.classList.add('d-none');
-                    salePrice.classList.add('d-none');
-                    saleLabel.classList.add('d-none');
+                    if (sale_price) {
+                        oldPrice.textContent = formatCurrency(price);
+                        salePrice.textContent = formatCurrency(sale_price);
+                        regularPrice.textContent = '';
+                        oldPrice.classList.remove('d-none');
+                        salePrice.classList.remove('d-none');
+                        saleLabel.classList.remove('d-none');
+                    } else {
+                        regularPrice.textContent = formatCurrency(price);
+                        oldPrice.classList.add('d-none');
+                        salePrice.classList.add('d-none');
+                        saleLabel.classList.add('d-none');
+                    }
                 }
             }
-        }
 
-        document.querySelectorAll('input[name="color"], input[name="size"]').forEach(input => {
-            input.addEventListener('change', updatePrice);
+            document.querySelectorAll('input[name="color"], input[name="size"]').forEach(input => {
+                input.addEventListener('change', updatePrice);
+            });
+
+            updatePrice(); // Lần đầu load
         });
-
-        updatePrice(); // Lần đầu load
-    });
-</script>
+    </script>
 @endsection
