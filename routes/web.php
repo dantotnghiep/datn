@@ -34,14 +34,6 @@ Route::get('/categories', [HomeController::class, 'category'])->name('categories
 
 
 
-
-
-//client/cart
-Route::post('/add-cart', [CartController::class, 'add'])->name('cart.add');
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::get('/order', [CartController::class, 'order'])->name('client.cart.order');
-Route::get('/checkout', [CartController::class, 'checkout'])->name('client.cart.checkout');
-
 //client/product
 Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
 Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('client.product.product-details');
@@ -108,6 +100,13 @@ Route::prefix('admin')->group(function () {
 
 
 
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('/cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
 });
 
 
