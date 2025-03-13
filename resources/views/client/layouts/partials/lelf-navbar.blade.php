@@ -36,7 +36,9 @@
                             <li><a href="product.html"><i class="flaticon-heart"></i></a></li>
                             <li class="cart-icon">
                                 <i class="flaticon-shopping-cart"></i>
-                                <div class="cart-count"><span>10</span></div>
+                                @if($cartCount > 0)
+                                    <div class="cart-count"><span>{{ $cartCount }}</span></div>
+                                @endif
                             </li>
                         </ul>
                     </div>
@@ -68,93 +70,78 @@
                 <i class="flaticon-letter-x"></i>
             </div>
             <ul class="cart-product-grid">
-                <li class="single-cart-product">
-                    <div class="cart-product-info d-flex align-items-center">
-                        <div class="product-img"><img src="/client/assets/images/product/cart-p1.png" alt=""
-                                class="img-fluid"></div>
-                        <div class="product-info">
-                            <a href="product-details.html">
-                                <h5 class="product-title">Men Casual Summer Sale</h5>
-                            </a>
-                            <ul class="product-rating d-flex">
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star"></i></li>
-                            </ul>
-                            <p class="product-price"><span>1</span>x <span class="p-price">$10.32</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="cart-product-delete-btn">
-                        <a href="javascript:void(0)"><i class="flaticon-letter-x"></i></a>
-                    </div>
-
-                </li>
-                <li class="single-cart-product">
-                    <div class="cart-product-info d-flex align-items-center">
-                        <div class="product-img"><img src="/client/assets/images/product/cart-p3.png" alt=""
-                                class="img-fluid"></div>
-                        <div class="product-info">
-                            <a href="product-details.html">
-                                <h5 class="product-title">Something Yellow Jens</h5>
-                            </a>
-                            <ul class="product-rating d-flex">
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star"></i></li>
-                            </ul>
-                            <p class="product-price"><span>1</span>x <span class="p-price">$10.32</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="cart-product-delete-btn">
-                        <a href="javascript:void(0)"><i class="flaticon-letter-x"></i></a>
-                    </div>
-
-                </li>
-                <li class="single-cart-product">
-                    <div class="cart-product-info d-flex align-items-center">
-                        <div class="product-img"><img src="/client/assets/images/product/cart-p2.png" alt=""
-                                class="img-fluid"></div>
-                        <div class="product-info">
-                            <a href="product-details.html">
-                                <h5 class="product-title">Woman Something Navy Top</h5>
-                            </a>
-                            <ul class="product-rating d-flex">
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star-fill"></i></li>
-                                <li><i class="bi bi-star"></i></li>
-                            </ul>
-                            <p class="product-price"><span>1</span>x <span class="p-price">$10.32</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="cart-product-delete-btn">
-                        <a href="javascript:void(0)"><i class="flaticon-letter-x"></i></a>
-                    </div>
-
-                </li>
+                @if(auth()->check() && isset($cartItems) && $cartItems->count() > 0)
+                    @php $total = 0; @endphp
+                    @foreach($cartItems as $item)
+                        @php
+                            $variation = $item->variation;
+                            $product = $variation->product;
+                            $mainImage = $product->images()->where('is_main', 1)->first();
+                            $subtotal = $item->price * $item->quantity;
+                            $total += $subtotal;
+                        @endphp
+                        <li class="single-cart-product">
+                            <div class="cart-product-info d-flex align-items-center">
+                                <div class="product-img">
+                                    <img src="{{ $mainImage ? $mainImage->url : asset('default-image.jpg') }}"
+                                         alt="{{ $item->product_name }}"
+                                         class="img-fluid">
+                                </div>
+                                <div class="product-info">
+                                    <a href="{{ route('client.product.product-details', $product->id) }}">
+                                        <h5 class="product-title">{{ $item->product_name }}</h5>
+                                    </a>
+                                    <div class="product-variant">
+                                        <span>{{ $item->color }} / {{ $item->size }}</span>
+                                    </div>
+                                    <p class="product-price">
+                                        <span>{{ $item->quantity }}</span>x
+                                        <span class="p-price">{{ number_format($item->price) }} VND</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="cart-product-delete-btn">
+                                <form action="{{ route('cart.remove', $item->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="border-0 bg-transparent">
+                                        <i class="flaticon-letter-x"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    @endforeach
+                @else
+                    <li class="text-center py-3">
+                        <p>Your cart is empty</p>
+                    </li>
+                @endif
             </ul>
         </div>
+        @if(auth()->check() && isset($cartItems) && $cartItems->count() > 0)
         <div class="cart-bottom">
             <div class="cart-total d-flex justify-content-between">
                 <label>Subtotal :</label>
-                <span>$64.08</span>
+                <span>{{ number_format($total) }} VND</span>
             </div>
             <div class="cart-btns">
-                <a href="checkout.html" class="cart-btn checkout">CHECKOUT</a>
-                <a href="cart.html" class="cart-btn cart">VIEW CART</a>
+                <a href="" class="cart-btn checkout">CHECKOUT</a>
+                <a href="{{ route('cart.index') }}" class="cart-btn cart">VIEW CART</a>
             </div>
 
-            <p class="cart-shipping-text"><strong>SHIPPING:</strong> Continue shopping up to $64.08 and receive free
-                shipping. stay with EG </p>
+            @if($total < 1000000) {{-- Giả sử free ship cho đơn > 1 triệu --}}
+                <p class="cart-shipping-text">
+                    <strong>FREE SHIPPING:</strong>
+                    Spend {{ number_format(1000000 - $total) }} VND more to qualify for free shipping
+                </p>
+            @else
+                <p class="cart-shipping-text text-success">
+                    <strong>CONGRATULATIONS!</strong>
+                    Your order qualifies for free shipping
+                </p>
+            @endif
         </div>
+        @endif
     </div>
 </div>
 <!-- =============== cart sidebar end=============== -->
