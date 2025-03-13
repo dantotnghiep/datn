@@ -20,7 +20,7 @@ class HomeController extends Controller
         $hotProducts = HotProduct::with(['product.images', 'product.variations'])
         ->take(8)
         ->get();
-        
+
         // Lấy 8 sản phẩm mới nhất
         $products = Product::with([
             'images' => function ($query) {
@@ -60,7 +60,7 @@ class HomeController extends Controller
 
     public function category()
     {
-        // Hiển thị danh sách danh mục 
+        // Hiển thị danh sách danh mục
         return view('client.categories');
     }
 
