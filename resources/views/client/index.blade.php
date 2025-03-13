@@ -624,8 +624,12 @@
                                             {{ $prd->name }}
                                         </a>                                        
                                         <div class="product-price">
+<<<<<<< HEAD
+                                                <ins class="new-price">{{ number_format($prd->variations()->min('price')) }} - {{ number_format($prd->variations()->max('price')) }}</ins>
+=======
                                             {{-- <del class="old-price">{{ number_format($prd->price) }}</del><ins
                                                 class="new-price">{{ number_format($prd->sale_price) }}</ins> --}}
+>>>>>>> 4a2ffeac1549747c55245f19491d7f705b2cf196
                                         </div>
                                     </div>
                                 </div>

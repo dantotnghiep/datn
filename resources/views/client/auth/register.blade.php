@@ -74,17 +74,6 @@
                                 @enderror
                             </div>
 
-                            <div class="reg-input-group">
-                                <label for="address">Address</label>
-                                <input type="text" id="address" name="address" value="{{ old('address') }}" 
-                                       class="@error('address') is-invalid @enderror">
-                                @error('address')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-
                             <div class="reg-input-group reg-submit-input d-flex align-items-center">
                                 <button type="submit" class="btn btn-primary w-100">REGISTER</button>
                             </div>
