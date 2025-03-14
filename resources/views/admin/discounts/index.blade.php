@@ -51,7 +51,7 @@
                                     @forelse($discounts as $discount)
                                     <tr>
                                         <td class="text-center align-middle">{{ $discount->code }}</td>
-                                        <td class="text-center align-middle">{{ number_format($discount->sale) }} VNĐ</td>
+                                        <td class="text-center align-middle">{{ number_format($discount->sale) }} %</td>
                                         <td class="text-center align-middle">{{ $discount->startDate->format('d/m/Y H:i') }}</td>
                                         <td class="text-center align-middle">{{ $discount->endDate->format('d/m/Y H:i') }}</td>
                                         <td class="text-center align-middle">{{ $discount->usageCount }}</td>
