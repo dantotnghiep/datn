@@ -36,9 +36,9 @@
                             <li><a href="product.html"><i class="flaticon-heart"></i></a></li>
                             <li class="cart-icon">
                                 <i class="flaticon-shopping-cart"></i>
-                                @if($cartCount > 0)
+                                {{-- @if($cartCount > 0)
                                     <div class="cart-count"><span>{{ $cartCount }}</span></div>
-                                @endif
+                                @endif --}}
                             </li>
                         </ul>
                     </div>
