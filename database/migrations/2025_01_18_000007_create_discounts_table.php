@@ -9,14 +9,15 @@ class CreateDiscountsTable extends Migration
     {
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique();
-            $table->decimal('amount', 8, 2);
-            $table->enum('type', ['fixed', 'percentage']);
-            $table->text('description')->nullable();
-            $table->integer('usage_limit')->nullable();
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_active')->default(true);
+            $table->string('code')->unique()->comment('Mã voucher');
+            $table->decimal('sale', 8, 2)->comment('Giá trị giảm giá');
+            $table->dateTime('startDate')->comment('Ngày bắt đầu');
+            $table->dateTime('endDate')->comment('Ngày kết thúc');
+            $table->integer('usageCount')->default(0)->comment('Số lần đã sử dụng');
+            $table->integer('maxUsage')->nullable()->comment('Số lần tối đa được sử dụng');
+            $table->decimal('minOrderValue', 12, 2)->nullable()->comment('Giá trị đơn hàng tối thiểu');
+            $table->decimal('maxDiscount', 12, 2)->nullable()->comment('Giá trị giảm tối đa');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
