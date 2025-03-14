@@ -164,12 +164,19 @@
                                     </li>
 
                                     <li class="d-flex align-items-center pd-cart-btns">
-                                        <div class="quantity">
-                                            <input type="number" min="1"
-                                                max="{{ $product->variations->first()->stock }}" step="1"
-                                                value="1">
-                                        </div>
-                                        <button type="submit" class="pd-add-cart">Add to cart</button>
+                                        <form action="{{ route('cart.add') }}" method="POST" class="d-flex align-items-center">
+                                            @csrf
+                                            <input type="hidden" name="variation_id" id="variation_id">
+                                            <input type="hidden" name="product_name" value="{{ $product->name }}">
+                                            <input type="hidden" name="color" id="selected_color">
+                                            <input type="hidden" name="size" id="selected_size">
+                                            <input type="hidden" name="price" id="selected_price">
+
+                                            <div class="quantity">
+                                                <input type="number" name="quantity" min="1" max="{{ $product->variations->first()->stock }}" step="1" value="1">
+                                            </div>
+                                            <button type="submit" class="pd-add-cart">Add to cart</button>
+                                        </form>
                                     </li>
                                     <li class="pd-type">Product Type: <span>{{ $product->category->name }}</span></li>
                                     <li class="pd-type">Categories: <span>{{ $product->category->name }}</span></li>
@@ -458,10 +465,8 @@
                 if (!selectedColor || !selectedSize) return;
 
                 const matchedVariation = variations.find(v => {
-                    const colorMatch = v.attributes.some(attr => attr.attribute_id === 2 && attr.value ===
-                        selectedColor);
-                    const sizeMatch = v.attributes.some(attr => attr.attribute_id === 1 && attr.value ===
-                        selectedSize);
+                    const colorMatch = v.attributes.some(attr => attr.attribute_id === 2 && attr.value === selectedColor);
+                    const sizeMatch = v.attributes.some(attr => attr.attribute_id === 1 && attr.value === selectedSize);
                     return colorMatch && sizeMatch;
                 });
 
@@ -496,6 +501,12 @@
                         salePrice.classList.add('d-none');
                         saleLabel.classList.add('d-none');
                     }
+
+                    // Cập nhật các input hidden
+                    document.getElementById('variation_id').value = matchedVariation.id;
+                    document.getElementById('selected_color').value = selectedColor;
+                    document.getElementById('selected_size').value = selectedSize;
+                    document.getElementById('selected_price').value = matchedVariation.sale_price || matchedVariation.price;
                 }
             }
 
