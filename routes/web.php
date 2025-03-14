@@ -98,8 +98,24 @@ Route::prefix('admin')->group(function () {
     Route::delete('/homesetting/hot-products/{id}', [HotProductController::class, 'destroy'])->name('hot-products.destroy');
     Route::get('/homesetting/hot-products/search', [HotProductController::class, 'search'])->name('hot_products.search');
 
+    // Admin Discount Routes
+    Route::get('/discounts', [App\Http\Controllers\Admin\DiscountController::class, 'index'])
+        ->name('admin.discounts.index');
 
+    Route::get('/discounts/create', [App\Http\Controllers\Admin\DiscountController::class, 'create'])
+        ->name('admin.discounts.create');
 
+    Route::post('/discounts', [App\Http\Controllers\Admin\DiscountController::class, 'store'])
+        ->name('admin.discounts.store');
+
+    Route::get('/discounts/{discount}/edit', [App\Http\Controllers\Admin\DiscountController::class, 'edit'])
+        ->name('admin.discounts.edit');
+
+    Route::put('/discounts/{discount}', [App\Http\Controllers\Admin\DiscountController::class, 'update'])
+        ->name('admin.discounts.update');
+
+    Route::delete('/discounts/{discount}', [App\Http\Controllers\Admin\DiscountController::class, 'destroy'])
+        ->name('admin.discounts.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {
