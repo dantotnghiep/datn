@@ -33,7 +33,7 @@
                                     </div>
 
                                     <div class="form-group mb-3">
-                                        <label for="sale">Giá trị giảm (VNĐ)</label>
+                                        <label for="sale">Giá trị giảm (%)</label>
                                         <input type="number" class="form-control @error('sale') is-invalid @enderror"
                                                id="sale" name="sale" value="{{ old('sale', $discount->sale) }}" required>
                                         @error('sale')
