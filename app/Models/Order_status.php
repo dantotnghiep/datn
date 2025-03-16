@@ -15,4 +15,4 @@ class Order_status extends Model
     public function orderStatusTimes() {
         return $this->hasMany(Order_status_time::class);
     }
-} 
+}

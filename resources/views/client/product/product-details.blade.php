@@ -47,32 +47,34 @@
                     <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-8">
                         <div class="product-switcher-wrap">
                             <div class="nav product-tab" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                                @foreach ($product->images as $image)
-                                    <div class="product-variation" id="v-pills-home-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-home" role="tab" aria-controls="v-pills-home">
-                                        <div class="pd-showcase-img">
-                                            <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
-                                            {{-- <img src="{{ asset('storage/' . $image->url) }}" alt="{{ $product->name }}"> --}}
-                                        </div>
+                                @foreach ($product->images as $index => $image)
+                                <button class="product-variation nav-link @if ($loop->first || $image->is_main) active @endif" 
+                                    id="v-pills-tab-{{ $index }}" 
+                                    data-bs-toggle="pill"
+                                    data-bs-target="#v-pills-{{ $index }}" 
+                                    type="button"
+                                    role="tab" 
+                                    aria-controls="v-pills-{{ $index }}"
+                                    aria-selected="{{ $loop->first || $image->is_main ? 'true' : 'false' }}">
+                                    <div class="pd-showcase-img">
+                                        <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
                                     </div>
-                                @endforeach
-                            </div>
-                            <div class="tab-content" id="v-pills-tabContent">
-                                @php
-                                    $mainImage = $product->images->firstWhere('is_main', 1);
-                                @endphp
-
-                                @if ($mainImage)
-                                    <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
-                                        aria-labelledby="v-pills-home-tab">
-                                        <div class="pd-preview-img">
-                                            <img src="{{ asset($mainImage->url) }}" alt="{{ $product->name }}">
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-
+                                </button>
+                            @endforeach
                         </div>
+                        <div class="tab-content" id="v-pills-tabContent">
+                            @foreach ($product->images as $index => $image)
+                            <div class="tab-pane fade @if ($loop->first || $image->is_main) show active @endif" 
+                                id="v-pills-{{ $index }}" 
+                                role="tabpanel" 
+                                aria-labelledby="v-pills-tab-{{ $index }}">
+                                <div class="pd-preview-img">
+                                    <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>                    
+                    </div>
                     </div>
                     <div class="col-xxl-6 col-xl-6 col-lg-6">
                         <div class="product-details-wrap">
@@ -95,9 +97,9 @@
                                 </h5>
 
 
-                                <p class="pd-small-info">
+                                {{-- <p class="pd-small-info">
                                     <strong>{{ $product->category->name }} -</strong> {!! $product->description !!}
-                                </p>
+                                </p> --}}
                             </div>
                             <div class="pd-quick-discription">
                                 <ul>
@@ -164,7 +166,8 @@
                                     </li>
 
                                     <li class="d-flex align-items-center pd-cart-btns">
-                                        <form action="{{ route('cart.add') }}" method="POST" class="d-flex align-items-center">
+                                        <form action="{{ route('cart.add') }}" method="POST"
+                                            class="d-flex align-items-center">
                                             @csrf
                                             <input type="hidden" name="variation_id" id="variation_id">
                                             <input type="hidden" name="product_name" value="{{ $product->name }}">
@@ -173,7 +176,9 @@
                                             <input type="hidden" name="price" id="selected_price">
 
                                             <div class="quantity">
-                                                <input type="number" name="quantity" min="1" max="{{ $product->variations->first()->stock }}" step="1" value="1">
+                                                <input type="number" name="quantity" min="1"
+                                                    max="{{ $product->variations->first()->stock }}" step="1"
+                                                    value="1">
                                             </div>
                                             <button type="submit" class="pd-add-cart">Add to cart</button>
                                         </form>
@@ -465,8 +470,10 @@
                 if (!selectedColor || !selectedSize) return;
 
                 const matchedVariation = variations.find(v => {
-                    const colorMatch = v.attributes.some(attr => attr.attribute_id === 2 && attr.value === selectedColor);
-                    const sizeMatch = v.attributes.some(attr => attr.attribute_id === 1 && attr.value === selectedSize);
+                    const colorMatch = v.attributes.some(attr => attr.attribute_id === 2 && attr.value ===
+                        selectedColor);
+                    const sizeMatch = v.attributes.some(attr => attr.attribute_id === 1 && attr.value ===
+                        selectedSize);
                     return colorMatch && sizeMatch;
                 });
 
@@ -506,7 +513,8 @@
                     document.getElementById('variation_id').value = matchedVariation.id;
                     document.getElementById('selected_color').value = selectedColor;
                     document.getElementById('selected_size').value = selectedSize;
-                    document.getElementById('selected_price').value = matchedVariation.sale_price || matchedVariation.price;
+                    document.getElementById('selected_price').value = matchedVariation.sale_price ||
+                        matchedVariation.price;
                 }
             }
 
