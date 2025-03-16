@@ -15,7 +15,33 @@ class CartController extends Controller
                         ->where('startDate', '<=', now())
                         ->get();
 
-        return view("client.cart.cart", compact('cartItems', 'discounts'));
+        // Tính tổng giá trị giỏ hàng
+        $total = $cartItems->sum(function($item) {
+            return $item->price * $item->quantity;
+        });
+
+        // Khởi tạo giá trị mặc định
+        $discountAmount = 0;
+        $finalTotal = $total;
+
+        // Kiểm tra và áp dụng mã giảm giá từ session
+        $discountCode = session('discount_code');
+        if ($discountCode) {
+            $discount = \App\Models\Discount::where('code', $discountCode)
+                ->where('startDate', '<=', now())
+                ->where('endDate', '>', now())
+                ->first();
+
+            if ($discount && $total >= $discount->minOrderValue) {
+                $discountAmount = ($total * $discount->sale) / 100;
+                if ($discount->maxDiscount > 0) {
+                    $discountAmount = min($discountAmount, $discount->maxDiscount);
+                }
+                $finalTotal = $total - $discountAmount;
+            }
+        }
+
+        return view("client.cart.cart", compact('cartItems', 'discounts', 'total', 'finalTotal', 'discountAmount'));
     }
 
     public function add(Request $request)
@@ -93,6 +119,9 @@ class CartController extends Controller
             'discount_code' => 'required|exists:discounts,code'
         ]);
 
+        // Xóa mã giảm giá cũ trong session (nếu có)
+        session()->forget('discount_code');
+
         $discount = \App\Models\Discount::where('code', $request->discount_code)
             ->where('startDate', '<=', now())
             ->where('endDate', '>', now())
@@ -116,11 +145,8 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Giá trị đơn hàng chưa đạt mức tối thiểu!');
         }
 
-        // Lưu mã giảm giá vào session
+        // Lưu mã giảm giá mới vào session
         session(['discount_code' => $discount->code]);
-
-        // Tăng số lần sử dụng
-        $discount->increment('usageCount');
 
         return redirect()->back()->with('success', 'Áp dụng mã giảm giá thành công!');
     }
