@@ -83,8 +83,21 @@
                         <div class="col-xxl-4 col-lg-4">
                             <div class="cart-coupon-input">
                                 <h5 class="coupon-title">Coupon Code</h5>
-                                <form class="coupon-input d-flex align-items-center">
-                                    <input type="text" placeholder="Coupon Code">
+                                <form action="{{ route('cart.apply-coupon') }}" method="POST" class="coupon-input">
+                                    @csrf
+                                    <select name="discount_code" class="form-select" style="min-width: 200px;">
+                                        <option value="">Select a coupon</option>
+                                        @foreach($discounts as $discount)
+                                            @if(now()->between($discount->startDate, $discount->endDate) && ($discount->maxUsage > $discount->usageCount || $discount->maxUsage == 0))
+                                                <option value="{{ $discount->code }}">
+                                                    {{ $discount->code }} - Giảm {{ number_format($discount->sale) }}%
+                                                    @if($discount->minOrderValue > 0)
+                                                        (Đơn tối thiểu {{ number_format($discount->minOrderValue) }} VND)
+                                                    @endif
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    </select>
                                     <button type="submit">Apply Code</button>
                                 </form>
                             </div>

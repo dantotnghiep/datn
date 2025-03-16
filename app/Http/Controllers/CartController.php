@@ -11,7 +11,11 @@ class CartController extends Controller
     public function index()
     {
         $cartItems = Cart::where('user_id', auth()->id())->get();
-        return view("client.cart.cart", compact('cartItems'));
+        $discounts = \App\Models\Discount::where('endDate', '>', now())
+                        ->where('startDate', '<=', now())
+                        ->get();
+
+        return view("client.cart.cart", compact('cartItems', 'discounts'));
     }
 
     public function add(Request $request)
@@ -81,5 +85,43 @@ class CartController extends Controller
     public function order()
     {
         return view('client.cart.order');
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate([
+            'discount_code' => 'required|exists:discounts,code'
+        ]);
+
+        $discount = \App\Models\Discount::where('code', $request->discount_code)
+            ->where('startDate', '<=', now())
+            ->where('endDate', '>', now())
+            ->first();
+
+        if (!$discount) {
+            return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ hoặc đã hết hạn!');
+        }
+
+        // Kiểm tra số lần sử dụng
+        if ($discount->maxUsage > 0 && $discount->usageCount >= $discount->maxUsage) {
+            return redirect()->back()->with('error', 'Mã giảm giá đã hết lượt sử dụng!');
+        }
+
+        // Tính tổng giá trị đơn hàng
+        $cartTotal = Cart::where('user_id', auth()->id())
+            ->sum(\DB::raw('price * quantity'));
+
+        // Kiểm tra giá trị đơn hàng tối thiểu
+        if ($cartTotal < $discount->minOrderValue) {
+            return redirect()->back()->with('error', 'Giá trị đơn hàng chưa đạt mức tối thiểu!');
+        }
+
+        // Lưu mã giảm giá vào session
+        session(['discount_code' => $discount->code]);
+
+        // Tăng số lần sử dụng
+        $discount->increment('usageCount');
+
+        return redirect()->back()->with('success', 'Áp dụng mã giảm giá thành công!');
     }
 }
