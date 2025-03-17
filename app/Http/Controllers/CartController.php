@@ -11,9 +11,41 @@ class CartController extends Controller
     public function index()
     {
         $cartItems = Cart::where('user_id', auth()->id())->get();
-        $discounts = \App\Models\Discount::where('endDate', '>', now())
-                        ->where('startDate', '<=', now())
-                        ->get();
+
+        // Sửa lại query lấy discounts
+        $now = now();
+        \Log::info('Current time:', ['now' => $now->toDateTimeString()]);
+
+        $discounts = \App\Models\Discount::query()
+            ->whereNull('deleted_at')
+            ->where('endDate', '>', $now->format('Y-m-d H:i:s'))  // Format datetime
+            ->where('startDate', '<=', $now->format('Y-m-d H:i:s'))  // Format datetime
+            ->where(function($query) {
+                $query->whereNull('maxUsage')
+                      ->orWhereRaw('maxUsage > usageCount');
+            })
+            ->get();
+
+        // Log full query để debug
+        \Log::info('SQL Query:', [
+            'sql' => \App\Models\Discount::query()
+                ->whereNull('deleted_at')
+                ->where('endDate', '>', $now->format('Y-m-d H:i:s'))
+                ->where('startDate', '<=', $now->format('Y-m-d H:i:s'))
+                ->where(function($query) {
+                    $query->whereNull('maxUsage')
+                          ->orWhereRaw('maxUsage > usageCount');
+                })
+                ->toSql(),
+            'bindings' => [
+                'now' => $now->format('Y-m-d H:i:s')
+            ]
+        ]);
+
+        \Log::info('Discounts found:', [
+            'count' => $discounts->count(),
+            'discounts' => $discounts->toArray()
+        ]);
 
         // Tính tổng giá trị giỏ hàng
         $total = $cartItems->sum(function($item) {
