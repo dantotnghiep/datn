@@ -9,7 +9,7 @@
                 <div class="col-xxl-8 col-xl-8">
                 <form action="{{ route('checkout.store') }}" method="POST" id="checkout-form">
                     @csrf
-                    <h5 class="checkout-title">Billing Details</h5>
+                    <h5 class="checkout-title">Billingggg Details</h5>
                     <div class="row">
                         <div class="col-lg-6 col-md-6">
                             <div class="eg-input-group">
