@@ -5,6 +5,22 @@
     <!-- =============== Cart area start =============== -->
     <div class="cart-area mt-100 ml-110">
         <div class="container">
+            <!-- Add this alert section -->
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            <!-- End alert section -->
+
             <div class="row justify-content-center">
                 <div class="col-xxl-12 col-xl-12 col-md-12 col-sm-8">
                     @if($cartItems->count() > 0)
@@ -83,8 +99,21 @@
                         <div class="col-xxl-4 col-lg-4">
                             <div class="cart-coupon-input">
                                 <h5 class="coupon-title">Coupon Code</h5>
-                                <form class="coupon-input d-flex align-items-center">
-                                    <input type="text" placeholder="Coupon Code">
+                                <form action="{{ route('cart.apply-coupon') }}" method="POST" class="coupon-input">
+                                    @csrf
+                                    <select name="discount_code" class="form-select" style="min-width: 200px;">
+                                        <option value="">Select a coupon</option>
+                                        @foreach($discounts as $discount)
+                                            @if(now()->between($discount->startDate, $discount->endDate) && ($discount->maxUsage > $discount->usageCount || $discount->maxUsage == 0))
+                                                <option value="{{ $discount->code }}" {{ session('discount_code') == $discount->code ? 'selected' : '' }}>
+                                                    {{ $discount->code }} - Giảm {{ number_format($discount->sale) }}%
+                                                    @if($discount->minOrderValue > 0)
+                                                        (Đơn tối thiểu {{ number_format($discount->minOrderValue) }} VND)
+                                                    @endif
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    </select>
                                     <button type="submit">Apply Code</button>
                                 </form>
                             </div>
@@ -97,15 +126,17 @@
                                         <td></td>
                                         <td class="tt-right">{{ number_format($total) }} VND</td>
                                     </tr>
+                                    @if(isset($discountAmount) && $discountAmount > 0)
                                     <tr>
-                                        <td class="tt-left">Shipping Fee</td>
+                                        <td class="tt-left">Discount ({{ session('discount_code') }})</td>
                                         <td></td>
-                                        <td class="tt-right">Free</td>
+                                        <td class="tt-right">-{{ number_format($discountAmount) }} VND</td>
                                     </tr>
+                                    @endif
                                     <tr>
                                         <td class="tt-left">Total</td>
                                         <td></td>
-                                        <td class="tt-right"><strong>{{ number_format($total) }} VND</strong></td>
+                                        <td class="tt-right"><strong>{{ number_format($finalTotal) }} VND</strong></td>
                                     </tr>
                                 </tbody>
                             </table>
