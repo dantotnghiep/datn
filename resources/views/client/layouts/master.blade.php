@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    
+
     @include('client.layouts.partials.lelf-navbar')
     <header>
         @include('client.layouts.partials.header')

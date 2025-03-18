@@ -7,82 +7,64 @@
 
             <div class="row">
                 <div class="col-xxl-8 col-xl-8">
-                    <form class="billing-from">
-                        <h5 class="checkout-title">
-                            Billing Details
-                        </h5>
-                        <div class="row">
-                            <div class="col-lg-6 col-md-6">
-                                <div class="eg-input-group">
-                                    <label for="first-name1">First Name</label>
-                                    <input type="text" id="first-name1" placeholder="Your first name">
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6">
-                                <div class="eg-input-group">
-                                    <label for="last-name">Last Name</label>
-                                    <input type="text" id="last-name" placeholder="Your last name">
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="eg-input-group">
-                                    <label for="country">Country / Region</label>
-                                    <input type="text" id="country" placeholder="Your country name">
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="eg-input-group">
-                                    <label>Street Address</label>
-                                    <input type="text" placeholder="House and street name">
-                                </div>
-                                <div class="eg-input-group">
-                                    <input type="text" placeholder="Town / City">
-                                </div>
-                                <div class="eg-input-group">
-                                    <input type="text" placeholder="Post Code">
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="eg-input-group">
-                                    <label>Additional Information</label>
-                                    <input type="text" placeholder="Your Phone Number">
-                                </div>
-                                <div class="eg-input-group">
-                                    <input type="text" placeholder="Your Email Address">
-                                </div>
-                                <div class="eg-input-group mb-0">
-                                    <textarea cols="30" rows="7" placeholder="Order Notes (Optional)"></textarea>
-                                </div>
+                <form action="{{ route('checkout.store') }}" method="POST" id="checkout-form">
+                    @csrf
+                    <h5 class="checkout-title">Billing Details</h5>
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6">
+                            <div class="eg-input-group">
+                                <label for="first-name1">First Name</label>
+                                <input type="text" id="first-name1" name="first_name" placeholder="Your first name" required>
                             </div>
                         </div>
-                    </form>
-
-
-                    <form class="different-address-form">
-                        <h5 class="checkout-title">
-                            Ship to a Different Address?
-                        </h5>
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="eg-input-group">
-                                    <label for="first-name-d">First Name</label>
-                                    <input type="text" id="first-name-d" placeholder="Your first name">
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="eg-input-group">
-                                    <label for="last-name-d">Last Name</label>
-                                    <input type="text" id="last-name-d" placeholder="Your last name">
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="eg-input-group mb-0">
-                                    <textarea cols="30" rows="6" placeholder="Order Notes (Optional)"></textarea>
-                                </div>
+                        <div class="col-lg-6 col-md-6">
+                            <div class="eg-input-group">
+                                <label for="last-name">Last Name</label>
+                                <input type="text" id="last-name" name="last_name" placeholder="Your last name" required>
                             </div>
                         </div>
-                    </form>
+                        <div class="col-lg-12">
+                            <div class="eg-input-group">
+                                <label>Street Address</label>
+                                <input type="text" name="street_address" placeholder="House and street name" required>
+                            </div>
+                            <div class="eg-input-group">
+                                <input type="text" name="city" placeholder="Town / City" required>
+                            </div>
+                            <div class="eg-input-group">
+                                <input type="text" name="country" placeholder="Country / Region" required>
+                            </div>
+                            
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="eg-input-group">
+                                <label>Phone Number</label>
+                                <input type="text" name="phone" placeholder="Your Phone Number" required>
+                            </div>
+                            <div class="eg-input-group">
+                                <label>Email Address</label>
+                                <input type="email" name="email" placeholder="Your Email Address" required>
+                            </div>
+                            <div class="eg-input-group">
+                                <label>Order_Code</label>
+                                <input type="text" name="order_code" placeholder="Order_code" required>
+                            </div>
+                            <div class="eg-input-group mb-0">
+                                <textarea name="order_notes" cols="30" rows="7" placeholder="Order Notes (Optional)"></textarea>
+                            </div>
+                            
+                            {{-- <div class="col-lg-12">
+                                <button type="submit">Place Order</button>
+                            </div> --}}
+                            <div class="place-order-btn">
+                                <button type="submit">Place Order</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
                 </div>
+                
+                
                 <div class="col-xxl-4 col-xl-4">
                     <div class="order-summary">
                         <div class="added-product-summary">
@@ -193,9 +175,7 @@
                                 </div>
                             </div>
 
-                            <div class="place-order-btn">
-                                <button type="submit">Place Order</button>
-                            </div>
+                            
                         </form>
                     </div>
                 </div>
@@ -226,4 +206,6 @@
         </div>
     </div>
     <!-- ===============  newslatter area end  =============== -->
+    
+        
 @endsection
