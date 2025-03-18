@@ -32,7 +32,6 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', [HomeController::class, 'dashboard'])->name('client.index');
 Route::get('/categories', [HomeController::class, 'category'])->name('categories.index');
 
-Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 Route::get('/order', [CartController::class, 'order'])->name('cart.order');
 
 
@@ -130,9 +129,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
 });
 
-// Route::middleware('auth')->post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout.index');
 Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
-
+Route::get('/order', [OrderController::class, 'order'])->name('order');
 
 
 
