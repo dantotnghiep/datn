@@ -168,7 +168,7 @@
                                 </tbody>
                             </table>
                             <div class="cart-proceed-btns">
-                                <a href="{{route('cart.checkout')}}" class="cart-proceed">Proceed to Checkout</a>
+                                <a href="{{route('checkout.index')}}" class="cart-proceed">Proceed to Checkout</a>
                                 <a href="{{ route('client.index') }}" class="continue-shop">Continue Shopping</a>
                             </div>
                         </div>

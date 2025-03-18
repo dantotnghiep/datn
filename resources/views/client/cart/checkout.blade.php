@@ -44,9 +44,6 @@
                                 <textarea name="order_notes" cols="30" rows="7" placeholder="Order Notes (Optional)">{{ old('order_notes') }}</textarea>
                             </div>
 
-                            {{-- <div class="col-lg-12">
-                                <button type="submit">Place Order</button>
-                            </div> --}}
                             <div class="place-order-btn">
                                 <button type="submit">Place Order</button>
                             </div>
@@ -54,8 +51,6 @@
                     </div>
                 </form>
             </div>
-
-
 
 
 
