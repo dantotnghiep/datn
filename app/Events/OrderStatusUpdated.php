@@ -8,7 +8,6 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 class OrderStatusUpdated implements ShouldBroadcast
 {
@@ -34,24 +33,10 @@ class OrderStatusUpdated implements ShouldBroadcast
         if (!$order->relationLoaded('status')) {
             $this->order->load('status');
         }
-        
-        // Add more detailed logging
-        \Log::info('OrderStatusUpdated event constructed', [
-            'order_id' => $order->id,
-            'status_id' => $order->status_id,
-            'user_id' => $order->user_id,
-            'channel' => 'private-orders.admin',
-            'event' => 'OrderStatusUpdated'
-        ]);
     }
 
     public function broadcastOn(): array
     {
-        Log::info('Broadcasting to channels', [
-            'admin_channel' => 'private-orders.admin',
-            'user_channel' => 'private-orders.' . $this->order->user_id
-        ]);
-        
         return [
             new Channel('orders.admin'),
             new PrivateChannel('orders.' . $this->order->user_id)

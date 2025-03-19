@@ -76,50 +76,25 @@
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Enable pusher logging - don't include this in production
-            Pusher.logToConsole = true;
-
-            // Khởi tạo Pusher với cấu hình đầy đủ
             const pusher = new Pusher('{{ env("PUSHER_APP_KEY") }}', {
                 cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-                encrypted: true,
-                authEndpoint: '/broadcasting/auth', // Thêm endpoint xác thực
-                auth: {
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                }
+                encrypted: true
             });
 
-            // Thay đổi từ private channel sang public channel
-            const channel = pusher.subscribe('orders.admin'); // Bỏ 'private-' prefix
+            const channel = pusher.subscribe('orders.admin');
 
-            // Debug connection
-            pusher.connection.bind('connected', function() {
-                console.log('Connected to Pusher');
-            });
-
-            channel.bind('pusher:subscription_succeeded', function() {
-                console.log('Successfully subscribed to channel');
-            });
-
-            // Phần code xử lý sự kiện giữ nguyên
             channel.bind('OrderStatusUpdated', function(data) {
-                console.log('Received OrderStatusUpdated event:', data);
-                
                 const orderId = data.order.id;
                 const orderRow = $(`#order-row-${orderId}`);
                 const statusBadge = orderRow.find(`#status-badge-${orderId}`);
                 
-                // Xóa tất cả các class bg cũ
                 statusBadge.removeClass('bg-warning bg-info bg-danger bg-success');
                 
-                // Thêm class mới dựa vào status
                 let newClass = '';
                 let buttonHtml = '';
                 
                 switch(parseInt(data.order.status_id)) {
-                    case 1: // Chờ xác nhận
+                    case 1:
                         newClass = 'bg-warning';
                         buttonHtml = `
                             <button type="button" class="btn btn-sm btn-success confirm-order-btn" data-order-id="${orderId}">
@@ -127,7 +102,7 @@
                             </button>
                         `;
                         break;
-                    case 2: // Đang giao
+                    case 2:
                         newClass = 'bg-info';
                         buttonHtml = `
                             <button type="button" class="btn btn-sm btn-info complete-order-btn" data-order-id="${orderId}">
@@ -135,25 +110,20 @@
                             </button>
                         `;
                         break;
-                    case 3: // Đã hủy
+                    case 3:
                         newClass = 'bg-danger';
-                        buttonHtml = '';
                         break;
-                    case 4: // Hoàn thành
+                    case 4:
                         newClass = 'bg-success';
-                        buttonHtml = '';
                         break;
                 }
                 
-                // Cập nhật UI
                 statusBadge.addClass(newClass).text(data.order.status.status_name);
                 
-                // Cập nhật nút
                 const actionCell = orderRow.find('td:last');
                 const viewButton = `<a href="/admin/orders/${orderId}" class="btn btn-sm btn-primary">Xem chi tiết</a>`;
                 actionCell.html(buttonHtml + ' ' + viewButton);
                 
-                // Hiển thị thông báo
                 showNotification(
                     'Cập nhật trạng thái', 
                     `Đơn hàng #${data.order.order_code} đã được cập nhật thành ${data.order.status.status_name}`,
@@ -161,11 +131,9 @@
                 );
             });
 
-            // Xử lý nút xác nhận và hoàn thành
             $(document).on('click', '.confirm-order-btn, .complete-order-btn', function() {
                 const orderId = $(this).data('order-id');
                 const statusId = $(this).hasClass('confirm-order-btn') ? 2 : 4;
-                const button = $(this);
                 
                 $.ajax({
                     url: `/admin/orders/${orderId}/update-status`,
@@ -174,22 +142,14 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                         'Accept': 'application/json'
                     },
-                    data: {
-                        status_id: statusId
-                    },
+                    data: { status_id: statusId },
                     success: function(response) {
-                        if (response.success) {
-                            console.log('Order status updated successfully');
-                        } else {
+                        if (!response.success) {
                             showNotification('Lỗi', response.message, 'error');
                         }
                     },
                     error: function(xhr) {
-                        console.error('Error:', xhr);
-                        let message = 'Có lỗi xảy ra khi cập nhật trạng thái';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            message = xhr.responseJSON.message;
-                        }
+                        const message = xhr.responseJSON?.message || 'Có lỗi xảy ra khi cập nhật trạng thái';
                         showNotification('Lỗi', message, 'error');
                     }
                 });
@@ -207,9 +167,7 @@
             $('#admin-notifications').prepend(notification);
 
             setTimeout(() => {
-                notification.fadeOut(300, function() {
-                    $(this).remove();
-                });
+                notification.fadeOut(300, function() { $(this).remove(); });
             }, 5000);
         }
     </script>
