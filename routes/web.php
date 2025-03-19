@@ -6,12 +6,15 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Client\HomeController;
-use App\Http\Controllers\Client\OrderController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
 use App\Http\Controllers\VariationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
+use Pusher\Pusher;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -27,11 +30,12 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', [HomeController::class, 'dashboard'])->name('client.index');
 Route::get('/categories', [HomeController::class, 'category'])->name('categories.index');
 
-Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-Route::get('/order', [CartController::class, 'order'])->name('cart.order');
+// Route::get('/order', [CartController::class, 'order'])->name('cart.order');
 
-
-
+// Broadcast authentication cho Pusher
+Route::post('/broadcasting/auth', function () {
+    return auth()->check() ? auth()->user() : abort(403);
+});
 
 //client/product
 Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
@@ -53,10 +57,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
 
+
+    Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout.index');
+    Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
+    Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
-        Route::post('/{idid}', [OrderController::class, 'cancle'])->name('orders.cancle');
+        Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     });
 });
 
@@ -69,6 +77,13 @@ Route::prefix('admin')->group(function () {
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
+
+    // Admin Orders
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\OrderController::class, 'index'])->name('admin.orders.index');
+        Route::get('/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show'])->name('admin.orders.show');
+        Route::post('/{order}/update-status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.update_status');
+    });
 
     //admin/Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
@@ -131,5 +146,28 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
 });
 
-// Route::middleware('auth')->post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
-Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
+// Thêm route này cho client hủy đơn hàng
+// Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+// Thêm route mới này
+Route::post('/pusher/auth', function (Request $request) {
+    if (auth()->check()) {
+        $pusher = new Pusher(
+            config('broadcasting.connections.pusher.key'),
+            config('broadcasting.connections.pusher.secret'),
+            config('broadcasting.connections.pusher.app_id'),
+            config('broadcasting.connections.pusher.options')
+        );
+    
+        $channel = $request->input('channel_name');
+        $socket_id = $request->input('socket_id');
+    
+        $auth = $pusher->socket_auth($channel, $socket_id);
+    
+        return response($auth);
+    } else {
+        abort(403);
+    }
+});
+
+Broadcast::routes();

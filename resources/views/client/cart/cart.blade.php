@@ -99,23 +99,50 @@
                         <div class="col-xxl-4 col-lg-4">
                             <div class="cart-coupon-input">
                                 <h5 class="coupon-title">Coupon Code</h5>
+
+                                <!-- Debug information -->
+                                @php
+                                    $availableDiscounts = $discounts->filter(function($discount) {
+                                        return now()->between($discount->startDate, $discount->endDate);
+                                    });
+                                @endphp
+
+                                @if($availableDiscounts->isEmpty())
+                                    <div class="alert alert-info">Không có mã giảm giá nào khả dụng</div>
+                                @endif
+
                                 <form action="{{ route('cart.apply-coupon') }}" method="POST" class="coupon-input">
                                     @csrf
                                     <select name="discount_code" class="form-select" style="min-width: 200px;">
-                                        <option value="">Select a coupon</option>
+                                        <option value="">-- Chọn mã giảm giá --</option>
                                         @foreach($discounts as $discount)
-                                            @if(now()->between($discount->startDate, $discount->endDate) && ($discount->maxUsage > $discount->usageCount || $discount->maxUsage == 0))
-                                                <option value="{{ $discount->code }}" {{ session('discount_code') == $discount->code ? 'selected' : '' }}>
-                                                    {{ $discount->code }} - Giảm {{ number_format($discount->sale) }}%
-                                                    @if($discount->minOrderValue > 0)
-                                                        (Đơn tối thiểu {{ number_format($discount->minOrderValue) }} VND)
-                                                    @endif
-                                                </option>
-                                            @endif
+                                            <option value="{{ $discount->code }}">
+                                                {{ $discount->code }}
+                                                (Giảm {{ number_format($discount->sale) }}%
+                                                @if($discount->minOrderValue > 0)
+                                                    - Đơn tối thiểu {{ number_format($discount->minOrderValue) }}đ
+                                                @endif
+                                                )
+                                                - HSD: {{ $discount->endDate->format('d/m/Y') }}
+                                            </option>
                                         @endforeach
                                     </select>
-                                    <button type="submit">Apply Code</button>
+                                    <button type="submit" class="btn btn-primary">Áp dụng</button>
                                 </form>
+
+                                <!-- Thêm debug info -->
+                                <div style="display: none;">
+                                    <p>Debug Info:</p>
+                                    <p>Current time: {{ now() }}</p>
+                                    <p>Available discounts: {{ $discounts->count() }}</p>
+                                    @foreach($discounts as $discount)
+                                        <p>
+                                            Code: {{ $discount->code }} <br>
+                                            Start: {{ $discount->startDate }} <br>
+                                            End: {{ $discount->endDate }}
+                                        </p>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                         <div class="col-xxl-8 col-lg-8">
@@ -141,7 +168,7 @@
                                 </tbody>
                             </table>
                             <div class="cart-proceed-btns">
-                                <a href="{{route('cart.checkout')}}" class="cart-proceed">Proceed to Checkout</a>
+                                <a href="{{route('checkout.index')}}" class="cart-proceed">Proceed to Checkout</a>
                                 <a href="{{ route('client.index') }}" class="continue-shop">Continue Shopping</a>
                             </div>
                         </div>
