@@ -66,145 +66,73 @@
 @push('scripts')
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script>
-$(document).ready(function() {
-    // Khởi tạo Pusher thay vì Echo
-    const pusher = new Pusher('{{ env("PUSHER_APP_KEY") }}', {
-        cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-        encrypted: true,
-        authEndpoint: '/broadcasting/auth',
-        auth: {
-            headers: {
-                'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+    $(document).ready(function() {
+        // Khởi tạo Pusher
+        const pusher = new Pusher('{{ env("PUSHER_APP_KEY") }}', {
+            cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
+            encrypted: true
+        });
+
+        // Subscribe vào channel
+        const channel = pusher.subscribe('orders.admin');
+
+        // Lắng nghe sự kiện cập nhật trạng thái
+        channel.bind('OrderStatusUpdated', function(data) {
+            const order = data.order;
+            const orderId = order.id;
+            const orderRow = $(`#order-row-${orderId}`);
+            const statusBadge = orderRow.find(`#status-badge-${orderId}`);
+            
+            // Cập nhật trạng thái
+            statusBadge.removeClass('bg-warning bg-info bg-danger bg-success');
+            
+            let newClass = '';
+            switch(parseInt(order.status_id)) {
+                case 1: newClass = 'bg-warning'; break;
+                case 2: newClass = 'bg-info'; break;
+                case 3: newClass = 'bg-danger'; break;
+                case 4: newClass = 'bg-success'; break;
             }
-        }
-    });
-
-    // Đăng ký kênh private
-    const channel = pusher.subscribe('private-orders.{{ Auth::id() }}');
-
-    // Debug để kiểm tra kết nối
-    pusher.connection.bind('connected', () => {
-        console.log('Connected to Pusher');
-    });
-
-    channel.bind('pusher:subscription_succeeded', () => {
-        console.log('Subscribed to orders channel');
-    });
-
-    channel.bind('pusher:subscription_error', (error) => {
-        console.error('Subscription error:', error);
-    });
-
-    // Lắng nghe sự kiện OrderStatusUpdated
-    channel.bind('OrderStatusUpdated', function(data) {
-        console.log('Order status updated:', data);
-        updateOrderStatus(data.order);
-        
-        // Hiển thị thông báo dựa vào trạng thái
-        if (data.order.status_id == 3) {
-            showNotification(`Đơn hàng #${data.order.order_code} đã được hủy`, 'warning');
-        } else {
-            showNotification(`Đơn hàng #${data.order.order_code} đã được cập nhật trạng thái thành ${data.order.status.status_name}`, 'info');
-        }
-    });
-
-    // Không cần lắng nghe OrderCancelled riêng nữa vì đã xử lý trong OrderStatusUpdated
-    // channel.bind('OrderCancelled', function(data) {
-    //     console.log('Order cancelled:', data);
-    //     updateOrderStatus(data.order);
-    //     
-    //     // Hiển thị thông báo
-    //     showNotification(`Đơn hàng #${data.order.order_code} đã được hủy`, 'warning');
-    // });
-
-    // Sửa lại phần xử lý nút hủy đơn hàng
-    $('.cancel-order-btn').click(function() {
-        if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
-            return;
-        }
-
-        const orderId = $(this).data('order-id');
-        const button = $(this);
-        
-        $.ajax({
-            url: `/orders/${orderId}/cancel`,
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    const orderRow = button.closest('tr');
-                    const statusBadge = orderRow.find('#status-badge-' + orderId);
-                    
-                    statusBadge.removeClass('bg-warning bg-info bg-success')
-                             .addClass('bg-danger')
-                             .text('Đã hủy');
-                    
-                    button.remove();
-                    
-                    showNotification('Đơn hàng đã được hủy thành công', 'success');
-                } else {
-                    showNotification(response.message || 'Có lỗi xảy ra khi hủy đơn hàng', 'danger');
-                }
-            },
-            error: function(xhr) {
-                console.log('Error:', xhr);
-                let message = 'Có lỗi xảy ra khi hủy đơn hàng';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    message = xhr.responseJSON.message;
-                }
-                showNotification(message, 'danger');
+            
+            statusBadge.addClass(newClass).text(order.status.status_name);
+            
+            // Ẩn nút hủy nếu đơn hàng đã bị hủy hoặc hoàn thành
+            if (order.status_id == 3 || order.status_id == 4) {
+                orderRow.find('.cancel-order-btn').remove();
             }
         });
-    });
-});
 
-function updateOrderStatus(orderData) {
-    const statusBadge = $(`#status-badge-${orderData.id}`);
-    if (statusBadge.length) {
-        // Xóa tất cả các class bg-*
-        statusBadge.removeClass('bg-warning bg-info bg-danger bg-success');
-        
-        // Thêm class mới dựa vào status_id
-        let newClass = '';
-        switch(parseInt(orderData.status_id)) {
-            case 1: newClass = 'bg-warning'; break;
-            case 2: newClass = 'bg-info'; break;
-            case 3: newClass = 'bg-danger'; break;
-            case 4: newClass = 'bg-success'; break;
-            default: newClass = 'bg-warning';
-        }
-        
-        statusBadge.addClass(newClass);
-        statusBadge.text(orderData.status.status_name);
-        
-        // Ẩn nút hủy nếu đơn hàng đã hoàn thành hoặc đã hủy
-        if (orderData.status_id == 3 || orderData.status_id == 4) {
-            $(`#order-row-${orderData.id}`).find('.cancel-order-btn').remove();
-        }
-    }
-}
+        // Xử lý nút hủy đơn hàng
+        $('.cancel-order-btn').click(function() {
+            if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+                return;
+            }
 
-function showNotification(message, type = 'info') {
-    // Xóa thông báo cũ nếu có
-    $('#notification-container').empty();
-    
-    const notification = $(`
-        <div class="alert alert-${type} alert-dismissible fade show">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `);
-    
-    $('#notification-container').append(notification);
-    
-    // Tăng thời gian hiển thị thông báo
-    setTimeout(() => {
-        notification.fadeOut(500, function() {
-            $(this).remove();
+            const orderId = $(this).data('order-id');
+            const button = $(this);
+            
+            $.ajax({
+                url: `/orders/${orderId}/cancel`,
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Cập nhật UI ngay lập tức
+                        const statusBadge = $(`#status-badge-${orderId}`);
+                        statusBadge.removeClass('bg-warning bg-info bg-success')
+                                 .addClass('bg-danger')
+                                 .text('Đã hủy');
+                        button.remove();
+                    }
+                },
+                error: function(xhr) {
+                    alert('Có lỗi xảy ra khi hủy đơn hàng');
+                }
+            });
         });
-    }, 3000);
-}
+    });
 </script>
 @endpush

@@ -13,6 +13,7 @@ use App\Models\Order_item;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -46,9 +47,23 @@ class OrderController extends Controller
     // Phương thức hiển thị trang checkout
     public function index()
     {
-        $orders = Order::query()->where('user_id', Auth::id())->get();
+        $orders = Order::with('status')
+                      ->where('user_id', Auth::id())
+                      ->orderBy('created_at', 'desc')
+                      ->get();
+
         return view('client.orders.index', compact('orders'));
     }
+
+    public function show($id)
+    {
+        $order = Order::with(['orderItems.product', 'status'])
+                     ->where('user_id', Auth::id())
+                     ->findOrFail($id);
+
+        return view('client.orders.show', compact('order'));
+    }
+
     public function checkout()
     {
         $user = Auth::user();
@@ -185,32 +200,109 @@ class OrderController extends Controller
         return view('client.cart.order');
     }
     
+    public function updateStatus(Request $request, $orderId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $order = Order::with(['status', 'user'])->findOrFail($orderId);
+            $newStatusId = $request->status_id;
+
+            // Kiểm tra quyền cập nhật
+            if (!$this->canUpdateStatus($order, $newStatusId)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể cập nhật trạng thái này'
+                ], 403);
+            }
+
+            // Cập nhật trạng thái
+            $order->status_id = $newStatusId;
+            $order->save();
+
+            // Load lại relationship để đảm bảo dữ liệu mới nhất
+            $order->load(['status', 'user']);
+
+            DB::commit();
+
+            // Broadcast event
+            broadcast(new OrderStatusUpdated($order))->toOthers();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật trạng thái thành công',
+                'order' => $order
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating order status: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi cập nhật trạng thái'
+            ], 500);
+        }
+    }
+
+    /**
+     * Kiểm tra quyền cập nhật trạng thái
+     */
+    private function canUpdateStatus($order, $newStatusId)
+    {
+        // Nếu là admin
+        if (Auth::user()->is_admin) {
+            // Admin chỉ có thể xác nhận (status 2) đơn hàng đang chờ xác nhận (status 1)
+            // Hoặc hoàn thành (status 4) đơn hàng đang giao (status 2)
+            if (($order->status_id == 1 && $newStatusId == 2) || 
+                ($order->status_id == 2 && $newStatusId == 4)) {
+                return true;
+            }
+        }
+        // Nếu là khách hàng
+        else {
+            // Khách hàng chỉ có thể hủy (status 3) đơn hàng đang chờ xác nhận (status 1)
+            if ($order->user_id == Auth::id() && 
+                $order->status_id == 1 && 
+                $newStatusId == 3) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Lấy tên trạng thái theo ID
+     */
+    private function getStatusName($statusId)
+    {
+        $statuses = [
+            1 => 'Chờ xác nhận',
+            2 => 'Đang giao',
+            3 => 'Hủy',
+            4 => 'Hoàn thành'
+        ];
+
+        return $statuses[$statusId] ?? 'Không xác định';
+    }
+
     public function cancel($id)
     {
         try {
             DB::beginTransaction();
             
-            $order = Order::with(['user', 'status'])
-                         ->where('user_id', auth()->id())
+            $order = Order::with(['status', 'user'])
+                         ->where('user_id', Auth::id())
                          ->where('id', $id)
+                         ->where('status_id', 1)
                          ->firstOrFail();
 
-            if ($order->status_id == 3 || $order->status_id == 4) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không thể hủy đơn hàng này'
-                ], 400);
-            }
-
-            $order->status_id = 3; // Trạng thái đã hủy
+            $order->status_id = 3;
             $order->save();
-            
-            // Load lại relationship để đảm bảo dữ liệu mới nhất
-            $order->load(['status', 'user']);
             
             DB::commit();
             
-            // Broadcast event với dữ liệu đầy đủ
             broadcast(new OrderStatusUpdated($order))->toOthers();
             
             return response()->json([
@@ -221,28 +313,12 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error cancelling order: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi hủy đơn hàng'
             ], 500);
         }
-    }
-
-    public function updateStatus(Request $request, Order $order)
-    {
-        $request->validate([
-            'status_id' => 'required|exists:order_statuses,id'
-        ]);
-
-        $order->status_id = $request->status_id;
-        $order->save();
-
-        // Load the status relationship
-        $order->load('status');
-        
-        // Broadcast the event for real-time updates
-        event(new OrderStatusUpdated($order));
-
-        return redirect()->back()->with('success', 'Order status updated successfully');
     }
 }

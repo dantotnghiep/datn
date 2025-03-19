@@ -64,7 +64,6 @@ Route::middleware('auth')->group(function () {
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
-        Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     });
 });
 
@@ -144,6 +143,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
     Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
+    Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
+         ->name('orders.updateStatus');
+    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 });
 
 // Thêm route này cho client hủy đơn hàng
@@ -171,3 +173,15 @@ Route::post('/pusher/auth', function (Request $request) {
 });
 
 Broadcast::routes();
+
+// Route cho admin
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::post('/admin/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
+         ->name('admin.orders.updateStatus');
+});
+
+// Route cho client
+Route::middleware(['auth'])->group(function () {
+    Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
+         ->name('orders.updateStatus');
+});
