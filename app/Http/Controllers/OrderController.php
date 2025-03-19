@@ -199,78 +199,7 @@ class OrderController extends Controller
     {
         return view('client.cart.order');
     }
-    
-    public function updateStatus(Request $request, $orderId)
-    {
-        try {
-            DB::beginTransaction();
-
-            $order = Order::with(['status', 'user'])->findOrFail($orderId);
-            $newStatusId = $request->status_id;
-
-            // Kiểm tra quyền cập nhật
-            if (!$this->canUpdateStatus($order, $newStatusId)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không thể cập nhật trạng thái này'
-                ], 403);
-            }
-
-            // Cập nhật trạng thái
-            $order->status_id = $newStatusId;
-            $order->save();
-
-            // Load lại relationship để đảm bảo dữ liệu mới nhất
-            $order->load(['status', 'user']);
-
-            DB::commit();
-
-            // Broadcast event
-            broadcast(new OrderStatusUpdated($order))->toOthers();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cập nhật trạng thái thành công',
-                'order' => $order
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error updating order status: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi cập nhật trạng thái'
-            ], 500);
-        }
-    }
-
-    /**
-     * Kiểm tra quyền cập nhật trạng thái
-     */
-    private function canUpdateStatus($order, $newStatusId)
-    {
-        // Nếu là admin
-        if (Auth::user()->is_admin) {
-            // Admin chỉ có thể xác nhận (status 2) đơn hàng đang chờ xác nhận (status 1)
-            // Hoặc hoàn thành (status 4) đơn hàng đang giao (status 2)
-            if (($order->status_id == 1 && $newStatusId == 2) || 
-                ($order->status_id == 2 && $newStatusId == 4)) {
-                return true;
-            }
-        }
-        // Nếu là khách hàng
-        else {
-            // Khách hàng chỉ có thể hủy (status 3) đơn hàng đang chờ xác nhận (status 1)
-            if ($order->user_id == Auth::id() && 
-                $order->status_id == 1 && 
-                $newStatusId == 3) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+  
 
     /**
      * Lấy tên trạng thái theo ID
@@ -295,10 +224,10 @@ class OrderController extends Controller
             $order = Order::with(['status', 'user'])
                          ->where('user_id', Auth::id())
                          ->where('id', $id)
-                         ->where('status_id', 1)
+                         ->whereIn('status_id', [1, 2]) // Cho phép hủy đơn hàng chờ xác nhận (1) và đang vận chuyển (2)
                          ->firstOrFail();
 
-            $order->status_id = 3;
+            $order->status_id = 3; // Cập nhật trạng thái thành Hủy
             $order->save();
             
             DB::commit();

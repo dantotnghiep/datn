@@ -124,7 +124,7 @@
                         const statusBadge = $(`#status-badge-${orderId}`);
                         statusBadge.removeClass('bg-warning bg-info bg-success')
                                  .addClass('bg-danger')
-                                 .text('Đã hủy');
+                                 .text('Hủy');
                         button.remove();
                     }
                 },
