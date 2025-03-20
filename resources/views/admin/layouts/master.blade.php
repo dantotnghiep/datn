@@ -17,6 +17,7 @@
     <meta name="keywords" content="admin, dashboard, ecommerce, panel" />
     <meta name="description" content="Carrot - Admin.">
     <meta name="author" content="ashishmaraviya">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     
 
 
@@ -66,6 +67,9 @@
         
     </main>
 
+    <!-- jQuery (đảm bảo sẵn có trước khi các script khác chạy) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
     @include('admin.layouts.partials.js')
     <script type="text/javascript">
  
@@ -97,14 +101,12 @@
                     //Xóa các ký tự gạch ngang ở đầu và cuối
                     slug = '@' + slug + '@';
                     slug = slug.replace(/\@\-|\-\@|\@/gi, '');
-                    //In slug ra textbox có id “slug”
+                    //In slug ra textbox có id "slug"
                 document.getElementById('convert_slug').value = slug;
             }
-             
-    
-       
-       
     </script>
+    
+    @stack('scripts')
 </body>
 
 

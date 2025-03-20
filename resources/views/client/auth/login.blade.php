@@ -59,43 +59,10 @@
                                 <button type="submit" class="btn btn-primary w-100">LOG IN</button>
                             </div>
                         </form>
-
-                        <div class="reg-social-login">
-                            <h5>Or login WITH</h5>
-                            <ul class="social-login-options">
-                                <li><a href="#" class="facebook-login"><i class="flaticon-facebook-app-symbol"></i>
-                                        Sign up with facebook</a></li>
-                                <li><a href="#" class="google-login"><i class="flaticon-pinterest-1"></i> Sign up with
-                                        google</a></li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- ===============  newslatter area start  =============== -->
-    <div class="newslatter-area ml-110 mt-100">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="newslatter-wrap text-center">
-                        <h5>Connect To EG</h5>
-                        <h2 class="newslatter-title">Join Our Newsletter</h2>
-                        <p>Hey you, sign up it only, Get this limited-edition T-shirt Free!</p>
-
-                        <form action="#" method="POST">
-                            <div class="newslatter-form">
-                                <input type="text" placeholder="Type Your Email">
-                                <button type="submit">Send <i class="bi bi-envelope-fill"></i></button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- ===============  newslatter area end  =============== -->
 @endsection

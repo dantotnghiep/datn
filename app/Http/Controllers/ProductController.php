@@ -30,17 +30,30 @@ class ProductController extends Controller
     }
     public function show($id)
     {
-        $product = Product::with(['category', 'images', 'variations.attributes', 'variations.attributeValues'])->find($id);
+        $product = Product::with([
+            'category',
+            'images',
+            'variations.attributeValues.attribute',
+        ])->findOrFail($id);
     
-        if (!$product) {
-            abort(404);
-        }
+        // Lấy ra tất cả value của từng attribute
+        $attributeValues = $product->variations->flatMap(function ($variation) {
+            return $variation->attributeValues;
+        });
     
-        $attributeValues = AttributeValue::all(); // Lấy toàn bộ dữ liệu từ bảng attribute_values
+        $colorValues = $attributeValues
+            ->where('attribute_id', 2)
+            ->unique('value')
+            ->values();
     
-        return view('client.product.product-details', compact('product', 'attributeValues'));
+        $sizeValues = $attributeValues
+            ->where('attribute_id', 1)
+            ->unique('value')
+            ->values();
+    
+        return view('client.product.product-details', compact('product', 'colorValues', 'sizeValues'));
     }
-    
+
     public function index()
     {
         $products = Product::with(['variations', 'images', 'category'])->orderBy('created_at', 'desc')->get();
@@ -87,7 +100,7 @@ class ProductController extends Controller
                 if ($request->has('variations')) {
                     foreach ($request->variations as $variationData) {
                         $variation = Variation::create([
-                            'product_id' => $product->id, 
+                            'product_id' => $product->id,
                             'sku' => $variationData['sku'],
                             'price' => $variationData['price'],
                             'stock' => $variationData['stock'],
@@ -150,7 +163,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0',
             'quantity' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|exists:categphpories,id',
             'description' => 'nullable|string',
             'sale_start' => 'nullable|date',
             'sale_end' => 'nullable|date',

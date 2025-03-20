@@ -11,34 +11,41 @@
                     </div>
                     <div class="sidebar-bottom">
                         <ul class="sidebar-icons">
-                            <li class="user-menu-wrapper">
+                            <li class="user-menu-wrapper position-relative">
                                 <a href="#"><i class="flaticon-user"></i></a>
-                                <div class="submenu-right">
+                                <div class="submenu-right position-absolute" style="left: 70px;">
                                     @if (Auth::check())
-                                    <a href="{{ route('profile') }}" class="submenu-item">
-                                        <i class="bi bi-person me-2"></i>Profile</a>
-                                    <a href="{{ route('profile') }}" class="submenu-item">
-                                        <i class="bi bi-bag me-2"></i>Orders</a>
-                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="submenu-item border-0 bg-transparent w-100 text-start">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                        </button>
-                                    </form>
+
+                                        <div class="submenu-item-wrapper">
+                                            <a href="{{ route('profile') }}" class="submenu-item">
+                                                <i class="bi bi-person me-2"></i>Profile</a>
+                                            <a href="{{ route('orders.index') }}" class="submenu-item">
+                                                <i class="bi bi-bag me-2"></i>Orders</a>
+                                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="submenu-item border-0 bg-transparent w-100 text-start">
+                                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                                </button>
+                                            </form>
+                                        </div>
                                     @else
-                                    <a href="{{ route('login') }}" class="submenu-item">
-                                        <i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
-                                    <a href="{{ route('register') }}" class="submenu-item">
-                                        <i class="bi bi-person-plus me-2"></i>Register</a>
+                                        <div class="submenu-item-wrapper">
+                                            <a href="{{ route('login') }}" class="submenu-item">
+                                                <i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+                                            <a href="{{ route('register') }}" class="submenu-item">
+                                                <i class="bi bi-person-plus me-2"></i>Register</a>
+                                        </div>
+
                                     @endif
                                 </div>
                             </li>
                             <li><a href="product.html"><i class="flaticon-heart"></i></a></li>
                             <li class="cart-icon">
                                 <i class="flaticon-shopping-cart"></i>
-                                @if($cartCount > 0)
+                                {{-- @if($cartCount > 0)
                                     <div class="cart-count"><span>{{ $cartCount }}</span></div>
-                                @endif
+                                @endif --}}
                             </li>
                         </ul>
                     </div>
@@ -125,13 +132,10 @@
                 <span>{{ number_format($total) }} VND</span>
             </div>
             <div class="cart-btns">
-<<<<<<< HEAD
-                <a href="checkout" class="cart-btn checkout">CHECKOUT</a>
-                <a href="cart" class="cart-btn cart">VIEW CART</a>
-=======
+
                 <a href="" class="cart-btn checkout">CHECKOUT</a>
                 <a href="{{ route('cart.index') }}" class="cart-btn cart">VIEW CART</a>
->>>>>>> 7a64860aa616456782c8ebf544e8fb5c23ab8eb8
+
             </div>
 
             @if($total < 1000000) {{-- Giả sử free ship cho đơn > 1 triệu --}}
