@@ -57,9 +57,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
 
-
-    Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout.index');
-    Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
@@ -143,6 +140,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
     Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
+
+    // Thêm route cho checkout
+    Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
          ->name('orders.updateStatus');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
@@ -160,12 +161,12 @@ Route::post('/pusher/auth', function (Request $request) {
             config('broadcasting.connections.pusher.app_id'),
             config('broadcasting.connections.pusher.options')
         );
-    
+
         $channel = $request->input('channel_name');
         $socket_id = $request->input('socket_id');
-    
+
         $auth = $pusher->socket_auth($channel, $socket_id);
-    
+
         return response($auth);
     } else {
         abort(403);

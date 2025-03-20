@@ -64,45 +64,6 @@ class OrderController extends Controller
         return view('client.orders.show', compact('order'));
     }
 
-    public function checkout()
-    {
-        $user = Auth::user();
-        $cartItems = Cart::where('user_id', auth()->id())
-            ->with(['variation.product.images']) // Nạp cả product và images
-            ->get();
-
-        if ($cartItems->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống!');
-        }
-
-        // Tính tổng tiền trước giảm giá
-        $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
-
-        // Khởi tạo biến giảm giá
-        $discountAmount = 0;
-        $finalTotal = $subtotal; // Đảm bảo $finalTotal luôn được khởi tạo
-        $discountCode = session('discount_code');
-
-        // Kiểm tra và áp dụng giảm giá
-        if ($discountCode) {
-            $discount = Discount::where('code', $discountCode)
-                ->where('startDate', '<=', now())
-                ->where('endDate', '>', now())
-                ->where(function ($query) {
-                    $query->whereNull('maxUsage')
-                        ->orWhereRaw('maxUsage > usageCount');
-                })
-                ->first();
-
-            if ($discount && $subtotal >= $discount->minOrderValue) {
-                $discountAmount = min(($subtotal * $discount->sale) / 100, $discount->maxDiscount ?? INF);
-                $finalTotal = $subtotal - $discountAmount;
-            }
-        }
-        // Truyền dữ liệu vào view
-        return view('client.cart.checkout', compact('user', 'cartItems', 'subtotal', 'finalTotal', 'discountAmount', 'discountCode'));
-    }
-
 
     public function store(Request $request)
     {
@@ -199,7 +160,7 @@ class OrderController extends Controller
     {
         return view('client.cart.order');
     }
-  
+
 
     /**
      * Lấy tên trạng thái theo ID
@@ -220,7 +181,7 @@ class OrderController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $order = Order::with(['status', 'user'])
                          ->where('user_id', Auth::id())
                          ->where('id', $id)
@@ -229,11 +190,11 @@ class OrderController extends Controller
 
             $order->status_id = 3; // Cập nhật trạng thái thành Hủy
             $order->save();
-            
+
             DB::commit();
-            
+
             broadcast(new OrderStatusUpdated($order))->toOthers();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Đơn hàng đã được hủy thành công',
@@ -243,7 +204,7 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error cancelling order: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi hủy đơn hàng'
