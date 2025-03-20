@@ -26,37 +26,37 @@
                     </div>
                     <ul class="nav-item-list">
 
-                        <a class="active" href="{{ route('client.index') }}">Home</a>
+                        <a class="active" href="{{ route('client.index') }}">Trang Chủ</a>
                         <i class="fl flaticon-plus">+</i>
 
 
                         </li>
 
 
-                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="about.html">Sản Phẩm Chính</a></li>
                         <li class="has-child-menu">
-                            <a href="javascript:void(0)">Shop</a>
+                            <a href="javascript:void(0)">Cửa hàng</a>
                             <i class="fl flaticon-plus">+</i>
                             <ul class="sub-menu">
-                                <li><a href="{{ route('client.product.list-product') }}">Products</a></li>
+                                <li><a href="{{ route('client.product.list-product') }}">Sản phẩm</a></li>
                                 <li>
                                     {{-- <a href="{{ route('client.product.product-details') }}">Product Details</a> --}}
                                 </li>
                             </ul>
                         </li>
                         <li class="has-child-menu">
-                            <a href="javascript:void(0)">Pages</a>
+                            <a href="javascript:void(0)">Trang</a>
                             <i class="fl flaticon-plus">+</i>
                             <ul class="sub-menu">
-                                <li><a href="cart.html">Cart</a></li>
-                                <li><a href="checkout.html">Checkout</a></li>
-                                <li><a href="login.html">Login</a></li>
-                                <li><a href="register.html">Register</a></li>
-                                <li><a href="profile.html">Profile</a></li>
-                                <li><a href="dashboard.html">Dashboard</a></li>
-                                <li><a href="order.html">Orders</a></li>
-                                <li><a href="setting.html">Setting</a></li>
-                                <li><a href="coming-soon.html">Comming Soon</a></li>
+                                <li><a href="cart.html">Giỏ hàng</a></li>
+                                <li><a href="checkout.html">Thanh toán</a></li>
+                                <li><a href="login.html">Đăng nhập</a></li>
+                                <li><a href="register.html">Đăng ký</a></li>
+                                <li><a href="profile.html">Trang cá nhân</a></li>
+                                <li><a href="dashboard.html">Bảng điều khiển</a></li>
+                                <li><a href="order.html">Đơn hàng</a></li>
+                                <li><a href="setting.html">Cài đặt</a></li>
+                                <li><a href="coming-soon.html">Sắp ra mắt</a></li>
                                 <li><a href="faq.html">FAQ</a></li>
                                 <li><a href="404.html">404</a></li>
                             </ul>
@@ -102,15 +102,14 @@
                         <i class="flaticon-phone-call"></i>
                     </div>
                     <div class="contact-info">
-                        <p>Hot Line Number</p>
                         <a href="tel:+8801761111456">+880 176 1111 456</a>
                     </div>
                 </div>
             </div>
             <div class="col-xl-2 col-2 d-none d-xl-flex p-0 align-items-center justify-content-center">
                 <div class="nav-right text-center">
-                    <p class="text-uppercase">BLACK FRIDAY</p>
-                    <h5>All Item up to 20% Off!</h5>
+                    
+                    <h5>Giảm giá sản phẩm tới 20%</h5>
                 </div>
             </div>
         </div>
