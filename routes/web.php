@@ -37,20 +37,14 @@ Route::post('/forgot-password', [App\Http\Controllers\Client\AuthController::cla
 Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthController::class, 'showResetPasswordForm'])->name('reset-password');
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-    Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
-    Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
-
-    Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout.index');
-    Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
-    Route::get('/order', [OrderController::class, 'order'])->name('order');
-    Route::prefix('orders')->group(function () {
-        Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
-    });
+Route::middleware(['auth'])->group(function () {
+    Route::resource('/cart', CartController::class);
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add'); // Thêm route này
+    Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
+    Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 });
+
 
 // Admin Routes
 Route::prefix('admin')->group(function () {
