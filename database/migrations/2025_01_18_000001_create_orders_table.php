@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('status_id')->constrained('order_statuses')->onDelete('cascade'); 
+            $table->foreignId('status_id')->constrained('order_statuses')->onDelete('cascade');
             $table->string('order_code')->unique();
             $table->text('user_name');
             $table->text('user_phone');
@@ -19,6 +19,8 @@ return new class extends Migration
             $table->decimal('total_amount', 10, 2);
             $table->text('shipping_address');
             $table->string('payment_method');
+            $table->string('discount_code')->nullable();
+            $table->decimal('discount_amount', 10, 2)->default(0);
             $table->timestamps();
         });
     }
@@ -27,4 +29,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('orders');
     }
-}; 
+};

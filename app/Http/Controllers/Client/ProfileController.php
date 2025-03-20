@@ -16,6 +16,7 @@ class ProfileController extends Controller
 
     public function show()
     {
+
         return view('client.auth.profile');
     }
 
@@ -23,7 +24,6 @@ class ProfileController extends Controller
     {
         try {
             $validated = $request->validated();
-            
             User::where('id', Auth::id())->update([
                 'name' => $validated['name'],
                 'phone' => $validated['phone'],

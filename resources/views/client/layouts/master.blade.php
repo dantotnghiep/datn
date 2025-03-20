@@ -8,11 +8,12 @@
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @include('client.layouts.partials.css')
 </head>
 
 <body>
-    
+
     @include('client.layouts.partials.lelf-navbar')
     <header>
         @include('client.layouts.partials.header')
@@ -22,8 +23,13 @@
 
     @include('client.layouts.partials.footer')
 
+    <!-- jQuery (đảm bảo sẵn có trước khi các script khác chạy) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
     <!--Javascript -->
     @include('client.layouts.partials.js')
+    
+    @stack('scripts')
 </body>
 
 <!-- Mirrored from demo-egenslab.b-cdn.net/html/eg-shop-fashion/v1/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 11 Jan 2025 13:59:07 GMT -->

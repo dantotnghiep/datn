@@ -11,25 +11,30 @@
                     </div>
                     <div class="sidebar-bottom">
                         <ul class="sidebar-icons">
-                            <li class="user-menu-wrapper">
+                            <li class="user-menu-wrapper position-relative">
                                 <a href="#"><i class="flaticon-user"></i></a>
-                                <div class="submenu-right">
+                                <div class="submenu-right position-absolute" style="left: 70px;">
                                     @if (Auth::check())
-                                        <a href="{{ route('profile') }}" class="submenu-item">
-                                            <i class="bi bi-person me-2"></i>Profile</a>
-                                        <a href="{{ route('profile') }}" class="submenu-item">
-                                            <i class="bi bi-bag me-2"></i>Orders</a>
-                                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="submenu-item border-0 bg-transparent w-100 text-start">
-                                                <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                            </button>
-                                        </form>
+                                        <div class="submenu-item-wrapper">
+                                            <a href="{{ route('profile') }}" class="submenu-item">
+                                                <i class="bi bi-person me-2"></i>Profile</a>
+                                            <a href="{{ route('orders.index') }}" class="submenu-item">
+                                                <i class="bi bi-bag me-2"></i>Orders</a>
+                                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="submenu-item border-0 bg-transparent w-100 text-start">
+                                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                                </button>
+                                            </form>
+                                        </div>
                                     @else
-                                        <a href="{{ route('login') }}" class="submenu-item">
-                                            <i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
-                                        <a href="{{ route('register') }}" class="submenu-item">
-                                            <i class="bi bi-person-plus me-2"></i>Register</a>
+                                        <div class="submenu-item-wrapper">
+                                            <a href="{{ route('login') }}" class="submenu-item">
+                                                <i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+                                            <a href="{{ route('register') }}" class="submenu-item">
+                                                <i class="bi bi-person-plus me-2"></i>Register</a>
+                                        </div>
                                     @endif
                                 </div>
                             </li>
@@ -270,7 +275,7 @@
         min-width: 200px;
         border-radius: 12px;
         padding: 15px 0;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     }
 
     .user-menu-wrapper:hover .submenu-right {

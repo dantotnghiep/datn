@@ -1,6 +1,6 @@
 @extends('client.layouts.master')
 @section('content')
-@include('client.layouts.partials.lelf-navbar')
+    @include('client.layouts.partials.lelf-navbar')
 
     <!-- ===============peoduct area start=============== -->
 
@@ -188,7 +188,8 @@
                                             <div class="product-card-m d-flex align-content-center">
                                                 <div class="product-img-m">
                                                     <a href="product-details.html"><img
-                                                            src="/client/assets/images/product/pm1.png" alt=""></a>
+                                                            src="/client/assets/images/product/pm1.png"
+                                                            alt=""></a>
                                                     <div class="product-cart-icon"><a href="#"><i
                                                                 class="flaticon-shopping-cart"></i></a></div>
                                                 </div>
@@ -213,7 +214,8 @@
                                             <div class="product-card-m d-flex align-items-center">
                                                 <div class="product-img-m">
                                                     <a href="product-details.html"><img
-                                                            src="/client/assets/images/product/pm-4.png" alt=""></a>
+                                                            src="/client/assets/images/product/pm-4.png"
+                                                            alt=""></a>
                                                     <div class="product-cart-icon"><a href="#"><i
                                                                 class="flaticon-shopping-cart"></i></a></div>
                                                 </div>
@@ -238,7 +240,8 @@
                                             <div class="product-card-m d-flex align-items-center">
                                                 <div class="product-img-m">
                                                     <a href="product-details.html"><img
-                                                            src="/client/assets/images/product/pm-5.png" alt=""></a>
+                                                            src="/client/assets/images/product/pm-5.png"
+                                                            alt=""></a>
                                                     <div class="product-cart-icon"><a href="#"><i
                                                                 class="flaticon-shopping-cart"></i></a></div>
                                                 </div>
@@ -263,7 +266,8 @@
                                             <div class="product-card-m d-flex align-items-center">
                                                 <div class="product-img-m">
                                                     <a href="product-details.html"><img
-                                                            src="/client/assets/images/product/pm-6.png" alt=""></a>
+                                                            src="/client/assets/images/product/pm-6.png"
+                                                            alt=""></a>
                                                     <div class="product-cart-icon"><a href="#"><i
                                                                 class="flaticon-shopping-cart"></i></a></div>
                                                 </div>
@@ -328,7 +332,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl1.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl2.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl2.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -361,7 +366,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl4.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl3.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl3.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
                                         <span class="stock-out">-20%</span>
@@ -394,7 +400,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl5.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl4.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl4.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
                                         <span class="stock-out">Sold Out</span>
@@ -426,7 +433,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl7.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl8.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl8.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -458,7 +466,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl10.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl9.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl9.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
                                         <span class="new">New</span>
@@ -491,7 +500,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl12.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl11.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl11.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -524,7 +534,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl12.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl1.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl1.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -557,7 +568,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl13.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl4.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl4.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -590,7 +602,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl14.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl3.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl3.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
                                         <span class="new">New</span>
@@ -623,7 +636,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl15.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl6.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl6.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -655,7 +669,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl1.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl2.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl2.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -688,7 +703,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl4.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl3.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl3.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
                                         <span class="stock-out">-20%</span>
@@ -721,7 +737,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl5.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl4.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl4.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
                                         <span class="stock-out">Sold Out</span>
@@ -754,7 +771,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl7.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl8.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl8.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -787,7 +805,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl10.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl1.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl1.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
                                         <span class="new">New</span>
@@ -820,7 +839,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl12.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl11.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl11.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -852,7 +872,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl16.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl1.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl1.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -884,7 +905,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl13.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl4.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl4.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 
@@ -916,7 +938,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl14.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl3.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl3.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
                                         <span class="new">New</span>
@@ -948,7 +971,8 @@
                                 <div class="product-img">
                                     <a href="product-details.html">
                                         <img src="/client/assets/images/product/p-dbl15.png" alt="">
-                                        <img src="/client/assets/images/product/p-dbl6.png" alt="" class="hover-img">
+                                        <img src="/client/assets/images/product/p-dbl6.png" alt=""
+                                            class="hover-img">
                                     </a>
                                     <div class="product-lavels">
 

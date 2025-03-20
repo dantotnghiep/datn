@@ -5,6 +5,22 @@
     <!-- =============== Cart area start =============== -->
     <div class="cart-area mt-100 ml-110">
         <div class="container">
+            <!-- Add this alert section -->
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            <!-- End alert section -->
+
             <div class="row justify-content-center">
                 <div class="col-xxl-12 col-xl-12 col-md-12 col-sm-8">
                     @if($cartItems->count() > 0)
@@ -83,10 +99,50 @@
                         <div class="col-xxl-4 col-lg-4">
                             <div class="cart-coupon-input">
                                 <h5 class="coupon-title">Coupon Code</h5>
-                                <form class="coupon-input d-flex align-items-center">
-                                    <input type="text" placeholder="Coupon Code">
-                                    <button type="submit">Apply Code</button>
+
+                                <!-- Debug information -->
+                                @php
+                                    $availableDiscounts = $discounts->filter(function($discount) {
+                                        return now()->between($discount->startDate, $discount->endDate);
+                                    });
+                                @endphp
+
+                                @if($availableDiscounts->isEmpty())
+                                    <div class="alert alert-info">Không có mã giảm giá nào khả dụng</div>
+                                @endif
+
+                                <form action="{{ route('cart.apply-coupon') }}" method="POST" class="coupon-input">
+                                    @csrf
+                                    <select name="discount_code" class="form-select" style="min-width: 200px;">
+                                        <option value="">-- Chọn mã giảm giá --</option>
+                                        @foreach($discounts as $discount)
+                                            <option value="{{ $discount->code }}">
+                                                {{ $discount->code }}
+                                                (Giảm {{ number_format($discount->sale) }}%
+                                                @if($discount->minOrderValue > 0)
+                                                    - Đơn tối thiểu {{ number_format($discount->minOrderValue) }}đ
+                                                @endif
+                                                )
+                                                - HSD: {{ $discount->endDate->format('d/m/Y') }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <button type="submit" class="btn btn-primary">Áp dụng</button>
                                 </form>
+
+                                <!-- Thêm debug info -->
+                                <div style="display: none;">
+                                    <p>Debug Info:</p>
+                                    <p>Current time: {{ now() }}</p>
+                                    <p>Available discounts: {{ $discounts->count() }}</p>
+                                    @foreach($discounts as $discount)
+                                        <p>
+                                            Code: {{ $discount->code }} <br>
+                                            Start: {{ $discount->startDate }} <br>
+                                            End: {{ $discount->endDate }}
+                                        </p>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                         <div class="col-xxl-8 col-lg-8">
@@ -97,20 +153,22 @@
                                         <td></td>
                                         <td class="tt-right">{{ number_format($total) }} VND</td>
                                     </tr>
+                                    @if(isset($discountAmount) && $discountAmount > 0)
                                     <tr>
-                                        <td class="tt-left">Shipping Fee</td>
+                                        <td class="tt-left">Discount ({{ session('discount_code') }})</td>
                                         <td></td>
-                                        <td class="tt-right">Free</td>
+                                        <td class="tt-right">-{{ number_format($discountAmount) }} VND</td>
                                     </tr>
+                                    @endif
                                     <tr>
                                         <td class="tt-left">Total</td>
                                         <td></td>
-                                        <td class="tt-right"><strong>{{ number_format($total) }} VND</strong></td>
+                                        <td class="tt-right"><strong>{{ number_format($finalTotal) }} VND</strong></td>
                                     </tr>
                                 </tbody>
                             </table>
                             <div class="cart-proceed-btns">
-                                <a href="" class="cart-proceed">Proceed to Checkout</a>
+                                <a href="{{route('checkout.index')}}" class="cart-proceed">Proceed to Checkout</a>
                                 <a href="{{ route('client.index') }}" class="continue-shop">Continue Shopping</a>
                             </div>
                         </div>
