@@ -41,6 +41,7 @@ class AttributeValueController extends Controller
         AttributeValue::create([
             'attribute_id' => $request->attribute_id,
             'value' => $request->value,
+            'slug' => Str::slug($request->value),
         ]);
         return redirect()->route('admin.attribute-values')->with('success','Thêm giá tri thuộc tính thành công');
     }

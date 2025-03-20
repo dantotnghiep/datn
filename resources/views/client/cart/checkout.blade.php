@@ -98,6 +98,35 @@
                         </ul>
                     </div>
                 </div>
+                <form class="payment-form">
+                    <div class="payment-methods">
+                        <div class="form-check payment-check">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                            <label class="form-check-label" for="flexRadioDefault1">
+                                Check payments
+                            </label>
+                            <p>Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</p>
+                            
+                          </div>
+                          <div class="form-check payment-check">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+                            <label class="form-check-label" for="flexRadioDefault2">
+                                Cash on delivery
+                            </label>
+                            <p>Pay with cash upon delivery.</p>
+                          </div>
+                          <div class="form-check payment-check paypal">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3" checked>
+                            <label class="form-check-label" for="flexRadioDefault3">
+                                PayPal
+                            </label>
+                            <img src="assets/images/payment/payment-cards.png" alt="">
+                            <a href="#" class="about-paypal">What is PayPal</a>
+                          </div>
+                    </div>
+
+                   
+                </form>
             </div>
         </div>
     </div>

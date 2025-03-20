@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderCancelled;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\Discount;
+use App\Models\Order_cancellation;
 use App\Models\Order_item;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -41,6 +45,25 @@ class OrderController extends Controller
     //     Cart::where('user_id', $userId)->delete();
     // });
     // Phương thức hiển thị trang checkout
+    public function index()
+    {
+        $orders = Order::with('status')
+                      ->where('user_id', Auth::id())
+                      ->orderBy('created_at', 'desc')
+                      ->get();
+
+        return view('client.orders.index', compact('orders'));
+    }
+
+    public function show($id)
+    {
+        $order = Order::with(['orderItems.product', 'status'])
+                     ->where('user_id', Auth::id())
+                     ->findOrFail($id);
+
+        return view('client.orders.show', compact('order'));
+    }
+
     public function checkout()
     {
         $user = Auth::user();
@@ -173,8 +196,58 @@ class OrderController extends Controller
     }
 
     public function order()
-{
-    return view('client.cart.order');
-}
+    {
+        return view('client.cart.order');
+    }
+  
 
+    /**
+     * Lấy tên trạng thái theo ID
+     */
+    private function getStatusName($statusId)
+    {
+        $statuses = [
+            1 => 'Chờ xác nhận',
+            2 => 'Đang giao',
+            3 => 'Hủy',
+            4 => 'Hoàn thành'
+        ];
+
+        return $statuses[$statusId] ?? 'Không xác định';
+    }
+
+    public function cancel($id)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $order = Order::with(['status', 'user'])
+                         ->where('user_id', Auth::id())
+                         ->where('id', $id)
+                         ->whereIn('status_id', [1, 2]) // Cho phép hủy đơn hàng chờ xác nhận (1) và đang vận chuyển (2)
+                         ->firstOrFail();
+
+            $order->status_id = 3; // Cập nhật trạng thái thành Hủy
+            $order->save();
+            
+            DB::commit();
+            
+            broadcast(new OrderStatusUpdated($order))->toOthers();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Đơn hàng đã được hủy thành công',
+                'order' => $order
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error cancelling order: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi hủy đơn hàng'
+            ], 500);
+        }
+    }
 }
