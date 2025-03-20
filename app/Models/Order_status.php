@@ -12,7 +12,13 @@ class Order_status extends Model
     protected $table = 'order_statuses';
     protected $fillable = ['name', 'description'];
 
-    public function orderStatusTimes() {
+    public function orderStatusTimes()
+    {
         return $this->hasMany(Order_status_time::class);
     }
-} 
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+}

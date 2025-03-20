@@ -53,8 +53,6 @@ class ProductController extends Controller
     
         return view('client.product.product-details', compact('product', 'colorValues', 'sizeValues'));
     }
-    
-    
     public function index()
     {
         $products = Product::with(['variations', 'images', 'category'])->orderBy('created_at', 'desc')->get();
@@ -101,7 +99,7 @@ class ProductController extends Controller
                 if ($request->has('variations')) {
                     foreach ($request->variations as $variationData) {
                         $variation = Variation::create([
-                            'product_id' => $product->id, 
+                            'product_id' => $product->id,
                             'sku' => $variationData['sku'],
                             'price' => $variationData['price'],
                             'stock' => $variationData['stock'],
@@ -164,7 +162,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0',
             'quantity' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|exists:categphpories,id',
             'description' => 'nullable|string',
             'sale_start' => 'nullable|date',
             'sale_end' => 'nullable|date',
