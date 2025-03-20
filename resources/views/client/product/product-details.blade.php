@@ -324,9 +324,9 @@ $variations = $product->variations
             }
 
             // 👉 Nếu hết hàng thì thông báo
-            if (stock <= 0) {
-                showToast('Sản phẩm đã hết hàng!');
-            }
+            // if (stock <= 0) {
+            //     showToast('Sản phẩm đã hết hàng!');
+            // }
         }
     }
 
