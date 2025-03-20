@@ -206,7 +206,7 @@
                                     </div>
                                     <button type="submit" class="pd-add-cart">Add to cart</button>
                                 </li>
-                                <li class="pd-type">Product Type: <span>{{ $product->category->name }}</span></li>
+                                <li class="pd-type">Productt Type: <span>{{ $product->category->name }}</span></li>
                                 <li class="pd-type">Categories: <span>{{ $product->category->name }}</span></li>
                                 <li class="pd-type">Available: <span id="js-stock">{{
                                         $product->variations->first()->stock }}</span></li>
