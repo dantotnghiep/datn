@@ -522,6 +522,7 @@
                 input.addEventListener('change', updatePrice);
             });
 
+            
             updatePrice(); // Lần đầu load
         });
     </script>

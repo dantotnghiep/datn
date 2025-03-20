@@ -16,7 +16,7 @@ class AttributeValueController extends Controller
     public function index()
     {
         $attributeValues = AttributeValue::with('attribute')->get();
-        $attributes = Attribute::all(); // Lấy tất cả AttributeValues kèm Attribute liên kết
+        $attributes = Attribute::all();
         return view('admin.attribute.attribute-values', compact('attributeValues','attributes'));
     }
 
@@ -25,7 +25,7 @@ class AttributeValueController extends Controller
      */
     public function create()
     {
-        $attributes = Attribute::all(); // Lấy danh sách tất cả Attributes
+        $attributes = Attribute::all();
         return view('admin.attribute.attribute-values', compact('attributes'));
     }
 
