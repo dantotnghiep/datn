@@ -23,10 +23,21 @@ class Discount extends Model
     ];
 
     protected $casts = [
-        'startDate' => 'datetime',
-        'endDate' => 'datetime',
+        'startDate' => 'datetime:Y-m-d H:i:s',
+        'endDate' => 'datetime:Y-m-d H:i:s',
         'sale' => 'decimal:2',
         'minOrderValue' => 'decimal:2',
         'maxDiscount' => 'decimal:2',
     ];
+
+    // Thêm accessor để format thời gian
+    public function getStartDateAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value);
+    }
+
+    public function getEndDateAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value);
+    }
 }
