@@ -33,8 +33,6 @@ class OrderController extends Controller
                 'payment_method' => 'required|in:cod,vnpay',
             ]);
 
-            \DB::beginTransaction();
-
             // 2. Lấy thông tin giỏ hàng
             $cartItems = Cart::where('user_id', auth()->id())->get();
             if ($cartItems->isEmpty()) {
@@ -46,56 +44,56 @@ class OrderController extends Controller
                 return $item->price * $item->quantity;
             });
 
-            // 4. Tạo đơn hàng
+            // 4. Xử lý theo phương thức thanh toán
+            if ($validated['payment_method'] === 'vnpay') {
+                // Lưu thông tin đơn hàng vào session để dùng sau khi thanh toán
+                session([
+                    'pending_order' => [
+                        'user_name' => $validated['user_name'],
+                        'user_phone' => $validated['user_phone'],
+                        'user_email' => $validated['user_email'],
+                        'shipping_address' => $validated['shipping_address'],
+                        'payment_method' => 'vnpay',
+                        'cart_items' => $cartItems->toArray(),
+                        'total_amount' => $totalAmount
+                    ]
+                ]);
+
+                // Tạo URL thanh toán VNPay với mã đơn hàng tạm thời
+                $tempOrderCode = 'TEMP_' . time() . '_' . auth()->id();
+                $vnpayUrl = $this->vnpayService->createPaymentUrl([
+                    'order_code' => $tempOrderCode,
+                    'total_amount' => $totalAmount,
+                ]);
+
+                return redirect($vnpayUrl);
+            }
+
+            // Xử lý COD (giữ nguyên logic cũ)
+            \DB::beginTransaction();
+
             $order = Order::create([
                 'user_id' => auth()->id(),
                 'user_name' => $validated['user_name'],
                 'user_phone' => $validated['user_phone'],
                 'user_email' => $validated['user_email'],
                 'shipping_address' => $validated['shipping_address'],
-                'payment_method' => $validated['payment_method'],
+                'payment_method' => 'cod',
                 'total_amount' => $totalAmount,
-                'status_id' => 1, // Trạng thái chờ thanh toán
+                'status_id' => 1,
             ]);
 
-            // 5. Tạo chi tiết đơn hàng
             foreach ($cartItems as $item) {
                 Order_item::create([
                     'order_id' => $order->id,
-                    'variation_id' => $item->variation_id,
+                    'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                 ]);
             }
 
-            // 6. Xử lý theo phương thức thanh toán
-            if ($validated['payment_method'] === 'vnpay') {
-                // Đảm bảo order_code được tạo
-                if (empty($order->order_code)) {
-                    $order->order_code = 'ORD' . time() . rand(1000,9999);
-                    $order->save();
-                }
-
-                $vnpayUrl = $this->vnpayService->createPaymentUrl([
-                    'order_code' => $order->order_code,
-                    'total_amount' => (int)$totalAmount,
-                    'order_desc' => 'Thanh toan don hang ' . $order->order_code
-                ]);
-
-                \DB::commit();
-
-                // Thêm debug log
-                \Log::info('Redirecting to VNPay', [
-                    'order_code' => $order->order_code,
-                    'total_amount' => $totalAmount,
-                    'vnpay_url' => $vnpayUrl
-                ]);
-
-                return redirect($vnpayUrl);
-            }
-
-            // Nếu là COD
             Cart::where('user_id', auth()->id())->delete();
+
             \DB::commit();
 
             return redirect()->route('orders.show', $order->id)
@@ -104,7 +102,7 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             \DB::rollBack();
             \Log::error('Order creation failed: ' . $e->getMessage());
-            return back()->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage());
+            return back()->with('error', 'Có lỗi xảy ra khi đặt hàng: ' . $e->getMessage());
         }
     }
 
@@ -158,39 +156,65 @@ class OrderController extends Controller
     public function vnpayReturn(Request $request)
     {
         try {
-            if ($this->vnpayService->validateResponse($request)) {
-                $orderId = $request->vnp_TxnRef;
-                $order = Order::where('order_code', $orderId)->firstOrFail();
+            \Log::info('VNPay Callback Received', $request->all());
 
-                if ($request->vnp_ResponseCode == '00') {
-                    // Thanh toán thành công
-                    $order->update([
-                        'status_id' => 2, // Đã thanh toán
-                    ]);
-
-                    // Xóa giỏ hàng
-                    Cart::where('user_id', auth()->id())->delete();
-
-                    return redirect()->route('orders.show', $order->id)
-                        ->with('success', 'Thanh toán thành công!');
-                } else {
-                    // Thanh toán thất bại
-                    $order->update([
-                        'status_id' => 6, // Hủy
-                    ]);
-
-                    return redirect()->route('orders.show', $order->id)
-                        ->with('error', 'Thanh toán thất bại! Mã lỗi: ' . $request->vnp_ResponseCode);
-                }
+            if (!$this->vnpayService->validateResponse($request)) {
+                return redirect()->route('cart.index')
+                    ->with('error', 'Chữ ký không hợp lệ!');
             }
 
-            return redirect()->route('home')
-                ->with('error', 'Chữ ký không hợp lệ!');
+            if ($request->vnp_ResponseCode != '00') {
+                return redirect()->route('cart.index')
+                    ->with('error', 'Thanh toán thất bại! Vui lòng thử lại.');
+            }
+
+            // Lấy thông tin đơn hàng từ session
+            $pendingOrder = session('pending_order');
+            if (!$pendingOrder) {
+                return redirect()->route('cart.index')
+                    ->with('error', 'Không tìm thấy thông tin đơn hàng!');
+            }
+
+            \DB::beginTransaction();
+
+            // Tạo đơn hàng mới
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'user_name' => $pendingOrder['user_name'],
+                'user_phone' => $pendingOrder['user_phone'],
+                'user_email' => $pendingOrder['user_email'],
+                'shipping_address' => $pendingOrder['shipping_address'],
+                'payment_method' => 'vnpay',
+                'total_amount' => $pendingOrder['total_amount'],
+                'status_id' => 1, // Pending
+            ]);
+
+            // Tạo chi tiết đơn hàng
+            foreach ($pendingOrder['cart_items'] as $item) {
+                Order_item::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            }
+
+            // Xóa giỏ hàng
+            Cart::where('user_id', auth()->id())->delete();
+
+            // Xóa thông tin đơn hàng tạm từ session
+            session()->forget('pending_order');
+
+            \DB::commit();
+
+            return redirect()->route('orders.show', $order->id)
+                ->with('success', 'Đặt hàng và thanh toán thành công!');
 
         } catch (\Exception $e) {
+            \DB::rollBack();
             \Log::error('VNPay return processing failed: ' . $e->getMessage());
-            return redirect()->route('home')
-                ->with('error', 'Có lỗi xảy ra khi xử lý kết quả thanh toán');
+            return redirect()->route('cart.index')
+                ->with('error', 'Có lỗi xảy ra khi xử lý thanh toán');
         }
     }
 }

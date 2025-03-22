@@ -144,16 +144,15 @@ Route::middleware(['auth'])->group(function () {
     // Routes cho checkout và thanh toán
     Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('/cart/process-checkout', [OrderController::class, 'store'])->name('cart.process-checkout');
-
-    // Thêm route cho Stripe
-    Route::post('/stripe/create-payment-intent', [OrderController::class, 'processStripePayment'])
-        ->name('stripe.create-payment-intent');
-
+    Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
-         ->name('orders.updateStatus');
+        ->name('orders.updateStatus');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/payment/success', [OrderController::class, 'paymentSuccess'])->name('payment.success');
+    Route::post('/process-stripe-payment', [OrderController::class, 'processStripePayment'])->name('process.stripe.payment');
+    Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
+
 });
 
 // Thêm route này cho client hủy đơn hàng
@@ -185,13 +184,12 @@ Broadcast::routes();
 // Route cho admin
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
-         ->name('admin.orders.updateStatus');
+        ->name('admin.orders.updateStatus');
 });
 
 // Route cho client
 Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
-         ->name('orders.updateStatus');
+        ->name('orders.updateStatus');
 });
 
-Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
