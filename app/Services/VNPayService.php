@@ -58,7 +58,7 @@ class VNPayService
         $inputData = [];
         foreach ($request->all() as $key => $value) {
             if (substr($key, 0, 4) == "vnp_") {
-                $inputData[$key] = $value;
+                $inputData[$key] = urldecode($value);
             }
         }
 
@@ -67,15 +67,15 @@ class VNPayService
         unset($inputData['vnp_SecureHashType']);
         ksort($inputData);
 
-        $hashData = "";
         $i = 0;
+        $hashData = "";
         foreach ($inputData as $key => $value) {
-            if ($i == 0) {
-                $hashData .= $key . "=" . $value;
+            if ($i == 1) {
+                $hashData .= '&' . urlencode($key) . "=" . urlencode($value);
             } else {
-                $hashData .= '&' . $key . "=" . $value;
+                $hashData .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
             }
-            $i++;
         }
 
         $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);

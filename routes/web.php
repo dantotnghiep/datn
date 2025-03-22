@@ -149,8 +149,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('orders.updateStatus');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-    Route::get('/payment/success', [OrderController::class, 'paymentSuccess'])->name('payment.success');
-    Route::post('/process-stripe-payment', [OrderController::class, 'processStripePayment'])->name('process.stripe.payment');
     Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
 
 });

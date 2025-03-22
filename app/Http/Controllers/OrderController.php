@@ -5,11 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\Order_item;
-use App\Models\OrderDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Stripe\Stripe;
-use Stripe\PaymentIntent;
 use App\Services\VNPayService;
 
 class OrderController extends Controller
@@ -90,6 +87,7 @@ class OrderController extends Controller
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                 ]);
+
             }
 
             Cart::where('user_id', auth()->id())->delete();
@@ -111,110 +109,55 @@ class OrderController extends Controller
         return view('client.orders.show', compact('order'));
     }
 
-    public function paymentSuccess()
-    {
-        if (!session('order_id')) {
-            return redirect()->route('cart.index');
-        }
-
-        return view('client.orders.success');
-    }
-
-    public function processStripePayment(Request $request)
-    {
-        try {
-            Stripe::setApiKey(config('services.stripe.secret'));
-
-            // Validate amount
-            $amount = $request->input('amount');
-            if (!is_numeric($amount) || $amount <= 0) {
-                throw new \Exception('Invalid amount');
-            }
-
-            // Create PaymentIntent
-            $paymentIntent = PaymentIntent::create([
-                'amount' => (int)($amount * 100), // Convert to cents
-                'currency' => 'usd',
-                'payment_method_types' => ['card'],
-                'metadata' => [
-                    'user_id' => auth()->id()
-                ]
-            ]);
-
-            return response()->json([
-                'clientSecret' => $paymentIntent->client_secret
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Stripe payment processing failed: ' . $e->getMessage());
-            return response()->json([
-                'error' => 'Payment processing failed: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function vnpayReturn(Request $request)
     {
+        \Log::info('VNPay Callback Received', $request->all());
+
+        $vnpayService = new VNPayService();
+        $isValidHash = $vnpayService->validateResponse($request);
+
+        if (!$isValidHash) {
+            \Log::error('VNPay hash validation failed');
+            return redirect()->route('cart.index')->with('error', 'Có lỗi xảy ra khi xử lý thanh toán');
+        }
+
         try {
-            \Log::info('VNPay Callback Received', $request->all());
+            // Kiểm tra trạng thái giao dịch từ VNPay
+            if ($request->vnp_ResponseCode == '00') {
+                // Lấy mã đơn hàng từ vnp_TxnRef
+                $orderCode = $request->vnp_TxnRef;
 
-            if (!$this->vnpayService->validateResponse($request)) {
-                return redirect()->route('cart.index')
-                    ->with('error', 'Chữ ký không hợp lệ!');
-            }
+                // Tìm đơn hàng trong database
+                $order = Order::where('order_code', $orderCode)->first();
 
-            if ($request->vnp_ResponseCode != '00') {
-                return redirect()->route('cart.index')
-                    ->with('error', 'Thanh toán thất bại! Vui lòng thử lại.');
-            }
+                if (!$order) {
+                    \Log::error('Order not found: ' . $orderCode);
+                    return redirect()->route('cart.index')->with('error', 'Không tìm thấy đơn hàng');
+                }
 
-            // Lấy thông tin đơn hàng từ session
-            $pendingOrder = session('pending_order');
-            if (!$pendingOrder) {
-                return redirect()->route('cart.index')
-                    ->with('error', 'Không tìm thấy thông tin đơn hàng!');
-            }
-
-            \DB::beginTransaction();
-
-            // Tạo đơn hàng mới
-            $order = Order::create([
-                'user_id' => auth()->id(),
-                'user_name' => $pendingOrder['user_name'],
-                'user_phone' => $pendingOrder['user_phone'],
-                'user_email' => $pendingOrder['user_email'],
-                'shipping_address' => $pendingOrder['shipping_address'],
-                'payment_method' => 'vnpay',
-                'total_amount' => $pendingOrder['total_amount'],
-                'status_id' => 1, // Pending
-            ]);
-
-            // Tạo chi tiết đơn hàng
-            foreach ($pendingOrder['cart_items'] as $item) {
-                Order_item::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
+                // Cập nhật trạng thái đơn hàng
+                $order->update([
+                    'payment_status' => 'paid',
+                    'status' => 'processing',
+                    'vnpay_transaction_no' => $request->vnp_TransactionNo,
+                    'vnpay_payment_date' => date('Y-m-d H:i:s', strtotime($request->vnp_PayDate))
                 ]);
+
+                // Xóa giỏ hàng
+                Cart::where('user_id', auth()->id())->delete();
+
+                return redirect()->route('orders.show', $order->id)
+                               ->with('success', 'Thanh toán thành công');
             }
 
-            // Xóa giỏ hàng
-            Cart::where('user_id', auth()->id())->delete();
-
-            // Xóa thông tin đơn hàng tạm từ session
-            session()->forget('pending_order');
-
-            \DB::commit();
-
-            return redirect()->route('orders.show', $order->id)
-                ->with('success', 'Đặt hàng và thanh toán thành công!');
+            \Log::error('VNPay payment failed with code: ' . $request->vnp_ResponseCode);
+            return redirect()->route('cart.index')
+                           ->with('error', 'Thanh toán không thành công');
 
         } catch (\Exception $e) {
-            \DB::rollBack();
             \Log::error('VNPay return processing failed: ' . $e->getMessage());
             return redirect()->route('cart.index')
-                ->with('error', 'Có lỗi xảy ra khi xử lý thanh toán');
+                           ->with('error', 'Có lỗi xảy ra khi xử lý thanh toán');
         }
     }
 }

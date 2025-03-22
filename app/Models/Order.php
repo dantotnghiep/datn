@@ -18,10 +18,14 @@ class Order extends Model
         'payment_method',
         'discount_code',
         'discount_amount',
+        'payment_status',
+        'vnpay_transaction_no',
+        'vnpay_payment_date'
     ];
 
     protected $attributes = [
         'status_id' => 1,
+        'payment_status' => 'pending',
     ];
 
     public function items()
