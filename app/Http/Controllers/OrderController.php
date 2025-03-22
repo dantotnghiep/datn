@@ -2,213 +2,195 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\OrderCancelled;
-use App\Events\OrderStatusUpdated;
-use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Cart;
-use App\Models\Discount;
-use App\Models\Order_cancellation;
 use App\Models\Order_item;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Models\OrderDetail;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
+use App\Services\VNPayService;
 
 class OrderController extends Controller
 {
-    // DB::transaction(function () use ($request, $userId, $cartItems, $defaultStatusId, $totalAmount) {
-    //     // Tạo đơn hàng
-    //     $order = Order::create([
-    //         'user_id'         => $userId,
-    //         'status_id'       => $defaultStatusId,
-    //         'order_code'      => 'ORD' . time(),
-    //         'user_name'       => $request->first_name . ' ' . $request->last_name,
-    //         'user_phone'      => $request->phone,
-    //         'user_email'      => $request->email,
-    //         'total_amount'    => $totalAmount,
-    //         'shipping_address' => "{$request->street_address}, {$request->city}, {$request->country}",
-    //         'payment_method'  => 'COD',
-    //     ]);
+    protected $vnpayService;
 
-    //     // Lưu từng sản phẩm trong đơn hàng
-    //     foreach ($cartItems as $item) {
-    //         Order_item::create([
-    //             'order_id'     => $order->id,
-    //             'variation_id' => $item->variation_id,
-    //             'quantity'     => $item->quantity,
-    //             'price'        => $item->price,
-    //         ]);
-    //     }
-
-    //     // Xóa giỏ hàng sau khi đặt hàng thành công
-    //     Cart::where('user_id', $userId)->delete();
-    // });
-    // Phương thức hiển thị trang checkout
-    public function index()
+    public function __construct(VNPayService $vnpayService)
     {
-        $orders = Order::with('status')
-                      ->where('user_id', Auth::id())
-                      ->orderBy('created_at', 'desc')
-                      ->get();
-
-        return view('client.orders.index', compact('orders'));
+        $this->vnpayService = $vnpayService;
     }
-
-    public function show($id)
-    {
-        $order = Order::with(['orderItems.product', 'status'])
-                     ->where('user_id', Auth::id())
-                     ->findOrFail($id);
-
-        return view('client.orders.show', compact('order'));
-    }
-
 
     public function store(Request $request)
     {
-        $request->validate([
-            'user_name' => 'required|string',
-            'country' => 'required|string',
-            'street_address' => 'required|string',
-            'city' => 'required|string',
-            'phone' => 'required|string',
-            'email' => 'required|email',
-            'order_notes' => 'nullable|string',
-        ]);
-
-        $userId = Auth::id();
-
-        // Lấy giỏ hàng của người dùng từ database
-        $cartItems = Cart::where('user_id', $userId)->get();
-
-        if ($cartItems->isEmpty()) {
-            return redirect()->back()->with('error', 'Giỏ hàng của bạn đang trống!');
-        }
-
-        // Lấy ID của trạng thái mặc định thay vì hardcode
-        $defaultStatusId = DB::table('order_statuses')->where('id', 1)->value('id');
-
-        if (!$defaultStatusId) {
-            return redirect()->back()->with('error', 'Trạng thái đơn hàng không tồn tại!');
-        }
-
-        // Tính tổng tiền trước khi áp dụng giảm giá
-        $totalAmount = $cartItems->sum(fn($item) => $item->price * $item->quantity);
-        $discountAmount = 0;
-        $discountCode = session('discount_code');
-
-        // Kiểm tra và áp dụng mã giảm giá từ session
-        if ($discountCode) {
-            $discount = Discount::where('code', $discountCode)
-                ->where('startDate', '<=', now())
-                ->where('endDate', '>', now())
-                ->where(function ($query) {
-                    $query->whereNull('maxUsage')
-                        ->orWhereRaw('maxUsage > usageCount');
-                })
-                ->first();
-
-            if ($discount && $totalAmount >= $discount->minOrderValue) {
-                $discountAmount = min(($totalAmount * $discount->sale) / 100, $discount->maxDiscount ?? INF);
-                $discount->increment('usageCount');
-            }
-        }
-
-        // Tính tổng tiền cuối cùng sau khi áp dụng giảm giá
-        $finalTotal = $totalAmount - $discountAmount;
-
-        return DB::transaction(function () use ($request, $userId, $cartItems, $defaultStatusId, $finalTotal, $discountCode, $discountAmount) {
-            // Tạo đơn hàng
-            $order = Order::create([
-                'user_id'         => $userId,
-                'status_id'       => $defaultStatusId,
-                'order_code'      => 'ORD-' . Str::uuid(),
-                'user_name'       => $request->user_name,
-                'user_phone'      => $request->phone,
-                'user_email'      => $request->email,
-                'total_amount'    => $finalTotal,
-                'shipping_address' => "{$request->street_address}, {$request->city}, {$request->country}",
-                'payment_method'  => 'COD',
-                'discount_code'   => $discountCode,
-                'discount_amount' => $discountAmount,
+        try {
+            // 1. Validate input
+            $validated = $request->validate([
+                'user_name' => 'required',
+                'user_phone' => 'required',
+                'user_email' => 'required|email',
+                'shipping_address' => 'required',
+                'payment_method' => 'required|in:cod,vnpay',
             ]);
 
-            // Lưu sản phẩm trong đơn hàng
+            \DB::beginTransaction();
+
+            // 2. Lấy thông tin giỏ hàng
+            $cartItems = Cart::where('user_id', auth()->id())->get();
+            if ($cartItems->isEmpty()) {
+                return back()->with('error', 'Giỏ hàng trống!');
+            }
+
+            // 3. Tính tổng tiền
+            $totalAmount = $cartItems->sum(function($item) {
+                return $item->price * $item->quantity;
+            });
+
+            // 4. Tạo đơn hàng
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'user_name' => $validated['user_name'],
+                'user_phone' => $validated['user_phone'],
+                'user_email' => $validated['user_email'],
+                'shipping_address' => $validated['shipping_address'],
+                'payment_method' => $validated['payment_method'],
+                'total_amount' => $totalAmount,
+                'status_id' => 1, // Trạng thái chờ thanh toán
+            ]);
+
+            // 5. Tạo chi tiết đơn hàng
             foreach ($cartItems as $item) {
                 Order_item::create([
-                    'order_id'     => $order->id,
+                    'order_id' => $order->id,
                     'variation_id' => $item->variation_id,
-                    'quantity'     => $item->quantity,
-                    'price'        => $item->price,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
                 ]);
             }
 
-            // Xóa mã giảm giá trong session nếu có
-            if (session()->has('discount_code')) {
-                session()->forget('discount_code');
+            // 6. Xử lý theo phương thức thanh toán
+            if ($validated['payment_method'] === 'vnpay') {
+                // Đảm bảo order_code được tạo
+                if (empty($order->order_code)) {
+                    $order->order_code = 'ORD' . time() . rand(1000,9999);
+                    $order->save();
+                }
+
+                $vnpayUrl = $this->vnpayService->createPaymentUrl([
+                    'order_code' => $order->order_code,
+                    'total_amount' => (int)$totalAmount,
+                    'order_desc' => 'Thanh toan don hang ' . $order->order_code
+                ]);
+
+                \DB::commit();
+
+                // Thêm debug log
+                \Log::info('Redirecting to VNPay', [
+                    'order_code' => $order->order_code,
+                    'total_amount' => $totalAmount,
+                    'vnpay_url' => $vnpayUrl
+                ]);
+
+                return redirect($vnpayUrl);
             }
 
-            // Xóa giỏ hàng sau khi đặt hàng thành công
-            Cart::where('user_id', $userId)->delete();
+            // Nếu là COD
+            Cart::where('user_id', auth()->id())->delete();
+            \DB::commit();
 
-            return redirect()->route('order')->with('success', 'Đơn hàng đã được đặt thành công!');
-        });
+            return redirect()->route('orders.show', $order->id)
+                ->with('success', 'Đặt hàng thành công!');
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Order creation failed: ' . $e->getMessage());
+            return back()->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage());
+        }
     }
 
-    public function order()
+    public function show(Order $order)
     {
-        return view('client.cart.order');
+        return view('client.orders.show', compact('order'));
     }
 
-
-    /**
-     * Lấy tên trạng thái theo ID
-     */
-    private function getStatusName($statusId)
+    public function paymentSuccess()
     {
-        $statuses = [
-            1 => 'Chờ xác nhận',
-            2 => 'Đang giao',
-            3 => 'Hủy',
-            4 => 'Hoàn thành'
-        ];
+        if (!session('order_id')) {
+            return redirect()->route('cart.index');
+        }
 
-        return $statuses[$statusId] ?? 'Không xác định';
+        return view('client.orders.success');
     }
 
-    public function cancel($id)
+    public function processStripePayment(Request $request)
     {
         try {
-            DB::beginTransaction();
+            Stripe::setApiKey(config('services.stripe.secret'));
 
-            $order = Order::with(['status', 'user'])
-                         ->where('user_id', Auth::id())
-                         ->where('id', $id)
-                         ->whereIn('status_id', [1, 2]) // Cho phép hủy đơn hàng chờ xác nhận (1) và đang vận chuyển (2)
-                         ->firstOrFail();
+            // Validate amount
+            $amount = $request->input('amount');
+            if (!is_numeric($amount) || $amount <= 0) {
+                throw new \Exception('Invalid amount');
+            }
 
-            $order->status_id = 3; // Cập nhật trạng thái thành Hủy
-            $order->save();
-
-            DB::commit();
-
-            broadcast(new OrderStatusUpdated($order))->toOthers();
+            // Create PaymentIntent
+            $paymentIntent = PaymentIntent::create([
+                'amount' => (int)($amount * 100), // Convert to cents
+                'currency' => 'usd',
+                'payment_method_types' => ['card'],
+                'metadata' => [
+                    'user_id' => auth()->id()
+                ]
+            ]);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Đơn hàng đã được hủy thành công',
-                'order' => $order
+                'clientSecret' => $paymentIntent->client_secret
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error cancelling order: ' . $e->getMessage());
-
+            \Log::error('Stripe payment processing failed: ' . $e->getMessage());
             return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi hủy đơn hàng'
+                'error' => 'Payment processing failed: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function vnpayReturn(Request $request)
+    {
+        try {
+            if ($this->vnpayService->validateResponse($request)) {
+                $orderId = $request->vnp_TxnRef;
+                $order = Order::where('order_code', $orderId)->firstOrFail();
+
+                if ($request->vnp_ResponseCode == '00') {
+                    // Thanh toán thành công
+                    $order->update([
+                        'status_id' => 2, // Đã thanh toán
+                    ]);
+
+                    // Xóa giỏ hàng
+                    Cart::where('user_id', auth()->id())->delete();
+
+                    return redirect()->route('orders.show', $order->id)
+                        ->with('success', 'Thanh toán thành công!');
+                } else {
+                    // Thanh toán thất bại
+                    $order->update([
+                        'status_id' => 6, // Hủy
+                    ]);
+
+                    return redirect()->route('orders.show', $order->id)
+                        ->with('error', 'Thanh toán thất bại! Mã lỗi: ' . $request->vnp_ResponseCode);
+                }
+            }
+
+            return redirect()->route('home')
+                ->with('error', 'Chữ ký không hợp lệ!');
+
+        } catch (\Exception $e) {
+            \Log::error('VNPay return processing failed: ' . $e->getMessage());
+            return redirect()->route('home')
+                ->with('error', 'Có lỗi xảy ra khi xử lý kết quả thanh toán');
         }
     }
 }

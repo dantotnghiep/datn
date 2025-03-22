@@ -7,33 +7,74 @@
 
         <div class="row">
             <div class="col-xxl-8 col-xl-8">
-                <form action="" method="POST" id="checkout-form">
+                <form id="payment-form" action="{{ route('cart.process-checkout') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="payment_intent_id" id="payment_intent_id">
+                    <!-- Hiển thị lỗi validation nếu có -->
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <!-- Hiển thị thông báo success/error -->
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
                     <h5 class="checkout-title">Billing Details</h5>
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="eg-input-group">
-                                <label for="user-name">User Name</label>
-                                <input type="text" id="user-name" name="user_name" placeholder="Your full name" value="{{ old('user_name', Auth::user()->name ?? '') }}" required>
+                                <label for="user_name">User Name</label>
+                                <input type="text" id="user_name" name="user_name" placeholder="Your full name" value="{{ old('user_name', Auth::user()->name ?? '') }}" required>
                             </div>
                         </div>
                         <div class="col-lg-12">
                             <div class="eg-input-group">
                                 <label>Phone Number</label>
-                                <input type="text" name="phone" placeholder="Your Phone Number" value="{{ old('phone', Auth::user()->phone ?? '') }}" required>
+                                <input type="text" name="user_phone" placeholder="Your Phone Number" value="{{ old('user_phone', Auth::user()->phone ?? '') }}" required>
                             </div>
                             <div class="eg-input-group">
                                 <label>Email Address</label>
-                                <input type="email" name="email" placeholder="Your Email Address" value="{{ old('email', Auth::user()->email ?? '') }}" required>
+                                <input type="email" name="user_email" placeholder="Your Email Address" value="{{ old('user_email', Auth::user()->email ?? '') }}" required>
                             </div>
                             <div class="col-lg-12">
                                 <div class="eg-input-group">
-                                    <label>Street Address</label>
-                                    <input type="text" name="street_address" placeholder="House and street name" value="{{ old('street_address') }}" required>
+                                    <label>Shipping Address</label>
+                                    <input type="text" name="shipping_address" placeholder="House and street name" value="{{ old('shipping_address') }}" required>
+                                </div>
+                            </div>
+                            <div class="payment-methods">
+                                <div class="form-check payment-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="paymentCOD" value="cod" checked>
+                                    <label class="form-check-label" for="paymentCOD">
+                                        Cash on Delivery
+                                    </label>
+                                    <p>Pay with cash upon delivery.</p>
+                                </div>
+                                <div class="form-check payment-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="paymentVNPay" value="vnpay">
+                                    <label class="form-check-label" for="paymentVNPay">
+                                        Thanh toán qua VNPay
+                                    </label>
+                                    <p>Thanh toán an toàn với VNPay.</p>
                                 </div>
                             </div>
                             <div class="place-order-btn">
-                                <button type="submit">Place Order</button>
+                                <button type="submit" class="place-order-btn">Place Order</button>
                             </div>
                         </div>
                     </div>
@@ -83,35 +124,7 @@
                         </ul>
                     </div>
                 </div>
-                <form class="payment-form">
-                    <div class="payment-methods">
-                        <div class="form-check payment-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                            <label class="form-check-label" for="flexRadioDefault1">
-                                Check payments
-                            </label>
-                            <p>Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</p>
 
-                          </div>
-                          <div class="form-check payment-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-                            <label class="form-check-label" for="flexRadioDefault2">
-                                Cash on delivery
-                            </label>
-                            <p>Pay with cash upon delivery.</p>
-                          </div>
-                          <div class="form-check payment-check paypal">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3" checked>
-                            <label class="form-check-label" for="flexRadioDefault3">
-                                PayPal
-                            </label>
-                            <img src="assets/images/payment/payment-cards.png" alt="">
-                            <a href="#" class="about-paypal">What is PayPal</a>
-                          </div>
-                    </div>
-
-
-                </form>
             </div>
         </div>
     </div>
@@ -140,5 +153,117 @@
 </div>
 <!-- ===============  newslatter area end  =============== -->
 
+<style>
+    #card-element {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: white;
+        margin-top: 10px;
+    }
+    #card-errors {
+        color: #dc3545;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+    .place-order-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stripe = Stripe('{{ config("services.stripe.key") }}');
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    const cardElement = document.getElementById('card-element');
+    const errorElement = document.getElementById('card-errors');
+    const form = document.getElementById('payment-form');
+
+    // Mount card element
+    card.mount('#card-element');
+
+    // Handle payment method display
+    const paymentOnline = document.getElementById('paymentOnline');
+    const cardElementContainer = document.getElementById('card-element');
+
+    paymentOnline.addEventListener('change', function() {
+        cardElementContainer.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+        if (paymentMethod === 'stripe') {
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
+            try {
+                // Create PaymentIntent
+                const response = await fetch('/stripe/create-payment-intent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        amount: {{ $finalTotal * 100 }}
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    errorElement.textContent = data.error;
+                    submitButton.disabled = false;
+                    return;
+                }
+
+                // Confirm card payment
+                const {paymentIntent, error} = await stripe.confirmCardPayment(data.clientSecret, {
+                    payment_method: {
+                        card: card,
+                        billing_details: {
+                            name: document.getElementById('user_name').value,
+                            email: document.querySelector('input[name="user_email"]').value
+                        }
+                    }
+                });
+
+                if (error) {
+                    errorElement.textContent = error.message;
+                    submitButton.disabled = false;
+                    return;
+                }
+
+                // Payment successful
+                document.getElementById('payment_intent_id').value = paymentIntent.id;
+                form.submit();
+
+            } catch (err) {
+                console.error('Error:', err);
+                errorElement.textContent = 'An error occurred. Please try again.';
+                submitButton.disabled = false;
+            }
+        } else {
+            // For COD, submit form normally
+            form.submit();
+        }
+    });
+
+    // Handle real-time card validation
+    card.addEventListener('change', function(event) {
+        if (event.error) {
+            errorElement.textContent = event.error.message;
+        } else {
+            errorElement.textContent = '';
+        }
+    });
+});
+</script>
 
 @endsection

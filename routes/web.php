@@ -141,12 +141,19 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
 
-    // Thêm route cho checkout
+    // Routes cho checkout và thanh toán
     Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::post('/cart/process-checkout', [OrderController::class, 'store'])->name('cart.process-checkout');
 
+    // Thêm route cho Stripe
+    Route::post('/stripe/create-payment-intent', [OrderController::class, 'processStripePayment'])
+        ->name('stripe.create-payment-intent');
+
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
          ->name('orders.updateStatus');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::get('/payment/success', [OrderController::class, 'paymentSuccess'])->name('payment.success');
 });
 
 // Thêm route này cho client hủy đơn hàng
@@ -186,3 +193,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
          ->name('orders.updateStatus');
 });
+
+Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
