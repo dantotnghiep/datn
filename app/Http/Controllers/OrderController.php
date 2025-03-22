@@ -51,7 +51,13 @@ class OrderController extends Controller
                         'user_email' => $validated['user_email'],
                         'shipping_address' => $validated['shipping_address'],
                         'payment_method' => 'vnpay',
-                        'cart_items' => $cartItems->toArray(),
+                        'cart_items' => $cartItems->map(function($item) {
+                            return [
+                                'variation_id' => $item->variation_id,
+                                'quantity' => $item->quantity,
+                                'price' => $item->price
+                            ];
+                        })->toArray(),
                         'total_amount' => $totalAmount
                     ]
                 ]);
@@ -83,11 +89,10 @@ class OrderController extends Controller
             foreach ($cartItems as $item) {
                 Order_item::create([
                     'order_id' => $order->id,
-                    'product_id' => $item->product_id,
+                    'variation_id' => $item->variation_id,
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                 ]);
-
             }
 
             Cart::where('user_id', auth()->id())->delete();
@@ -106,58 +111,68 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        return view('client.orders.show', compact('order'));
+        return redirect()->route('cart.index')
+            ->with('success', 'Đặt hàng thành công!');
     }
 
     public function vnpayReturn(Request $request)
     {
-        \Log::info('VNPay Callback Received', $request->all());
-
-        $vnpayService = new VNPayService();
-        $isValidHash = $vnpayService->validateResponse($request);
-
-        if (!$isValidHash) {
-            \Log::error('VNPay hash validation failed');
-            return redirect()->route('cart.index')->with('error', 'Có lỗi xảy ra khi xử lý thanh toán');
+        // Validate response từ VNPay
+        if (!$this->vnpayService->validateResponse($request)) {
+            return redirect()->route('cart.checkout')->with('error', 'Invalid VNPay response');
         }
 
         try {
-            // Kiểm tra trạng thái giao dịch từ VNPay
-            if ($request->vnp_ResponseCode == '00') {
-                // Lấy mã đơn hàng từ vnp_TxnRef
-                $orderCode = $request->vnp_TxnRef;
+            \DB::beginTransaction();
 
-                // Tìm đơn hàng trong database
-                $order = Order::where('order_code', $orderCode)->first();
-
-                if (!$order) {
-                    \Log::error('Order not found: ' . $orderCode);
-                    return redirect()->route('cart.index')->with('error', 'Không tìm thấy đơn hàng');
-                }
-
-                // Cập nhật trạng thái đơn hàng
-                $order->update([
-                    'payment_status' => 'paid',
-                    'status' => 'processing',
-                    'vnpay_transaction_no' => $request->vnp_TransactionNo,
-                    'vnpay_payment_date' => date('Y-m-d H:i:s', strtotime($request->vnp_PayDate))
-                ]);
-
-                // Xóa giỏ hàng
-                Cart::where('user_id', auth()->id())->delete();
-
-                return redirect()->route('orders.show', $order->id)
-                               ->with('success', 'Thanh toán thành công');
+            // Lấy thông tin đơn hàng từ session
+            $pendingOrder = session('pending_order');
+            if (!$pendingOrder) {
+                throw new \Exception('Không tìm thấy thông tin đơn hàng');
             }
 
-            \Log::error('VNPay payment failed with code: ' . $request->vnp_ResponseCode);
+            // Tạo đơn hàng
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'user_name' => $pendingOrder['user_name'],
+                'user_phone' => $pendingOrder['user_phone'],
+                'user_email' => $pendingOrder['user_email'],
+                'shipping_address' => $pendingOrder['shipping_address'],
+                'payment_method' => 'vnpay',
+                'total_amount' => $pendingOrder['total_amount'],
+                'status_id' => 1,
+                'payment_status' => 'completed',
+                'vnpay_transaction_no' => $request->vnp_TransactionNo,
+                'vnpay_payment_date' => $request->vnp_PayDate
+            ]);
+
+            // Tạo các item cho đơn hàng
+            foreach ($pendingOrder['cart_items'] as $item) {
+                Order_item::create([
+                    'order_id' => $order->id,
+                    'variation_id' => $item['variation_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price']
+                ]);
+            }
+
+            // Xóa giỏ hàng
+            Cart::where('user_id', auth()->id())->delete();
+
+            // Xóa thông tin đơn hàng tạm từ session
+            session()->forget('pending_order');
+
+            \DB::commit();
+
+            // Thay đổi redirect về cart.index thay vì orders.show
             return redirect()->route('cart.index')
-                           ->with('error', 'Thanh toán không thành công');
+                ->with('success', 'Đặt hàng thành công!');
 
         } catch (\Exception $e) {
-            \Log::error('VNPay return processing failed: ' . $e->getMessage());
-            return redirect()->route('cart.index')
-                           ->with('error', 'Có lỗi xảy ra khi xử lý thanh toán');
+            \DB::rollBack();
+            \Log::error('VNPay order creation failed: ' . $e->getMessage());
+            return redirect()->route('cart.checkout')
+                ->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage());
         }
     }
 }
