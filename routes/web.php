@@ -9,6 +9,7 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -185,3 +186,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
          ->name('orders.updateStatus');
 });
+
+Route::resource('/admin/users', UserController::class);
+// Route::middleware(['auth', 'role:admin'])->group(function () {
+//     Route::resource('/admin/users', UserController::class);
+// });
+
