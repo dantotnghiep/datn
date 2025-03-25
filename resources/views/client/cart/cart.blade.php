@@ -181,13 +181,13 @@
 
                             <div class="cart-proceed-btns mt-4">
                                 <button type="submit" class="cart-proceed">Checkout</button>
-                                <a href="" class="continue-shop">Continue Shopping</a>
+                                <a href="{{ route('client.index') }}" class="continue-shop">Continue Shopping</a>
                             </div>
                         </form>
                     @else
                         <div class="text-center">
                             <h3>Your cart is empty</h3>
-                            <a href="" class="btn btn-primary mt-3">Continue Shopping</a>
+                            <a href="{{ route('client.index') }}" class="btn btn-primary mt-3">Continue Shopping</a>
                         </div>
                     @endif
                 </div>
