@@ -10,7 +10,7 @@ class Order_status extends Model
     use HasFactory;
 
     protected $table = 'order_statuses';
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['status_name'];
 
     public function orderStatusTimes()
     {
@@ -19,6 +19,6 @@ class Order_status extends Model
 
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'status_id');
     }
 }

@@ -135,9 +135,42 @@ class CartController extends Controller
         return redirect()->route('cart.index')->with('success', 'Cart updated successfully!');
     }
 
-    public function checkout()
+    public function checkout(Request $request)
     {
-        return view('client.cart.checkout');
+        $selectedItems = $request->input('selected_items', []);
+
+        // Kiểm tra nếu không có sản phẩm nào được chọn
+        if (empty($selectedItems)) {
+            return redirect()->route('cart.index')->with('error', 'Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
+        }
+
+        $cartItems = Cart::whereIn('id', $selectedItems)->get();
+
+        // Tính tổng tiền trước giảm giá
+        $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
+
+        // Khởi tạo giá trị mặc định
+        $discountAmount = 0;
+        $finalTotal = $subtotal;
+
+        // Kiểm tra và áp dụng mã giảm giá từ session
+        $discountCode = session('discount_code');
+        if ($discountCode) {
+            $discount = \App\Models\Discount::where('code', $discountCode)
+                ->where('startDate', '<=', now())
+                ->where('endDate', '>', now())
+                ->first();
+
+            if ($discount && $subtotal >= $discount->minOrderValue) {
+                $discountAmount = ($subtotal * $discount->sale) / 100;
+                if ($discount->maxDiscount > 0) {
+                    $discountAmount = min($discountAmount, $discount->maxDiscount);
+                }
+                $finalTotal = $subtotal - $discountAmount;
+            }
+        }
+
+        return view('client.cart.checkout', compact('cartItems', 'subtotal', 'finalTotal', 'discountAmount', 'discountCode'));
     }
 
     public function order()

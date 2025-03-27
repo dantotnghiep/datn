@@ -16,10 +16,16 @@ class Order extends Model
         'total_amount',
         'shipping_address',
         'payment_method',
+        'discount_code',
+        'discount_amount',
+        'payment_status',
+        'vnpay_transaction_no',
+        'vnpay_payment_date'
     ];
 
     protected $attributes = [
         'status_id' => 1,
+        'payment_status' => 'pending',
     ];
 
     public function items()
@@ -32,5 +38,14 @@ class Order extends Model
     }
     public function status(){
         return $this->belongsTo(Order_status::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            $order->order_code = 'ORD' . time() . rand(1000,9999);
+        });
     }
 }
