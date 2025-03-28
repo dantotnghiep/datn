@@ -72,6 +72,7 @@ class Kernel extends HttpKernel
         // 'client' => \App\Http\Middleware\ClientMiddleware::class,
         // 'admin' => \App\Http\Middleware\RedirectIfNotAdmin::class,
         'auth' => \App\Http\Middleware\Authenticate::class,
-        'admin' => \App\Http\Middleware\RedirectIfNotAdmin::class, 
+        'admin' => \App\Http\Middleware\RedirectIfNotAdmin::class,
+        // 'staff' => \App\Http\Middleware\StaffMiddleware::class, 
     ];
 }
