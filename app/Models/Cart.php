@@ -26,9 +26,9 @@ class Cart extends Model
     }
 
     /**
-     * Get the product variation.
+     * Get the variation that belongs to the cart item.
      */
-    public function variation(): BelongsTo
+    public function variation()
     {
         return $this->belongsTo(Variation::class);
     }

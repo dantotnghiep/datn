@@ -10,6 +10,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Http\Request;
+
 
 class AuthController extends Controller
 {
@@ -18,24 +20,31 @@ class AuthController extends Controller
         return view('client.auth.login');
     }
 
-    public function login(LoginRequest $request)
-    {
-        try {
-            $credentials = $request->validated();
-            
-            if (Auth::attempt($credentials, $request->filled('remember'))) {
-                return redirect()->intended(route('dashboard'));
-            }
+    // public function login(LoginRequest $request)
+    // {
+    //     try {
+    //         $credentials = $request->validated();
 
-            return redirect()->back()
-                ->with('error', 'Email hoặc mật khẩu không chính xác')
-                ->withInput($request->except('password'));
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Đã xảy ra lỗi khi đăng nhập.')
-                ->withInput($request->except('password'));
-        }
-    }
+    //         if (Auth::attempt($credentials, $request->filled('remember'))) {
+    //             $user = Auth::user();
+
+    //             // Điều hướng dựa trên role
+    //             if ($user->role === 'admin') {
+    //                 return redirect()->intended(route('admin.dashboard'));
+    //             }
+
+    //             return redirect()->intended(route('dashboard'));
+    //         }
+
+    //         return redirect()->back()
+    //             ->with('error', 'Email hoặc mật khẩu không chính xác')
+    //             ->withInput($request->except('password'));
+    //     } catch (\Exception $e) {
+    //         return redirect()->back()
+    //             ->with('error', 'Đã xảy ra lỗi khi đăng nhập.')
+    //             ->withInput($request->except('password'));
+    //     }
+    // }
 
     public function showRegisterForm()
     {
@@ -46,7 +55,7 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validated();
-            
+
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -87,10 +96,12 @@ class AuthController extends Controller
         }
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         try {
             Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
             return redirect()->route('login')
                 ->with('success', 'Đăng xuất thành công!');
         } catch (\Exception $e) {
@@ -98,4 +109,4 @@ class AuthController extends Controller
                 ->with('error', 'Đã xảy ra lỗi khi đăng xuất.');
         }
     }
-} 
+}

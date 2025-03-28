@@ -10,11 +10,11 @@ class Attribute_value_variation extends Model
     use HasFactory;
 
     protected $fillable = ['attribute_value_id', 'variation_id'];
-    
+
 
     public function attributeValue()
     {
-        return $this->belongsTo(Attribute_value::class);
+        return $this->belongsTo(AttributeValue::class);
     }
     public function variation()
     {
