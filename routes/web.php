@@ -203,3 +203,5 @@ Route::resource('/admin/users', UserController::class);
 // Route::middleware(['auth', 'role:admin'])->group(function () {
 //     Route::resource('/admin/users', UserController::class);
 // });
+
+Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');

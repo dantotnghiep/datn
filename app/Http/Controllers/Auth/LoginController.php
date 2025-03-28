@@ -166,8 +166,22 @@ class LoginController extends Controller
                 return redirect()->route('admin.auth.login')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
             }
 
+            if ($user->role === 'staff' && $type === 'user') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect()->route('admin.auth.login')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
+            }
+
+            if ($user->role === 'staff' && $type === 'admin') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect()->route('staff.dashboard')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
+            }
+
             // Nếu đăng nhập client nhưng tài khoản là admin, cũng phải logout
-            if ($user->role !== 'admin' && $type === 'admin') {
+            if ($user->role === 'user' && $type === 'admin') {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -188,5 +202,10 @@ class LoginController extends Controller
     public function loginUser(Request $request)
     {
         return $this->login($request, 'user');
+    }
+
+    public function sta()
+    {
+        return view('staff.dashboard');
     }
 }
