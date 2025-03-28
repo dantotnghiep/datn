@@ -173,15 +173,12 @@ Route::post('/pusher/auth', function (Request $request) {
             config('broadcasting.connections.pusher.app_id'),
             config('broadcasting.connections.pusher.options')
         );
-
-
+    
         $channel = $request->input('channel_name');
         $socket_id = $request->input('socket_id');
-
-
+    
         $auth = $pusher->socket_auth($channel, $socket_id);
-
-
+    
         return response($auth);
     } else {
         abort(403);
@@ -201,9 +198,3 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('orders.updateStatus');
 });
-
-Route::resource('/admin/users', UserController::class);
-// Route::middleware(['auth', 'role:admin'])->group(function () {
-//     Route::resource('/admin/users', UserController::class);
-// });
-
