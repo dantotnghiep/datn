@@ -92,9 +92,8 @@
                 <li class="cr-sb-item-separator"></li>
                 <li class="cr-sb-title condense">Elements</li>
                 <li class="cr-sb-item">
-                    <a href="remix-icons.html" class="cr-page-link">
-                        <i class="ri-remixicon-line"></i><span class="condense"><span class="hover-title">remix
-                                icons</span></span></a>
+                    <a href="{{route('staff.dashboard')}}" class="cr-page-link">
+                        <i class="ri-remixicon-line"></i><span class="condense"><span class="hover-title">Staff</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="material-icons.html" class="cr-page-link">
