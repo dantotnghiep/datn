@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\Order_item;
@@ -18,17 +19,38 @@ class OrderController extends Controller
         $this->vnpayService = $vnpayService;
     }
 
+    // Hiển thị trang thanh toán
+    public function showCheckout()
+    {
+        $cartItems = Cart::where('user_id', auth()->id())->get();
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống!');
+        }
+
+        $addresses = auth()->user()->addresses; // Lấy tất cả địa chỉ
+        $userEmail = auth()->user()->email; // Lấy email từ bảng users
+        $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
+        $discountAmount = 0; // Giả sử không có giảm giá, bạn có thể điều chỉnh
+        $finalTotal = $subtotal - $discountAmount;
+
+        return view('client.cart.checkout', compact('cartItems', 'userEmail', 'addresses', 'subtotal', 'discountAmount', 'finalTotal'));
+    }
+
     public function store(Request $request)
     {
         try {
             // 1. Validate input
             $validated = $request->validate([
-                'user_name' => 'required',
-                'user_phone' => 'required',
-                'user_email' => 'required|email',
-                'shipping_address' => 'required',
+                'address_id' => 'required|exists:addresses,id,user_id,' . auth()->id(), // Validate address_id
+                'user_email' => 'required|email|max:255', // Thêm trường email vào validation
                 'payment_method' => 'required|in:cod,vnpay',
             ]);
+
+            // Lấy thông tin địa chỉ
+            $address = Address::where('id', $validated['address_id'])
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+            $shippingAddress = implode(', ', [$address->street, $address->ward, $address->district, $address->province]);
 
             // 2. Lấy thông tin giỏ hàng
             $cartItems = Cart::where('user_id', auth()->id())->get();
@@ -37,7 +59,7 @@ class OrderController extends Controller
             }
 
             // 3. Tính tổng tiền
-            $totalAmount = $cartItems->sum(function($item) {
+            $totalAmount = $cartItems->sum(function ($item) {
                 return $item->price * $item->quantity;
             });
 
@@ -46,12 +68,12 @@ class OrderController extends Controller
                 // Lưu thông tin đơn hàng vào session để dùng sau khi thanh toán
                 session([
                     'pending_order' => [
-                        'user_name' => $validated['user_name'],
-                        'user_phone' => $validated['user_phone'],
-                        'user_email' => $validated['user_email'],
-                        'shipping_address' => $validated['shipping_address'],
+                        'user_name' => $address->recipient_name,
+                        'user_phone' => $address->phone,
+                        'user_email' => $validated['user_email'], // Dùng email từ form
+                        'shipping_address' => $shippingAddress,
                         'payment_method' => 'vnpay',
-                        'cart_items' => $cartItems->map(function($item) {
+                        'cart_items' => $cartItems->map(function ($item) {
                             return [
                                 'variation_id' => $item->variation_id,
                                 'quantity' => $item->quantity,
@@ -77,10 +99,10 @@ class OrderController extends Controller
 
             $order = Order::create([
                 'user_id' => auth()->id(),
-                'user_name' => $validated['user_name'],
-                'user_phone' => $validated['user_phone'],
-                'user_email' => $validated['user_email'],
-                'shipping_address' => $validated['shipping_address'],
+                'user_name' => $address->recipient_name,
+                'user_phone' => $address->phone,
+                'user_email' => $validated['user_email'], // Dùng email từ form
+                'shipping_address' => $shippingAddress,
                 'payment_method' => 'cod',
                 'total_amount' => $totalAmount,
                 'status_id' => 1,
@@ -101,11 +123,49 @@ class OrderController extends Controller
 
             return redirect()->route('orders.show', $order->id)
                 ->with('success', 'Đặt hàng thành công!');
-
         } catch (\Exception $e) {
             \DB::rollBack();
             \Log::error('Order creation failed: ' . $e->getMessage());
             return back()->with('error', 'Có lỗi xảy ra khi đặt hàng: ' . $e->getMessage());
+        }
+    }
+
+    // Thêm địa chỉ mới
+    public function storeAddress(Request $request)
+    {
+        $validated = $request->validate([
+            'recipient_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'street' => 'required|string|max:255',
+            'ward' => 'required|string|max:255',
+            'district' => 'required|string|max:255',
+            'province' => 'required|string|max:255',
+            'is_default' => 'boolean',
+        ]);
+
+        \DB::beginTransaction();
+        try {
+            if ($request->boolean('is_default')) {
+                // Nếu đặt làm mặc định, cập nhật tất cả địa chỉ khác thành không mặc định
+                Address::where('user_id', auth()->id())->update(['is_default' => false]);
+            }
+
+            $address = Address::create([
+                'user_id' => auth()->id(),
+                'recipient_name' => $validated['recipient_name'],
+                'phone' => $validated['phone'],
+                'street' => $validated['street'],
+                'ward' => $validated['ward'],
+                'district' => $validated['district'],
+                'province' => $validated['province'],
+                'is_default' => $request->boolean('is_default', false),
+            ]);
+
+            \DB::commit();
+            return redirect()->route('cart.checkout')->with('success', 'Thêm địa chỉ thành công!');
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return back()->with('error', 'Thêm địa chỉ thất bại: ' . $e->getMessage());
         }
     }
 
@@ -167,7 +227,6 @@ class OrderController extends Controller
             // Thay đổi redirect về cart.index thay vì orders.show
             return redirect()->route('cart.index')
                 ->with('success', 'Đặt hàng thành công!');
-
         } catch (\Exception $e) {
             \DB::rollBack();
             \Log::error('VNPay order creation failed: ' . $e->getMessage());
