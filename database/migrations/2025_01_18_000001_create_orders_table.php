@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('payment_method');
             $table->string('discount_code')->nullable();
             $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->string('payment_status')->default('pending');
+            $table->string('vnpay_transaction_no')->nullable();
+            $table->datetime('vnpay_payment_date')->nullable();
             $table->timestamps();
         });
     }
