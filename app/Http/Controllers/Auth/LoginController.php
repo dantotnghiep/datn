@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -152,6 +153,11 @@ class LoginController extends Controller
             'email' => 'required|email',
             'password' => 'required|min:8'
         ]);
+
+        $user = User::where('email', $request->email)->first();
+        if ($user && $user->status === 'inactive') {
+            return redirect()->back()->withErrors(['email' => 'Tài khoản của bạn đã bị khóa.']);
+        }
 
         $credentials = $request->only('email', 'password');
 

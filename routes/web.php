@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\Admin\AdminCustomerController;
+use App\Http\Controllers\Admin\AdminEmployeeController;
 use App\Http\Controllers\Admin\HotProductController;
 use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\Auth\LoginController;
@@ -169,6 +171,22 @@ Route::middleware(['auth'])->group(function () {
         ->name('orders.updateStatus');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
+});
+
+//Route::middleware(['auth', 'staff'])->prefix('admin/users')->group(function () {
+Route::middleware(['auth'])->prefix('admin/users')->group(function () {
+    // Khách hàng
+    Route::get('/clients', [AdminCustomerController::class, 'index'])->name('admin.users.clients.index');
+    Route::post('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
+    Route::post('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
+
+    // Nhân viên/admin
+    Route::get('/staffs', [AdminEmployeeController::class, 'index'])->name('admin.users.staffs.index');
+    Route::post('/staffs', [AdminEmployeeController::class, 'store'])->name('admin.users.staffs.store');
+    Route::put('/staffs/{id}', [AdminEmployeeController::class, 'update'])->name('admin.users.staffs.update');
+    Route::delete('/staffs/{id}', [AdminEmployeeController::class, 'destroy'])->name('admin.users.staffs.destroy');
+    Route::post('/staffs/{id}/lock', [AdminEmployeeController::class, 'lock'])->name('admin.users.staffs.lock');
+    Route::post('/staffs/{id}/unlock', [AdminEmployeeController::class, 'unlock'])->name('admin.users.staffs.unlock');
 });
 
 // Thêm route này cho client hủy đơn hàng
