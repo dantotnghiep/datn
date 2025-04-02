@@ -17,15 +17,29 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Pusher\Pusher;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|php artisan key:generate
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
 
 Route::get('/', [HomeController::class, 'dashboard'])->name('client.index');
 Route::get('/categories', [HomeController::class, 'category'])->name('categories.index');
 
+// Route::get('/order', [CartController::class, 'order'])->name('cart.order');
+
+// Broadcast authentication cho Pusher
 Route::post('/broadcasting/auth', function () {
     return auth()->check() ? auth()->user() : abort(403);
 });
 
-// Client Product
+//client/product
 Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
 Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('client.product.product-details');
 
@@ -39,14 +53,6 @@ Route::post('/forgot-password', [App\Http\Controllers\Client\AuthController::cla
 Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthController::class, 'showResetPasswordForm'])->name('reset-password');
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
-<<<<<<< HEAD
-Route::middleware(['auth'])->group(function () {
-    Route::resource('/cart', CartController::class);
-    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add'); // Thêm route này
-    Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
-    Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
-    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-=======
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
@@ -58,19 +64,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
     });
->>>>>>> f83408911b97f63d36d14c99c115e19ce80e9761
 });
 
 
-// Admin Routes
+//ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
+
 Route::prefix('admin')->group(function () {
-<<<<<<< HEAD
-    Route::get('/', [ProductController::class, 'dashboard'])->name('admin.dashboard');
-=======
     
 
     //admin/Auth
->>>>>>> f83408911b97f63d36d14c99c115e19ce80e9761
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
@@ -81,16 +83,6 @@ Route::prefix('admin')->group(function () {
         Route::post('/{order}/update-status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.update_status');
     });
 
-<<<<<<< HEAD
-    // Admin Category
-    Route::resource('/category', CategoryController::class);
-    
-    // Admin AttributesValues
-    Route::resource('/attribute-values', AttributeValueController::class);
-    
-    // Admin Product
-    Route::resource('/product', ProductController::class);
-=======
     Route::middleware(['admin'])->group(function () {
         Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
     });
@@ -119,26 +111,43 @@ Route::prefix('admin')->group(function () {
     Route::delete('/products/{id}/delete', [ProductController::class, 'destroy'])->name('products.destroy');
 
     //admin/Variation
->>>>>>> f83408911b97f63d36d14c99c115e19ce80e9761
     Route::get('/products/{id}/variations', [ProductController::class, 'showVariations'])->name('product.variations');
-    Route::resource('/product-variations', ProductVariationController::class);
-    
-    // Admin Variation
+    Route::get('/products/{id}/variations/create', [ProductVariationController::class, 'create'])->name('product-variations.create');
+    Route::post('/product-variations/store', [ProductVariationController::class, 'store'])->name('product-variations.store');
+
     Route::put('/variation/{id}', [VariationController::class, 'update'])->name('admin.variation.update');
 
-    // Admin Hot Products
-    Route::resource('/homesetting/hot-products', HotProductController::class);
-    
-    // Admin Discount
-    Route::resource('/discounts', App\Http\Controllers\Admin\DiscountController::class);
+    Route::get('/homesetting/hot-products', [HotProductController::class, 'index'])->name('hot-products.index');
+    Route::post('/homesetting/hot-products', [HotProductController::class, 'store'])->name('hot-products.store');
+    Route::delete('/homesetting/hot-products/{id}', [HotProductController::class, 'destroy'])->name('hot-products.destroy');
+    Route::get('/homesetting/hot-products/search', [HotProductController::class, 'search'])->name('hot_products.search');
+
+    // Admin Discount Routes
+    Route::get('/discounts', [App\Http\Controllers\Admin\DiscountController::class, 'index'])
+        ->name('admin.discounts.index');
+
+    Route::get('/discounts/create', [App\Http\Controllers\Admin\DiscountController::class, 'create'])
+        ->name('admin.discounts.create');
+
+    Route::post('/discounts', [App\Http\Controllers\Admin\DiscountController::class, 'store'])
+        ->name('admin.discounts.store');
+
+    Route::get('/discounts/{discount}/edit', [App\Http\Controllers\Admin\DiscountController::class, 'edit'])
+        ->name('admin.discounts.edit');
+
+    Route::put('/discounts/{discount}', [App\Http\Controllers\Admin\DiscountController::class, 'update'])
+        ->name('admin.discounts.update');
+
+    Route::delete('/discounts/{discount}', [App\Http\Controllers\Admin\DiscountController::class, 'destroy'])
+        ->name('admin.discounts.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::resource('/cart', CartController::class);
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('/cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
-<<<<<<< HEAD
-    Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
-=======
 
     // Routes cho checkout và thanh toán
     Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
@@ -147,13 +156,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('orders.updateStatus');
->>>>>>> f83408911b97f63d36d14c99c115e19ce80e9761
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
 
 });
 
-// Pusher Authentication
+// Thêm route này cho client hủy đơn hàng
+// Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+// Thêm route mới này
 Route::post('/pusher/auth', function (Request $request) {
     if (auth()->check()) {
         $pusher = new Pusher(
@@ -162,10 +173,6 @@ Route::post('/pusher/auth', function (Request $request) {
             config('broadcasting.connections.pusher.app_id'),
             config('broadcasting.connections.pusher.options')
         );
-<<<<<<< HEAD
-        
-        return response($pusher->socket_auth($request->input('channel_name'), $request->input('socket_id')));
-=======
 
         $channel = $request->input('channel_name');
         $socket_id = $request->input('socket_id');
@@ -175,14 +182,10 @@ Route::post('/pusher/auth', function (Request $request) {
         return response($auth);
     } else {
         abort(403);
->>>>>>> f83408911b97f63d36d14c99c115e19ce80e9761
     }
-    abort(403);
 });
 
 Broadcast::routes();
-<<<<<<< HEAD
-=======
 
 // Route cho admin
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -202,4 +205,3 @@ Route::resource('/admin/users', UserController::class);
 // });
 
 Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
->>>>>>> f83408911b97f63d36d14c99c115e19ce80e9761

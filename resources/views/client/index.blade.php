@@ -287,92 +287,91 @@
 </div>
 
 <div class="recent-product-wrapper ml-110 mt-100">
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Phần tab danh mục -->
-            <div class="col-xxl-3 col-xl-3 col-lg-4">
-                <!-- <div class="nav flex-column nav-pills category-tabs p-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                    @foreach ($categories as $key => $category)
+<div class="container-fluid">
+    <div class="row">
+        <!-- Phần tab danh mục -->
+        <div class="col-xxl-3 col-xl-3 col-lg-4">
+            <div class="nav flex-column nav-pills category-tabs p-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                @foreach ($categories as $key => $category)
                     <button class="nav-link category-tab {{ $key === 0 ? 'active' : '' }}"
-                        id="v-pills-{{ $category->id }}-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#v-pills-{{ $category->id }}"
-                        type="button"
-                        role="tab"
-                        aria-controls="v-pills-{{ $category->id }}"
-                        aria-selected="{{ $key === 0 ? 'true' : 'false' }}">
+                            id="v-pills-{{ $category->id }}-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#v-pills-{{ $category->id }}"
+                            type="button"
+                            role="tab"
+                            aria-controls="v-pills-{{ $category->id }}"
+                            aria-selected="{{ $key === 0 ? 'true' : 'false' }}">
                         {{ $category->name }}
                     </button>
-                    @endforeach
-                </div> -->
+                @endforeach
             </div>
+        </div>
 
-            <!-- Phần nội dung tab -->
-            {{--
-            <div class="col-xxl-9 col-xl-9 col-lg-8">
-                <div class="tab-content" id="v-pills-tabContent">
-                    @foreach ($categories as $key => $category)
+        <!-- Phần nội dung tab -->
+        <div class="col-xxl-9 col-xl-9 col-lg-8">
+            <div class="tab-content" id="v-pills-tabContent">
+                @foreach ($categories as $key => $category)
                     <div class="tab-pane fade {{ $key === 0 ? 'show active' : '' }}"
-            id="v-pills-{{ $category->id }}"
-            role="tabpanel"
-            aria-labelledby="v-pills-{{ $category->id }}-tab">
-            <div class="row">
-                @if ($category->products->count() > 0)
-                @foreach ($category->products as $product)
-                @php
-                $mainImage = $product->images->first(); // Ảnh chính
-                $bestVariation = $product->variations->first(); // Variation có giảm giá mạnh nhất
-                @endphp
-                <div class="col-xxl-3 col-xl-3 col-lg-4 col-md-4 col-sm-6 mb-4">
-                    <div class="product-card-l">
-                        <div class="product-img position-relative overflow-hidden">
-                            <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}" class="d-block">
-                                <!-- Ảnh chính: đồng bộ kích thước bằng ratio và object-fit -->
-                                <div class="ratio ratio-1x1">
-                                    <img src="{{ asset($mainImage->url ?? '/client/assets/images/product/default.jpg') }}"
-                                        alt="{{ $product->name }}"
-                                        class="img-fluid w-100 object-fit-cover"
-                                        style="transition: transform 0.3s ease;"
-                                        onmouseover="this.style.transform='scale(1.1)'"
-                                        onmouseout="this.style.transform='scale(1)'" />
-                                </div>
-                            </a>
-                            <div class="product-lavels position-absolute top-0 start-0">
-                                @if ($bestVariation)
-                                <span class="badge bg-danger">Giảm
-                                    {{ number_format($bestVariation->price - $bestVariation->sale_price, 0, ',', '.') }}đ</span>
-                                @endif
-                            </div>
-                            <div class="product-actions position-absolute bottom-0 end-0 p-2">
-                                <a href="#" class="text-dark me-2"><i class="flaticon-heart"></i></a>
-                                <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}" class="text-dark me-2"><i class="flaticon-search"></i></a>
-                                <a href="{{ route('cart.add', ['id' => $product->id]) }}" class="text-dark"><i class="flaticon-shopping-cart"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-title text-center py-2">
-                            <h3 class="product-title mb-2">
-                                <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}"
-                                    class="text-dark text-decoration-none link-primary">{{ $product->name }}</a>
-                            </h3>
-                            @if ($bestVariation)
-                            <div>
-                                <del class="text-muted">{{ number_format($bestVariation->price, 0, ',', '.') }}đ</del>
-                                <span class="text-danger ms-2">{{ number_format($bestVariation->sale_price, 0, ',', '.') }}đ</span>
-                            </div>
+                         id="v-pills-{{ $category->id }}"
+                         role="tabpanel"
+                         aria-labelledby="v-pills-{{ $category->id }}-tab">
+                        <div class="row">
+                            @if ($category->products->count() > 0)
+                                @foreach ($category->products as $product)
+                                    @php
+                                        $mainImage = $product->images->first(); // Ảnh chính
+                                        $bestVariation = $product->variations->first(); // Variation có giảm giá mạnh nhất
+                                    @endphp
+                                    <div class="col-xxl-3 col-xl-3 col-lg-4 col-md-4 col-sm-6 mb-4">
+                                        <div class="product-card-l">
+                                            <div class="product-img position-relative overflow-hidden">
+                                                <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}" class="d-block">
+                                                    <!-- Ảnh chính: đồng bộ kích thước bằng ratio và object-fit -->
+                                                    <div class="ratio ratio-1x1">
+                                                        <img src="{{ asset($mainImage->url ?? '/client/assets/images/product/default.jpg') }}"
+                                                             alt="{{ $product->name }}"
+                                                             class="img-fluid w-100 object-fit-cover"
+                                                             style="transition: transform 0.3s ease;"
+                                                             onmouseover="this.style.transform='scale(1.1)'"
+                                                             onmouseout="this.style.transform='scale(1)'" />
+                                                    </div>
+                                                </a>
+                                                <div class="product-lavels position-absolute top-0 start-0">
+                                                    @if ($bestVariation)
+                                                        <span class="badge bg-danger">Giảm
+                                                            {{ number_format($bestVariation->price - $bestVariation->sale_price, 0, ',', '.') }}đ</span>
+                                                    @endif
+                                                </div>
+                                                <div class="product-actions position-absolute bottom-0 end-0 p-2">
+                                                    <a href="#" class="text-dark me-2"><i class="flaticon-heart"></i></a>
+                                                    <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}" class="text-dark me-2"><i class="flaticon-search"></i></a>
+                                                    <a href="{{ route('cart.add', ['id' => $product->id]) }}" class="text-dark"><i class="flaticon-shopping-cart"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="product-title text-center py-2">
+                                                <h3 class="product-title mb-2">
+                                                    <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}"
+                                                       class="text-dark text-decoration-none link-primary">{{ $product->name }}</a>
+                                                </h3>
+                                                @if ($bestVariation)
+                                                    <div>
+                                                        <del class="text-muted">{{ number_format($bestVariation->price, 0, ',', '.') }}đ</del>
+                                                        <span class="text-danger ms-2">{{ number_format($bestVariation->sale_price, 0, ',', '.') }}đ</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p>Không có sản phẩm nào trong danh mục này.</p>
                             @endif
                         </div>
                     </div>
-                </div>
                 @endforeach
-                @else
-                <p>Không có sản phẩm nào trong danh mục này.</p>
-                @endif
             </div>
         </div>
-        @endforeach
     </div>
-</div>--}}
-</div>
 </div>
 
 <!-- Đảm bảo Bootstrap JS được tải để tab hoạt động -->
@@ -515,68 +514,9 @@
 
 <!-- =============== banner xl area start =============== -->
 <div class="banner-xl-area ml-110 mt-100">
-<!-- Giữ nguyên nội dung từ nhánh dat1 -->
-<div class="container-fluid p-0">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="banner-xl-bg d-flex align-items-center position-relative">
-                <div class="banner-shapes">
-                    <img src="/client/assets/images/shapes/b-xl-right.png" alt=""
-                        class="position-absolute top-0 end-0" />
-                    <img src="/client/assets/images/shapes/b-xl-left.png" alt=""
-                        class="position-absolute top0 bottom-0" />
-                </div>
-                <div class="col-xxl-9 col-xl-9 col-lg-8">
-                    <div class="tab-content" id="v-pills-tabContent">
-                        @foreach ($categories as $key => $category)
-                        <div class="tab-pane fade {{ $key === 0 ? 'show active' : '' }}"
-                            id="v-pills-{{ $category->id }}" role="tabpanel"
-                            aria-labelledby="v-pills-{{ $category->id }}-tab">
-                            <div class="row">
-                                @if ($category->products->count() > 0)
-                                @foreach ($category->products as $product)
-                                <div class="col-xxl-3 col-xl-4 col-lg-4 col-md-4 col-sm-6">
-                                    <div class="product-card-m d-flex align-items-center">
-                                        <div class="product-img-m">
-                                            <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}">
-                                                <img src="{{ $product->mainImage ? asset('storage/' . $product->mainImage->url) : asset('storage/products/default.jpg') }}"
-                                                    alt="{{ $product->name }}">
-                                            </a>
-                                            <div class="product-cart-icon">
-                                                <a href="javascript:void(0)"
-                                                    onclick="AddCart({{ $product->id }})"
-                                                    class="add-to-cart">
-                                                    <i class="flaticon-shopping-cart"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="product-details-m">
-                                            <a class="product-title-m"
-                                                href="{{ route('client.product.product-details', ['id' => $product->id]) }}">{{ $product->name }}</a>
-                                            <div class="product-price">
-                                                {{-- <del class="old-price">${{ $product->sale_price }}</del> --}}
-                                                {{-- <ins class="new-price">${{ $product->price }}</ins> --}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                                @else
-                                <p>Không có sản phẩm nào trong danh mục này.</p>
-                                @endif
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Giữ lại phần banner-xl-area -->
-<div class="banner-xl-area ml-110 mt-100">
-
+  
+ <!-- =============== banner xl area start =============== -->
+ <div class="banner-xl-area ml-110 mt-100">
         <div class="container-fluid p-0">
             <div class="row">
                 <div class="col-lg-12">
@@ -612,70 +552,70 @@
    
 <div class="tranding-product-wrapper ml-110 mt-70 position-relative">
     <div class="container-fluid">
-        <div class="container mt-5">
-            <div class="row">
-                <div class="col-12 mb-5">
-                    <div class="section-head text-center">
-                        <h2 class="section-title">Sản Phẩm Hot</h2>
-                    </div>
-                </div>
+    <div class="container mt-5">
+    <div class="row">
+        <div class="col-12 mb-5">
+            <div class="section-head text-center">
+                <h2 class="section-title">Sản Phẩm Hot</h2>
             </div>
+        </div>
+    </div>
 
-            <div class="row">
-                @foreach ($hotProducts as $hotProduct)
-                @php
+    <div class="row">
+        @foreach ($hotProducts as $hotProduct)
+            @php
                 $product = $hotProduct->product;
                 $image = $product->images->first()->url ?? '/client/assets/images/default.png';
                 $variation = $product->variations->first();
                 $originalPrice = $variation->price ?? 0;
                 $salePrice = $variation->sale_price ?? $originalPrice;
                 $discount = $originalPrice > $salePrice ? round((($originalPrice - $salePrice) / $originalPrice) * 100) : null;
-                @endphp
+            @endphp
 
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"> <!-- 4 sản phẩm trên 1 hàng -->
-                    <div class="product-card-l">
-                        <div class="product-img position-relative overflow-hidden">
-                            <a href="{{ route('client.product.product-details', $product->id) }}" class="d-block">
-                                <!-- Ảnh chính: đồng bộ kích thước bằng ratio và object-fit -->
-                                <div class="ratio ratio-1x1">
-                                    <img src="{{ asset($image) }}"
-                                        alt="{{ $product->name }}"
-                                        class="img-fluid w-100 object-fit-cover"
-                                        style="transition: transform 0.3s ease;"
-                                        onmouseover="this.style.transform='scale(1.1)'"
-                                        onmouseout="this.style.transform='scale(1)'" />
-                                </div>
-                            </a>
-                            <div class="product-lavels position-absolute top-0 start-0">
-                                @if ($discount)
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"> <!-- 4 sản phẩm trên 1 hàng -->
+                <div class="product-card-l">
+                    <div class="product-img position-relative overflow-hidden">
+                        <a href="{{ route('client.product.product-details', $product->id) }}" class="d-block">
+                            <!-- Ảnh chính: đồng bộ kích thước bằng ratio và object-fit -->
+                            <div class="ratio ratio-1x1">
+                                <img src="{{ asset($image) }}"
+                                     alt="{{ $product->name }}"
+                                     class="img-fluid w-100 object-fit-cover"
+                                     style="transition: transform 0.3s ease;"
+                                     onmouseover="this.style.transform='scale(1.1)'"
+                                     onmouseout="this.style.transform='scale(1)'" />
+                            </div>
+                        </a>
+                        <div class="product-lavels position-absolute top-0 start-0">
+                            @if ($discount)
                                 <span class="badge bg-danger">Giảm {{ $discount }}%</span>
-                                @endif
-                            </div>
-                            <div class="product-actions position-absolute bottom-0 end-0 p-2">
-                                <a href="#" class="text-dark me-2"><i class="flaticon-heart"></i></a>
-                                <a href="{{ route('client.product.product-details', $product->id) }}" class="text-dark me-2"><i class="flaticon-search"></i></a>
-                                <a href="{{ route('cart.add', ['id' => $product->id]) }}" class="text-dark"><i class="flaticon-shopping-cart"></i></a>
-                            </div>
+                            @endif
                         </div>
-                        <div class="product-title text-center py-2">
-                            <h3 class="product-title mb-2">
-                                <a href="{{ route('client.product.product-details', $product->id) }}"
-                                    class="text-dark text-decoration-none link-primary">{{ $product->name }}</a>
-                            </h3>
-                            <div>
-                                @if ($originalPrice > $salePrice)
+                        <div class="product-actions position-absolute bottom-0 end-0 p-2">
+                            <a href="#" class="text-dark me-2"><i class="flaticon-heart"></i></a>
+                            <a href="{{ route('client.product.product-details', $product->id) }}" class="text-dark me-2"><i class="flaticon-search"></i></a>
+                            <a href="{{ route('cart.add', ['id' => $product->id]) }}" class="text-dark"><i class="flaticon-shopping-cart"></i></a>
+                        </div>
+                    </div>
+                    <div class="product-title text-center py-2">
+                        <h3 class="product-title mb-2">
+                            <a href="{{ route('client.product.product-details', $product->id) }}"
+                               class="text-dark text-decoration-none link-primary">{{ $product->name }}</a>
+                        </h3>
+                        <div>
+                            @if ($originalPrice > $salePrice)
                                 <del class="text-muted">{{ number_format($originalPrice, 0, ',', '.') }}đ</del>
                                 <span class="text-danger ms-2">{{ number_format($salePrice, 0, ',', '.') }}đ</span>
-                                @else
+                            @else
                                 <span class="text-danger">{{ number_format($originalPrice, 0, ',', '.') }}đ</span>
-                                @endif
-                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
-                @endforeach
             </div>
-        </div>
+        @endforeach
+    </div>
+</div>
 
 
         <!-- ===============  blog area start =============== -->
