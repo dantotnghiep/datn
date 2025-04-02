@@ -23,7 +23,7 @@ class VNPayService
             "vnp_Locale" => "vn",
             "vnp_OrderInfo" => "Thanh toan don hang " . $vnp_TxnRef,
             "vnp_OrderType" => "other",
-            "vnp_ReturnUrl" => config('vnpay.return_url'),
+            "vnp_ReturnUrl" => request()->getSchemeAndHttpHost() . '/vnpay-return',
             "vnp_TxnRef" => $vnp_TxnRef
         );
 
