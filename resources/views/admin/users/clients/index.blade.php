@@ -29,7 +29,7 @@
                     @foreach ($customers as $customer)
                     <tr>
                         <td>
-                            <a href="{{ route('admin.users.clients.index', $customer->id) }}">{{ $customer->name }}</a>
+                            <a href="{{ route('admin.users.clients.detail', $customer->id) }}">{{ $customer->name }}</a>
                         </td>
                         <td>{{ $customer->email }}</td>
                         <td>{{ $customer->completed_orders }}</td>

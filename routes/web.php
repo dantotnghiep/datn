@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
@@ -70,7 +71,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
-        Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/', [ClientOrderController::class, 'index'])->name('orders.index');
         Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
     });
 });
@@ -179,6 +180,7 @@ Route::middleware(['auth'])->prefix('admin/users')->group(function () {
     Route::get('/clients', [AdminCustomerController::class, 'index'])->name('admin.users.clients.index');
     Route::post('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
     Route::post('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
+    Route::get('/clients/{id}', [AdminCustomerController::class, 'show'])->name('admin.users.clients.detail');
 
     // Nhân viên/admin
     Route::get('/staffs', [AdminEmployeeController::class, 'index'])->name('admin.users.staffs.index');
