@@ -37,4 +37,26 @@ class AdminCustomerController extends Controller
         $customer->update(['status' => 'active']);
         return redirect()->route('admin.users.clients.index')->with('success', 'Mở khóa tài khoản thành công!');
     }
+
+    public function show($id)
+    {
+        $customer = User::with(['orders.status'])->where('role', 'user')->findOrFail($id);
+
+        // Dữ liệu cho biểu đồ: Số lượng đơn hàng theo trạng thái
+        $chartData = $customer->orders()
+            ->join('order_statuses', 'orders.status_id', '=', 'order_statuses.id')
+            ->selectRaw('order_statuses.status_name, COUNT(*) as count')
+            ->groupBy('order_statuses.status_name')
+            ->pluck('count', 'order_statuses.status_name')
+            ->toArray();
+
+        // Đảm bảo có dữ liệu cho các trạng thái chính
+        $statuses = ['Completed', 'Cancelled', 'Failed'];
+        $chartDataFinal = [];
+        foreach ($statuses as $status) {
+            $chartDataFinal[$status] = $chartData[$status] ?? 0;
+        }
+
+        return view('admin.users.clients.detail', compact('customer', 'chartDataFinal'));
+    }
 }
