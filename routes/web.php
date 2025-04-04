@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function () {
 //ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
 
 Route::prefix('admin')->group(function () {
-    
+
 
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
@@ -87,7 +87,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
     });
 
-    Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
+    Route::post('/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
 
     //admin/Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');

@@ -97,7 +97,7 @@
                             <li><a href="team-update.html">Settings</a></li>
                         </ul>
                         <ul class="border-top">
-                            <li><a href="signin.html"><i class="ri-logout-circle-r-line"></i>Logout</a>
+                            <li><a href="{{ route('vh.dz') }}"><i class="ri-logout-circle-r-line"></i>Logout</a>
                             </li>
                         </ul>
                     </div>
