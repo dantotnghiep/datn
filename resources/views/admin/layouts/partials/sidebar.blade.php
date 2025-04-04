@@ -49,7 +49,7 @@
                                     class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>
                         <li><a href="add-sub-category.html" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Sub Category</a></li>
-                        <li><a href="order-list.html" class="cr-page-link drop"><i
+                        <li><a href="{{ route('admin.orders.index') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Order List</a></li>
                         <li class="cr-sb-item sb-subdrop-item">
                             <a href="javascript:void(0)" class="cr-sub-drop-toggle">
@@ -92,9 +92,8 @@
                 <li class="cr-sb-item-separator"></li>
                 <li class="cr-sb-title condense">Elements</li>
                 <li class="cr-sb-item">
-                    <a href="remix-icons.html" class="cr-page-link">
-                        <i class="ri-remixicon-line"></i><span class="condense"><span class="hover-title">remix
-                                icons</span></span></a>
+                    <a href="{{route('staff.dashboard')}}" class="cr-page-link">
+                        <i class="ri-remixicon-line"></i><span class="condense"><span class="hover-title">Staff</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="material-icons.html" class="cr-page-link">

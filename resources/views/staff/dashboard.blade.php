@@ -1,4 +1,4 @@
-@extends('admin.layouts.master')
+@extends('staff.layouts.master')
 
 @section('content')
     <div class="cr-main-content">
@@ -238,7 +238,7 @@
                                                 </td>
                                                 <td>
                                                     <span class="cat">
-                                                        <a href="product-list.html">Laptop1111</a>
+                                                        <a href="product-list.html">Laptop</a>
                                                         <a href="product-list.html">Furniture</a>
                                                         <a href="product-list.html">Phones</a>
                                                     </span>

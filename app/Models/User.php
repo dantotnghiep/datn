@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -22,7 +23,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'phone',
-        'address'
+        'address',
+        'status',
+        'role'
     ];
 
     /**
@@ -45,7 +48,29 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
     ];
 
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        $this->setAttribute('status', $this->status ?? 'active');
+        $this->setAttribute('role', $this->role ?? 'user');
+    }
+
+    
+
     public function orders(){
         return $this->hasMany(Order::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+    public function isStaff()
+    {
+        return $this->role === 'staff';
+    }
+    public function isActive()
+    {
+        return $this->status === 'active';
     }
 }

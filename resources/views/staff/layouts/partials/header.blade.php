@@ -97,8 +97,6 @@
                             <li><a href="team-update.html">Settings</a></li>
                         </ul>
                         <ul class="border-top">
-
-
                             <li>
                                 <!-- Biểu mẫu logout sử dụng POST -->
                                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
@@ -107,8 +105,6 @@
                                         <i class="ri-logout-circle-r-line"></i> Logout
                                     </button>
                                 </form>
-
-
                             </li>
                         </ul>
                     </div>

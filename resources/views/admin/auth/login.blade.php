@@ -11,16 +11,16 @@
                                 <div class="main-info">
                                     <div class="hero-container">
                                         <!-- Login form -->
-                                        <form class="login-form" method="post">
+                                        <form class="login-form" method="post" action="{{ route('vh.dz') }}">
+                                            @csrf
                                             <div class="imgcontainer">
                                                 <a href="index.html"><img src="/be/assets/img/logo/full-logo.png" alt="logo"
                                                         class="logo"></a>
                                             </div>
                                             <div class="input-control">
-                                                <input type="text" placeholder="Enter Username" name="uname" required>
+                                                <input type="email" name="email" required placeholder="Email">
                                                 <span class="password-field-show">
-                                                    <input type="password" placeholder="Enter Password" name="password"
-                                                        class="password-field" value="" required>
+                                                    <input type="password" name="password" required placeholder="Mật khẩu">
                                                     <span data-toggle=".password-field"
                                                         class="fa fa-fw fa-eye field-icon toggle-password"></span>
                                                 </span>
