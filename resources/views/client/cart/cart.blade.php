@@ -5,6 +5,9 @@
     <!-- =============== Cart area start =============== -->
     <div class="cart-area mt-100 ml-110">
         <div class="container">
+            <!-- Add CSRF token meta tag -->
+            <meta name="csrf-token" content="{{ csrf_token() }}">
+
             <!-- Add this alert section -->
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -76,18 +79,19 @@
                                                 @endif
                                             </td>
                                             <td class="quantity-col">
-                                                <form action="{{ route('cart.update', $item->id) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <div class="quantity">
-                                                        <input type="number" name="quantity" min="1"
-                                                            max="{{ $variation->stock }}" value="{{ $item->quantity }}"
-                                                            onchange="this.form.submit()">
-                                                    </div>
-                                                </form>
+                                                <div class="quantity">
+                                                    <button type="button" class="quantity-btn quantity-decrease">-</button>
+                                                    <input type="text" name="quantity" min="1"
+                                                        max="{{ $variation->stock }}" value="{{ $item->quantity }}"
+                                                        class="quantity-input"
+                                                        data-item-id="{{ $item->id }}"
+                                                        data-price="{{ $item->price }}"
+                                                        data-subtotal-id="subtotal-{{ $item->id }}"
+                                                        readonly>
+                                                    <button type="button" class="quantity-btn quantity-increase">+</button>
+                                                </div>
                                             </td>
-                                            <td class="total-col">{{ number_format($subtotal) }} VND</td>
+                                            <td class="total-col" id="subtotal-{{ $item->id }}">{{ number_format($subtotal) }} VND</td>
                                             <td class="delete-col">
                                                 <form action="{{ route('cart.remove', $item->id) }}" method="POST"
                                                     class="d-inline">
@@ -107,17 +111,6 @@
                                 <div class="col-xxl-4 col-lg-4">
                                     <div class="cart-coupon-input">
                                         <h5 class="coupon-title">Coupon Code</h5>
-
-                                        <!-- Debug information -->
-                                        @php
-                                            $availableDiscounts = $discounts->filter(function ($discount) {
-                                                return now()->between($discount->startDate, $discount->endDate);
-                                            });
-                                        @endphp
-
-                                        @if ($availableDiscounts->isEmpty())
-                                            <div class="alert alert-info">Không có mã giảm giá nào khả dụng</div>
-                                        @endif
 
                                         <form action="{{ route('cart.apply-coupon') }}" method="POST"
                                             class="coupon-input">
@@ -218,19 +211,194 @@
         </div>
     </div>
     <!-- ===============  newslatter area end  =============== -->
-
     <script>
-        document.getElementById('select-all-btn').addEventListener('click', function() {
-            document.querySelectorAll('.select-item').forEach(item => item.checked = true);
-        });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tự động chọn tất cả các sản phẩm khi trang tải xong
+            const checkboxes = document.querySelectorAll('.select-item');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+                checkbox.addEventListener('change', updateCartTotal);
+            });
 
-        document.getElementById('deselect-all-btn').addEventListener('click', function() {
-            document.querySelectorAll('.select-item').forEach(item => item.checked = false);
-        });
+            // Cập nhật giỏ hàng khi trang tải lần đầu
+            updateCartTotal();
 
-        document.getElementById('select-all').addEventListener('change', function() {
-            const isChecked = this.checked;
-            document.querySelectorAll('.select-item').forEach(item => item.checked = isChecked);
+            // Select/Deselect all buttons
+            document.getElementById('select-all-btn').addEventListener('click', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                updateCartTotal();
+            });
+
+            document.getElementById('deselect-all-btn').addEventListener('click', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updateCartTotal();
+            });
+
+            const quantityInputs = document.querySelectorAll('.quantity-input');
+            quantityInputs.forEach(input => {
+                // The input is now readonly, so we only need to handle programmatic changes
+                input.addEventListener('change', handleQuantityChange);
+            });
+
+            // Add event handlers for the quantity buttons
+            const decreaseButtons = document.querySelectorAll('.quantity-decrease');
+            const increaseButtons = document.querySelectorAll('.quantity-increase');
+
+            decreaseButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentNode.querySelector('.quantity-input');
+                    let value = parseInt(input.value);
+                    if (value > 1) {
+                        input.value = value - 1;
+                        // Trigger the change event manually
+                        const event = new Event('change', { bubbles: true });
+                        input.dispatchEvent(event);
+                    }
+                });
+            });
+
+            increaseButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentNode.querySelector('.quantity-input');
+                    let value = parseInt(input.value);
+                    let max = parseInt(input.getAttribute('max'));
+                    if (value < max) {
+                        input.value = value + 1;
+                        // Trigger the change event manually
+                        const event = new Event('change', { bubbles: true });
+                        input.dispatchEvent(event);
+                    }
+                });
+            });
+
+            function handleQuantityChange() {
+                const itemId = this.dataset.itemId;
+                let quantity = parseInt(this.value) || 0;
+                const price = parseFloat(this.dataset.price) || 0;
+                const subtotalId = this.dataset.subtotalId;
+
+                // Kiểm tra và giới hạn số lượng
+                const maxStock = parseInt(this.getAttribute('max')) || 1;
+                if (quantity > maxStock) {
+                    quantity = maxStock;
+                    this.value = maxStock;
+                }
+                if (quantity < 1) {
+                    quantity = 1;
+                    this.value = 1;
+                }
+
+                // Cập nhật subtotal cho sản phẩm
+                const subtotal = quantity * price;
+                const subtotalElement = document.getElementById(subtotalId);
+                if (subtotalElement) {
+                    subtotalElement.textContent = `${numberFormat(subtotal)} VND`;
+                }
+
+                // Gọi hàm cập nhật tổng giỏ hàng
+                updateCartTotal();
+
+                // Gửi Ajax request
+                const token = document.querySelector('meta[name="csrf-token"]').content;
+                fetch(`{{ url('/cart') }}/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        quantity: quantity,
+                        _method: 'PUT'
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            console.error('Response error:', err);
+                            throw new Error(err.message || 'Lỗi từ máy chủ');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Server response:', data);
+                    if (data.success) {
+                        // Cập nhật giá trị trong input box nếu có thay đổi từ server
+                        if (data.quantity && parseInt(data.quantity) !== quantity) {
+                            this.value = data.quantity;
+                            // Cập nhật lại subtotal và tổng
+                            const newSubtotal = data.quantity * price;
+                            if (subtotalElement) {
+                                subtotalElement.textContent = `${numberFormat(newSubtotal)} VND`;
+                            }
+                            updateCartTotal();
+                        }
+                    } else {
+                        console.error('Error:', data.message);
+                        // Có thể hiển thị thông báo lỗi
+                        alert(data.message || 'Có lỗi xảy ra khi cập nhật giỏ hàng');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error details:', error);
+                    alert('Có lỗi xảy ra khi cập nhật giỏ hàng: ' + error.message);
+                });
+            }
+
+            function updateCartTotal() {
+                // Tính tổng cho các mục đã chọn (cho quá trình thanh toán)
+                let selectedTotal = 0;
+                const selectedItems = document.querySelectorAll('.select-item:checked');
+
+                selectedItems.forEach(checkbox => {
+                    const row = checkbox.closest('tr');
+                    const quantityInput = row.querySelector('.quantity-input');
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    const price = parseFloat(quantityInput.dataset.price) || 0;
+                    selectedTotal += quantity * price;
+                });
+
+                // Tính tổng cho tất cả các mục trong giỏ hàng
+                let allItemsTotal = 0;
+                const allQuantityInputs = document.querySelectorAll('.quantity-input');
+
+                allQuantityInputs.forEach(input => {
+                    const quantity = parseInt(input.value) || 0;
+                    const price = parseFloat(input.dataset.price) || 0;
+                    allItemsTotal += quantity * price;
+                });
+
+                // Cập nhật Cart Subtotal với tổng tất cả mục
+                const subtotalElement = document.querySelector('.total-table tbody tr:first-child .tt-right');
+                if (subtotalElement) {
+                    subtotalElement.textContent = `${numberFormat(allItemsTotal)} VND`;
+                }
+
+                // Cập nhật Final Total
+                const finalTotalElement = document.querySelector('.total-table tbody tr:last-child .tt-right strong');
+                if (finalTotalElement) {
+                    let finalTotal = allItemsTotal;
+
+                    // Kiểm tra và áp dụng giảm giá nếu có
+                    const discountRow = document.querySelector('.total-table tbody tr:nth-child(2)');
+                    if (discountRow && discountRow.querySelector('.tt-left').textContent.includes('Discount')) {
+                        const discountText = discountRow.querySelector('.tt-right').textContent;
+                        const discountAmount = parseFloat(discountText.replace(/[^0-9]/g, '')) || 0;
+                        finalTotal = allItemsTotal - discountAmount;
+                    }
+
+                    finalTotalElement.textContent = `${numberFormat(finalTotal)} VND`;
+                }
+            }
+
+            function numberFormat(number) {
+                return new Intl.NumberFormat('vi-VN').format(Math.round(number));
+            }
         });
     </script>
 
@@ -239,5 +407,38 @@
             display: block;
             margin: 0 auto;
         }
+
+        .quantity {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            margin: 0 5px;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .quantity-btn:hover {
+            background-color: #e9ecef;
+        }
+
+        /* No need for browser spinner removal since we're using text input */
     </style>
 @endsection
