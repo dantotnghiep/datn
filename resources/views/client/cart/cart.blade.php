@@ -80,12 +80,15 @@
                                             </td>
                                             <td class="quantity-col">
                                                 <div class="quantity">
-                                                    <input type="number" name="quantity" min="1"
+                                                    <button type="button" class="quantity-btn quantity-decrease">-</button>
+                                                    <input type="text" name="quantity" min="1"
                                                         max="{{ $variation->stock }}" value="{{ $item->quantity }}"
                                                         class="quantity-input"
                                                         data-item-id="{{ $item->id }}"
                                                         data-price="{{ $item->price }}"
-                                                        data-subtotal-id="subtotal-{{ $item->id }}">
+                                                        data-subtotal-id="subtotal-{{ $item->id }}"
+                                                        readonly>
+                                                    <button type="button" class="quantity-btn quantity-increase">+</button>
                                                 </div>
                                             </td>
                                             <td class="total-col" id="subtotal-{{ $item->id }}">{{ number_format($subtotal) }} VND</td>
@@ -237,27 +240,56 @@
 
             const quantityInputs = document.querySelectorAll('.quantity-input');
             quantityInputs.forEach(input => {
-                // Xử lý khi số lượng thay đổi
+                // The input is now readonly, so we only need to handle programmatic changes
                 input.addEventListener('change', handleQuantityChange);
-                // Xử lý khi người dùng nhập số (không cần đợi blur)
-                input.addEventListener('input', handleQuantityChange);
+            });
+
+            // Add event handlers for the quantity buttons
+            const decreaseButtons = document.querySelectorAll('.quantity-decrease');
+            const increaseButtons = document.querySelectorAll('.quantity-increase');
+
+            decreaseButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentNode.querySelector('.quantity-input');
+                    let value = parseInt(input.value);
+                    if (value > 1) {
+                        input.value = value - 1;
+                        // Trigger the change event manually
+                        const event = new Event('change', { bubbles: true });
+                        input.dispatchEvent(event);
+                    }
+                });
+            });
+
+            increaseButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentNode.querySelector('.quantity-input');
+                    let value = parseInt(input.value);
+                    let max = parseInt(input.getAttribute('max'));
+                    if (value < max) {
+                        input.value = value + 1;
+                        // Trigger the change event manually
+                        const event = new Event('change', { bubbles: true });
+                        input.dispatchEvent(event);
+                    }
+                });
             });
 
             function handleQuantityChange() {
                 const itemId = this.dataset.itemId;
-                const quantity = parseInt(this.value) || 0;
+                let quantity = parseInt(this.value) || 0;
                 const price = parseFloat(this.dataset.price) || 0;
                 const subtotalId = this.dataset.subtotalId;
 
                 // Kiểm tra và giới hạn số lượng
                 const maxStock = parseInt(this.getAttribute('max')) || 1;
                 if (quantity > maxStock) {
+                    quantity = maxStock;
                     this.value = maxStock;
-                    return;
                 }
                 if (quantity < 1) {
+                    quantity = 1;
                     this.value = 1;
-                    return;
                 }
 
                 // Cập nhật subtotal cho sản phẩm
@@ -272,7 +304,7 @@
 
                 // Gửi Ajax request
                 const token = document.querySelector('meta[name="csrf-token"]').content;
-                fetch(`/cart/update/${itemId}`, {
+                fetch(`{{ url('/cart') }}/${itemId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -284,12 +316,37 @@
                         _method: 'PUT'
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            console.error('Response error:', err);
+                            throw new Error(err.message || 'Lỗi từ máy chủ');
+                        });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     console.log('Server response:', data);
+                    if (data.success) {
+                        // Cập nhật giá trị trong input box nếu có thay đổi từ server
+                        if (data.quantity && parseInt(data.quantity) !== quantity) {
+                            this.value = data.quantity;
+                            // Cập nhật lại subtotal và tổng
+                            const newSubtotal = data.quantity * price;
+                            if (subtotalElement) {
+                                subtotalElement.textContent = `${numberFormat(newSubtotal)} VND`;
+                            }
+                            updateCartTotal();
+                        }
+                    } else {
+                        console.error('Error:', data.message);
+                        // Có thể hiển thị thông báo lỗi
+                        alert(data.message || 'Có lỗi xảy ra khi cập nhật giỏ hàng');
+                    }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('Error details:', error);
+                    alert('Có lỗi xảy ra khi cập nhật giỏ hàng: ' + error.message);
                 });
             }
 
@@ -350,5 +407,38 @@
             display: block;
             margin: 0 auto;
         }
+
+        .quantity {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            margin: 0 5px;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .quantity-btn:hover {
+            background-color: #e9ecef;
+        }
+
+        /* No need for browser spinner removal since we're using text input */
     </style>
 @endsection
