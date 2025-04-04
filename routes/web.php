@@ -74,6 +74,7 @@ Route::prefix('admin')->group(function () {
 
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
     // Admin Orders
