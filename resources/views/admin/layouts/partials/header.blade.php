@@ -98,9 +98,7 @@
                         </ul>
                         <ul class="border-top">
 
-                            <li><a href="{{ route('vh.dz') }}"><i class="ri-logout-circle-r-line"></i>Logout</a>
 
-                            <li><a href="signin.html"><i class="ri-logout-circle-r-line"></i>Logout</a>
                             <li>
                                 <!-- Biểu mẫu logout sử dụng POST -->
                                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
