@@ -88,7 +88,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
     });
 
-    Route::post('/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
+    Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
 
     //admin/Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
@@ -190,6 +190,9 @@ Broadcast::routes();
 
 // Route cho admin
 Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/order-list', [OrderController::class, 'index'])->name('admin.orders.list');
+
+    // Route cập nhật trạng thái đơn hàng
     Route::post('/admin/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('admin.orders.updateStatus');
 });
