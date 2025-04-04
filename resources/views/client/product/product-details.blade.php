@@ -236,16 +236,27 @@
                                     </li>
 
                                     <li class="d-flex align-items-center pd-cart-btns">
+                                      
+
+                                        <form action="{{ route('cart.add') }}" method="POST"
+                                        class="d-flex align-items-center">
+                                        @csrf
+                                        <input type="hidden" name="variation_id" id="variation_id">
+                                        <input type="hidden" name="product_name" value="{{ $product->name }}">
+                                        <input type="hidden" name="color" id="selected_color">
+                                        <input type="hidden" name="size" id="selected_size">
+                                        <input type="hidden" name="price" id="selected_price">
+
                                         <div class="quantity-group">
                                             <button type="button" class="qty-btn qty-minus">−</button>
                                             <input type="number" id="product-quantity" min="1" max="10"
                                                 step="1" value="1" readonly>
                                             <button type="button" class="qty-btn qty-plus">+</button>
                                         </div>
-
-
-
                                         <button type="submit" class="pd-add-cart">Add to cart</button>
+                                    </form>
+
+                                     
                                     </li>
                                     <li class="pd-type">Product Type: <span>{{ $product->category->name }}</span></li>
                                     <li class="pd-type">Categories: <span>{{ $product->category->name }}</span></li>
