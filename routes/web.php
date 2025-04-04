@@ -70,10 +70,11 @@ Route::middleware('auth')->group(function () {
 //ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
 
 Route::prefix('admin')->group(function () {
-    
+
 
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
     // Admin Orders
@@ -189,6 +190,9 @@ Broadcast::routes();
 
 // Route cho admin
 Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/order-list', [OrderController::class, 'index'])->name('admin.orders.list');
+
+    // Route cập nhật trạng thái đơn hàng
     Route::post('/admin/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('admin.orders.updateStatus');
 });
