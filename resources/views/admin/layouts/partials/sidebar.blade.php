@@ -49,7 +49,7 @@
                                     class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>
                         <li><a href="add-sub-category.html" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Sub Category</a></li>
-                        <li><a href="order-list.html" class="cr-page-link drop"><i
+                        <li><a href="{{ route('admin.orders.index') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Order List</a></li>
                         <li class="cr-sb-item sb-subdrop-item">
                             <a href="javascript:void(0)" class="cr-sub-drop-toggle">
