@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\HotProductController;
 use App\Http\Controllers\AttributeValueController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -43,7 +45,7 @@ Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('c
 
 // Auth
 Route::get('/login', [App\Http\Controllers\Client\AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [App\Http\Controllers\Client\AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [LoginController::class, 'loginUser'])->name('login.post');
 Route::get('/register', [App\Http\Controllers\Client\AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [App\Http\Controllers\Client\AuthController::class, 'register'])->name('register.post');
 Route::get('/forgot-password', [App\Http\Controllers\Client\AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
@@ -52,7 +54,7 @@ Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthControlle
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
+    // Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
@@ -60,7 +62,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
     });
 });
 
@@ -68,10 +69,11 @@ Route::middleware('auth')->group(function () {
 //ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
 
 Route::prefix('admin')->group(function () {
-    Route::get('/', [ProductController::class, 'dashboard'])->name('admin.dashboard');
+
 
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
     // Admin Orders
@@ -80,6 +82,12 @@ Route::prefix('admin')->group(function () {
         Route::get('/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show'])->name('admin.orders.show');
         Route::post('/{order}/update-status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.update_status');
     });
+
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
+    });
+
+    Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
 
     //admin/Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
@@ -181,6 +189,9 @@ Broadcast::routes();
 
 // Route cho admin
 Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/order-list', [OrderController::class, 'index'])->name('admin.orders.list');
+
+    // Route cập nhật trạng thái đơn hàng
     Route::post('/admin/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('admin.orders.updateStatus');
 });
@@ -191,3 +202,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('orders.updateStatus');
 });
 
+Route::resource('/admin/users', UserController::class);
+// Route::middleware(['auth', 'role:admin'])->group(function () {
+//     Route::resource('/admin/users', UserController::class);
+// });
+
+Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
