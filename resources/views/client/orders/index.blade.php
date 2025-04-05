@@ -30,7 +30,7 @@
                                         <td>${{ number_format($order->total_amount, 2) }}</td>
                                         <td>
                                             <span id="status-badge-{{ $order->id }}"
-                                                class="badge bg-{{ $order->status_id == 1 ? 'warning' : ($order->status_id == 2 ? 'info' : ($order->status_id == 3 ? 'danger' : 'success')) }}">
+                                                class="badge bg-{{ $order->status_id == 1 ? 'warning' : ($order->status_id == 2 ? 'info' : ($order->status_id == 3 ? 'success' : 'danger')) }}">
                                                 {{ $order->status->status_name ?? 'Processing' }}
                                             </span>
                                         </td>
@@ -90,8 +90,8 @@
             switch(parseInt(order.status_id)) {
                 case 1: newClass = 'bg-warning'; break;
                 case 2: newClass = 'bg-info'; break;
-                case 3: newClass = 'bg-danger'; break;
-                case 4: newClass = 'bg-success'; break;
+                case 3: newClass = 'bg-success'; break;
+                case 4: newClass = 'bg-danger'; break;
             }
             
             statusBadge.addClass(newClass).text(order.status.status_name);
@@ -118,7 +118,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                     'Accept': 'application/json'
                 },
-                success: function(response) {
+                success: function(response) {   
                     if (response.success) {
                         // Cập nhật UI ngay lập tức
                         const statusBadge = $(`#status-badge-${orderId}`);

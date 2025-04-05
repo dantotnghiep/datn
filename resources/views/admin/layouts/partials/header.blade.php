@@ -97,7 +97,18 @@
                             <li><a href="team-update.html">Settings</a></li>
                         </ul>
                         <ul class="border-top">
-                            <li><a href="signin.html"><i class="ri-logout-circle-r-line"></i>Logout</a>
+
+
+                            <li>
+                                <!-- Biểu mẫu logout sử dụng POST -->
+                                <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                                    @csrf  <!-- Bảo vệ khỏi CSRF -->
+                                    <button type="submit" style="background: none; border: none; padding: 0;">
+                                        <i class="ri-logout-circle-r-line"></i> Logout
+                                    </button>
+                                </form>
+
+
                             </li>
                         </ul>
                     </div>
