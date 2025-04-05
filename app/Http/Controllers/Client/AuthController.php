@@ -46,7 +46,7 @@ class AuthController extends Controller
     //     }
     // }
 
-    public function showRegisterForm()
+    public function showRegisterForm(Request $request)
     {
         return view('client.auth.register');
     }
@@ -101,6 +101,7 @@ class AuthController extends Controller
         try {
             Auth::logout();
             $request->session()->invalidate();
+            $request->session()->forget('error'); // Xóa session error
             $request->session()->regenerateToken();
             return redirect()->route('login')
                 ->with('success', 'Đăng xuất thành công!');
