@@ -19,37 +19,25 @@ return new class extends Migration
         DB::table('order_statuses')->insert([
             [
                 'id' => 1,
-                'status_name' => 'Pending',
+                'status_name' => 'Chờ xử lý',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
                 'id' => 2,
-                'status_name' => 'Processing',
+                'status_name' => 'Đang vận chuyển',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
                 'id' => 3,
-                'status_name' => 'Shipping',
+                'status_name' => 'Thành công',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
                 'id' => 4,
-                'status_name' => 'Completed',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'id' => 5,
-                'status_name' => 'Failed',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'id' => 6,
-                'status_name' => 'Cancelled',
+                'status_name' => 'Đã hủy',
                 'created_at' => now(),
                 'updated_at' => now()
             ]
