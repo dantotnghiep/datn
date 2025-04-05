@@ -10,7 +10,7 @@ class Order_cancellation extends Model
     use HasFactory;
 
     protected $table = 'order_cancellations';
-    protected $fillable = ['order_id', 'reason', 'created_at'];
+    protected $fillable = ['order_id', 'reason', 'created_at', 'updated_at'];
 
     public function order() {
         return $this->belongsTo(Order::class);
