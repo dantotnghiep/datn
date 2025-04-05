@@ -234,8 +234,4 @@ class OrderController extends Controller
                 ->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage());
         }
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> 4625bba550d4dfe95a7f7eba6ed330d93ad2934a
 }
