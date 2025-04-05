@@ -104,7 +104,7 @@ class OrderController extends Controller
             // Khách hàng chỉ có thể hủy (status 3) đơn hàng đang chờ xác nhận (status 1)
             if ($order->user_id == Auth::id() && 
                 $order->status_id == 1 && 
-                $newStatusId == 3) {
+                $newStatusId == 4) {
                 return true;
             }
         }
@@ -120,7 +120,7 @@ class OrderController extends Controller
         $statuses = [
             1 => 'Chờ xác nhận',
             2 => 'Đang giao',
-            3 => 'Hủy',
+            3 => 'Đã hủy',
             4 => 'Hoàn thành'
         ];
 
@@ -163,7 +163,7 @@ class OrderController extends Controller
             }
 
             // Cập nhật trạng thái hủy (3)
-            $order->status_id = 3;
+            $order->status_id = 4;
             $order->save();
             
             // Load lại relationship để đảm bảo dữ liệu mới nhất

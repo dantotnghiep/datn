@@ -31,7 +31,7 @@
                                         <td>{{ number_format($order->total_amount, 2) }}</td>
                                         <td>
                                             <span id="status-badge-{{ $order->id }}"
-                                                class="badge bg-{{ $order->status_id == 1 ? 'warning' : ($order->status_id == 2 ? 'info' : ($order->status_id == 3 ? 'danger' : 'success')) }}">
+                                                class="badge bg-{{ $order->status_id == 1 ? 'warning' : ($order->status_id == 2 ? 'info' : ($order->status_id == 3 ? 'success' : 'danger')) }}">
                                                 {{ $order->status->status_name ?? 'Processing' }}
                                             </span>
                                         </td>
@@ -44,7 +44,7 @@
                                             @endif
                                             @if ($order->status_id == 2)
                                                 <button type="button" class="btn btn-sm btn-info update-status-btn"
-                                                    data-order-id="{{ $order->id }}" data-status-id="4">
+                                                    data-order-id="{{ $order->id }}" data-status-id="3">
                                                     Hoàn thành
                                                 </button>
                                             @endif
@@ -110,9 +110,9 @@
             // Cấu hình cho từng trạng thái
             const statusConfig = {
                 1: { class: 'bg-warning', button: '<button type="button" class="btn btn-sm btn-success update-status-btn" data-order-id="' + orderId + '" data-status-id="2">Xác nhận</button>' },
-                2: { class: 'bg-info', button: '<button type="button" class="btn btn-sm btn-info update-status-btn" data-order-id="' + orderId + '" data-status-id="4">Hoàn thành</button>' },
-                3: { class: 'bg-danger', button: '' },
-                4: { class: 'bg-success', button: '' }
+                2: { class: 'bg-info', button: '<button type="button" class="btn btn-sm btn-info update-status-btn" data-order-id="' + orderId + '" data-status-id="3">Hoàn thành</button>' },
+                3: { class: 'bg-success', button: '' },
+                4: { class: 'bg-danger', button: '' }
             };
 
             const config = statusConfig[order.status_id];
