@@ -54,11 +54,15 @@ Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthControlle
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
+    // Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
 
+    // Route::get('/order', [OrderController::class, 'order'])->name('order');
+    // Route::prefix('orders')->group(function () {
+    //     Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+    // });
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
@@ -70,10 +74,11 @@ Route::middleware('auth')->group(function () {
 //ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
 
 Route::prefix('admin')->group(function () {
-    
+
 
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
     // Admin Orders
@@ -189,6 +194,9 @@ Broadcast::routes();
 
 // Route cho admin
 Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/order-list', [OrderController::class, 'index'])->name('admin.orders.list');
+
+    // Route cập nhật trạng thái đơn hàng
     Route::post('/admin/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('admin.orders.updateStatus');
 });

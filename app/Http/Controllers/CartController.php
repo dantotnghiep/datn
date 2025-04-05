@@ -81,8 +81,8 @@ class CartController extends Controller
         $request->validate([
             'variation_id' => 'required|exists:variations,id',
             'product_name' => 'required|string',
-            'color' => 'required|string',
-            'size' => 'required|string',
+            'color' => 'string',
+            'size' => 'string',
             'quantity' => 'required|integer|min:1',
             'price' => 'required|numeric'
         ]);
@@ -124,15 +124,50 @@ class CartController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Đảm bảo request có quantity
+        if (!$request->has('quantity')) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Thiếu thông tin số lượng'], 400);
+            }
+            return redirect()->route('cart.index')->with('error', 'Thiếu thông tin số lượng!');
+        }
+
+        // Validate dữ liệu
         $request->validate([
             'quantity' => 'required|integer|min:1'
         ]);
 
-        Cart::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->update(['quantity' => $request->quantity]);
+        \Log::info('Update Cart Request', [
+            'cart_id' => $id,
+            'user_id' => auth()->id(),
+            'quantity' => $request->quantity
+        ]);
 
-        return redirect()->route('cart.index')->with('success', 'Cart updated successfully!');
+        $cart = Cart::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($cart) {
+            $cart->update(['quantity' => $request->quantity]);
+
+            // Trả về JSON response khi là AJAX request
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Số lượng đã được cập nhật',
+                    'quantity' => $request->quantity,
+                    'id' => $id
+                ]);
+            }
+
+            return redirect()->route('cart.index')->with('success', 'Cart updated successfully!');
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy sản phẩm'], 404);
+        }
+
+        return redirect()->route('cart.index')->with('error', 'Không tìm thấy sản phẩm!');
     }
 
     public function checkout(Request $request)

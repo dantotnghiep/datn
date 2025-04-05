@@ -46,21 +46,12 @@
                                         @forelse ($products as $product)
                                             <tr>
                                                 <td>
-                                                    @if ($product->images)
-                                                        @foreach ($product->images as $image)
-                                                            @if ($image->is_main)
-                                                            <img class="tbl-thumb"
-                                                                src="{{ asset('storage/' . $image->url) }}"
-                                                                alt="{{ $product->name }}"
-                                                                style="width: 100px; height: 100px; object-fit: cover;"
-                                                                onerror="this.src='/be/assets/img/product/default.jpg'">
-                                                            @endif
-                                                        @endforeach
-                                                    @else
-                                                        <img class="tbl-thumb" src="/be/assets/img/product/default.jpg"
-                                                            alt="No Image Available"
-                                                            style="width: 100px; height: 100px; object-fit: cover;">
-                                                    @endif
+                                                    @php
+                                                        $mainImage = $product->images()->where('is_main', 1)->first();
+                                                    @endphp
+                                                    <img class="custom-img"
+                                                        src="{{ $mainImage ? $mainImage->url : 'default-image.jpg' }}"
+                                                        alt="{{ $product->product_name }}">
                                                 </td>
                                                 <td>{{ $product->name }}</td>
                                                 <td>{{ Str::limit($product->description, 50) }}</td>
