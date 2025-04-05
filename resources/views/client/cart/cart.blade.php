@@ -29,7 +29,8 @@
                     <button type="button" id="select-all-btn" class="btn btn-secondary">Chọn tất cả</button>
                     <button type="button" id="deselect-all-btn" class="btn btn-secondary">Bỏ chọn tất cả</button>
                     @if ($cartItems->count() > 0)
-                        <form action="{{ route('cart.checkout') }}" method="GET" id="checkout-form">
+                        <div class="cart-content">
+                            <!-- Bảng sản phẩm -->
                             <table class="table cart-table">
                                 <thead>
                                     <tr>
@@ -54,7 +55,7 @@
                                         @endphp
                                         <tr>
                                             <td style="text-align: center; vertical-align: middle;">
-                                                <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
+                                                <input type="checkbox" data-item-id="{{ $item->id }}"
                                                     class="select-item" style="width: 20px; height: 20px;">
                                             </td>
                                             <td class="image-col">
@@ -81,7 +82,7 @@
                                             <td class="quantity-col">
                                                 <div class="quantity">
                                                     <button type="button" class="quantity-btn quantity-decrease">-</button>
-                                                    <input type="text" name="quantity" min="1"
+                                                    <input type="text" min="1"
                                                         max="{{ $variation->stock }}" value="{{ $item->quantity }}"
                                                         class="quantity-input"
                                                         data-item-id="{{ $item->id }}"
@@ -94,7 +95,7 @@
                                             <td class="total-col" id="subtotal-{{ $item->id }}">{{ number_format($subtotal) }} VND</td>
                                             <td class="delete-col">
                                                 <form action="{{ route('cart.remove', $item->id) }}" method="POST"
-                                                    class="d-inline">
+                                                    class="delete-form">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger">
@@ -172,11 +173,20 @@
                                 </div>
                             </div>
 
-                            <div class="cart-proceed-btns mt-4">
-                                <button type="submit" class="cart-proceed">Checkout</button>
-                                <a href="{{ route('client.index') }}" class="continue-shop">Continue Shopping</a>
-                            </div>
-                        </form>
+                            <!-- Form checkout tách biệt -->
+                            <form action="{{ route('cart.checkout') }}" method="GET" id="checkout-form">
+                                <!-- Hidden inputs để chứa item đã chọn -->
+                                @foreach ($cartItems as $item)
+                                    <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
+                                        class="hidden-item-{{ $item->id }}" style="display: none;">
+                                @endforeach
+
+                                <div class="cart-proceed-btns mt-4">
+                                    <button type="submit" class="cart-proceed">Checkout</button>
+                                    <a href="{{ route('client.index') }}" class="continue-shop">Continue Shopping</a>
+                                </div>
+                            </form>
+                        </div>
                     @else
                         <div class="text-center">
                             <h3>Your cart is empty</h3>
@@ -217,7 +227,21 @@
             const checkboxes = document.querySelectorAll('.select-item');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = true;
-                checkbox.addEventListener('change', updateCartTotal);
+                checkbox.addEventListener('change', function() {
+                    // Khi checkbox thay đổi, cập nhật trạng thái cho checkbox ẩn tương ứng
+                    const itemId = this.getAttribute('data-item-id');
+                    const hiddenCheckbox = document.querySelector(`.hidden-item-${itemId}`);
+                    if (hiddenCheckbox) {
+                        hiddenCheckbox.checked = this.checked;
+                    }
+                    updateCartTotal();
+                });
+            });
+
+            // Chọn tất cả các checkbox ẩn khi trang load
+            const hiddenCheckboxes = document.querySelectorAll('[class^="hidden-item-"]');
+            hiddenCheckboxes.forEach(checkbox => {
+                checkbox.checked = true;
             });
 
             // Cập nhật giỏ hàng khi trang tải lần đầu
@@ -228,11 +252,19 @@
                 checkboxes.forEach(checkbox => {
                     checkbox.checked = true;
                 });
+                // Đồng bộ hóa với checkbox ẩn
+                hiddenCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
                 updateCartTotal();
             });
 
             document.getElementById('deselect-all-btn').addEventListener('click', function() {
                 checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                // Đồng bộ hóa với checkbox ẩn
+                hiddenCheckboxes.forEach(checkbox => {
                     checkbox.checked = false;
                 });
                 updateCartTotal();
