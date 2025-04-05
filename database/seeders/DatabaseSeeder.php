@@ -399,48 +399,32 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // 10. Seed Order_statuses (20)
+        // 10. Seed Order_statuses (4 trạng thái)
+        // Xóa tất cả các trạng thái cũ
+        Order_status::query()->delete();
+        
         $orderStatuses = [];
         $statusNames = [
-            'Pending', 'Processing', 'Shipping', 'Completed', 'Cancelled',
-            'Refunded', 'Not Refunded'
+            'Chờ xử lý', 'Đang vận chuyển', 'Thành công', 'Đã hủy'
         ];
 
-        // First get any existing statuses
-        $existingStatuses = Order_status::all();
-        foreach ($existingStatuses as $status) {
-            $orderStatuses[] = $status;
-        }
-
-        // Track which names already exist
-        $existingStatusNames = $existingStatuses->pluck('status_name')->toArray();
-
-        // Create only statuses that don't exist yet
+        // Tạo mới 4 trạng thái với ID từ 1-4
         foreach ($statusNames as $index => $statusName) {
-            if (!in_array($statusName, $existingStatusNames)) {
-                $status = Order_status::create([
-                    'status_name' => $statusName,
-                ]);
-                $orderStatuses[] = $status;
-                $existingStatusNames[] = $statusName;
-            }
+            $status = Order_status::create([
+                'id' => $index + 1,
+                'status_name' => $statusName,
+            ]);
+            $orderStatuses[] = $status;
         }
 
         // 11. Seed Orders (20)
         $orders = [];
 
-        // Get existing orders
-        $existingOrders = Order::all();
-        foreach ($existingOrders as $order) {
-            $orders[] = $order;
-        }
-
-        // Track existing order codes
-        $existingOrderCodes = $existingOrders->pluck('order_code')->toArray();
-
-        // Create orders up to 20 total
-        $ordersToCreate = max(0, 20 - count($existingOrders));
-        for ($i = 0; $i < $ordersToCreate; $i++) {
+        // Xóa các orders hiện tại
+        Order::query()->delete();
+        
+        // Create orders
+        for ($i = 0; $i < 20; $i++) {
             $user = $faker->randomElement($users);
             $totalAmount = 0;
             $discountAmount = 0;
@@ -451,17 +435,17 @@ class DatabaseSeeder extends Seeder
             }
             
             $paymentMethod = $faker->randomElement(['COD', 'Bank Transfer', 'VNPAY', 'Momo', 'Wallet']);
-            $paymentStatus = $faker->randomElement(['pending', 'completed', 'failed', 'refunded']);
+            $paymentStatus = $faker->randomElement(['pending', 'completed', 'failed']);
+            
+            // Chọn trạng thái ngẫu nhiên
+            $statusId = $orderStatuses[$faker->numberBetween(0, count($orderStatuses) - 1)]->id;
             
             // Generate unique order code
-            $orderCode = 'ORD' . time() . rand(1000, 9999);
-            while (in_array($orderCode, $existingOrderCodes)) {
-                $orderCode = 'ORD' . time() . rand(1000, 9999);
-            }
+            $orderCode = 'ORD' . time() . rand(1000, 9999) . $i;
             
             $order = Order::create([
                 'user_id' => $user->id,
-                'status_id' => $orderStatuses[$faker->numberBetween(0, count($orderStatuses) - 1)]->id,
+                'status_id' => $statusId,
                 'order_code' => $orderCode,
                 'user_name' => $user->name,
                 'user_phone' => $user->phone,
@@ -479,10 +463,11 @@ class DatabaseSeeder extends Seeder
             ]);
             
             $orders[] = $order;
-            $existingOrderCodes[] = $orderCode;
         }
 
-        // 12. Seed Order_items (Multiple per order, total at least 20)
+        // 12. Seed Order_items (Multiple per order)
+        Order_item::query()->delete();
+        
         $orderItems = [];
         foreach ($orders as $order) {
             $itemCount = $faker->numberBetween(1, 5);
@@ -513,6 +498,8 @@ class DatabaseSeeder extends Seeder
         }
 
         // 13. Seed Order_status_times (20)
+        Order_status_time::query()->delete();
+        
         $orderStatusTimes = [];
         for ($i = 0; $i < 20; $i++) {
             $order = $faker->randomElement($orders);
@@ -524,55 +511,24 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // 14. Seed Order_cancellations (20)
+        // 14. Seed Order_cancellations
+        Order_cancellation::query()->delete();
+        
+        $cancelledStatus = Order_status::where('status_name', 'Đã hủy')->first();
         $orderCancellations = [];
         $cancellationReasons = [
-            'Changed mind', 'Found better price elsewhere', 'Ordered by mistake',
-            'Taking too long to deliver', 'Product unavailable', 'Payment issues',
-            'Wrong size', 'Wrong color', 'Quality concerns', 'Bad reviews',
-            'No longer needed', 'Duplicate order', 'Shipping too expensive',
-            'Delivery address issues', 'Seller communication problems',
-            'Missing features', 'Technical issues', 'Incorrect product information',
-            'Unexpected costs', 'Other'
+            'Thay đổi ý định', 'Tìm thấy giá tốt hơn ở nơi khác', 'Đặt nhầm sản phẩm',
+            'Thời gian giao hàng quá lâu', 'Sản phẩm không có sẵn', 'Vấn đề thanh toán',
+            'Sai kích cỡ', 'Sai màu sắc', 'Lo ngại về chất lượng', 'Nhận xét xấu',
+            'Không còn cần thiết', 'Đơn hàng trùng lặp', 'Chi phí vận chuyển quá đắt',
+            'Vấn đề địa chỉ giao hàng', 'Vấn đề giao tiếp với người bán',
+            'Thiếu tính năng', 'Vấn đề kỹ thuật', 'Thông tin sản phẩm không chính xác',
+            'Chi phí phát sinh không mong muốn', 'Lý do khác'
         ];
         
-        // Check existing cancellations
-        $existingCancellations = Order_cancellation::all();
-        $existingCancelledOrderIds = $existingCancellations->pluck('order_id')->toArray();
+        // Lấy tất cả đơn hàng có trạng thái "Đã hủy"
+        $cancelledOrders = Order::where('status_id', $cancelledStatus->id)->get();
         
-        // Get cancelled orders that don't already have a cancellation record
-        $cancelledOrders = [];
-        foreach ($orders as $order) {
-            // Only consider orders that aren't already completed payments and don't have a cancellation yet
-            if ($order->payment_status != 'completed' && 
-                $order->status->status_name == 'Cancelled' && 
-                !in_array($order->id, $existingCancelledOrderIds)) {
-                $cancelledOrders[] = $order;
-            }
-        }
-        
-        // If we don't have enough cancelled orders, create more from non-cancelled orders
-        if (count($cancelledOrders) < 20) {
-            foreach ($orders as $order) {
-                // Skip orders that are completed payments or already cancelled
-                if ($order->payment_status == 'completed' || 
-                    $order->status->status_name == 'Cancelled' || 
-                    in_array($order->id, $existingCancelledOrderIds)) {
-                    continue;
-                }
-                
-                // Set status to cancelled
-                $cancelledStatus = Order_status::where('status_name', 'Cancelled')->first();
-                $order->update(['status_id' => $cancelledStatus->id]);
-                $cancelledOrders[] = $order;
-                
-                if (count($cancelledOrders) >= 20) {
-                    break;
-                }
-            }
-        }
-        
-        // Create cancellation records
         foreach ($cancelledOrders as $index => $order) {
             $orderCancellations[] = Order_cancellation::create([
                 'order_id' => $order->id,

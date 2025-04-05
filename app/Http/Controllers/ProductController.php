@@ -44,57 +44,49 @@ class ProductController extends Controller
             // Get count of orders
             $totalOrders = \App\Models\Order::count();
             
-            // Lấy ID của các trạng thái quan trọng
-            $completedStatusId = \App\Models\Order_status::where('status_name', 'Completed')->value('id');
-            $cancelledStatusId = \App\Models\Order_status::where('status_name', 'Cancelled')->value('id');
+            // Lấy tất cả trạng thái đơn hàng - đã biết trước ID cố định
+            $orderStatuses = \App\Models\Order_status::all();
             
-            // Tính tổng giá trị tất cả đơn hàng (không bao gồm đơn hủy)
-            $totalOrderValue = \App\Models\Order::where(function($query) use ($cancelledStatusId) {
-                   $query->where('status_id', '!=', $cancelledStatusId)
-                         ->orWhereNull('status_id');
-               })
-               ->sum('total_amount');
+            // Đặt ID của các trạng thái quan trọng theo cấu trúc database mới
+            $pendingStatusId = 1;    // Chờ xử lý - ID 1
+            $shippingStatusId = 2;   // Đang vận chuyển - ID 2
+            $completedStatusId = 3;  // Thành công - ID 3
+            $cancelledStatusId = 4;  // Đã hủy - ID 4
             
-            // Tính doanh thu thực tế (chỉ tính các đơn đã hoàn thành và thanh toán)
-            $totalRevenue = \App\Models\Order::where('payment_status', 'completed')
-                        ->where('status_id', $completedStatusId)
-                        ->sum('total_amount');
+            // Tính doanh số theo từng trạng thái
+            $revenueByStatus = [];
             
-            // Tính tổng số tiền hoàn trả (đơn đã thanh toán nhưng sau đó hoàn tiền)
-            $totalRefunds = \App\Models\Order::where('payment_status', 'refunded')
-                        ->sum('total_amount');
+            foreach ($orderStatuses as $status) {
+                $revenueByStatus[$status->id] = [
+                    'name' => $status->status_name,
+                    'amount' => \App\Models\Order::where('status_id', $status->id)->sum('total_amount'),
+                    'count' => \App\Models\Order::where('status_id', $status->id)->count()
+                ];
+            }
             
-            // Tính tổng giá trị đơn bị hủy
-            $totalCancelled = \App\Models\Order::where('status_id', $cancelledStatusId)
-                        ->sum('total_amount');
+            // Tính tổng giá trị tất cả đơn hàng (bao gồm tất cả trạng thái)
+            $totalOrderValue = \App\Models\Order::sum('total_amount');
             
-            // Tính doanh thu ròng (doanh thu thực - refunds)
-            $netRevenue = max(0, $totalRevenue - $totalRefunds);
+            // Doanh thu thực tế (chỉ tính các đơn đã hoàn thành)
+            $totalRevenue = \App\Models\Order::where('status_id', $completedStatusId)->sum('total_amount');
             
-            // Doanh số chưa thu (đơn chưa hoàn thành, chưa thanh toán hoặc đang xử lý, và không phải đơn hủy)
-            $pendingRevenue = \App\Models\Order::where(function($query) {
-                    // Chưa thanh toán hoặc đang xử lý thanh toán
-                    $query->where('payment_status', 'pending')
-                          ->orWhere('payment_status', 'processing');
-                })
-                ->where(function($query) use ($cancelledStatusId, $completedStatusId) {
-                    // Không phải đơn đã hủy và chưa hoàn thành
-                    $query->where(function($q) use ($cancelledStatusId) {
-                            $q->where('status_id', '!=', $cancelledStatusId)
-                              ->orWhereNull('status_id');
-                        })
-                        ->where(function($q) use ($completedStatusId) {
-                            $q->where('status_id', '!=', $completedStatusId)
-                              ->orWhereNull('status_id');
-                        });
-                })
-                ->sum('total_amount');
+            // Tổng số tiền từ đơn đã hủy
+            $totalCancelled = \App\Models\Order::where('status_id', $cancelledStatusId)->sum('total_amount');
             
-            // Get expenses (40% of revenue for demo)
-            $totalExpenses = $netRevenue * 0.4;
+            // Doanh thu chờ xử lý (đơn đang chờ xử lý và đang vận chuyển)
+            $pendingRevenue = \App\Models\Order::whereIn('status_id', [$pendingStatusId, $shippingStatusId])->sum('total_amount');
             
-            // Calculate profit
-            $totalProfit = $netRevenue - $totalExpenses;
+            // Hoàn tiền (trong trường hợp này, cũng chính là giá trị đơn đã hủy)
+            $totalRefunds = $totalCancelled;
+            
+            // Doanh thu ròng (doanh thu thực tế)
+            $netRevenue = $totalRevenue;
+            
+            // Tính chi phí (40% của doanh thu thực tế cho demo)
+            $totalExpenses = $totalRevenue * 0.4;
+            
+            // Tính lợi nhuận
+            $totalProfit = $totalRevenue - $totalExpenses;
             
             // Get top selling products
             $topProducts = \App\Models\Product::with(['images', 'category'])
@@ -137,17 +129,16 @@ class ProductController extends Controller
                                     ->pluck('count', 'month')
                                     ->toArray();
             
-            // Lấy doanh thu theo tháng (chỉ đơn hàng đã hoàn thành và thanh toán)
+            // Lấy doanh thu theo tháng (chỉ đơn hàng đã hoàn thành)
             $revenueByMonth = \App\Models\Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(total_amount) as total')
-                                    ->where('payment_status', 'completed')
                                     ->where('status_id', $completedStatusId)
                                     ->groupBy('month')
                                     ->pluck('total', 'month')
                                     ->toArray();
             
-            // Lấy hoàn tiền theo tháng
+            // Lấy doanh thu đơn hủy theo tháng
             $refundsByMonth = \App\Models\Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(total_amount) as total')
-                                    ->where('payment_status', 'refunded')
+                                    ->where('status_id', $cancelledStatusId)
                                     ->groupBy('month')
                                     ->pluck('total', 'month')
                                     ->toArray();
@@ -160,22 +151,14 @@ class ProductController extends Controller
             $currentMonthRevenue = $revenueByMonth[$currentMonth] ?? 0;
             $lastMonthRevenue = $revenueByMonth[$lastMonth] ?? 0;
             
-            // Tính hoàn tiền tháng này và tháng trước
-            $currentMonthRefunds = $refundsByMonth[$currentMonth] ?? 0;
-            $lastMonthRefunds = $refundsByMonth[$lastMonth] ?? 0;
-            
-            // Tính doanh thu ròng
-            $currentMonthNetRevenue = max(0, $currentMonthRevenue - $currentMonthRefunds);
-            $lastMonthNetRevenue = max(0, $lastMonthRevenue - $lastMonthRefunds);
-            
             // Tính % tăng trưởng
             $orderGrowth = $lastMonthOrders > 0 
                             ? round((($currentMonthOrders - $lastMonthOrders) / $lastMonthOrders) * 100, 2)
                             : ($currentMonthOrders > 0 ? 100 : 0);
             
-            $revenueGrowth = $lastMonthNetRevenue > 0 
-                            ? round((($currentMonthNetRevenue - $lastMonthNetRevenue) / $lastMonthNetRevenue) * 100, 2)
-                            : ($currentMonthNetRevenue > 0 ? 100 : 0);
+            $revenueGrowth = $lastMonthRevenue > 0 
+                            ? round((($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 2)
+                            : ($currentMonthRevenue > 0 ? 100 : 0);
             
             // For the Revenue Chart - Prepare data for each month
             $revenueChartData = [];
@@ -196,17 +179,11 @@ class ProductController extends Controller
                                  ? $revenueByMonth[$month] 
                                  : rand(50000, 200000);
                 
-                // Hoàn tiền của tháng (nếu có)
-                $monthlyRefunds = isset($refundsByMonth[$month]) ? $refundsByMonth[$month] : ($monthlyRevenue * 0.05);
-                
-                // Doanh thu ròng = doanh thu gộp - hoàn tiền (không để âm)
-                $monthlyNetRevenue = max(0, $monthlyRevenue - $monthlyRefunds);
-                
-                // Tính chi phí hàng tháng (40% doanh thu ròng)
-                $monthlyExpenses = $monthlyNetRevenue * 0.4;
+                // Tính chi phí hàng tháng (40% doanh thu thực tế)
+                $monthlyExpenses = $monthlyRevenue * 0.4;
                 
                 // Tính lợi nhuận hàng tháng
-                $monthlyProfit = $monthlyNetRevenue - $monthlyExpenses;
+                $monthlyProfit = $monthlyRevenue - $monthlyExpenses;
                 
                 // Đếm số đơn hàng của tháng
                 $monthlyOrderCount = isset($ordersByMonth[$month]) && $ordersByMonth[$month] > 0
@@ -227,9 +204,8 @@ class ProductController extends Controller
             $endDate = now();
             $startDate = now()->subDays(6)->startOfDay();
             
-            // Lấy doanh thu từng ngày trong tuần vừa qua
-            $dailyRevenueQuery = \App\Models\Order::where('payment_status', 'completed')
-                ->where('status_id', $completedStatusId)
+            // Lấy doanh thu từng ngày trong tuần vừa qua (chỉ đơn hàng thành công)
+            $dailyRevenueQuery = \App\Models\Order::where('status_id', $completedStatusId)
                 ->where('created_at', '>=', $startDate)
                 ->where('created_at', '<=', $endDate)
                 ->selectRaw('DAYOFWEEK(created_at) as day_of_week, SUM(total_amount) as daily_revenue')
@@ -299,7 +275,9 @@ class ProductController extends Controller
                 'campaignData',
                 'dailyRevenue',
                 'dailyOrders',
-                'dayNames'
+                'dayNames',
+                'revenueByStatus',
+                'orderStatuses'
             ));
         } catch (\Exception $e) {
             // Log the error and return a simple dashboard with error message
@@ -331,6 +309,8 @@ class ProductController extends Controller
                 'dailyRevenue' => [],
                 'dailyOrders' => [],
                 'dayNames' => [],
+                'revenueByStatus' => [],
+                'orderStatuses' => collect(),
                 'error' => 'There was an error loading the dashboard statistics: ' . $e->getMessage()
             ]);
         }

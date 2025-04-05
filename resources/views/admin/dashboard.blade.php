@@ -43,8 +43,8 @@
             </div>
             @endif
             
-            <div class="row card-metrics">
-                <div class="col-xl-3 col-md-6">
+            <div class="row">
+                <div class="col-xl-2 col-md-4">
                     <div class="cr-card metric-card">
                         <div class="cr-card-content">
                             <div class="metric-icon customer-icon">
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6">
+                <div class="col-xl-2 col-md-4">
                     <div class="cr-card metric-card">
                         <div class="cr-card-content">
                             <div class="metric-icon order-icon">
@@ -70,20 +70,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="cr-card metric-card">
-                        <div class="cr-card-content">
-                            <div class="metric-icon sales-icon">
-                                <i class="ri-money-dollar-box-line"></i>
-                            </div>
-                            <div class="metric-details">
-                                <h6>Total Sales</h6>
-                                <h3>${{ number_format($totalOrderValue, 2) }}</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
+                <div class="col-xl-2 col-md-4">
                     <div class="cr-card metric-card">
                         <div class="cr-card-content">
                             <div class="metric-icon revenue-icon">
@@ -96,7 +83,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6">
+                <div class="col-xl-2 col-md-4">
                     <div class="cr-card metric-card">
                         <div class="cr-card-content">
                             <div class="metric-icon cancel-icon">
@@ -109,7 +96,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6">
+                <div class="col-xl-2 col-md-4">
                     <div class="cr-card metric-card">
                         <div class="cr-card-content">
                             <div class="metric-icon pending-icon">
@@ -122,20 +109,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="cr-card metric-card">
-                        <div class="cr-card-content">
-                            <div class="metric-icon refund-icon">
-                                <i class="ri-refund-2-line"></i>
-                            </div>
-                            <div class="metric-details">
-                                <h6>Refunds</h6>
-                                <h3>${{ number_format($totalRefunds, 2) }}</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
+                <div class="col-xl-2 col-md-4">
                     <div class="cr-card metric-card">
                         <div class="cr-card-content">
                             <div class="metric-icon net-icon">
@@ -171,16 +145,16 @@
                                     <h5>{{ $totalOrders }}</h5>
                                 </div>
                                 <div class="block">
-                                    <h6>Gross Revenue</h6>
+                                    <h6>Actual Revenue</h6>
                                     <h5>{{ $totalRevenue < 0 ? '-' : '' }}${{ number_format(abs($totalRevenue/1000), 1) }}k</h5>
+                                </div>
+                                <div class="block">
+                                    <h6>Pending Revenue</h6>
+                                    <h5>{{ $pendingRevenue < 0 ? '-' : '' }}${{ number_format(abs($pendingRevenue/1000), 1) }}k</h5>
                                 </div>
                                 <div class="block">
                                     <h6>Net Revenue</h6>
                                     <h5>{{ $netRevenue < 0 ? '-' : '' }}${{ number_format(abs($netRevenue/1000), 1) }}k</h5>
-                                </div>
-                                <div class="block">
-                                    <h6>Profit</h6>
-                                    <h5>{{ $totalProfit < 0 ? '-' : '' }}${{ number_format(abs($totalProfit/1000), 1) }}k</h5>
                                 </div>
                             </div>
                             <div class="cr-chart-content">
@@ -323,6 +297,77 @@
             </div>
             <div class="row">
                 <div class="col-xxl-12 col-xl-12">
+                    <div class="cr-card" id="status-revenue">
+                        <div class="cr-card-header">
+                            <h4 class="cr-card-title">Doanh số theo trạng thái đơn hàng</h4>
+                            <div class="header-tools">
+                                <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
+                                        class="ri-fullscreen-line"></i></a>
+                            </div>
+                        </div>
+                        <div class="cr-card-content">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Trạng thái</th>
+                                                    <th>Số lượng đơn hàng</th>
+                                                    <th>Doanh số</th>
+                                                    <th>Tỷ lệ</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @php 
+                                                    $totalAmount = array_sum(array_column($revenueByStatus, 'amount'));
+                                                    $totalCount = array_sum(array_column($revenueByStatus, 'count'));
+                                                @endphp
+                                                @foreach($orderStatuses as $status)
+                                                    @php
+                                                        $statusData = $revenueByStatus[$status->id];
+                                                        $percentage = $totalAmount > 0 ? ($statusData['amount'] / $totalAmount) * 100 : 0;
+                                                        $countPercentage = $totalCount > 0 ? ($statusData['count'] / $totalCount) * 100 : 0;
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $status->id }}</td>
+                                                        <td>{{ $status->status_name }}</td>
+                                                        <td>
+                                                            {{ $statusData['count'] }}
+                                                            <div class="progress" style="height: 6px;">
+                                                                <div class="progress-bar" role="progressbar" style="width: {{ $countPercentage }}%;" aria-valuenow="{{ $countPercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                            </div>
+                                                        </td>
+                                                        <td>${{ number_format($statusData['amount'], 2) }}</td>
+                                                        <td>
+                                                            {{ number_format($percentage, 1) }}%
+                                                            <div class="progress" style="height: 6px;">
+                                                                <div class="progress-bar" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                                <tr class="table-active">
+                                                    <td colspan="2"><strong>Tổng cộng</strong></td>
+                                                    <td><strong>{{ $totalCount }}</strong></td>
+                                                    <td><strong>${{ number_format($totalAmount, 2) }}</strong></td>
+                                                    <td><strong>100%</strong></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div id="statusPieChart" style="min-height: 350px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xxl-12 col-xl-12">
                     <div class="cr-card" id="ordertbl">
                         <div class="cr-card-header">
                             <h4 class="cr-card-title">Recent Orders</h4>
@@ -364,8 +409,8 @@
                                                 </td>
                                                 <td>{{ $order->user_name ?? ($order->user->name ?? 'Guest') }}</td>
                                                 <td>${{ number_format($order->total_amount, 2) }}</td>
-                                                <td class="{{ strtolower($order->payment_status) }}">
-                                                    {{ $order->status->name ?? $order->payment_status }}
+                                                <td class="{{ strtolower($order->status->status_name ?? 'unknown') }}">
+                                                    {{ $order->status->status_name ?? 'Unknown' }}
                                                 </td>
                                                 <td>{{ $order->created_at->format('M d, Y') }}</td>
                                             </tr>
@@ -386,8 +431,8 @@
 <script>
 // Lấy dữ liệu thực tế từ PHP
 const realData = {
+    totalCustomers: {{ $totalCustomers ?? 0 }},
     totalOrders: {{ $totalOrders ?? 0 }},
-    totalOrderValue: {{ $totalOrderValue ?? 0 }},
     totalRevenue: {{ $totalRevenue ?? 0 }},
     totalRefunds: {{ $totalRefunds ?? 0 }},
     totalCancelled: {{ $totalCancelled ?? 0 }},
@@ -416,43 +461,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Cập nhật số liệu tóm tắt từ dữ liệu thực
 function updateSummaryStatistics(data) {
-    // Cập nhật Orders
+    // Cập nhật thông tin tổng quát
+    const metricCards = document.querySelectorAll('.metric-card');
+    
+    if (metricCards.length >= 6) {
+        // Cập nhật Customers
+        let metricDetails = metricCards[0].querySelector('.metric-details');
+        metricDetails.querySelector('h3').textContent = data.totalCustomers.toLocaleString();
+        
+        // Cập nhật Orders
+        metricDetails = metricCards[1].querySelector('.metric-details');
+        metricDetails.querySelector('h3').textContent = data.totalOrders.toLocaleString();
+        
+        // Cập nhật Actual Revenue
+        metricDetails = metricCards[2].querySelector('.metric-details');
+        metricDetails.querySelector('h3').textContent = '$' + data.totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        // Cập nhật Cancelled Orders
+        metricDetails = metricCards[3].querySelector('.metric-details');
+        metricDetails.querySelector('h3').textContent = '$' + data.totalCancelled.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        // Cập nhật Pending Revenue
+        metricDetails = metricCards[4].querySelector('.metric-details');
+        metricDetails.querySelector('h3').textContent = '$' + data.pendingRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        // Cập nhật Net Revenue
+        metricDetails = metricCards[5].querySelector('.metric-details');
+        metricDetails.querySelector('h3').textContent = '$' + data.netRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    
+    // Cập nhật Revenue Overview header
     document.querySelector('.cr-chart-header .block:nth-child(1) h5').innerHTML = 
-        `${data.totalOrders}`;
+        data.totalOrders.toLocaleString();
     
     // Cập nhật Actual Revenue
     document.querySelector('.cr-chart-header .block:nth-child(2) h5').innerHTML = 
         `${data.totalRevenue < 0 ? '-' : ''}$${(Math.abs(data.totalRevenue)/1000).toFixed(1)}k`;
     
-    // Cập nhật Net Revenue
+    // Cập nhật Pending Revenue
     document.querySelector('.cr-chart-header .block:nth-child(3) h5').innerHTML = 
-        `${data.netRevenue < 0 ? '-' : ''}$${(Math.abs(data.netRevenue)/1000).toFixed(1)}k`;
+        `${data.pendingRevenue < 0 ? '-' : ''}$${(Math.abs(data.pendingRevenue)/1000).toFixed(1)}k`;
     
-    // Cập nhật Profit
+    // Cập nhật Net Revenue
     document.querySelector('.cr-chart-header .block:nth-child(4) h5').innerHTML = 
-        `${data.totalProfit < 0 ? '-' : ''}$${(Math.abs(data.totalProfit)/1000).toFixed(1)}k`;
-        
-    // Cập nhật KPI cards
-    document.querySelectorAll('.metric-card').forEach((card, index) => {
-        const metricDetails = card.querySelector('.metric-details');
-        if (index === 0) { // Customers
-            metricDetails.querySelector('h3').textContent = data.totalCustomers.toString();
-        } else if (index === 1) { // Orders
-            metricDetails.querySelector('h3').textContent = data.totalOrders.toString();
-        } else if (index === 2) { // Total Sales
-            metricDetails.querySelector('h3').textContent = `$${Math.abs(data.totalOrderValue).toLocaleString()}`;
-        } else if (index === 3) { // Actual Revenue
-            metricDetails.querySelector('h3').textContent = `${data.totalRevenue < 0 ? '-' : ''}$${Math.abs(data.totalRevenue).toLocaleString()}`;
-        } else if (index === 4) { // Cancelled Orders
-            metricDetails.querySelector('h3').textContent = `$${Math.abs(data.totalCancelled).toLocaleString()}`;
-        } else if (index === 5) { // Pending Revenue
-            metricDetails.querySelector('h3').textContent = `$${Math.abs(data.pendingRevenue).toLocaleString()}`;
-        } else if (index === 6) { // Refunds
-            metricDetails.querySelector('h3').textContent = `$${Math.abs(data.totalRefunds).toLocaleString()}`;
-        } else if (index === 7) { // Net Revenue
-            metricDetails.querySelector('h3').textContent = `${data.netRevenue < 0 ? '-' : ''}$${Math.abs(data.netRevenue).toLocaleString()}`;
-        }
-    });
+        `${data.netRevenue < 0 ? '-' : ''}$${(Math.abs(data.netRevenue)/1000).toFixed(1)}k`;
 }
 
 // Định nghĩa data theo khoảng thời gian
@@ -768,6 +820,7 @@ function initCharts() {
     // Check if chart containers exist
     const revenueChartEl = document.getElementById('revenueChart');
     const dailyRevenueChartEl = document.getElementById('dailyRevenueChart');
+    const statusPieChartEl = document.getElementById('statusPieChart');
     
     if (revenueChartEl) {
         // Initialize with default data (last 30 days)
@@ -777,12 +830,16 @@ function initCharts() {
     if (dailyRevenueChartEl) {
         window.dailyRevenueChart = initDailyRevenueChart();
     }
+    
+    if (statusPieChartEl) {
+        window.statusPieChart = initStatusPieChart();
+    }
 }
 
 function initDailyRevenueChart() {
     try {
         // Sample data for daily revenue (đơn vị: nghìn đô)
-        var dailyRevenueData = {!! isset($dailyRevenue) ? json_encode($dailyRevenue) : '[3.1, 4.2, 4.5, 5.2, 5.7, 8.2, 6.5]' !!};
+        var dailyRevenueData = {!! isset($dailyRevenue) ? json_encode($dailyRevenue) : '[3100, 4200, 4500, 5200, 5700, 8200, 6500]' !!};
         var dailyOrdersData = {!! isset($dailyOrders) ? json_encode($dailyOrders) : '[12, 19, 22, 27, 30, 45, 35]' !!};
         var weekDays = {!! isset($dayNames) ? json_encode($dayNames) : "['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" !!};
         
@@ -795,61 +852,77 @@ function initDailyRevenueChart() {
         const lowestDayValue = dailyRevenueData[lowestDayIndex];
         const avgValue = dailyRevenueData.reduce((a, b) => a + b, 0) / dailyRevenueData.length;
         
-        // Cập nhật thông tin hiển thị mà không gây lỗi
+        // Cập nhật thông tin hiển thị Peak Day, Daily Avg, Lowest Day
         setTimeout(() => {
-            try {
-                // Cập nhật thông tin hiển thị
-                const peakDayElement = document.querySelector('.cr-chart-header-2 .block:nth-child(1) h5');
-                if (peakDayElement) {
-                    peakDayElement.innerHTML = `<span id="peak-day">${peakDay}</span> <span id="peak-value" class="value">$${peakDayValue.toFixed(1)}k</span>`;
-                }
-                
-                const avgElement = document.querySelector('.cr-chart-header-2 .block:nth-child(2) h5');
-                if (avgElement) {
-                    avgElement.innerHTML = `<span id="average-revenue" class="value">$${avgValue.toFixed(1)}k</span>`;
-                }
-                
-                const lowestDayElement = document.querySelector('.cr-chart-header-2 .block:nth-child(3) h5');
-                if (lowestDayElement) {
-                    lowestDayElement.innerHTML = `<span id="lowest-day">${lowestDay}</span> <span id="lowest-value" class="value">$${lowestDayValue.toFixed(1)}k</span>`;
-                }
-            } catch (e) {
-                console.error('Error updating daily revenue stats:', e);
-            }
+            document.getElementById('peak-day').textContent = peakDay;
+            document.getElementById('peak-value').textContent = '$' + peakDayValue.toLocaleString();
+            
+            document.getElementById('average-revenue').textContent = '$' + avgValue.toLocaleString();
+            
+            document.getElementById('lowest-day').textContent = lowestDay;
+            document.getElementById('lowest-value').textContent = '$' + lowestDayValue.toLocaleString();
         }, 100);
         
         var options = {
             series: [{
                 name: 'Revenue',
+                type: 'line',
                 data: dailyRevenueData
             }, {
                 name: 'Orders',
+                type: 'line',
                 data: dailyOrdersData
             }],
             chart: {
-                type: 'bar',
                 height: 320,
+                type: 'line',
                 stacked: false,
                 toolbar: {
                     show: false
+                },
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800
                 }
             },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '60%',
-                    borderRadius: 4
-                },
-            },
             dataLabels: {
-                enabled: false
+                enabled: true,
+                formatter: function(val, { seriesIndex }) {
+                    if (seriesIndex === 0) {
+                        return '$' + val.toLocaleString();
+                    }
+                    return val;
+                },
+                style: {
+                    fontSize: '10px'
+                }
             },
             stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
+                curve: 'smooth',
+                width: [3, 3]
             },
             colors: ['#6571ff', '#36cfff'],
+            grid: {
+                borderColor: '#e2e5ec',
+                strokeDashArray: 4,
+                xaxis: {
+                    lines: {
+                        show: true
+                    }
+                },
+                yaxis: {
+                    lines: {
+                        show: true
+                    }
+                }
+            },
+            markers: {
+                size: 4,
+                hover: {
+                    size: 6
+                }
+            },
             xaxis: {
                 categories: weekDays,
                 labels: {
@@ -861,11 +934,11 @@ function initDailyRevenueChart() {
             yaxis: [
                 {
                     title: {
-                        text: "Revenue ($k)"
+                        text: "Revenue ($)"
                     },
                     labels: {
                         formatter: function(val) {
-                            return '$' + val.toFixed(1) + 'k';
+                            return '$' + val.toLocaleString();
                         }
                     }
                 },
@@ -874,26 +947,27 @@ function initDailyRevenueChart() {
                     title: {
                         text: "Orders"
                     },
-                    min: 0,
-                    max: 50,
-                    show: false
+                    labels: {
+                        formatter: function(val) {
+                            return val;
+                        }
+                    }
                 }
             ],
-            fill: {
-                opacity: 1
-            },
             tooltip: {
+                shared: true,
+                intersect: false,
                 y: {
                     formatter: function(val, { seriesIndex }) {
                         if (seriesIndex === 1) {
                             return val + ' orders';
                         }
-                        return '$' + val.toFixed(1) + 'k';
+                        return '$' + val.toLocaleString();
                     }
                 }
             },
             legend: {
-                position: 'bottom'
+                position: 'top'
             }
         };
         
@@ -904,6 +978,84 @@ function initDailyRevenueChart() {
         console.error('Error initializing Daily Revenue Chart:', error);
         return null;
     }
+}
+
+function initStatusPieChart() {
+    // Lấy dữ liệu doanh số theo trạng thái
+    const statusData = @json($revenueByStatus);
+    const orderStatuses = @json($orderStatuses);
+    
+    const series = [];
+    const labels = [];
+    const colors = ['#6571ff', '#4bc0c0', '#36cfff', '#ff6b6b', '#ffb800', '#2fc781', '#a55eea', '#fd7e14'];
+    
+    // Chuẩn bị dữ liệu cho biểu đồ
+    orderStatuses.forEach((status, index) => {
+        if (statusData[status.id] && statusData[status.id].amount > 0) {
+            series.push(parseFloat(statusData[status.id].amount));
+            labels.push(status.status_name);
+        }
+    });
+    
+    let options = {
+        series: series,
+        chart: {
+            type: 'pie',
+            height: 350,
+            fontFamily: 'Inter, sans-serif',
+        },
+        labels: labels,
+        colors: colors,
+        legend: {
+            position: 'bottom',
+            horizontalAlign: 'center',
+            fontSize: '14px',
+            markers: {
+                width: 12,
+                height: 12,
+                radius: 6,
+            },
+            itemMargin: {
+                horizontal: 10,
+                vertical: 0
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function(val) {
+                    return '$' + parseFloat(val).toLocaleString();
+                }
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function(val, opts) {
+                return Math.round(val) + '%';
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: '500',
+            },
+            dropShadow: {
+                enabled: false
+            }
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    height: 300
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+    
+    const chart = new ApexCharts(document.getElementById('statusPieChart'), options);
+    chart.render();
+    return chart;
 }
 </script>
 
