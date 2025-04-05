@@ -54,7 +54,7 @@ Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthControlle
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
 Route::middleware('auth')->group(function () {
-    // Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
     });
 });
 
