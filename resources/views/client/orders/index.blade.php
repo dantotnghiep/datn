@@ -118,7 +118,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                     'Accept': 'application/json'
                 },
-                success: function(response) {
+                success: function(response) {   
                     if (response.success) {
                         // Cập nhật UI ngay lập tức
                         const statusBadge = $(`#status-badge-${orderId}`);

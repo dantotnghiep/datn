@@ -21,7 +21,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // API routes will be added here when needed
 
-Route::middleware('auth:sanctum')->group(function () {
+// Cấu hình CORS và sanctum
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
     Route::post('/orders/{order}/update-status', [OrderController::class, 'updateStatus']);
 });

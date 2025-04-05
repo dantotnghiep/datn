@@ -66,7 +66,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
         Route::get('/', [App\Http\Controllers\Client\OrderController::class, 'index'])->name('orders.index');
-        Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
     });
 });
 
@@ -162,7 +161,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('orders.updateStatus');
-    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{id}/cancel', [App\Http\Controllers\Api\OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
 
 });
