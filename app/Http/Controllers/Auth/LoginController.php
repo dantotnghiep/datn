@@ -156,8 +156,10 @@ class LoginController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if ($user && $user->status === 'inactive') {
-            return redirect()->back()->withErrors(['email' => 'Tài khoản của bạn đã bị khóa.']);
+            session()->flash('error', 'Tài khoản của bạn đã bị khóa.');
+            return redirect()->route('login');
         }
+        
 
         $credentials = $request->only('email', 'password');
 

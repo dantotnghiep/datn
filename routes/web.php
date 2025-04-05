@@ -44,6 +44,7 @@ Route::post('/broadcasting/auth', function () {
     return auth()->check() ? auth()->user() : abort(403);
 });
 
+
 //client/product
 Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
 Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('client.product.product-details');
@@ -189,6 +190,7 @@ Route::middleware(['auth'])->prefix('admin/users')->group(function () {
     Route::delete('/staffs/{id}', [AdminEmployeeController::class, 'destroy'])->name('admin.users.staffs.destroy');
     Route::post('/staffs/{id}/lock', [AdminEmployeeController::class, 'lock'])->name('admin.users.staffs.lock');
     Route::post('/staffs/{id}/unlock', [AdminEmployeeController::class, 'unlock'])->name('admin.users.staffs.unlock');
+
 });
 
 // Thêm route này cho client hủy đơn hàng

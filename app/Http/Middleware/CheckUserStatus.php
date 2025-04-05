@@ -15,9 +15,17 @@ class CheckUserStatus
             $user = Auth::user();
             if ($user->status === 'inactive') {
                 Auth::logout();
-                return redirect()->route('login')->withErrors(['email' => 'Tài khoản của bạn đã bị khóa.']);
+                session()->flash('error', 'Tài khoản của bạn đã bị khóa.');
+                $request->session()->regenerateToken(); // Chỉ regenerate token
+                return redirect()->route('login');
+            }
+
+            // Xóa session error nếu tài khoản active
+            if ($user->status === 'active') {
+                $request->session()->forget('error');
             }
         }
+
 
         return $next($request);
     }
