@@ -10,22 +10,22 @@
                             <div class="content-detail">
                                 <div class="main-info">
                                     <div class="hero-container">
-                                        <!-- Forgot form -->
+                                        <!-- Form Quên Mật Khẩu -->
                                         <form class="forgot-form" method="post">
                                             <div class="imgcontainer">
                                                 <a href="index.html"><img src="/be/assets/img/logo/full-logo.png" alt="logo"
                                                         class="logo"></a>
                                             </div>
                                             <div class="input-control">
-                                                <p>Enter your email, we will send a link to reset your password.</p>
-                                                <input type="email" placeholder="Enter your email" name="email"
+                                                <p>Nhập email của bạn, chúng tôi sẽ gửi một liên kết để đặt lại mật khẩu.</p>
+                                                <input type="email" placeholder="Nhập email của bạn" name="email"
                                                     required>
                                                 <div class="login-btns">
-                                                    <button type="submit">Reset</button>
+                                                    <button type="submit">Đặt lại mật khẩu</button>
                                                 </div>
                                                 <div class="login-with-btns">
-                                                    <span class="already-acc">Return to<a href="signin.html"
-                                                            class="login-btn">Login</a></span>
+                                                    <span class="already-acc">Quay lại <a href="signin.html"
+                                                            class="login-btn">Đăng nhập</a></span>
                                                 </div>
                                             </div>
                                         </form>
