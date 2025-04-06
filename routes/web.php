@@ -64,6 +64,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [ProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password.store');
+    Route::get('/profile/addresses', [ProfileController::class, 'showAddresses'])->name('profile.addresses');
     Route::post('/addresses', [ProfileController::class, 'storeAddress'])->name('addresses.store');
     Route::put('/addresses/{address}', [ProfileController::class, 'updateAddress'])->name('addresses.update');
     Route::delete('/addresses/{address}', [ProfileController::class, 'destroyAddress'])->name('addresses.destroy');
