@@ -25,7 +25,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'address',
         'status',
-        'role'
+        'role',
+        'gender',
+        'birthday',
+        'avatar',
     ];
 
     /**
@@ -55,9 +58,10 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->setAttribute('role', $this->role ?? 'user');
     }
 
-    
 
-    public function orders(){
+
+    public function orders()
+    {
         return $this->hasMany(Order::class);
     }
 
