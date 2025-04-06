@@ -25,74 +25,89 @@
 <!-- SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
+    .custom-img {
+        width: 100px !important;
+        height: 100px !important;
+        object-fit: contain;
+    }
+
     .menu-item {
-    position: relative;
-}
+        position: relative;
+    }
 
-.submenu {
-    list-style: none;
-    position: absolute;
-    left: 0;
-    top: 100%;
-    /* background-color: #cfcfcf; */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 0;
-    margin: 0;
-    display: none; /* Ẩn submenu ban đầu */
-    z-index: 1000;
-}
+    .submenu {
+        list-style: none;
+        position: absolute;
+        left: 0;
+        top: 100%;
+        /* background-color: #cfcfcf; */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 0;
+        margin: 0;
+        display: none;
+        /* Ẩn submenu ban đầu */
+        z-index: 1000;
+    }
 
-.submenu li {
-    border-bottom: 1px solid #ddd;
+    .submenu li {
+        border-bottom: 1px solid #ddd;
 
-}
+    }
 
-.submenu li:last-child {
-    border-bottom: none;
-}
+    .submenu li:last-child {
+        border-bottom: none;
+    }
 
-.submenu a {
-    text-decoration: none;
-    color: #333;
-    padding: 10px 20px;
-    display: block;
-}
+    .submenu a {
+        text-decoration: none;
+        color: #333;
+        padding: 10px 20px;
+        display: block;
+    }
 
-.submenu a:hover {
-    /* background-color: #ffc7c7; */
-    margin: 5px ;
-    
-    
-}
-.submenu {
-    position: relative; /* Giữ nguyên submenu bên trong parent */
-    left: 30px; /* Dịch submenu sang bên trái 30px */
-    display: none; /* Ban đầu ẩn submenu */
-}
-
-.submenu.show {
-    display: block; /* Hiển thị submenu khi được kích hoạt */
-}
-.drop-arrow {
-    font-size: 12px; /* Kích thước của mũi tên */
-    color: #ecf0f1; /* Màu sắc của mũi tên */
-    margin-right: 5px; /* Khoảng cách với chữ */
-    transition: transform 0.3s ease; /* Hiệu ứng xoay mũi tên */
-}
-
-.cr-page-link.active .drop-arrow {
-    transform: rotate(180deg); /* Xoay mũi tên khi menu mở */
-}
-.drop-arrow {
-    transition: transform 0.3s ease; /* Hiệu ứng mượt khi xoay */
-}
-
-.rotate-180 {
-    transform: rotate(180deg); 
-}
+    .submenu a:hover {
+        /* background-color: #ffc7c7; */
+        margin: 5px;
 
 
+    }
 
+    .submenu {
+        position: relative;
+        /* Giữ nguyên submenu bên trong parent */
+        left: 30px;
+        /* Dịch submenu sang bên trái 30px */
+        display: none;
+        /* Ban đầu ẩn submenu */
+    }
 
+    .submenu.show {
+        display: block;
+        /* Hiển thị submenu khi được kích hoạt */
+    }
+
+    .drop-arrow {
+        font-size: 12px;
+        /* Kích thước của mũi tên */
+        color: #ecf0f1;
+        /* Màu sắc của mũi tên */
+        margin-right: 5px;
+        /* Khoảng cách với chữ */
+        transition: transform 0.3s ease;
+        /* Hiệu ứng xoay mũi tên */
+    }
+
+    .cr-page-link.active .drop-arrow {
+        transform: rotate(180deg);
+        /* Xoay mũi tên khi menu mở */
+    }
+
+    .drop-arrow {
+        transition: transform 0.3s ease;
+        /* Hiệu ứng mượt khi xoay */
+    }
+
+    .rotate-180 {
+        transform: rotate(180deg);
+    }
 </style>
-

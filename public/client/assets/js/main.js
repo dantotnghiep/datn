@@ -3,7 +3,7 @@
 
     /*
     **** Mobile Menu JS ****
-    */  
+    */
     $('.hamburger').on('click',function (event) {
       $(this).toggleClass('h-active');
       $('.main-nav').toggleClass('slidenav');
@@ -28,7 +28,7 @@
 
     /*
     **** Cart Sidebar JS ****
-    */  
+    */
     document.querySelectorAll('.cart-icon i').forEach((element) => {
       element.addEventListener('click', () => {
         document.querySelectorAll('.cart-sidebar-wrappper').forEach((element) => element.classList.add('cart-active'))
@@ -51,7 +51,7 @@
 
     /*
     **** Category Sidebar JS ****
-    */ 
+    */
     document.querySelectorAll('.category-icon i').forEach((element)=>{
       element.addEventListener('click', ()=>{
         document.querySelectorAll('.category-bar').forEach((bar)=>{
@@ -67,7 +67,7 @@
 
     /*
     **** Custom Select Input JS ****
-    */ 
+    */
     var x, i, j, l, ll, selElmnt, a, b, c;
     x = document.getElementsByClassName("custom-select");
     l = x.length;
@@ -140,7 +140,7 @@
 
     /*
     **** Sticky Navbar JS ****
-    */ 
+    */
     $(window).on('scroll',function () {
       var scroll = $(window).scrollTop();
       if (scroll >= 20) {
@@ -155,7 +155,7 @@
 
     /*
     **** Pricing Slider JS ****
-    */ 
+    */
 
     $("#slider-range").slider({
       range: true,
@@ -172,8 +172,7 @@
 
     /*
     **** Cart Quantity Increment JS ****
-    */ 
-    jQuery('<div class="quantity-nav"><div class="quantity-button quantity-up"><i class="bi bi-plus"></i></div><div class="quantity-button quantity-down"><i class="bi bi-dash"></i></div></div>').insertAfter('.quantity input');
+    */
     jQuery('.quantity').each(function () {
       var spinner = jQuery(this),
         input = spinner.find('input[type="number"]'),
@@ -209,7 +208,7 @@
 
     /*
     **** Custom Countdown State JS ****
-    */ 
+    */
 
     function timeConverter(UNIX_timestamp) {
       var a = new Date(UNIX_timestamp * 1000);
@@ -270,7 +269,7 @@
 
     /*
     **** Fancy Box JS ****
-    */ 
+    */
     $('[data-fancybox]').fancybox({
       youtube: {
         controls: 0,
@@ -284,7 +283,7 @@
 
     /*
     **** Hero Slider JS ****
-    */ 
+    */
     var heroSlider = new Swiper('.swiper-container', {
       loop: true,
       effect: 'fade',
@@ -306,7 +305,7 @@
 
     /*
     **** Tranding product Slider JS ****
-    */ 
+    */
     var trandingSlider = new Swiper('.swiper-tranding-container', {
       loop: true,
       spaceBetween: 24,
@@ -346,7 +345,7 @@
 
     /*
     **** Blog Slider JS ****
-    */ 
+    */
     var blogSlider = new Swiper('.swiper-blog-container', {
       loop: true,
       spaceBetween: 24,
