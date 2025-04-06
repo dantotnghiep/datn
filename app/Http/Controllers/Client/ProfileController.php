@@ -29,18 +29,40 @@ class ProfileController extends Controller
             $validated = $request->validated();
             $user = Auth::user();
 
+            // Debug dữ liệu gửi lên
+            \Log::info('Validated data:', $validated);
+
+            if ($request->hasFile('avatar')) {
+                if ($user->avatar) {
+                    \Storage::delete('avatars/' . $user->avatar);
+                }
+                $avatarName = time() . '.' . $request->file('avatar')->extension();
+                $path = $request->file('avatar')->storeAs('avatars', $avatarName);
+                $validated['avatar'] = $avatarName;
+            }
+
             // Cập nhật thông tin người dùng
             $user->update([
                 'name' => $validated['name'],
                 'phone' => $validated['phone'],
+                'gender' => $validated['gender'] ?? $user->gender,
+                'birthday' => $validated['birthday'] ?? $user->birthday,
+                'avatar' => $validated['avatar'] ?? $user->avatar,
             ]);
 
             return redirect()->route('profile')->with('success', 'Cập nhật thông tin thành công!');
         } catch (\Exception $e) {
+            \Log::error('Error updating profile: ' . $e->getMessage());
             return redirect()->back()
-                ->with('error', 'Đã xảy ra lỗi khi cập nhật thông tin.')
+                ->with('error', 'Đã xảy ra lỗi khi cập nhật thông tin: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+    public function showAddresses()
+    {
+        $user = Auth::user();
+        $addresses = $user->addresses;
+        return view('client.auth.addresses', compact('user', 'addresses'));
     }
 
     // Thêm địa chỉ
@@ -69,7 +91,7 @@ class ProfileController extends Controller
 
         Address::create($data);
 
-        return redirect()->route('profile')->with('success', 'Địa chỉ đã được thêm thành công.');
+        return redirect()->route('profile.addresses')->with('success', 'Địa chỉ đã được thêm thành công.');
     }
 
     // Cập nhật địa chỉ
@@ -87,7 +109,7 @@ class ProfileController extends Controller
 
         $user = Auth::user();
         if ($address->user_id !== $user->id) {
-            return redirect()->route('profile')->with('error', 'Bạn không có quyền chỉnh sửa địa chỉ này.');
+            return redirect()->route('profile.addresses')->with('error', 'Bạn không có quyền chỉnh sửa địa chỉ này.');
         }
 
         if ($request->input('is_default')) {
@@ -96,7 +118,7 @@ class ProfileController extends Controller
 
         $address->update($request->all());
 
-        return redirect()->route('profile')->with('success', 'Địa chỉ đã được cập nhật thành công.');
+        return redirect()->route('profile.addresses')->with('success', 'Địa chỉ đã được cập nhật thành công.');
     }
 
     // Xóa địa chỉ
@@ -104,7 +126,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         if ($address->user_id !== $user->id) {
-            return redirect()->route('profile')->with('error', 'Bạn không có quyền xóa địa chỉ này.');
+            return redirect()->route('profile.addresses')->with('error', 'Bạn không có quyền xóa địa chỉ này.');
         }
 
         $address->delete();
@@ -113,7 +135,7 @@ class ProfileController extends Controller
             $user->addresses->first()->update(['is_default' => true]);
         }
 
-        return redirect()->route('profile')->with('success', 'Địa chỉ đã được xóa thành công.');
+        return redirect()->route('profile.addresses')->with('success', 'Địa chỉ đã được xóa thành công.');
     }
 
     // Đặt địa chỉ mặc định
@@ -121,12 +143,46 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         if ($address->user_id !== $user->id) {
-            return redirect()->route('profile')->with('error', 'Bạn không có quyền thực hiện hành động này.');
+            return redirect()->route('profile.addresses')->with('error', 'Bạn không có quyền thực hiện hành động này.');
         }
 
         Address::where('user_id', $user->id)->update(['is_default' => false]);
         $address->update(['is_default' => true]);
 
-        return redirect()->route('profile')->with('success', 'Đã đặt địa chỉ mặc định thành công.');
+        return redirect()->route('profile.addresses')->with('success', 'Đã đặt địa chỉ mặc định thành công.');
     }
-} 
+
+    public function showChangePassword()
+    {
+        return view('client.auth.change-password');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ], [
+            'current_password.required' => 'Mật khẩu cũ không được để trống.',
+            'new_password.required' => 'Mật khẩu mới không được để trống.',
+            'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+            'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
+        ]);
+
+        // Debug dữ liệu gửi lên
+        \Log::info('Change password data:', $request->all());
+        $user = Auth::user();
+
+        // Kiểm tra mật khẩu cũ
+        if (!\Hash::check($request->current_password, $user->password)) {
+            return redirect()->back()->with('error', 'Mật khẩu cũ không đúng.');
+        }
+
+        // Cập nhật mật khẩu mới
+        $user->update([
+            'password' => \Hash::make($request->new_password),
+        ]);
+
+        return redirect()->route('profile.change-password')->with('success', 'Đổi mật khẩu thành công!');
+    }
+}
