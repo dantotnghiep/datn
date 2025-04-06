@@ -11,94 +11,93 @@
             <ul class="cr-sb-list">
                 <li class="cr-sb-item sb-drop-item">
                     <a href="{{ route('admin.dashboard') }}" class="cr-drop-toggle">
-                        <i class="ri-dashboard-3-line"></i><span class="condense">Dashboard<i
+                        <i class="ri-dashboard-3-line"></i><span class="condense">Bảng điều khiển<i
                                 class="drop-arrow ri-arrow-down-s-line"></i></span></a>
                     <ul class="cr-sb-drop condense">
                         <li><a href="index.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>ecommerce</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Thương mại điện tử</a></li>
                         <li><a href="{{ route('admin.product.product-list') }}" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Product list</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Danh sách sản phẩm</a></li>
                         <li class="menu-item">
                             <a href="#"
                                 class="cr-page-link drop flex items-center justify-between px-4 py-2 text-gray-200 hover:bg-gray-700 rounded-md"
                                 onclick="toggleSubmenu(event)">
 
-                                Add Product
+                                Thêm sản phẩm
                             </a>
                             <!-- Submenu -->
                             <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md ">
                                 <li>
                                     <a href="{{ route('admin.product.create') }}"
                                         class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
-                                        Add Product
+                                        Thêm sản phẩm
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ route('admin.attribute-values') }}"
                                         class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
-                                        Attribute Values
+                                        Giá trị thuộc tính
                                     </a>
                                 </li>
                             </ul>
                         </li>
 
                         <li><a href="{{ route('hot-products.index') }}" class="cr-page-link drop"><i
-                            class="ri-checkbox-blank-circle-line"></i>Home setting</a></li>
+                            class="ri-checkbox-blank-circle-line"></i>Cài đặt trang chủ</a></li>
 
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Thêm danh mục</a></li>
                         <li><a href="add-sub-category.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Add Sub Category</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Thêm danh mục con</a></li>
                         <li><a href="{{ route('admin.orders.index') }}" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Order List</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Danh sách đơn hàng</a></li>
                         <li class="cr-sb-item sb-subdrop-item">
                             <a href="javascript:void(0)" class="cr-sub-drop-toggle">
-                                <i class="ri-shield-user-line"></i><span class="condense">Vendor<i
+                                <i class="ri-shield-user-line"></i><span class="condense">Nhà cung cấp<i
                                         class="drop-arrow ri-arrow-down-s-line"></i></span></a>
                             <ul class="cr-sb-subdrop condense">
                                 <li><a href="vendor-profile.html" class="cr-page-link subdrop"><i
-                                            class="ri-checkbox-blank-circle-line"></i>Profile</a></li>
+                                            class="ri-checkbox-blank-circle-line"></i>Hồ sơ</a></li>
                                 <li><a href="vendor-update.html" class="cr-page-link subdrop"><i
-                                            class="ri-checkbox-blank-circle-line"></i>Vendor Update</a></li>
+                                            class="ri-checkbox-blank-circle-line"></i>Cập nhật nhà cung cấp</a></li>
                                 <li><a href="vendor-list.html" class="cr-page-link subdrop"><i
-                                            class="ri-checkbox-blank-circle-line"></i>Vendor List</a></li>
+                                            class="ri-checkbox-blank-circle-line"></i>Danh sách nhà cung cấp</a></li>
                                 <li><a href="invoice.html" class="cr-page-link subdrop"><i
-                                            class="ri-checkbox-blank-circle-line"></i>Invoice</a></li>
+                                            class="ri-checkbox-blank-circle-line"></i>Hóa đơn</a></li>
                             </ul>
                         </li>
                     </ul>
                 </li>
                 <li class="cr-sb-item-separator"></li>
-                <li class="cr-sb-title condense">Pages</li>
+                <li class="cr-sb-title condense">Trang</li>
                 <li class="cr-sb-item sb-drop-item">
                     <a href="javascript:void(0)" class="cr-drop-toggle">
-                        <i class="ri-pages-line"></i><span class="condense">Authentication<i
+                        <i class="ri-pages-line"></i><span class="condense">Xác thực<i
                                 class="drop-arrow ri-arrow-down-s-line"></i></span></a>
                     <ul class="cr-sb-drop condense">
                         <li><a href="signin.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i></i>Login</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i></i>Đăng nhập</a></li>
                         <li><a href="signup.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Signup</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Đăng ký</a></li>
                         <li><a href="forgot.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Forgot password</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Quên mật khẩu</a></li>
                         <li><a href="two-factor.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>two factor</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Xác thực hai yếu tố</a></li>
                         <li><a href="reset-password.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Reset password</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Đặt lại mật khẩu</a></li>
                         <li><a href="remember.html" class="cr-page-link drop"><i
-                                    class="ri-checkbox-blank-circle-line"></i>Remember</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Nhớ tài khoản</a></li>
                     </ul>
                 </li>
                 <li class="cr-sb-item-separator"></li>
-                <li class="cr-sb-title condense">Elements</li>
+                <li class="cr-sb-title condense">Phần tử</li>
                 <li class="cr-sb-item">
                     <a href="{{route('staff.dashboard')}}" class="cr-page-link">
-                        <i class="ri-remixicon-line"></i><span class="condense"><span class="hover-title">Staff</span></span></a>
+                        <i class="ri-remixicon-line"></i><span class="condense"><span class="hover-title">Nhân viên</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="material-icons.html" class="cr-page-link">
-                        <i class="mdi mdi-material-ui"></i><span class="condense"><span class="hover-title">Material
-                                icons</span></span></a>
+                        <i class="mdi mdi-material-ui"></i><span class="condense"><span class="hover-title">Biểu tượng vật liệu</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="apexchart.html" class="cr-page-link">
@@ -108,22 +107,21 @@
                 <li class="cr-sb-item">
                     <a href="buttons.html" class="cr-page-link">
                         <i class="ri-radio-button-line"></i><span class="condense"><span
-                                class="hover-title">Buttons</span></span></a>
+                                class="hover-title">Nút</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="accordions.html" class="cr-page-link">
                         <i class="ri-play-list-add-line"></i><span class="condense"><span
-                                class="hover-title">Accordions</span></span></a>
+                                class="hover-title">Accordion</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="typography.html" class="cr-page-link">
                         <i class="ri-file-text-line"></i><span class="condense"><span
-                                class="hover-title">Typography</span></span></a>
+                                class="hover-title">Định dạng văn bản</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="alert-popup.html" class="cr-page-link">
-                        <i class="ri-file-warning-line"></i><span class="condense"><span class="hover-title">Alert
-                                Popup</span></span></a>
+                        <i class="ri-file-warning-line"></i><span class="condense"><span class="hover-title">Thông báo cảnh báo</span></span></a>
                 </li>
             </ul>
         </div>

@@ -30,7 +30,7 @@
                             <li><a href="javascript:void(0)"><img class="flag"
                                         src="/be/assets/img/flag/in.png" alt="flag">Hindi</a></li>
                             <li><a href="javascript:void(0)"><img class="flag"
-                                        src="/be/assets/img/flag/de.png" alt="flag"> Deutsch</a></li>
+                                        src="/be/assets/img/flag/de.png" alt="flag">Deutsch</a></li>
                             <li><a href="javascript:void(0)"><img class="flag"
                                         src="/be/assets/img/flag/it.png" alt="flag">Italian</a></li>
                             <li><a href="javascript:void(0)"><img class="flag"
@@ -48,17 +48,17 @@
                         <h6 class="title">Apps</h6>
                         <ul>
                             <li><a href="javascript:void(0)"><img class="app"
-                                        src="/be/assets/img/apps/1.png" alt="flag">English</a></li>
+                                        src="/be/assets/img/apps/1.png" alt="flag">App 1</a></li>
                             <li><a href="javascript:void(0)"><img class="app"
-                                        src="/be/assets/img/apps/2.png" alt="flag">Hindi</a></li>
+                                        src="/be/assets/img/apps/2.png" alt="flag">App 2</a></li>
                             <li><a href="javascript:void(0)"><img class="app"
-                                        src="/be/assets/img/apps/3.png" alt="flag"> Deutsch</a></li>
+                                        src="/be/assets/img/apps/3.png" alt="flag">App 3</a></li>
                             <li><a href="javascript:void(0)"><img class="app"
-                                        src="/be/assets/img/apps/4.png" alt="flag">Italian</a></li>
+                                        src="/be/assets/img/apps/4.png" alt="flag">App 4</a></li>
                             <li><a href="javascript:void(0)"><img class="app"
-                                        src="/be/assets/img/apps/5.png" alt="flag">Japanese</a></li>
+                                        src="/be/assets/img/apps/5.png" alt="flag">App 5</a></li>
                             <li><a href="javascript:void(0)"><img class="app"
-                                        src="/be/assets/img/apps/6.png" alt="flag">Japanese</a></li>
+                                        src="/be/assets/img/apps/6.png" alt="flag">App 6</a></li>
                         </ul>
                     </div>
                 </div>
@@ -97,18 +97,14 @@
                             <li><a href="team-update.html">Settings</a></li>
                         </ul>
                         <ul class="border-top">
-
-
                             <li>
-                                <!-- Biểu mẫu logout sử dụng POST -->
+                                <!-- Logout form -->
                                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
-                                    @csrf  <!-- Bảo vệ khỏi CSRF -->
+                                    @csrf
                                     <button type="submit" style="background: none; border: none; padding: 0;">
                                         <i class="ri-logout-circle-r-line"></i> Logout
                                     </button>
                                 </form>
-
-
                             </li>
                         </ul>
                     </div>
