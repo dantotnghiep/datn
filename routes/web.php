@@ -182,9 +182,15 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->prefix('admin/users')->group(function () {
     // Khách hàng
     Route::get('/clients', [AdminCustomerController::class, 'index'])->name('admin.users.clients.index');
-    Route::post('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
-    Route::post('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
+    Route::get('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
+    Route::get('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
     Route::get('/clients/{id}', [AdminCustomerController::class, 'show'])->name('admin.users.clients.detail');
+    Route::post('/clients', [AdminCustomerController::class, 'store'])->name('admin.users.clients.store');
+    Route::post('/clients/{id}/reset-password', [AdminCustomerController::class, 'resetPassword'])->name('admin.users.clients.reset-password');
+    Route::post('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock.detail');
+    Route::post('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock.detail');
+    Route::post('/clients/{id}/warn', [AdminCustomerController::class, 'warn'])->name('admin.users.clients.warn');
+
 
     // Nhân viên/admin
     Route::get('/staffs', [AdminEmployeeController::class, 'index'])->name('admin.users.staffs.index');

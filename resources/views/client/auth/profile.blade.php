@@ -11,8 +11,10 @@
                                 <img src="{{ asset('storage/avatars/' . auth()->user()->avatar) }}" alt="Avatar"
                                     class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
                             @else
-                                <img src="https://via.placeholder.com/120" alt="Default Avatar" class="rounded-circle mb-3"
-                                    style="width: 120px; height: 120px;">
+                                <div class="rounded-circle me-2 text-white d-flex align-items-center justify-content-center"
+                                    style="width: 40px; height: 40px; background-color: #ccc; font-size: 16px;">
+                                    {{ mb_substr($user->name, 0, 1, 'UTF-8') }}
+                                </div>
                             @endif
                             <div>
 

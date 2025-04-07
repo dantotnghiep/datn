@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'gender',
         'birthday',
         'avatar',
+        'locked_at',
     ];
 
     /**
@@ -86,5 +87,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function defaultAddress()
     {
         return $this->hasOne(Address::class)->where('is_default', true);
+    }
+
+    public function wishlist()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(UserActivity::class);
     }
 }

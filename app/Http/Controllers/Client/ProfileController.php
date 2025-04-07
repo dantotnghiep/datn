@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\Address;
 use App\Models\User;
+use App\Models\UserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -181,6 +182,13 @@ class ProfileController extends Controller
         // Cập nhật mật khẩu mới
         $user->update([
             'password' => \Hash::make($request->new_password),
+        ]);
+
+        // Ghi lại hoạt động
+        UserActivity::create([
+            'user_id' => $user->id,
+            'activity_type' => 'password_reset',
+            'reason' => 'Đặt lại mật khẩu bởi admin',
         ]);
 
         return redirect()->route('profile.change-password')->with('success', 'Đổi mật khẩu thành công!');
