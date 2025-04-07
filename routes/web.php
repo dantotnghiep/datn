@@ -17,6 +17,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationController;
+use App\Jobs\UnlockUserAfterThreeDays;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -184,6 +185,7 @@ Route::middleware(['auth'])->prefix('admin/users')->group(function () {
     Route::get('/clients', [AdminCustomerController::class, 'index'])->name('admin.users.clients.index');
     Route::get('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
     Route::get('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
+    Route::get('/unlock-users', function () {UnlockUserAfterThreeDays::dispatch(); return 'Job dispatched!';});
     Route::get('/clients/{id}', [AdminCustomerController::class, 'show'])->name('admin.users.clients.detail');
     Route::post('/clients', [AdminCustomerController::class, 'store'])->name('admin.users.clients.store');
     Route::post('/clients/{id}/reset-password', [AdminCustomerController::class, 'resetPassword'])->name('admin.users.clients.reset-password');

@@ -46,6 +46,7 @@ class ProfileController extends Controller
             $user->update([
                 'name' => $validated['name'],
                 'phone' => $validated['phone'],
+                'email' => $validated['email'],
                 'gender' => $validated['gender'] ?? $user->gender,
                 'birthday' => $validated['birthday'] ?? $user->birthday,
                 'avatar' => $validated['avatar'] ?? $user->avatar,

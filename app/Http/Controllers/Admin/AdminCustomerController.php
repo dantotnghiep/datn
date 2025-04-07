@@ -16,7 +16,7 @@ class AdminCustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::where('role', 'user');
+        $query = User::where('role', 'user')->with('activities');
 
         // Tìm kiếm
         if ($request->has('search') && !empty($request->search)) {

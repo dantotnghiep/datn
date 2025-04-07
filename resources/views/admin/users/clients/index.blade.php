@@ -68,6 +68,7 @@
                             <th>Thành Phố</th>
                             <th>Đơn Hàng Gần Nhất</th>
                             <th>Trạng Thái</th>
+                            <th>Cảnh báo</th>
                             <th>Hành Động</th>
                         </tr>
                     </thead>
@@ -96,6 +97,21 @@
                                 <td>{{ $customer->addresses->first()->province ?? 'N/A' }}</td>
                                 <td>{{ $customer->last_order ? $customer->last_order->format('d/m/Y H:i') : 'N/A' }}</td>
                                 <td>{{ $customer->status === 'active' ? 'Hoạt động' : 'Bị khóa' }}</td>
+                                <td>
+                                    @php
+                                        $warning = $customer->activities()
+                                            ->where('activity_type', 'warning')
+                                            ->latest()
+                                            ->first();
+                                    @endphp
+                                    @if($warning)
+                                        <span class="badge bg-warning text-dark" title="{{ $warning->reason }}">
+                                            Có cảnh báo
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if ($customer->status === 'active')
                                         <form action="{{ route('admin.users.clients.lock', $customer->id) }}"
