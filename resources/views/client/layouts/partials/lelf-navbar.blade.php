@@ -15,9 +15,10 @@
                                 <a href="#"><i class="flaticon-user"></i></a>
                                 <div class="submenu-right position-absolute" style="left: 70px;">
                                     @if (Auth::check())
+
                                         <div class="submenu-item-wrapper">
                                             <a href="{{ route('profile') }}" class="submenu-item">
-                                                <i class="bi bi-person me-2"></i>Thông tin cá nhân</a>
+                                                <i class="bi bi-person me-2"></i>Hồ sơ</a>
                                             <a href="{{ route('orders.index') }}" class="submenu-item">
                                                 <i class="bi bi-bag me-2"></i>Đơn hàng</a>
                                             <form action="{{ route('logout') }}" method="POST" class="d-inline">
@@ -35,6 +36,7 @@
                                             <a href="{{ route('register') }}" class="submenu-item">
                                                 <i class="bi bi-person-plus me-2"></i>Đăng ký</a>
                                         </div>
+
                                     @endif
                                 </div>
                             </li>
@@ -118,7 +120,7 @@
                     @endforeach
                 @else
                     <li class="text-center py-3">
-                        <p>Giỏ hàng của bạn hiện tại không có sản phẩm</p>
+                        <p>Giỏ hàng của bạn trống</p>
                     </li>
                 @endif
             </ul>
@@ -126,7 +128,7 @@
         @if(auth()->check() && isset($cartItems) && $cartItems->count() > 0)
         <div class="cart-bottom">
             <div class="cart-total d-flex justify-content-between">
-                <label>Tổng cộng :</label>
+                <label>Tạm tính :</label>
                 <span>{{ number_format($total) }} VND</span>
             </div>
             <div class="cart-btns">
@@ -139,12 +141,12 @@
             @if($total < 1000000) {{-- Giả sử free ship cho đơn > 1 triệu --}}
                 <p class="cart-shipping-text">
                     <strong>MIỄN PHÍ VẬN CHUYỂN:</strong>
-                    Chi tiêu thêm {{ number_format(1000000 - $total) }} VND để đủ điều kiện miễn phí vận chuyển
+                    Chi tiêu thêm {{ number_format(1000000 - $total) }} VND để đủ điều kiện nhận miễn phí vận chuyển
                 </p>
             @else
                 <p class="cart-shipping-text text-success">
                     <strong>CHÚC MỪNG!</strong>
-                    Đơn hàng của bạn đủ điều kiện miễn phí vận chuyển
+                    Đơn hàng của bạn đủ điều kiện nhận miễn phí vận chuyển
                 </p>
             @endif
         </div>
@@ -175,7 +177,7 @@
                     <i class="flaticon-woman"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Phụ nữ <i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Đồ nữ <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -207,7 +209,7 @@
                     <i class="flaticon-shoes"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Giày dép <i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Bộ sưu tập giày <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -247,7 +249,7 @@
                     <i class="flaticon-fashion"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Trang phục theo mùa <i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Trang phục mùa <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -261,4 +263,46 @@
         </ul>
     </div>
 </div>
-<!-- =
+<!-- =============== category wrapper end=============== -->
+
+<style>
+    .user-menu-wrapper {
+        position: relative;
+    }
+
+    .submenu-right {
+        display: none;
+        position: absolute;
+        left: 85px;
+        top: -10px;
+        background: white;
+        min-width: 200px;
+        border-radius: 12px;
+        padding: 15px 0;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-menu-wrapper:hover .submenu-right {
+        display: block;
+    }
+
+    .submenu-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #333;
+        text-decoration: none;
+        transition: background 0.3s;
+        font-size: 14px;
+    }
+
+    .submenu-item i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+    }
+
+    .submenu-item:hover {
+        background: #f5f5f5;
+    }
+</style>
