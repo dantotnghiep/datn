@@ -43,7 +43,7 @@
                         </li>
 
                         <li><a href="{{ route('hot-products.index') }}" class="cr-page-link drop"><i
-                            class="ri-checkbox-blank-circle-line"></i>Home setting</a></li>
+                                    class="ri-checkbox-blank-circle-line"></i>Home setting</a></li>
 
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Add Category</a></li>
@@ -51,6 +51,30 @@
                                     class="ri-checkbox-blank-circle-line"></i>Add Sub Category</a></li>
                         <li><a href="{{ route('admin.orders.index') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Order List</a></li>
+
+                        <li class="menu-item">                   
+                            <a href="#"
+                                class="cr-page-link drop flex items-center justify-between px-4 py-2 text-gray-200 hover:bg-gray-700 rounded-md"
+                                onclick="toggleSubmenu(event)">
+                                Customer
+                            </a>
+                            <!-- Submenu -->
+                            <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md ">
+                                <li>
+                                    <a href="{{ route('admin.users.clients.index') }}"
+                                        class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                                        Users
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.staffs.index') }}"
+                                        class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+                                        Staffs
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li class="cr-sb-item sb-subdrop-item">
                             <a href="javascript:void(0)" class="cr-sub-drop-toggle">
                                 <i class="ri-shield-user-line"></i><span class="condense">Vendor<i
@@ -92,8 +116,9 @@
                 <li class="cr-sb-item-separator"></li>
                 <li class="cr-sb-title condense">Elements</li>
                 <li class="cr-sb-item">
-                    <a href="{{route('staff.dashboard')}}" class="cr-page-link">
-                        <i class="ri-remixicon-line"></i><span class="condense"><span class="hover-title">Staff</span></span></a>
+                    <a href="{{ route('staff.dashboard') }}" class="cr-page-link">
+                        <i class="ri-remixicon-line"></i><span class="condense"><span
+                                class="hover-title">Staff</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="material-icons.html" class="cr-page-link">

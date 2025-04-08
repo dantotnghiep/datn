@@ -38,7 +38,7 @@
                                     @endif
                                 </div>
                             </li>
-                            <li><a href="product.html"><i class="flaticon-heart"></i></a></li>
+                            <li><a href="{{ route('wishlist.index') }}"><i class="flaticon-heart"></i></a></li>
                             <li class="cart-icon">
                                 <i class="flaticon-shopping-cart"></i>
                                 {{-- @if($cartCount > 0)

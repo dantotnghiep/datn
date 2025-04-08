@@ -163,7 +163,7 @@ class OrderController extends Controller
             }
 
             // Cập nhật trạng thái hủy (3)
-            $order->status_id = 4;
+            $order->status_id = 6;
             $order->save();
             
             // Load lại relationship để đảm bảo dữ liệu mới nhất

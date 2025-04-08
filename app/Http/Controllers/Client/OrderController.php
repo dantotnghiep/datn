@@ -15,8 +15,22 @@ class OrderController extends Controller
 
     public function index()
     {
+        $user = Auth::user();
+
         $orders = Order::query()->where('user_id', Auth::id())->get();
-        return view('client.orders.index', compact('orders'));
+
+        // Kiểm tra số đơn hủy trong 7 ngày
+        $cancelledOrders = $user->orders()
+            ->where('status_id', 6) // Cancelled
+            ->where('created_at', '>=', now()->subDays(7))
+            ->count();
+
+        $warningMessage = null;
+        if ($cancelledOrders >= 4 && $user->status === 'active') {
+            $warningMessage = 'Bạn đã hủy ' . $cancelledOrders . ' đơn trong 7 ngày. Nếu hủy thêm, tài khoản của bạn sẽ bị khóa trong 3 ngày.';
+        }
+
+        return view('client.orders.index', compact('orders', 'warningMessage'));
     }
 
     public function cancle($id)
@@ -31,8 +45,7 @@ class OrderController extends Controller
                         'order_id' => $order->id,
                         'reason' => 'abcabc'
                     ]);
-                }
-                else {
+                } else {
                     return back()->with('error', 'Không thể hủy đơn hàng này vì trạng thái không hợp lệ');
                 }
             }
@@ -45,12 +58,12 @@ class OrderController extends Controller
         $request->validate([
             'status_id' => 'required|exists:order_statuses,id'
         ]);
-        
+
         $order->status_id = $request->status_id;
         $order->save();
-        
+
         event(new OrderStatusUpdated($order));
-        
+
         return redirect()->back()->with('success', 'Order status updated successfully');
     }
 }
