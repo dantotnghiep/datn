@@ -26,6 +26,12 @@
                     @endif
 
                     <h5 class="checkout-title">Billing Details</h5>
+                    <div class="mb-4">
+                        <h5>Người đặt hàng</h5>
+                        <p><strong>Tên:</strong> {{ $user->name }}</p>
+                        <p><strong>Email:</strong> {{ $user->email }}</p>
+                        <p><strong>Số điện thoại:</strong> {{ $user->phone ?? 'Chưa cung cấp' }}</p>
+                    </div>
                     @if ($addresses->isEmpty())
                     <div class="alert alert-warning">
                         Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ để tiếp tục!

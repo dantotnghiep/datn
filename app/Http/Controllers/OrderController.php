@@ -9,6 +9,7 @@ use App\Models\Order_item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Services\VNPayService;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -27,13 +28,15 @@ class OrderController extends Controller
             return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống!');
         }
 
+        // Lấy thông tin người dùng hiện tại (người đặt hàng)
+        $user = Auth::user();
         $addresses = auth()->user()->addresses; // Lấy tất cả địa chỉ
         $userEmail = auth()->user()->email; // Lấy email từ bảng users
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
         $discountAmount = 0; // Giả sử không có giảm giá, bạn có thể điều chỉnh
         $finalTotal = $subtotal - $discountAmount;
 
-        return view('client.cart.checkout', compact('cartItems', 'userEmail', 'addresses', 'subtotal', 'discountAmount', 'finalTotal'));
+        return view('client.cart.checkout', compact('cartItems', 'user','userEmail', 'addresses', 'subtotal', 'discountAmount', 'finalTotal'));
     }
 
     public function store(Request $request)
