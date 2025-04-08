@@ -8,6 +8,7 @@ use App\Jobs\CheckCancelledOrders;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\UserActivity;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -148,11 +149,18 @@ class AdminCustomerController extends Controller
             'addresses' => function ($q) {
                 $q->where('is_default', true);
             },
-            'wishlist.variation.product.images' => function ($q) {
-                $q->where('is_main', true);
-            },
             'activities'
         ])->where('role', 'user')->findOrFail($id);
+
+      // Lấy danh sách yêu thích với phân trang
+      $wishlistItems = Wishlist::where('user_id', $customer->id)
+      ->with([
+          'product.images' => function ($q) {
+              $q->where('is_main', true);
+          },
+          'product.variations' // Tải variations để lấy giá
+      ])
+      ->paginate(5); // 5 sản phẩm mỗi trang
 
         $orderStats = $customer->orders()
             ->join('order_statuses', 'orders.status_id', '=', 'order_statuses.id')
@@ -172,7 +180,7 @@ class AdminCustomerController extends Controller
         // Dispatch job để kiểm tra hủy đơn
         CheckCancelledOrders::dispatch($customer);
 
-        return view('admin.users.clients.detail', compact('customer', 'stats', 'totalPaid'));
+        return view('admin.users.clients.detail', compact('customer', 'stats', 'totalPaid', 'wishlistItems'));
     }
 
     public function warn(Request $request, $id)

@@ -238,52 +238,77 @@
             </div>
         </div>
 
-        <!-- Danh sách yêu thích -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Danh sách yêu thích</h5>
-            </div>
-            <div class="card-body">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Sản phẩm</th>
-                            <th>Màu sắc</th>
-                            <th>Kích thước</th>
-                            <th>Giá</th>
-                            <th>Tổng</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($customer->wishlist as $item)
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        @if ($item->variation->product->images->isNotEmpty())
-                                            <img src="{{ asset($item->variation->product->images->where('is_main', true)->first()->url) }}"
-                                                alt="{{ $item->variation->product->name }}"
-                                                style="width: 50px; height: 50px; object-fit: cover;" class="me-2">
-                                        @endif
-                                        {{ $item->variation->product->name }}
-                                    </div>
-                                </td>
-                                <td>{{ $item->variation->sku }}</td>
-                                <td>N/A</td>
-                                <td>{{ number_format($item->variation->sale_price ?? $item->variation->price, 0) }} VNĐ
-                                </td>
-                                <td>{{ number_format($item->variation->sale_price ?? $item->variation->price, 0) }} VNĐ
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center">Không có sản phẩm trong danh sách yêu thích.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+    <!-- Danh sách yêu thích -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Sản phẩm yêu thích</h5>
         </div>
+        <div class="card-body">
+            @if($wishlistItems->isEmpty())
+                <p class="text-center text-muted">Không có sản phẩm trong danh sách yêu thích.</p>
+            @else
+                <ul class="list-group list-group-flush">
+                    @foreach($wishlistItems as $wishlistItem)
+                        @php
+                            $product = $wishlistItem->product;
+                            // Lấy giá từ biến thể mặc định (nếu có), nếu không thì từ sản phẩm
+                            $defaultVariation = $product->variations->first();
+                            if ($defaultVariation) {
+                                $originalPrice = $defaultVariation->price;
+                                $salePrice = $defaultVariation->sale_price ?? $defaultVariation->price;
+                            } else {
+                                $originalPrice = $product->price;
+                                $salePrice = $product->price - ($product->discount ?? 0);
+                            }
+                        @endphp
+                        <li class="list-group-item d-flex align-items-center">
+                            <div class="me-3">
+                                @if ($product->images->isNotEmpty())
+                                    <img src="{{ asset($product->images->where('is_main', true)->first()->url) }}"
+                                        alt="{{ $product->name }}"
+                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                @else
+                                    <img src="{{ asset('/client/assets/images/product/default.jpg') }}"
+                                        alt="{{ $product->name }}"
+                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                @endif
+                            </div>
+                            <div class="flex-grow-1">
+                                <a href="{{ route('client.product.product-details', ['id' => $product->id]) }}"
+                                    class="text-decoration-none text-dark">
+                                    {{ Str::limit($product->name, 50) }}
+                                </a>
+                                <div class="mt-1">
+                                    @if ($originalPrice != $salePrice)
+                                        <span class="text-muted text-decoration-line-through me-2">
+                                            {{ number_format($originalPrice, 0, ',', '.') }} VNĐ
+                                        </span>
+                                        <span class="text-danger">
+                                            {{ number_format($salePrice, 0, ',', '.') }} VNĐ
+                                        </span>
+                                    @else
+                                        <span class="text-danger">
+                                            {{ number_format($originalPrice, 0, ',', '.') }} VNĐ
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
 
+                <!-- Phân trang -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="text-muted">
+                        {{ $wishlistItems->firstItem() }} to {{ $wishlistItems->lastItem() }} Items of {{ $wishlistItems->total() }}
+                    </span>
+                    @if ($wishlistItems->hasMorePages())
+                        <a href="{{ $wishlistItems->nextPageUrl() }}" class="text-primary">View all <i class="bi bi-chevron-right"></i></a>
+                    @endif
+                </div>
+            @endif
+        </div>
+    </div>
        
 
         <!-- Đánh giá -->
