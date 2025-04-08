@@ -21,7 +21,7 @@
                             </div>
                             <div class="col-lg-12">
                                 <div class="sidebar-category">
-                                    <h5 class="sb-title">SHOP BY CATAGORY</h5>
+                                    <h5 class="sb-title">CHỌN THEO DANH MỤC</h5>
 
                                     <div class="sb-category-dropdown">
                                         <div class="accordion" id="accordionExample">
@@ -30,24 +30,23 @@
                                                     <button class="accordion-button" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#collapseOne"
                                                         aria-expanded="true" aria-controls="collapseOne">
-                                                        Woman Collection
+                                                        Bộ Sưu Tập Nữ
                                                     </button>
                                                 </h2>
                                                 <div id="collapseOne" class="accordion-collapse collapse show"
                                                     aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                                                     <div class="accordion-body">
                                                         <ul class="sb-category-list">
-                                                            <li><a href="product.html">Man Casual Silk Shirt</a> <span
+                                                            <li><a href="product.html">Áo sơ mi lụa nam</a> <span
                                                                     class="product-amount">(10)</span></li>
-                                                            <li><a href="product.html">Man Orange Shorts</a> <span
+                                                            <li><a href="product.html">Quần short cam nam</a> <span
                                                                     class="product-amount">(22)</span></li>
-                                                            <li><a href="product.html">Party Dress</a> <span
+                                                            <li><a href="product.html">Váy dạ hội</a> <span
                                                                     class="product-amount">(08)</span></li>
-                                                            <li><a href="#">T-Shirt</a> <span
+                                                            <li><a href="#">Áo thun</a> <span
                                                                     class="product-amount">(41)</span></li>
-                                                            <li><a href="product.html">Ghost Mannequin Black Hoodie</a>
-                                                                <span class="product-amount">(15)</span>
-                                                            </li>
+                                                            <li><a href="product.html">Áo hoodie đen Ghost Mannequin</a>
+                                                                <span class="product-amount">(15)</span></li>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -57,23 +56,18 @@
                                                     <button class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#collapseTwo"
                                                         aria-expanded="false" aria-controls="collapseTwo">
-                                                        Kid’s Collection
+                                                        Bộ Sưu Tập Trẻ Em
                                                     </button>
                                                 </h2>
                                                 <div id="collapseTwo" class="accordion-collapse collapse"
                                                     aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
                                                     <div class="accordion-body">
                                                         <ul class="sb-category-list">
-                                                            <li><a href="#">Man Casual Silk Shirt</a> <span
-                                                                    class="product-amount">(10)</span></li>
-                                                            <li><a href="#">Man Orange Shorts</a> <span
-                                                                    class="product-amount">(22)</span></li>
-                                                            <li><a href="#">Party Dress</a> <span
-                                                                    class="product-amount">(08)</span></li>
-                                                            <li><a href="#">T-Shirt</a> <span
-                                                                    class="product-amount">(41)</span></li>
-                                                            <li><a href="#">Ghost Mannequin Black Hoodie</a> <span
-                                                                    class="product-amount">(15)</span></li>
+                                                            <li><a href="#">Áo sơ mi lụa nam</a> <span class="product-amount">(10)</span></li>
+                                                            <li><a href="#">Quần short cam nam</a> <span class="product-amount">(22)</span></li>
+                                                            <li><a href="#">Váy dạ hội</a> <span class="product-amount">(08)</span></li>
+                                                            <li><a href="#">Áo thun</a> <span class="product-amount">(41)</span></li>
+                                                            <li><a href="#">Áo hoodie đen Ghost Mannequin</a> <span class="product-amount">(15)</span></li>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -83,23 +77,18 @@
                                                     <button class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#collapseThree"
                                                         aria-expanded="false" aria-controls="collapseThree">
-                                                        Man Collection
+                                                        Bộ Sưu Tập Nam
                                                     </button>
                                                 </h2>
                                                 <div id="collapseThree" class="accordion-collapse collapse"
                                                     aria-labelledby="headingThree" data-bs-parent="#accordionExample">
                                                     <div class="accordion-body">
                                                         <ul class="sb-category-list">
-                                                            <li><a href="#">Man Casual Silk Shirt</a> <span
-                                                                    class="product-amount">(10)</span></li>
-                                                            <li><a href="#">Man Orange Shorts</a> <span
-                                                                    class="product-amount">(22)</span></li>
-                                                            <li><a href="#">Party Dress</a> <span
-                                                                    class="product-amount">(08)</span></li>
-                                                            <li><a href="#">T-Shirt</a> <span
-                                                                    class="product-amount">(41)</span></li>
-                                                            <li><a href="#">Ghost Mannequin Black Hoodie</a> <span
-                                                                    class="product-amount">(15)</span></li>
+                                                            <li><a href="#">Áo sơ mi lụa nam</a> <span class="product-amount">(10)</span></li>
+                                                            <li><a href="#">Quần short cam nam</a> <span class="product-amount">(22)</span></li>
+                                                            <li><a href="#">Váy dự tiệc</a> <span class="product-amount">(08)</span></li>
+                                                            <li><a href="#">Áo thun</a> <span class="product-amount">(41)</span></li>
+                                                            <li><a href="#">Áo hoodie đen Ghost Mannequin</a> <span class="product-amount">(15)</span></li>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -109,7 +98,7 @@
                                                     <button class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#collapseFour"
                                                         aria-expanded="false" aria-controls="collapseFour">
-                                                        Health & Beauty
+                                                        Sức khỏe & Sắc đẹp
                                                     </button>
                                                 </h2>
                                                 <div id="collapseFour" class="accordion-collapse collapse"

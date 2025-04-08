@@ -49,14 +49,14 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="newslatter-wrap text-center">
-                        <h5>Connect To EG</h5>
-                        <h2 class="newslatter-title">Join Our Newsletter</h2>
-                        <p>Hey you, sign up it only, Get this limited-edition T-shirt Free!</p>
+                        <h5>Kết nối với EG</h5>
+                        <h2 class="newslatter-title">Tham gia nhận bản tin</h2>
+                        <p>Chào bạn! Đăng ký ngay để nhận ngay áo thun phiên bản giới hạn miễn phí!</p>
 
                         <form action="#" method="POST">
                             <div class="newslatter-form">
                                 <input type="text" placeholder="Type Your Email">
-                                <button type="submit">Send <i class="bi bi-envelope-fill"></i></button>
+                                <button type="submit">Gửi<i class="bi bi-envelope-fill"></i></button>
                             </div>
                         </form>
                     </div>

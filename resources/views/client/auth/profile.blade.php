@@ -6,7 +6,7 @@
                 <div class="col-xxl-6 col-xl-6 col-lg-8 col-md-10">
                     <div class="reg-login-forms">
                         <h4 class="reg-login-title text-center mb-4">
-                            Your Profile
+                            Thông tin cá nhân
                         </h4>
 
                         @if(session('success'))
@@ -25,7 +25,7 @@
                             @csrf
                             @method('PUT')
                             <div class="reg-input-group">
-                                <label for="name">Full Name *</label>
+                                <label for="name">Họ và tên</label>
                                 <input type="text" id="name" name="name" value="{{ old('name', auth()->user()->name) }}" 
                                        class="@error('name') is-invalid @enderror" required>
                                 @error('name')
@@ -36,13 +36,13 @@
                             </div>
 
                             <div class="reg-input-group">
-                                <label for="email">Email *</label>
+                                <label for="email">Email</label>
                                 <input type="email" id="email" value="{{ auth()->user()->email }}" 
                                        class="form-control" disabled>
                             </div>
 
                             <div class="reg-input-group">
-                                <label for="phone">Phone Number</label>
+                                <label for="phone">Số điện thoại</label>
                                 <input type="text" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone) }}" 
                                        class="@error('phone') is-invalid @enderror">
                                 @error('phone')
@@ -53,13 +53,13 @@
                             </div>
 
                             <div class="reg-input-group reg-submit-input d-flex align-items-center">
-                                <button type="submit" class="btn btn-primary w-100">Update Profile</button>
+                                <button type="submit" class="btn btn-primary w-100">Cập nhật thông tin</button>
                             </div>
                         </form>
 <!-- Nút mở modal thêm địa chỉ -->
 <div class="mt-5 text-center">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">
-                                Add New Address
+                                Thêm địa chỉ mới
                             </button>
                         </div>
 
@@ -68,14 +68,14 @@
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+                                        <h5 class="modal-title" id="addAddressModalLabel">Thêm địa chỉ mới</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <form action="{{ route('addresses.store') }}" method="POST">
                                         @csrf
                                         <div class="modal-body">
                                             <div class="reg-input-group">
-                                                <label for="recipient_name">Recipient Name *</label>
+                                                <label for="recipient_name">Tên người nhận</label>
                                                 <input type="text" id="recipient_name" name="recipient_name" value="{{ old('recipient_name') }}" 
                                                        class="@error('recipient_name') is-invalid @enderror" required>
                                                 @error('recipient_name')
@@ -86,7 +86,7 @@
                                             </div>
 
                                             <div class="reg-input-group">
-                                                <label for="phone">Phone Number *</label>
+                                                <label for="phone">Số điện thoại</label>
                                                 <input type="text" id="phone" name="phone" value="{{ old('phone') }}" 
                                                        class="@error('phone') is-invalid @enderror" required>
                                                 @error('phone')
@@ -97,7 +97,7 @@
                                             </div>
 
                                             <div class="reg-input-group">
-                                                <label for="province">Province/City *</label>
+                                                <label for="province">Tỉnh/Thành phố</label>
                                                 <input type="text" id="province" name="province" value="{{ old('province') }}" 
                                                        class="@error('province') is-invalid @enderror" required>
                                                 @error('province')
@@ -108,7 +108,7 @@
                                             </div>
 
                                             <div class="reg-input-group">
-                                                <label for="district">District *</label>
+                                                <label for="district">Quận/Huyện</label>
                                                 <input type="text" id="district" name="district" value="{{ old('district') }}" 
                                                        class="@error('district') is-invalid @enderror" required>
                                                 @error('district')
@@ -119,7 +119,7 @@
                                             </div>
 
                                             <div class="reg-input-group">
-                                                <label for="ward">Ward *</label>
+                                                <label for="ward">Phường/Xã</label>
                                                 <input type="text" id="ward" name="ward" value="{{ old('ward') }}" 
                                                        class="@error('ward') is-invalid @enderror" required>
                                                 @error('ward')
@@ -130,7 +130,7 @@
                                             </div>
 
                                             <div class="reg-input-group">
-                                                <label for="street">Street/Building/House Number *</label>
+                                                <label for="street">Số nhà / Tòa nhà / Đường</label>
                                                 <input type="text" id="street" name="street" value="{{ old('street') }}" 
                                                        class="@error('street') is-invalid @enderror" required>
                                                 @error('street')
@@ -142,12 +142,12 @@
 
                                             <div class="reg-input-group form-check">
                                                 <input type="checkbox" class="form-check-input" id="is_default" name="is_default" value="1">
-                                                <label class="form-check-label" for="is_default">Set as Default Address</label>
+                                                <label class="form-check-label" for="is_default">Đặt làm địa chỉ mặc định</label>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Add Address</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                            <button type="submit" class="btn btn-primary">Thêm địa chỉ</button>
                                         </div>
                                     </form>
                                 </div>
@@ -155,18 +155,18 @@
                         </div>
 
                         <!-- Danh sách địa chỉ -->
-                        <h5 class="mt-5">Your Addresses</h5>
+                        <h5 class="mt-5">Địa chỉ của bạn</h5>
                         @if(auth()->user()->addresses->isEmpty())
-                            <p class="text-center">You have no addresses yet.</p>
+                            <p class="text-center">Bạn chưa có địa chỉ nào</p>
                         @else
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th>Recipient</th>
-                                            <th>Address</th>
-                                            <th>Default</th>
-                                            <th>Actions</th>
+                                            <th>Người nhận</th>
+                                            <th>Địa chỉ</th>
+                                            <th>Mặc định</th>
+                                            <th>Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -176,22 +176,22 @@
                                                 <td>{{ $address->street }}, {{ $address->ward }}, {{ $address->district }}, {{ $address->province }}</td>
                                                 <td>
                                                     @if($address->is_default)
-                                                        <span class="badge bg-success">Default</span>
+                                                        <span class="badge bg-success">Mặc định</span>
                                                     @else
                                                         <form action="{{ route('addresses.set-default', $address) }}" method="POST" class="d-inline">
                                                             @csrf
-                                                            <button type="submit" class="btn btn-sm btn-outline-success">Set as Default</button>
+                                                            <button type="submit" class="btn btn-sm btn-outline-success">Đặt làm mặc định</button>
                                                         </form>
                                                     @endif
                                                 </td>
                                                 <td>
                                                     <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editAddressModal{{ $address->id }}">
-                                                        Edit
+                                                        Chỉnh sửa
                                                     </button>
                                                     <form action="{{ route('addresses.destroy', $address) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this address?')">Delete</button>
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này không?')">Xóa</button>
                                                     </form>
                                                 </td>
                                             </tr>
@@ -201,7 +201,7 @@
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="editAddressModalLabel{{ $address->id }}">Edit Address</h5>
+                                                            <h5 class="modal-title" id="editAddressModalLabel{{ $address->id }}">Chỉnh sửa địa chỉ</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <form action="{{ route('addresses.update', $address) }}" method="POST">
@@ -209,7 +209,7 @@
                                                             @method('PUT')
                                                             <div class="modal-body">
                                                                 <div class="reg-input-group">
-                                                                    <label for="recipient_name_{{ $address->id }}">Recipient Name *</label>
+                                                                    <label for="recipient_name_{{ $address->id }}">Họ tên người nhận</label>
                                                                     <input type="text" id="recipient_name_{{ $address->id }}" name="recipient_name" value="{{ old('recipient_name', $address->recipient_name) }}" 
                                                                            class="@error('recipient_name') is-invalid @enderror" required>
                                                                     @error('recipient_name')
@@ -220,7 +220,7 @@
                                                                 </div>
 
                                                                 <div class="reg-input-group">
-                                                                    <label for="phone_{{ $address->id }}">Phone Number *</label>
+                                                                    <label for="phone_{{ $address->id }}">Số điện thoại</label>
                                                                     <input type="text" id="phone_{{ $address->id }}" name="phone" value="{{ old('phone', $address->phone) }}" 
                                                                            class="@error('phone') is-invalid @enderror" required>
                                                                     @error('phone')
@@ -231,7 +231,7 @@
                                                                 </div>
 
                                                                 <div class="reg-input-group">
-                                                                    <label for="province_{{ $address->id }}">Province/City *</label>
+                                                                    <label for="province_{{ $address->id }}">Tỉnh/Thành phố</label>
                                                                     <input type="text" id="province_{{ $address->id }}" name="province" value="{{ old('province', $address->province) }}" 
                                                                            class="@error('province') is-invalid @enderror" required>
                                                                     @error('province')
@@ -242,7 +242,7 @@
                                                                 </div>
 
                                                                 <div class="reg-input-group">
-                                                                    <label for="district_{{ $address->id }}">District *</label>
+                                                                    <label for="district_{{ $address->id }}">Quận/Huyện</label>
                                                                     <input type="text" id="district_{{ $address->id }}" name="district" value="{{ old('district', $address->district) }}" 
                                                                            class="@error('district') is-invalid @enderror" required>
                                                                     @error('district')
@@ -253,7 +253,7 @@
                                                                 </div>
 
                                                                 <div class="reg-input-group">
-                                                                    <label for="ward_{{ $address->id }}">Ward *</label>
+                                                                    <label for="ward_{{ $address->id }}">Phường/Xã</label>
                                                                     <input type="text" id="ward_{{ $address->id }}" name="ward" value="{{ old('ward', $address->ward) }}" 
                                                                            class="@error('ward') is-invalid @enderror" required>
                                                                     @error('ward')
@@ -264,7 +264,7 @@
                                                                 </div>
 
                                                                 <div class="reg-input-group">
-                                                                    <label for="street_{{ $address->id }}">Street/Building/House Number *</label>
+                                                                    <label for="street_{{ $address->id }}">Số nhà/Tòa nhà/Đường</label>
                                                                     <input type="text" id="street_{{ $address->id }}" name="street" value="{{ old('street', $address->street) }}" 
                                                                            class="@error('street') is-invalid @enderror" required>
                                                                     @error('street')
@@ -276,12 +276,12 @@
 
                                                                 <div class="reg-input-group form-check">
                                                                     <input type="checkbox" class="form-check-input" id="is_default_{{ $address->id }}" name="is_default" value="1" {{ $address->is_default ? 'checked' : '' }}>
-                                                                    <label class="form-check-label" for="is_default_{{ $address->id }}">Set as Default Address</label>
+                                                                    <label class="form-check-label" for="is_default_{{ $address->id }}">Đặt làm địa chỉ mặc định</label>
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                <button type="submit" class="btn btn-primary">Update Address</button>
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                                                <button type="submit" class="btn btn-primary">Cập nhật địa chỉ</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -297,7 +297,7 @@
                         <div class="mt-4 text-center">
                             <form action="{{ route('logout') }}" method="POST" class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn btn-danger">Logout</button>
+                                <button type="submit" class="btn btn-danger">Đăng xuất</button>
                             </form>
                         </div>
                     </div>

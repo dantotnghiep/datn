@@ -35,12 +35,12 @@
                                 <thead>
                                     <tr>
                                         <th scope="col"></th>
-                                        <th scope="col">Image</th>
-                                        <th scope="col">Product Details</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col">Quantity</th>
-                                        <th scope="col">Subtotal</th>
-                                        <th scope="col">Action</th>
+                                        <th scope="col">Hình ảnh</th>
+                                        <th scope="col">Chi tiết sản phẩm</th>
+                                        <th scope="col">Giá</th>
+                                        <th scope="col">Số lượng</th>
+                                        <th scope="col">Thành tiền</th>
+                                        <th scope="col">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -65,8 +65,8 @@
                                             <td class="product-col">
                                                 <div class="product-details">
                                                     <h5>{{ $item->product_name }}</h5>
-                                                    <p>Color: {{ $item->color }}</p>
-                                                    <p>Size: {{ $item->size }}</p>
+                                                    <p>Màu sắc: {{ $item->color }}</p>
+                                                    <p>Kích thước: {{ $item->size }}</p>
                                                 </div>
                                             </td>
                                             <td class="price-col">
@@ -111,7 +111,7 @@
                             <div class="row mt-60">
                                 <div class="col-xxl-4 col-lg-4">
                                     <div class="cart-coupon-input">
-                                        <h5 class="coupon-title">Coupon Code</h5>
+                                        <h5 class="coupon-title">Mã giảm giá</h5>
 
                                         <form action="{{ route('cart.apply-coupon') }}" method="POST"
                                             class="coupon-input">
@@ -134,14 +134,14 @@
 
                                         <!-- Thêm debug info -->
                                         <div style="display: none;">
-                                            <p>Debug Info:</p>
-                                            <p>Current time: {{ now() }}</p>
-                                            <p>Available discounts: {{ $discounts->count() }}</p>
+                                            <p>Thông tin gỡ lỗi:</p>
+                                            <p>Thời gian hiện tại: {{ now() }}</p>
+                                            <p>Số lượng mã giảm giá có sẵn: {{ $discounts->count() }}</p>
                                             @foreach ($discounts as $discount)
                                                 <p>
-                                                    Code: {{ $discount->code }} <br>
-                                                    Start: {{ $discount->startDate }} <br>
-                                                    End: {{ $discount->endDate }}
+                                                    Mã giảm giá: {{ $discount->code }} <br>
+                                                    Bắt đầu: {{ $discount->startDate }} <br>
+                                                    Kết thúc: {{ $discount->endDate }}
                                                 </p>
                                             @endforeach
                                         </div>
@@ -151,19 +151,19 @@
                                     <table class="table total-table">
                                         <tbody>
                                             <tr>
-                                                <td class="tt-left">Cart Subtotal</td>
+                                                <td class="tt-left">Tạm tính giỏ hàng</td>
                                                 <td></td>
                                                 <td class="tt-right">{{ number_format($total) }} VND</td>
                                             </tr>
                                             @if (isset($discountAmount) && $discountAmount > 0)
                                                 <tr>
-                                                    <td class="tt-left">Discount ({{ session('discount_code') }})</td>
+                                                    <td class="tt-left">Giảm giá ({{ session('discount_code') }})</td>
                                                     <td></td>
                                                     <td class="tt-right">-{{ number_format($discountAmount) }} VND</td>
                                                 </tr>
                                             @endif
                                             <tr>
-                                                <td class="tt-left">Total</td>
+                                                <td class="tt-left">Tổng cộng</td>
                                                 <td></td>
                                                 <td class="tt-right"><strong>{{ number_format($finalTotal) }} VND</strong>
                                                 </td>
@@ -182,15 +182,15 @@
                                 @endforeach
 
                                 <div class="cart-proceed-btns mt-4">
-                                    <button type="submit" class="cart-proceed">Checkout</button>
-                                    <a href="{{ route('client.index') }}" class="continue-shop">Continue Shopping</a>
+                                    <button type="submit" class="cart-proceed">Thanh toán</button>
+                                    <a href="{{ route('client.index') }}" class="continue-shop">Tiếp tục mua sắm</a>
                                 </div>
                             </form>
                         </div>
                     @else
                         <div class="text-center">
-                            <h3>Your cart is empty</h3>
-                            <a href="{{ route('client.index') }}" class="btn btn-primary mt-3">Continue Shopping</a>
+                            <h3>Giỏ hàng của bạn hiện đang trống</h3>
+                            <a href="{{ route('client.index') }}" class="btn btn-primary mt-3">Tiếp tục mua sắm</a>
                         </div>
                     @endif
                 </div>
@@ -205,14 +205,14 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="newslatter-wrap text-center">
-                        <h5>Connect To EG</h5>
-                        <h2 class="newslatter-title">Join Our Newsletter</h2>
-                        <p>Hey you, sign up it only, Get this limited-edition T-shirt Free!</p>
+                        <h5>Kết nối với EG</h5>
+                        <h2 class="newslatter-title">Tham gia Bản Tin Của Chúng Tôi</h2>
+                        <p>Chào bạn, đăng ký ngay để nhận chiếc áo thun phiên bản giới hạn miễn phí!</p>
 
                         <form action="#" method="POST">
                             <div class="newslatter-form">
                                 <input type="text" placeholder="Type Your Email">
-                                <button type="submit">Send <i class="bi bi-envelope-fill"></i></button>
+                                <button type="submit">Gửi<i class="bi bi-envelope-fill"></i></button>
                             </div>
                         </form>
                     </div>

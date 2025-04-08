@@ -25,7 +25,7 @@
                     </div>
                     @endif
 
-                    <h5 class="checkout-title">Billing Details</h5>
+                    <h5 class="checkout-title">Thông Tin Thanh Toán</h5>
                     @if ($addresses->isEmpty())
                     <div class="alert alert-warning">
                         Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ để tiếp tục!
@@ -69,8 +69,8 @@
                     <div class="payment-methods mt-4">
                         <div class="form-check payment-check">
                             <input class="form-check-input" type="radio" name="payment_method" id="paymentCOD" value="cod" checked>
-                            <label class="form-check-label" for="paymentCOD">Cash on Delivery</label>
-                            <p>Pay with cash upon delivery.</p>
+                            <label class="form-check-label" for="paymentCOD">Thanh Toán Khi Nhận Hàng</label>
+                            <p>Thanh toán bằng tiền mặt khi nhận hàng</p>
                         </div>
                         <div class="form-check payment-check">
                             <input class="form-check-input" type="radio" name="payment_method" id="paymentVNPay" value="vnpay">
@@ -80,7 +80,7 @@
                     </div>
 
                     <div class="place-order-btn mt-4">
-                        <button type="submit" class="place-order-btn">Place Order</button>
+                        <button type="submit" class="place-order-btn">Đặt Hàng</button>
                     </div>
                     @endif
                 </form>
@@ -139,7 +139,7 @@
             <div class="col-xxl-4 col-xl-4">
                 <div class="order-summary">
                     <div class="added-product-summary">
-                        <h5 class="checkout-title">Order Summary</h5>
+                        <h5 class="checkout-title">Tóm Tắt Đơn Hàng</h5>
                         <ul class="added-products">
                             @foreach ($cartItems as $item)
                             @php
@@ -168,11 +168,11 @@
                     </div>
                     <div class="total-cost-summary">
                         <ul>
-                            <li class="subtotal">Subtotal <span>{{ number_format($subtotal, 2) }}</span></li>
+                            <li class="subtotal">Tổng Phụ<span>{{ number_format($subtotal, 2) }}</span></li>
                             @if ($discountAmount > 0)
-                            <li>Discount <span>-{{ number_format($discountAmount, 2) }}</span></li>
+                            <li>Giảm Giá<span>-{{ number_format($discountAmount, 2) }}</span></li>
                             @endif
-                            <li>Total <span>{{ number_format($finalTotal, 2) }}</span></li>
+                            <li>Tổng Cộng<span>{{ number_format($finalTotal, 2) }}</span></li>
                         </ul>
                     </div>
                 </div>
@@ -187,13 +187,13 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="newslatter-wrap text-center">
-                    <h5>Connect To EG</h5>
-                    <h2 class="newslatter-title">Join Our Newsletter</h2>
-                    <p>Hey you, sign up it only, Get this limited-edition T-shirt Free!</p>
+                    <h5>Kết nối với EG</h5>
+                    <h2 class="newslatter-title">Tham gia nhận bản tin</h2>
+                    <p>Chào bạn! Đăng ký ngay để nhận ngay áo thun phiên bản giới hạn miễn phí!</p>
                     <form action="#" method="POST">
                         <div class="newslatter-form">
                             <input type="text" placeholder="Type Your Email">
-                            <button type="submit">Send <i class="bi bi-envelope-fill"></i></button>
+                            <button type="submit">Gửi<i class="bi bi-envelope-fill"></i></button>
                         </div>
                     </form>
                 </div>

@@ -9,9 +9,9 @@
                             <img src="/client/assets/images/Logo.png" alt="">
                         </a>
                     </div> -->
-                        <h5 class="footer-widget-title">About EG Store</h5>
+                        <h5 class="footer-widget-title">Về ManSo</h5>
                         <p class="about-company">
-                            EG STORE - We sell over 200+ branded products on our web-site.
+                            ManSo - Chúng tôi bán hơn 200 sản phẩm thương hiệu trên website của mình.
                         </p>
 
                         <div class="footer-contact-actions">
@@ -46,13 +46,13 @@
                         <!-- company colum -->
                         <div class="col-lg-3 col-md-6 col-sm-6">
                             <div class="footer-widget">
-                                <h5 class="footer-widget-title">Company</h5>
+                                <h5 class="footer-widget-title">Công ty</h5>
                                 <ul class="footer-links">
-                                    <li><a href="#">Privacy Policy</a></li>
-                                    <li><a href="#">Returns </a></li>
-                                    <li><a href="#">Terms & Conditions</a></li>
-                                    <li><a href="#">Our Support</a></li>
-                                    <li><a href="#">Terms & Service</a></li>
+                                    <li><a href="#">Chính sách bảo mật</a></li>
+                                    <li><a href="#">Chính sách đổi trả</a></li>
+                                    <li><a href="#">Điều khoản & Điều kiện</a></li>
+                                    <li><a href="#">Hỗ trợ của chúng tôi</a></li>
+                                    <li><a href="#">Điều khoản dịch vụ</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -60,13 +60,13 @@
                         <!-- quick links colum colum -->
                         <div class="col-lg-3 col-md-6 col-sm-6">
                             <div class="footer-widget">
-                                <h5 class="footer-widget-title">Quick Links</h5>
+                                <h5 class="footer-widget-title">Liên kết nhanh</h5>
                                 <ul class="footer-links">
-                                    <li><a href="about.html">About EG STORE</a></li>
-                                    <li><a href="product.html">New Collection</a></li>
-                                    <li><a href="product.html">Woman Dress</a></li>
-                                    <li><a href="product.html">Man Dress</a></li>
-                                    <li><a href="blog-grid.html">Our Latest News</a></li>
+                                    <li><a href="about.html">Giới thiệu về EG STORE</a></li>
+                                    <li><a href="product.html">Bộ sưu tập mới</a></li>
+                                    <li><a href="product.html">Váy nữ</a></li>
+                                    <li><a href="product.html">Áo nam</a></li>
+                                    <li><a href="blog-grid.html">Tin tức mới nhất của chúng tôi</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -74,12 +74,12 @@
                         <!-- Brands colum -->
                         <div class="col-lg-3 col-md-6 col-sm-6">
                             <div class="footer-widget">
-                                <h5 class="footer-widget-title">Our Brands</h5>
+                                <h5 class="footer-widget-title">Các thương hiệu của chúng tôi</h5>
                                 <ul class="footer-links">
                                     <li><a href="#">Louis Vuitton</a></li>
                                     <li><a href="#">Polo Ralph Lauren</a></li>
                                     <li><a href="#">Dresses Tranding CO</a></li>
-                                    <li><a href="#">Aeropostale </a></li>
+                                    <li><a href="#">Aeropostale</a></li>
                                     <li><a href="#">Consistent Manner Collective</a></li>
                                     <li><a href="#">Fashionable Houses</a></li>
                                 </ul>
@@ -89,7 +89,7 @@
                         <!-- Store colum -->
                         <div class="col-lg-3 col-md-6 col-sm-6">
                             <div class="footer-widget">
-                                <h5 class="footer-widget-title">Our Stores</h5>
+                                <h5 class="footer-widget-title">ManSo</h5>
                                 <ul class="footer-links">
                                     <li><a href="#">las Vegas</a></li>
                                     <li><a href="#">Returns New London N</a></li>
@@ -107,13 +107,13 @@
                 <div class="row align-items-center">
                     <div class="col-lg-6 col-md-5">
                         <div class="footer-copyright">
-                            <p>Copyright 2021 EG Shop Fashion | Design By Egens Lab</p>
+                            <p><p>Copyright 2021 EG Shop Fashion | Thiết kế bởi Egens Lab</p></p>
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-7">
                         <div
                             class="footer-bottom-paymant-option d-flex align-items-center justify-content-end flex-wrap">
-                            <p>We Using Safe Payment For:</p>
+                            <p>Chúng tôi sử dụng phương thức thanh toán an toàn cho:</p>
                             <ul class="payment-options d-flex">
                                 <li>
                                     <img src="/client/assets/images/payment/payment-1.png" alt="" />

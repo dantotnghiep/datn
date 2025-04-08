@@ -137,14 +137,14 @@
                                     <li><i class="bi bi-star-fill"></i></li>
                                     <li><i class="bi bi-star"></i></li>
 
-                                    <li class="count-review">(<span>{{ $product->reviews_count ?? 0 }}</span> Review)</li>
+                                    <li class="count-review">(<span>{{ $product->reviews_count ?? 0 }}</span>Đánh giá)</li>
                                 </ul>
                                 <h3 class="pd-title">{{ $product->name }}</h3>
                                 <h5 class="pd-price">
                                     <span id="js-old-price" class="old-price d-none"></span>
                                     <span id="js-sale-price" class="sale-price d-none"></span>
                                     <span id="js-regular-price"></span>
-                                    <span id="js-sale-label" class="sale-label d-none">Sale</span>
+                                    <span id="js-sale-label" class="sale-label d-none">Giảm giá</span>
                                 </h5>
 
 
@@ -232,7 +232,7 @@
                                     </li>
                                     <li class="mt-2 text-left">
                                         <button id="js-reset-selection"
-                                            class="btn btn-outline-secondary btn-sm">Reset</button>
+                                            class="btn btn-outline-secondary btn-sm">Thay đổi</button>
                                     </li>
 
                                     <li class="d-flex align-items-center pd-cart-btns">
@@ -253,18 +253,18 @@
                                                 step="1" value="1" >
                                             <button type="button" class="qty-btn qty-plus">+</button>
                                         </div>
-                                        <button type="submit" class="pd-add-cart">Add to cart</button>
+                                        <button type="submit" class="pd-add-cart">Thêm vào giỏ hàng</button>
                                     </form>
 
                                      
                                     </li>
-                                    <li class="pd-type">Product Type: <span>{{ $product->category->name }}</span></li>
-                                    <li class="pd-type">Categories: <span>{{ $product->category->name }}</span></li>
-                                    <li class="pd-type">Available: <span
+                                    <li class="pd-type">Loại sản phẩm:<span>{{ $product->category->name }}</span></li>
+                                    <li class="pd-type">Danh mục:<span>{{ $product->category->name }}</span></li>
+                                    <li class="pd-type">Sẵn có:<span
                                             id="js-stock">{{ $product->variations->first()->stock }}</span></li>
                                     <input type="hidden" id="js-qty" min="1"
                                         max="{{ $product->variations->first()->stock }}" step="1" value="1">
-                                    <li class="pd-type">Material : <span>100% Cotton, Jens</span></li>
+                                    <li class="pd-type">Chất liệu:<span>100% Cotton, Jens</span></li>
                                 </ul>
                             </div>
                         </div>

@@ -7,11 +7,11 @@
         <div class="row">
             <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-12">
                 <div class="dashbord-switcher">
-                    <a href="dashboard.html"><i class="flaticon-dashboard"></i> Dashboard</a>
-                    <a href="profile.html"><i class="flaticon-user"></i> My Profile</a>
-                    <a href="order.html" class="active"><i class="flaticon-shopping-bag"></i> My Order</a>
-                    <a href="setting.html"><i class="flaticon-settings"></i> Account Setting</a>
-                    <a href="#"><i class="flaticon-logout"></i> Logout</a>
+                    <a href="dashboard.html"><i class="flaticon-dashboard"></i>Bảng điều khiển</a>
+                    <a href="profile.html"><i class="flaticon-user"></i>Hồ sơ của tôi</a>
+                    <a href="order.html" class="active"><i class="flaticon-shopping-bag"></i>Đơn hàng của tôi</a>
+                    <a href="setting.html"><i class="flaticon-settings"></i>Cài đặt tài khoản</a>
+                    <a href="#"><i class="flaticon-logout"></i>Đăng xuất</a>
                 </div>
             </div>
             <div class="col-xxl-8 col-xl-8 col-lg-8">
@@ -19,13 +19,11 @@
                     <table class="table order-table mb-0">
                         <thead>
                             <tr>
-
-                                <th scope="col" class="order-id">Order ID</th>
-                                <th scope="col" class="order-date">Order Date</th>
-                                <th scope="col" class="order-status">Status</th>
-                                <th scope="col" class="order-amount">Total</th>
-                                <th scope="col" class="order-active">Active</th>
-
+                                <th scope="col" class="order-id">Mã đơn hàng</th>
+                                <th scope="col" class="order-date">Ngày đặt hàng</th>
+                                <th scope="col" class="order-status">Trạng thái</th>
+                                <th scope="col" class="order-amount">Tổng cộng</th>
+                                <th scope="col" class="order-active">Hoạt động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -67,14 +65,14 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="newslatter-wrap text-center">
-                    <h5>Connect To EG</h5>
-                    <h2 class="newslatter-title">Join Our Newsletter</h2>
-                    <p>Hey you, sign up it only, Get this limited-edition T-shirt Free!</p>
+                    <h5>Kết nối với EG</h5>
+                    <h2 class="newslatter-title">Tham gia nhận bản tin</h2>
+                    <p>Chào bạn! Đăng ký ngay để nhận ngay áo thun phiên bản giới hạn miễn phí!</p>
 
                     <form action="#" method="POST">
                         <div class="newslatter-form">
                             <input type="text" placeholder="Type Your Email">
-                            <button type="submit">Send <i class="bi bi-envelope-fill"></i></button>
+                            <button type="submit">Gửi<i class="bi bi-envelope-fill"></i></button>
                         </div>
                     </form>
                 </div>
