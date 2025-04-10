@@ -13,7 +13,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with(['user', 'status'])->latest()->paginate(10);
+        $orders = Order::with(['user', 'status'])->latest('id')->paginate(10);
         return view('admin.orders.index', compact('orders'));
     }
 
@@ -32,7 +32,7 @@ class OrderController extends Controller
             ]);
 
             // Kiểm tra nếu đơn hàng đã bị hủy
-            if ($order->status_id == 3) {
+            if ($order->status_id == 3) {   
                 return response()->json([
                     'success' => false,
                     'message' => 'Không thể cập nhật đơn hàng đã bị hủy'
