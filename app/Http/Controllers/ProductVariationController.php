@@ -24,8 +24,8 @@ class ProductVariationController extends Controller
     public function create($productId)
     {
         $product = Product::findOrFail($productId);
-
-
+        
+        
         $attributes = $product->productAttributes()
             ->with('attributeValue')
             ->get()
