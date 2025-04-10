@@ -59,6 +59,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
 
+    // Route::get('/order', [OrderController::class, 'order'])->name('order');
+    // Route::prefix('orders')->group(function () {
+    //     Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+    // });
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
@@ -152,6 +156,7 @@ Route::middleware(['auth'])->group(function () {
     // Routes cho checkout và thanh toán
     Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('/cart/process-checkout', [OrderController::class, 'store'])->name('cart.process-checkout');
+    Route::post('/order', [OrderController::class, 'index'])->name('order.index');
     Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
