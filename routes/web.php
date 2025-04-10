@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\AddressController;
-use App\Http\Controllers\Admin\AdminCustomerController;
-use App\Http\Controllers\Admin\AdminEmployeeController;
 use App\Http\Controllers\Admin\HotProductController;
 use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\Auth\LoginController;
@@ -10,8 +7,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Client\HomeController;
-use App\Http\Controllers\Client\OrderController as ClientOrderController;
-use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
@@ -44,7 +39,6 @@ Route::post('/broadcasting/auth', function () {
     return auth()->check() ? auth()->user() : abort(403);
 });
 
-
 //client/product
 Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
 Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('client.product.product-details');
@@ -60,19 +54,15 @@ Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthControlle
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
 Route::middleware('auth')->group(function () {
-    // Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/addresses', [ProfileController::class, 'storeAddress'])->name('addresses.store');
-    Route::put('/addresses/{address}', [ProfileController::class, 'updateAddress'])->name('addresses.update');
-    Route::delete('/addresses/{address}', [ProfileController::class, 'destroyAddress'])->name('addresses.destroy');
-    Route::post('/addresses/{address}/set-default', [ProfileController::class, 'setDefaultAddress'])->name('addresses.set-default');
-
+    Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
+    Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
-        Route::get('/', [App\Http\Controllers\Client\OrderController::class, 'index'])->name('orders.index');
+        Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
     });
 });
 
@@ -80,11 +70,10 @@ Route::middleware('auth')->group(function () {
 //ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
 
 Route::prefix('admin')->group(function () {
-
+    
 
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
     // Admin Orders
@@ -163,33 +152,12 @@ Route::middleware(['auth'])->group(function () {
     // Routes cho checkout và thanh toán
     Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('/cart/process-checkout', [OrderController::class, 'store'])->name('cart.process-checkout');
-    // Routes cho trang checkout và quản lý địa chỉ
-    Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
-    Route::post('/checkout/address', [OrderController::class, 'storeAddress'])->name('order.storeAddress');
-
     Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('orders.updateStatus');
-    Route::post('/orders/{id}/cancel', [App\Http\Controllers\Api\OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
-});
-
-//Route::middleware(['auth', 'staff'])->prefix('admin/users')->group(function () {
-Route::middleware(['auth'])->prefix('admin/users')->group(function () {
-    // Khách hàng
-    Route::get('/clients', [AdminCustomerController::class, 'index'])->name('admin.users.clients.index');
-    Route::post('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
-    Route::post('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
-    Route::get('/clients/{id}', [AdminCustomerController::class, 'show'])->name('admin.users.clients.detail');
-
-    // Nhân viên/admin
-    Route::get('/staffs', [AdminEmployeeController::class, 'index'])->name('admin.users.staffs.index');
-    Route::post('/staffs', [AdminEmployeeController::class, 'store'])->name('admin.users.staffs.store');
-    Route::put('/staffs/{id}', [AdminEmployeeController::class, 'update'])->name('admin.users.staffs.update');
-    Route::delete('/staffs/{id}', [AdminEmployeeController::class, 'destroy'])->name('admin.users.staffs.destroy');
-    Route::post('/staffs/{id}/lock', [AdminEmployeeController::class, 'lock'])->name('admin.users.staffs.lock');
-    Route::post('/staffs/{id}/unlock', [AdminEmployeeController::class, 'unlock'])->name('admin.users.staffs.unlock');
 
 });
 
@@ -221,9 +189,6 @@ Broadcast::routes();
 
 // Route cho admin
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/order-list', [OrderController::class, 'index'])->name('admin.orders.list');
-
-    // Route cập nhật trạng thái đơn hàng
     Route::post('/admin/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('admin.orders.updateStatus');
 });
