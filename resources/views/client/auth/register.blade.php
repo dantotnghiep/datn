@@ -14,7 +14,7 @@
                 <div class="col-xxl-6 col-xl-6 col-lg-8 col-md-10">
                     <div class="reg-login-forms">
                         <h4 class="reg-login-title text-center">
-                            Tạo tài khoản của bạn
+                            Tạo tài khoản mới
                         </h4>
 
                         @if(session('error'))
@@ -26,7 +26,7 @@
                         <form action="{{ route('register.post') }}" method="POST">
                             @csrf
                             <div class="reg-input-group">
-                                <label for="name">Họ và tên</label>
+                                <label for="name">Họ và tên *</label>
                                 <input type="text" id="name" name="name" value="{{ old('name') }}" 
                                        class="@error('name') is-invalid @enderror" >
                                 @error('name')
@@ -48,7 +48,7 @@
                             </div>
 
                             <div class="reg-input-group">
-                                <label for="password">Mật khẩu</label>
+                                <label for="password">Mật khẩu *</label>
                                 <input type="password" id="password" name="password" 
                                        class="@error('password') is-invalid @enderror" >
                                 @error('password')
@@ -59,7 +59,7 @@
                             </div>
 
                             <div class="reg-input-group">
-                                <label for="password_confirmation">Xác nhận mật khẩu</label>
+                                <label for="password_confirmation">Xác nhận mật khẩu *</label>
                                 <input type="password" id="password_confirmation" name="password_confirmation" >
                             </div>
 
@@ -85,7 +85,6 @@
         </div>
     </div>
 
-
     <!-- ===============  newslatter area start  =============== -->
     <div class="newslatter-area ml-110 mt-100">
         <div class="container-fluid">
@@ -93,13 +92,13 @@
                 <div class="col-lg-12">
                     <div class="newslatter-wrap text-center">
                         <h5>Kết nối với EG</h5>
-                        <h2 class="newslatter-title">Tham gia nhận bản tin</h2>
-                        <p>Chào bạn! Đăng ký ngay để nhận ngay áo thun phiên bản giới hạn miễn phí!</p>
+                        <h2 class="newslatter-title">Đăng ký nhận bản tin</h2>
+                        <p>Chào bạn, đăng ký ngay để nhận áo thun phiên bản giới hạn miễn phí!</p>
 
                         <form action="#" method="POST">
                             <div class="newslatter-form">
-                                <input type="text" placeholder="Type Your Email">
-                                <button type="submit">Gửi<i class="bi bi-envelope-fill"></i></button>
+                                <input type="text" placeholder="Nhập email của bạn">
+                                <button type="submit">Gửi <i class="bi bi-envelope-fill"></i></button>
                             </div>
                         </form>
                     </div>

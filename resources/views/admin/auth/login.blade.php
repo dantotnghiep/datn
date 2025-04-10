@@ -10,7 +10,7 @@
                             <div class="content-detail">
                                 <div class="main-info">
                                     <div class="hero-container">
-                                        <!-- Login form -->
+                                        <!-- Form Đăng Nhập -->
                                         <form class="login-form" method="post" action="{{ route('vh.dz') }}">
                                             @csrf
                                             <div class="imgcontainer">
@@ -24,17 +24,16 @@
                                                     <span data-toggle=".password-field"
                                                         class="fa fa-fw fa-eye field-icon toggle-password"></span>
                                                 </span>
-                                                <label class="label-container">Remember me
+                                                <label class="label-container">Ghi nhớ đăng nhập
                                                     <input type="checkbox">
                                                     <span class="checkmark"></span>
                                                 </label>
-                                                <span class="psw"><a href="forgot.html" class="forgot-btn">Forgot
-                                                        password?</a></span>
+                                                <span class="psw"><a href="forgot.html" class="forgot-btn">Quên mật khẩu?</a></span>
                                                 <div class="login-btns">
-                                                    <button type="submit">Login</button>
+                                                    <button type="submit">Đăng nhập</button>
                                                 </div>
                                                 <div class="division-lines">
-                                                    <p>or login with</p>
+                                                    <p>hoặc đăng nhập bằng</p>
                                                 </div>
                                                 <div class="login-with-btns">
                                                     <button type="button" class="google">
@@ -49,8 +48,8 @@
                                                     <button type="button" class="linkedin">
                                                         <i class="ri-linkedin-fill"></i>
                                                     </button>
-                                                    <span class="already-acc">Not a member? <a href="signup.html"
-                                                            class="signup-btn">Sign up</a></span>
+                                                    <span class="already-acc">Chưa có tài khoản? <a href="signup.html"
+                                                            class="signup-btn">Đăng ký</a></span>
                                                 </div>
                                             </div>
                                         </form>

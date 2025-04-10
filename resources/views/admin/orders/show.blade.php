@@ -5,7 +5,7 @@
     <!-- Thêm lớp container để căn chỉnh lại phần nội dung -->
     <div class="row justify-content-start">
         <div class="col-md-10">
-            <h1 class="h3 mb-4 text-gray-800">Order Details</h1>
+            <h1 class="h3 mb-4 text-gray-800">Chi Tiết Đơn Hàng</h1>
 
             @if(session('success'))
             <div class="alert alert-success">
@@ -15,7 +15,7 @@
 
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Order #{{ $order->order_code }}</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Đơn Hàng #{{ $order->order_code }}</h6>
                     <div>
                         <form action="{{ route('admin.orders.update_status', $order->id) }}" method="POST" class="d-flex align-items-center">
                             @csrf
@@ -28,44 +28,44 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary">Update Status</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật Trạng Thái</button>
                         </form>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <h5>Customer Information</h5>
-                            <p><strong>Name:</strong> {{ $order->user_name }}</p>
+                            <h5>Thông Tin Khách Hàng</h5>
+                            <p><strong>Tên:</strong> {{ $order->user_name }}</p>
                             <p><strong>Email:</strong> {{ $order->user_email }}</p>
-                            <p><strong>Phone:</strong> {{ $order->user_phone }}</p>
-                            <p><strong>Shipping Address:</strong> {{ $order->shipping_address }}</p>
+                            <p><strong>Số Điện Thoại:</strong> {{ $order->user_phone }}</p>
+                            <p><strong>Địa Chỉ Giao Hàng:</strong> {{ $order->shipping_address }}</p>
                         </div>
                         <div class="col-md-6">
-                            <h5>Order Information</h5>
-                            <p><strong>Date:</strong> {{ $order->created_at->format('M d, Y H:i') }}</p>
-                            <p><strong>Status:</strong>
+                            <h5>Thông Tin Đơn Hàng</h5>
+                            <p><strong>Ngày:</strong> {{ $order->created_at->format('M d, Y H:i') }}</p>
+                            <p><strong>Trạng Thái:</strong>
                                 <span class="badge bg-{{ $order->status_id == 1 ? 'warning' : ($order->status_id == 2 ? 'info' : ($order->status_id == 3 ? 'danger' : 'success')) }}">
                                     {{ $order->status->status_name }}
                                 </span>
                             </p>
-                            <p><strong>Payment Method:</strong> {{ $order->payment_method }}</p>
+                            <p><strong>Phương Thức Thanh Toán:</strong> {{ $order->payment_method }}</p>
                             @if($order->discount_code)
-                            <p><strong>Discount Code:</strong> {{ $order->discount_code }} ({{ number_format($order->discount_amount, 2) }})</p>
+                            <p><strong>Mã Giảm Giá:</strong> {{ $order->discount_code }} ({{ number_format($order->discount_amount, 2) }})</p>
                             @endif
                         </div>
                     </div>
 
-                    <h5>Order Items</h5>
+                    <h5>Sản Phẩm Trong Đơn Hàng</h5>
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>Variation</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Total</th>
+                                    <th>Sản Phẩm</th>
+                                    <th>Biến Thể</th>
+                                    <th>Giá</th>
+                                    <th>Số Lượng</th>
+                                    <th>Tổng</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,17 +81,17 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="4" class="text-right"><strong>Subtotal</strong></td>
+                                    <td colspan="4" class="text-right"><strong>Tổng Tiền</strong></td>
                                     <td>${{ number_format($order->items->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</td>
                                 </tr>
                                 @if($order->discount_amount > 0)
                                 <tr>
-                                    <td colspan="4" class="text-right"><strong>Discount</strong></td>
+                                    <td colspan="4" class="text-right"><strong>Giảm Giá</strong></td>
                                     <td>-${{ number_format($order->discount_amount, 2) }}</td>
                                 </tr>
                                 @endif
                                 <tr>
-                                    <td colspan="4" class="text-right"><strong>Total</strong></td>
+                                    <td colspan="4" class="text-right"><strong>Tổng Cộng</strong></td>
                                     <td>${{ number_format($order->total_amount, 2) }}</td>
                                 </tr>
                             </tfoot>

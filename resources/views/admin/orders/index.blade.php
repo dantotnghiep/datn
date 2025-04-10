@@ -3,23 +3,23 @@
 @section('content')
     <div class="cr-main-content">
         <div class="container-fluid">
-            <h1 class="h3 mb-4 text-gray-800">Orders Management</h1>
+            <h1 class="h3 mb-4 text-gray-800">Quản lý Đơn Hàng</h1>
 
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">All Orders</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Tất cả Đơn Hàng</h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Date</th>
-                                    <th>Total Amount</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>Mã Đơn Hàng</th>
+                                    <th>Khách Hàng</th>
+                                    <th>Ngày</th>
+                                    <th>Tổng Tiền</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Thao Tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -32,7 +32,7 @@
                                         <td>
                                             <span id="status-badge-{{ $order->id }}"
                                                 class="badge bg-{{ $order->status_id == 1 ? 'warning' : ($order->status_id == 2 ? 'info' : ($order->status_id == 3 ? 'success' : 'danger')) }}">
-                                                {{ $order->status->status_name ?? 'Processing' }}
+                                                {{ $order->status->status_name ?? 'Đang xử lý' }}
                                             </span>
                                         </td>
                                         <td>
@@ -156,7 +156,7 @@
 
         // Hàm hiển thị thông báo
         function showNotification(title, message, type = 'info') {
-            const notification = $(`
+            const notification = $(` 
                 <div class="alert alert-${type} alert-dismissible fade show" role="alert">
                     <strong>${title}</strong> ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

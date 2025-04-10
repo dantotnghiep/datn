@@ -26,14 +26,16 @@
                     </div>
                     <ul class="nav-item-list">
 
-                        <a class="active" href="{{ route('client.index') }}">Trang chủ</a>
+                        <a class="active" href="{{ route('client.index') }}">Trang Chủ</a>
                         <i class="fl flaticon-plus">+</i>
 
 
                         </li>
 
 
-                        <li><a href="about.html">Giới thiệu</a></li>
+
+                        <li><a href="about.html">Sản Phẩm Chính</a></li>
+
                         <li class="has-child-menu">
                             <a href="javascript:void(0)">Cửa hàng</a>
                             <i class="fl flaticon-plus">+</i>
@@ -48,17 +50,19 @@
                             <a href="javascript:void(0)">Trang</a>
                             <i class="fl flaticon-plus">+</i>
                             <ul class="sub-menu">
+
                                 <li><a href="cart.html">Giỏ hàng</a></li>
                                 <li><a href="checkout.html">Thanh toán</a></li>
                                 <li><a href="login.html">Đăng nhập</a></li>
                                 <li><a href="register.html">Đăng ký</a></li>
-                                <li><a href="profile.html">Hồ sơ</a></li>
+                                <li><a href="profile.html">Trang cá nhân</a></li>
                                 <li><a href="dashboard.html">Bảng điều khiển</a></li>
                                 <li><a href="order.html">Đơn hàng</a></li>
                                 <li><a href="setting.html">Cài đặt</a></li>
                                 <li><a href="coming-soon.html">Sắp ra mắt</a></li>
-                                <li><a href="faq.html">Câu hỏi thường gặp</a></li>
+                                <li><a href="faq.html">FAQ</a></li>
                                 <li><a href="404.html">404</a></li>
+
                             </ul>
                         </li>
 
@@ -66,9 +70,9 @@
                             <a href="javascript:void(0)">Blog</a>
                             <i class="fl flaticon-plus">+</i>
                             <ul class="sub-menu">
-                                <li><a href="blog-grid.html">Lưới Blog</a></li>
-                                <li><a href="blog-sidebar.html">Blog với thanh bên</a></li>
-                                <li><a href="blog-details.html">Chi tiết Blog</a></li>
+                                <li><a href="blog-grid">Blog Grid</a></li>
+                                <li><a href="blog-sidebar">Blog Sidebar</a></li>
+                                <li><a href="blog-details">Blog Details</a></li>
                             </ul>
                         </li>
                         {{-- <li><a href="contact.html">Contact Us</a></li> --}}
@@ -102,15 +106,14 @@
                         <i class="flaticon-phone-call"></i>
                     </div>
                     <div class="contact-info">
-                        <p>Số điện thoại đường dây nóng</p>
                         <a href="tel:+8801761111456">+880 176 1111 456</a>
                     </div>
                 </div>
             </div>
             <div class="col-xl-2 col-2 d-none d-xl-flex p-0 align-items-center justify-content-center">
                 <div class="nav-right text-center">
-                    <p class="text-uppercase">BLACK FRIDAY</p>
-                    <h5>Giảm giá lên đến 20% cho tất cả các mặt hàng!</h5>
+                    
+                    <h5>Giảm giá sản phẩm tới 20%</h5>
                 </div>
             </div>
         </div>

@@ -15,6 +15,7 @@
                                 <a href="#"><i class="flaticon-user"></i></a>
                                 <div class="submenu-right position-absolute" style="left: 70px;">
                                     @if (Auth::check())
+
                                         <div class="submenu-item-wrapper">
                                             <a href="{{ route('profile') }}" class="submenu-item">
                                                 <i class="bi bi-person me-2"></i>Hồ sơ</a>
@@ -35,6 +36,7 @@
                                             <a href="{{ route('register') }}" class="submenu-item">
                                                 <i class="bi bi-person-plus me-2"></i>Đăng ký</a>
                                         </div>
+
                                     @endif
                                 </div>
                             </li>
@@ -88,7 +90,7 @@
                         <li class="single-cart-product">
                             <div class="cart-product-info d-flex align-items-center">
                                 <div class="product-img">
-                                    <img src="{{ $mainImage ? $mainImage->url : asset('default-image.jpg') }}"
+                                    <img src="{{ $mainImage ? $mainImage->url : asset('default-image.jpg') }} "
                                          alt="{{ $item->product_name }}"
                                          class="img-fluid">
                                 </div>
@@ -118,7 +120,7 @@
                     @endforeach
                 @else
                     <li class="text-center py-3">
-                        <p>Your cart is empty</p>
+                        <p>Giỏ hàng của bạn trống</p>
                     </li>
                 @endif
             </ul>
@@ -126,24 +128,26 @@
         @if(auth()->check() && isset($cartItems) && $cartItems->count() > 0)
         <div class="cart-bottom">
             <div class="cart-total d-flex justify-content-between">
-                <label>Subtotal :</label>
+                <label>Tạm tính :</label>
                 <span>{{ number_format($total) }} VND</span>
             </div>
             <div class="cart-btns">
+
                 <a href="" class="cart-btn checkout">THANH TOÁN</a>
                 <a href="{{ route('cart.index') }}" class="cart-btn cart">XEM GIỎ HÀNG</a>
+
             </div>
 
             @if($total < 1000000) {{-- Giả sử free ship cho đơn > 1 triệu --}}
-            <p class="cart-shipping-text">
-                <strong>MIỄN PHÍ VẬN CHUYỂN:</strong>
-                Chi tiêu thêm {{ number_format(1000000 - $total) }} VND để đủ điều kiện nhận miễn phí vận chuyển
-            </p>
+                <p class="cart-shipping-text">
+                    <strong>MIỄN PHÍ VẬN CHUYỂN:</strong>
+                    Chi tiêu thêm {{ number_format(1000000 - $total) }} VND để đủ điều kiện nhận miễn phí vận chuyển
+                </p>
             @else
-            <p class="cart-shipping-text text-success">
-                <strong>CHÚC MỪNG!</strong>
-                Đơn hàng của bạn đủ điều kiện nhận miễn phí vận chuyển
-            </p>
+                <p class="cart-shipping-text text-success">
+                    <strong>CHÚC MỪNG!</strong>
+                    Đơn hàng của bạn đủ điều kiện nhận miễn phí vận chuyển
+                </p>
             @endif
         </div>
         @endif
@@ -156,7 +160,7 @@
 <div class="category-wrapper">
     <div class="category-bar">
         <h5 class="cb-title text-uppercase category-icon">
-            Tất Cả Danh Mục
+            Tất cả danh mục
             <i class="flaticon-arrow-pointing-to-left"></i>
         </h5>
         <ul class="cb-category-list">
@@ -165,7 +169,7 @@
                     <i class="flaticon-man"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Đồ Nam<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Nam <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -173,7 +177,7 @@
                     <i class="flaticon-woman"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Đồ nữ<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Đồ nữ <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -181,7 +185,7 @@
                     <i class="flaticon-children"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Bộ sưu tập trẻ em<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Bộ sưu tập trẻ em <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -189,7 +193,7 @@
                     <i class="flaticon-sun-glasses"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Phụ kiện<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Phụ kiện <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -197,7 +201,7 @@
                     <i class="flaticon-formal"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Đồ ngủ<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Đồ ngủ <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -205,7 +209,7 @@
                     <i class="flaticon-shoes"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Bộ sưu tập giày<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Bộ sưu tập giày <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -213,7 +217,7 @@
                     <i class="flaticon-watch"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Đồng hồ<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Đồng hồ <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -221,7 +225,7 @@
                     <i class="flaticon-necklace"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Trang sức<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Trang sức <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -229,7 +233,7 @@
                     <i class="flaticon-diamond"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Kim cương<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Kim cương <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -237,7 +241,7 @@
                     <i class="flaticon-baby-boy"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Trang phục trẻ em<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Quần áo trẻ em <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -245,7 +249,7 @@
                     <i class="flaticon-fashion"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Trang phục theo mùa<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Trang phục mùa <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
             <li class="cb-single-category">
@@ -253,7 +257,7 @@
                     <i class="flaticon-sports"></i>
                 </div>
                 <a href="product.html">
-                    <h5 class="cb-category-title">Thể thao<i class="bi bi-arrow-right"></i></h5>
+                    <h5 class="cb-category-title">Thể thao <i class="bi bi-arrow-right"></i></h5>
                 </a>
             </li>
         </ul>
