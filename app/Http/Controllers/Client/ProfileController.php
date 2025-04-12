@@ -25,41 +25,52 @@ class ProfileController extends Controller
     }
 
     public function update(UpdateProfileRequest $request)
-    {
-        try {
-            $validated = $request->validated();
-            $user = Auth::user();
+{
+    try {
+        $validated = $request->validated();
+        $user = Auth::user();
 
-            // Debug dữ liệu gửi lên
-            \Log::info('Validated data:', $validated);
-
-            if ($request->hasFile('avatar')) {
-                if ($user->avatar) {
-                    \Storage::delete('avatars/' . $user->avatar);
-                }
-                $avatarName = time() . '.' . $request->file('avatar')->extension();
-                $path = $request->file('avatar')->storeAs('avatars', $avatarName);
-                $validated['avatar'] = $avatarName;
+        // Xử lý ảnh đại diện
+        if ($request->hasFile('avatar')) {
+            // Xóa ảnh cũ nếu tồn tại
+            if ($user->avatar && \Storage::exists('avatars/' . $user->avatar)) {
+                \Storage::delete('avatars/' . $user->avatar);
             }
-
-            // Cập nhật thông tin người dùng
-            $user->update([
-                'name' => $validated['name'],
-                'phone' => $validated['phone'],
-                'email' => $validated['email'],
-                'gender' => $validated['gender'] ?? $user->gender,
-                'birthday' => $validated['birthday'] ?? $user->birthday,
-                'avatar' => $validated['avatar'] ?? $user->avatar,
-            ]);
-
-            return redirect()->route('profile')->with('success', 'Cập nhật thông tin thành công!');
-        } catch (\Exception $e) {
-            \Log::error('Error updating profile: ' . $e->getMessage());
-            return redirect()->back()
-                ->with('error', 'Đã xảy ra lỗi khi cập nhật thông tin: ' . $e->getMessage())
-                ->withInput();
+            // Lưu ảnh mới
+            $avatarName = time() . '.' . $request->file('avatar')->extension();
+            $request->file('avatar')->storeAs('avatars', $avatarName, 'public');
+            $validated['avatar'] = $avatarName;
         }
+
+        // Cập nhật chỉ các trường có trong $validated
+        $updateData = [
+            'name' => $validated['name'],
+            'phone' => $validated['phone'],
+            'gender' => $validated['gender'] ?? $user->gender,
+            'birthday' => $validated['birthday'] ?? $user->birthday,
+            'avatar' => $validated['avatar'] ?? $user->avatar,
+        ];
+
+        // Chỉ thêm email nếu được gửi
+        if (isset($validated['email'])) {
+            $updateData['email'] = $validated['email'];
+        }
+
+        $user->update($updateData);
+
+        return redirect()->route('profile')->with('success', 'Cập nhật thông tin thành công!');
+     } 
+    //catch (\Exception $e) {
+    //     \Log::error('Error updating profile: ' . $e->getMessage());
+    //     return redirect()->back()
+    //         ->with('error', 'Đã xảy ra lỗi khi cập nhật thông tin: ' . $e->getMessage())
+    //         ->withInput();
+    // }
+    catch (\Exception $e) {
+        \Log::error('Update error: ' . $e->getMessage());
+        throw $e; // Tạm thời để xem lỗi
     }
+}
     public function showAddresses()
     {
         $user = Auth::user();

@@ -3,15 +3,7 @@
     <div class="px-5 ml-110 mt-100">
         <div class="row">
             <div class="col-12">
-                <h2 class="mb-4">My Orders</h2>
-
-                <!-- Hiển thị cảnh báo -->
-                @if ($warningMessage)
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        {{ $warningMessage }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
+                <h2 class="mb-4">My Orders</h2>               
 
                 @if ($orders->isEmpty())
                     <div class="alert alert-info">

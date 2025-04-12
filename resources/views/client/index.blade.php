@@ -194,7 +194,6 @@
             </div>
         </div>
 
-        <!-- Thêm một chút inline style tối thiểu để xử lý hover, vì Bootstrap không hỗ trợ trực tiếp -->
         <style>
             .product-img:hover .hover-img {
                 display: block !important;
@@ -583,8 +582,7 @@
                             console.log('Product ID:', productId);
 
                             $.ajax({
-                                url: '{{ route('wishlist.toggle', ':productId') }}'.replace(':productId',
-                                    productId),
+                                url: `/wishlist/toggle/${productId}`,
                                 method: 'POST',
                                 data: {
                                     _token: '{{ csrf_token() }}'

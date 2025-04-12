@@ -64,14 +64,4 @@ class Variation extends Model
             'attribute_value_id' // Khóa ngoại trong bảng pivot
         );
     }
-    
-    /**
-     * Get the order items for the variation.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function orderItems()
-    {
-        return $this->hasMany(Order_item::class);
-    }
 } 

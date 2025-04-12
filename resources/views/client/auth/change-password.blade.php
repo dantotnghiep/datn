@@ -13,7 +13,7 @@
                             @else
                             <div class="rounded-circle me-2 text-white d-flex align-items-center justify-content-center"
                             style="width: 40px; height: 40px; background-color: #ccc; font-size: 16px;">
-                            {{ mb_substr($user->name, 0, 1, 'UTF-8') }}
+                            {{ mb_substr(auth()->user()->name, 0, 1, 'UTF-8') }}
                         </div>
                             @endif
                             <div>

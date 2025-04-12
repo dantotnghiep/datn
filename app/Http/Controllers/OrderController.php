@@ -43,6 +43,7 @@ class OrderController extends Controller
     {
         try {
             // 1. Validate input
+            // dd($request->all());
             $validated = $request->validate([
                 'address_id' => 'required|exists:addresses,id,user_id,' . auth()->id(), // Validate address_id
                 'user_email' => 'required|email|max:255', // Thêm trường email vào validation
