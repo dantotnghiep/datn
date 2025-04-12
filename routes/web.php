@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminCustomerController;
+use App\Http\Controllers\Admin\AdminEmployeeController;
 use App\Http\Controllers\Admin\HotProductController;
 use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\Auth\LoginController;
@@ -7,15 +9,20 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\OrderController as ClientOrderController;
+use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationController;
+use App\Http\Controllers\WishlistController;
+use App\Jobs\UnlockUserAfterThreeDays;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
+
 use Pusher\Pusher;
 /*
 |--------------------------------------------------------------------------
@@ -54,19 +61,26 @@ Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthControlle
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
+     Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-    Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'show'])->name('profile');
-    Route::put('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [ProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password.store');
+    Route::get('/profile/addresses', [ProfileController::class, 'showAddresses'])->name('profile.addresses');
+    Route::post('/addresses', [ProfileController::class, 'storeAddress'])->name('addresses.store');
+    Route::put('/addresses/{address}', [ProfileController::class, 'updateAddress'])->name('addresses.update');
+    Route::delete('/addresses/{address}', [ProfileController::class, 'destroyAddress'])->name('addresses.destroy');
+    Route::post('/addresses/{address}/set-default', [ProfileController::class, 'setDefaultAddress'])->name('addresses.set-default');
 
-    // Route::get('/order', [OrderController::class, 'order'])->name('order');
-    // Route::prefix('orders')->group(function () {
-    //     Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-    // });
+
+    Route::post('/wishlist/toggle/{productId}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+
+
     Route::get('/order', [OrderController::class, 'order'])->name('order');
     Route::prefix('orders')->group(function () {
-        Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/', [App\Http\Controllers\Client\OrderController::class, 'index'])->name('orders.index');
     });
 });
 
@@ -154,15 +168,42 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
 
     // Routes cho checkout và thanh toán
-    Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
     Route::post('/cart/process-checkout', [OrderController::class, 'store'])->name('cart.process-checkout');
-    Route::post('/order', [OrderController::class, 'index'])->name('order.index');
+     // Routes cho trang checkout và quản lý địa chỉ
+     Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
+     Route::post('/checkout/address', [OrderController::class, 'storeAddress'])->name('order.storeAddress');
+ 
     Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('orders.updateStatus');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
+});
+
+//Route::middleware(['auth', 'staff'])->prefix('admin/users')->group(function () {
+Route::middleware(['auth'])->prefix('admin/users')->group(function () {
+    // Khách hàng
+    Route::get('/clients', [AdminCustomerController::class, 'index'])->name('admin.users.clients.index');
+    Route::get('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
+    Route::get('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
+    Route::get('/unlock-users', function () {UnlockUserAfterThreeDays::dispatch(); return 'Job dispatched!';});
+    Route::get('/clients/{id}', [AdminCustomerController::class, 'show'])->name('admin.users.clients.detail');
+    Route::post('/clients', [AdminCustomerController::class, 'store'])->name('admin.users.clients.store');
+    Route::post('/clients/{id}/reset-password', [AdminCustomerController::class, 'resetPassword'])->name('admin.users.clients.reset-password');
+    Route::post('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock.detail');
+    Route::post('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock.detail');
+    Route::post('/clients/{id}/warn', [AdminCustomerController::class, 'warn'])->name('admin.users.clients.warn');
+
+
+    // Nhân viên/admin
+    Route::get('/staffs', [AdminEmployeeController::class, 'index'])->name('admin.users.staffs.index');
+    Route::post('/staffs', [AdminEmployeeController::class, 'store'])->name('admin.users.staffs.store');
+    Route::put('/staffs/{id}', [AdminEmployeeController::class, 'update'])->name('admin.users.staffs.update');
+    Route::delete('/staffs/{id}', [AdminEmployeeController::class, 'destroy'])->name('admin.users.staffs.destroy');
+    Route::post('/staffs/{id}/lock', [AdminEmployeeController::class, 'lock'])->name('admin.users.staffs.lock');
+    Route::post('/staffs/{id}/unlock', [AdminEmployeeController::class, 'unlock'])->name('admin.users.staffs.unlock');
 
 });
 

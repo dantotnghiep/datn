@@ -96,18 +96,27 @@ class AuthController extends Controller
         }
     }
 
+    // public function logout(Request $request)
+    // {
+    //     try {
+    //         Auth::logout();
+    //         $request->session()->invalidate();
+    //         $request->session()->forget('error'); // Xóa session error
+    //         $request->session()->regenerateToken();
+    //         return redirect()->route('login')
+    //             ->with('success', 'Đăng xuất thành công!');
+    //     } catch (\Exception $e) {
+    //         return redirect()->back()
+    //             ->with('error', 'Đã xảy ra lỗi khi đăng xuất.');
+    //     }
+    // }
     public function logout(Request $request)
     {
-        try {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->forget('error'); // Xóa session error
-            $request->session()->regenerateToken();
-            return redirect()->route('login')
-                ->with('success', 'Đăng xuất thành công!');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Đã xảy ra lỗi khi đăng xuất.');
-        }
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
     }
 }
