@@ -51,6 +51,24 @@
                                     class="ri-checkbox-blank-circle-line"></i>Thêm danh mục con</a></li>
                         <li><a href="{{ route('admin.orders.index') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Danh sách đơn hàng</a></li>
+
+                        <li class="menu-item">                   
+                            <a href="#"
+                                class="cr-page-link drop flex items-center justify-between px-4 py-2 text-gray-200 hover:bg-gray-700 rounded-md"
+                                onclick="toggleSubmenu(event)">Danh sách tài khoản </a>
+                            <!-- Submenu -->
+                            <ul class="submenu hidden ml-6 mt-2 space-y-2 bg-gray-800 rounded-md ">
+                                <li>
+                                    <a href="{{ route('admin.users.clients.index') }}"
+                                        class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md"> Khách hàng  </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.staffs.index') }}"
+                                        class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md"> Nhân viên</a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li class="cr-sb-item sb-subdrop-item">
                             <a href="javascript:void(0)" class="cr-sub-drop-toggle">
                                 <i class="ri-shield-user-line"></i><span class="condense">Nhà cung cấp<i
@@ -94,6 +112,9 @@
                 <li class="cr-sb-item">
                     <a href="{{route('staff.dashboard')}}" class="cr-page-link">
                         <i class="ri-remixicon-line"></i><span class="condense"><span class="hover-title">Nhân viên</span></span></a>
+                    <a href="{{ route('staff.dashboard') }}" class="cr-page-link">
+                        <i class="ri-remixicon-line"></i><span class="condense"><span
+                                class="hover-title">Staff</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="material-icons.html" class="cr-page-link">

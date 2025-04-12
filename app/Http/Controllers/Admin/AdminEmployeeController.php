@@ -9,9 +9,26 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminEmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $employees = User::whereIn('role', ['admin', 'staff'])->get();
+        $query = User::whereIn('role', ['admin', 'staff']);
+
+        // Xử lý tìm kiếm
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Phân trang: 10 nhân viên mỗi trang
+        $employees = $query->paginate(8);
+
+        // Thêm tham số tìm kiếm vào link phân trang
+        $employees->appends($request->only('search'));
+
         return view('admin.users.staffs.index', compact('employees'));
     }
 

@@ -7,6 +7,7 @@
     <div class="container-fluid">
 
         <h1>Danh sách nhân viên/admin</h1>
+
         @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -14,7 +15,21 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
         <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">Thêm nhân viên</button>
+
+        <!-- Form tìm kiếm -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form method="GET" action="{{ route('admin.users.staffs.index') }}">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Tìm kiếm theo tên, email, hoặc số điện thoại..." value="{{ request('search') }}">
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <table class="table table-bordered">
+
             <thead>
                 <tr>
                     <th>Tên</th>
@@ -168,6 +183,11 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Phân trang -->
+    <div class="d-flex justify-content-center">
+        {{ $employees->links() }}
     </div>
 </div>
 @endsection
