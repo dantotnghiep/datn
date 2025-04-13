@@ -362,12 +362,55 @@ class ProductController extends Controller
     }
 
 
-    public function store(StoreProductRequest $request)
+    public function store(Request $request)
     {
+        dd($request->all());
+        // Validate the request manually
+        $validator = \Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:products,slug',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+            'main_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'variations' => 'required|array',
+            'variations.*.sku' => 'required|string|unique:variations,sku',
+            'variations.*.price' => 'required|numeric|min:0',
+            'variations.*.stock' => 'required|integer|min:0',
+        ], [
+            'name.required' => 'Tên sản phẩm là bắt buộc.',
+            'slug.required' => 'Slug là bắt buộc.',
+            'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
+            'category_id.required' => 'Danh mục là bắt buộc.',
+            'main_image.required' => 'Hình ảnh chính là bắt buộc.',
+            'main_image.image' => 'File phải là hình ảnh.',
+            'variations.required' => 'Phải có ít nhất một biến thể sản phẩm.',
+            'variations.*.sku.required' => 'SKU là bắt buộc cho mỗi biến thể.',
+            'variations.*.sku.unique' => 'SKU của biến thể đã tồn tại.',
+            'variations.*.price.required' => 'Giá là bắt buộc cho mỗi biến thể.',
+            'variations.*.price.numeric' => 'Giá phải là số.',
+            'variations.*.stock.required' => 'Số lượng là bắt buộc cho mỗi biến thể.',
+            'variations.*.stock.integer' => 'Số lượng phải là số nguyên.',
+        ]);
+
+        if ($validator->fails()) {
+            Log::info('Validation errors:', $validator->errors()->toArray());
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         try {
             DB::transaction(function () use ($request) {
                 // Tạo sản phẩm
-                $product = Product::create($request->validated());
+                $product = Product::create([
+                    'name' => $request->name,
+                    'slug' => $request->slug,
+                    'category_id' => $request->category_id,
+                    'description' => $request->description,
+                    'status' => $request->status
+                ]);
+
                 // Xử lý upload hình ảnh chính
                 if ($request->hasFile('main_image')) {
                     $mainImage = new ProductImage();
@@ -419,6 +462,8 @@ class ProductController extends Controller
             return redirect()->route('admin.product.product-list')
                 ->with('success', 'Sản phẩm và biến thể đã được thêm thành công!');
         } catch (\Exception $e) {
+            Log::error('Product creation error: ' . $e->getMessage());
+            
             return redirect()->back()
                 ->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage())
                 ->withInput();

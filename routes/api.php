@@ -19,10 +19,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// API routes will be added here when needed
-
-// Cấu hình CORS và sanctum
+// API routes - Accessible through /api/...
 Route::middleware(['auth:sanctum'])->group(function () {
+    // Note: These routes are also available in web.php for standard web access
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
     Route::post('/orders/{order}/update-status', [OrderController::class, 'updateStatus']);
 });

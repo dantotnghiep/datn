@@ -21,12 +21,10 @@
         @endif
 
         @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            @foreach ($errors->all() as $error)
+            <div style="margin-bottom: 5px;">{{ $error }}</div>
+            @endforeach
         </div>
         @endif
 
