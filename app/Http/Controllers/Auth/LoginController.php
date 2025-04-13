@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -153,6 +154,13 @@ class LoginController extends Controller
             'password' => 'required|min:8'
         ]);
 
+        $user = User::where('email', $request->email)->first();
+        if ($user && $user->status === 'inactive') {
+            session()->flash('error', 'Tài khoản của bạn đã bị khóa.');
+            return redirect()->route('login');
+        }
+        
+
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
@@ -160,18 +168,32 @@ class LoginController extends Controller
 
             // Nếu đăng nhập admin nhưng tài khoản là user, phải logout hoàn toàn
             if ($user->role === 'admin' && $type === 'user') {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                return redirect()->route('admin.auth.login')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
+                // Auth::logout();
+                // $request->session()->invalidate();
+                // $request->session()->regenerateToken();
+                return redirect()->route('client.index')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
             }
+
+            // if ($user->role === 'staff' && $type === 'user') {
+            //     Auth::logout();
+            //     $request->session()->invalidate();
+            //     $request->session()->regenerateToken();
+            //     return redirect()->route('admin.auth.login')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
+            // }
 
             if ($user->role === 'staff' && $type === 'user') {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
-                return redirect()->route('admin.auth.login')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
+                return redirect()->route('client.index')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
             }
+
+            // if ($user->role === 'admin' && $type === 'admin') {
+            //     Auth::logout();
+            //     $request->session()->invalidate();
+            //     $request->session()->regenerateToken();
+                
+            // }
 
             if ($user->role === 'staff' && $type === 'admin') {
                 Auth::logout();

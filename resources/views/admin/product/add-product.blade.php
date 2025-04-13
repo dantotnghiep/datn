@@ -13,17 +13,23 @@
                 </div>
             </div>
 
-
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+            <!-- Debug -->
+            @if($errors->any())
+                <div style="background-color: #000; color: #fff; padding: 15px; margin-bottom: 20px;">
+                    <p>Debug: {{ count($errors->all()) }} errors found</p>
+                    @foreach($errors->all() as $error)
+                        <p>- {{ $error }}</p>
+                    @endforeach
                 </div>
             @endif
 
+            @if ($errors->any())
+                <div id="error-anchor" style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                    @foreach ($errors->all() as $error)
+                        <div style="margin-bottom: 5px;">{{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
 
             @if (session('success'))
                 <div class="alert alert-success">
@@ -48,32 +54,32 @@
                                     <div class="col-md-6">
                                         <label for="name">Product Name</label>
                                         <input type="text" name="name" class="form-control" id="slug"
-                                            onkeyup="ChangeToSlug();" required>
+                                            onkeyup="ChangeToSlug();" required value="{{ old('name') }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="slug">Slug</label>
                                         <input type="text" name="slug" class="form-control" id="convert_slug"
-                                            required>
+                                            required value="{{ old('slug') }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="category_id">Category</label>
                                         <select name="category_id" id="category_id" class="form-control" required>
                                             <option value="">-- Select Category --</option>
                                             @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="status">Status</label>
                                         <select name="status" id="status" class="form-control" required>
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
+                                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                                         </select>
                                     </div>
                                     <div class="col-md-12">
                                         <label for="description">Description</label>
-                                        <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+                                        <textarea name="description" id="description" class="form-control" rows="3">{{ old('description') }}</textarea>
                                     </div>
 
                                     <hr class="my-4">
@@ -98,7 +104,7 @@
                                     @foreach ($attributes as $attribute)
                                         <div class="col-md-6">
                                             <label>{{ $attribute->name }}</label>
-                                            <select name="selected_attributes[]" class="form-control attribute-select"
+                                            <select name="attributes[{{ $attribute->id }}][]" class="form-control attribute-select"
                                                 data-attribute-id="{{ $attribute->id }}" multiple>
                                                 @foreach ($attribute->values as $value)
                                                     <option value="{{ $value->id }}"
@@ -132,6 +138,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Debug logs
+            console.log('Errors object:', {!! json_encode($errors->all()) !!});
+            console.log('Errors count:', {!! $errors->count() !!});
+            console.log('Has errors:', {!! $errors->any() ? 'true' : 'false' !!});
+            
             // Image preview functionality
             const mainImageInput = document.querySelector('input[name="main_image"]');
             const additionalImagesInput = document.querySelector('input[name="additional_images[]"]');
@@ -189,6 +200,11 @@
                     }
                 });
 
+                if (selectedAttributes.length === 0) {
+                    alert('Please select at least one attribute value before generating variations.');
+                    return;
+                }
+
                 let combinations = generateCombinations(selectedAttributes);
                 const variationsContainer = document.getElementById('variations-container');
                 variationsContainer.innerHTML = '';
@@ -243,6 +259,15 @@
                         reindexVariations();
                     });
                 });
+                
+                // Add form validation - make sure user can't submit without generating variations
+                document.querySelector('form').addEventListener('submit', function(e) {
+                    const variations = document.querySelectorAll('.variation-item');
+                    if (variations.length === 0) {
+                        e.preventDefault();
+                        alert('Please generate at least one variation before submitting the form.');
+                    }
+                });
             }
 
             // Function to reindex variations after deletion
@@ -285,6 +310,31 @@
                 }
 
                 return combinations;
+            }
+
+            // Scroll to error section if there are errors
+            if (document.getElementById('error-anchor')) {
+                const errorAnchor = document.getElementById('error-anchor');
+                const yOffset = -100; // Adjust offset to better display
+                const y = errorAnchor.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({top: y, behavior: 'smooth'});
+            }
+            
+            // Lưu vị trí cuộn trước khi submit
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    sessionStorage.setItem('scrollPosition', window.pageYOffset);
+                });
+            }
+            
+            // Phục hồi vị trí cuộn nếu có lỗi xảy ra
+            if ({{ $errors->any() ? 'true' : 'false' }}) {
+                const savedPosition = sessionStorage.getItem('scrollPosition');
+                if (savedPosition) {
+                    window.scrollTo(0, savedPosition);
+                    sessionStorage.removeItem('scrollPosition');
+                }
             }
         });
     </script>

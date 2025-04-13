@@ -1,423 +1,438 @@
 @extends('admin.layouts.master')
 
 @section('content')
-    <div class="cr-main-content">
-        <div class="container-fluid">
+<div class="cr-main-content">
+    <div class="container-fluid">
 
-            <div class="cr-page-title">
-                <div class="cr-breadcrumb">
-                    <h5>eCommerce</h5>
-                    <ul>
-                        <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li>eCommerce</li>
-                    </ul>
+        <div class="cr-page-title">
+            <div class="cr-breadcrumb">
+                <h5>eCommerce</h5>
+                <ul>
+                    <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                    <li>eCommerce</li>
+                </ul>
+            </div>
+            <div class="cr-tools">
+                <div class="date-picker-container">
+                    <div class="cr-date-range" title="Date">
+                        <i class="ri-calendar-line"></i>
+                        <span>{{ now()->format('M d, Y') }} - {{ now()->format('M d, Y') }}</span>
+                    </div>
+                    <div class="date-range-dropdown">
+                        <ul>
+                            <li><button class="active">Today</button></li>
+                            <li><button>Yesterday</button></li>
+                            <li><button>Last 7 Days</button></li>
+                            <li><button>Last 30 Days</button></li>
+                            <li><button>This Month</button></li>
+                            <li><button>Last Month</button></li>
+                            <li><button>Custom Range</button></li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="cr-tools">
-                    <div class="date-picker-container">
-                        <div class="cr-date-range" title="Date">
-                            <i class="ri-calendar-line"></i>
-                            <span>{{ now()->format('M d, Y') }} - {{ now()->format('M d, Y') }}</span>
+            </div>
+        </div>
+
+        @if(isset($error))
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    {{ $error }}
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <div class="row">
+            <div class="col-xl-2 col-md-4">
+                <div class="cr-card metric-card">
+                    <div class="cr-card-content">
+                        <div class="metric-icon customer-icon">
+                            <i class="ri-shield-user-line"></i>
                         </div>
-                        <div class="date-range-dropdown">
-                            <ul>
-                                <li><button class="active">Today</button></li>
-                                <li><button>Yesterday</button></li>
-                                <li><button>Last 7 Days</button></li>
-                                <li><button>Last 30 Days</button></li>
-                                <li><button>This Month</button></li>
-                                <li><button>Last Month</button></li>
-                                <li><button>Custom Range</button></li>
-                            </ul>
+                        <div class="metric-details">
+                            <h6>Customers</h6>
+                            <h3>{{ number_format($totalCustomers) }}</h3>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            @if(isset($error))
-            <div class="row">
-                <div class="col-12">
-                    <div class="alert alert-danger">
-                        {{ $error }}
-                    </div>
-                </div>
-            </div>
-            @endif
-            
-            <div class="row">
-                <div class="col-xl-2 col-md-4">
-                    <div class="cr-card metric-card">
-                        <div class="cr-card-content">
-                            <div class="metric-icon customer-icon">
-                                <i class="ri-shield-user-line"></i>
-                            </div>
-                            <div class="metric-details">
-                                <h6>Customers</h6>
-                                <h3>{{ number_format($totalCustomers) }}</h3>
-                            </div>
+            <div class="col-xl-2 col-md-4">
+                <div class="cr-card metric-card">
+                    <div class="cr-card-content">
+                        <div class="metric-icon order-icon">
+                            <i class="ri-shopping-bag-3-line"></i>
+                        </div>
+                        <div class="metric-details">
+                            <h6>Orders</h6>
+                            <h3>{{ number_format($totalOrders) }}</h3>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-2 col-md-4">
-                    <div class="cr-card metric-card">
-                        <div class="cr-card-content">
-                            <div class="metric-icon order-icon">
-                                <i class="ri-shopping-bag-3-line"></i>
+            </div>
+            <div class="col-xl-2 col-md-4">
+                <div class="cr-card metric-card">
+                    <div class="cr-card-content">
+                        <div class="metric-icon revenue-icon">
+                            <i class="ri-money-dollar-circle-line"></i>
+                        </div>
+                        <div class="metric-details">
+                            <h6>Actual Revenue</h6>
+                            <h3>${{ number_format($totalRevenue, 2) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4">
+                <div class="cr-card metric-card">
+                    <div class="cr-card-content">
+                        <div class="metric-icon cancel-icon">
+                            <i class="ri-close-circle-line"></i>
+                        </div>
+                        <div class="metric-details">
+                            <h6>Cancelled Orders</h6>
+                            <h3>${{ number_format($totalCancelled, 2) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4">
+                <div class="cr-card metric-card">
+                    <div class="cr-card-content">
+                        <div class="metric-icon pending-icon">
+                            <i class="ri-time-line"></i>
+                        </div>
+                        <div class="metric-details">
+                            <h6>Pending Revenue</h6>
+                            <h3>${{ number_format($pendingRevenue, 2) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4">
+                <div class="cr-card metric-card">
+                    <div class="cr-card-content">
+                        <div class="metric-icon net-icon">
+                            <i class="ri-coins-line"></i>
+                        </div>
+                        <div class="metric-details">
+                            <h6>Net Revenue</h6>
+                            <h3>${{ number_format($netRevenue, 2) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xxl-8 col-xl-12">
+                <div class="cr-card revenue-overview">
+                    <div class="cr-card-header header-575">
+                        <h4 class="cr-card-title">Revenue Overview</h4>
+                        <div class="header-tools">
+                            <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen">
+                                <i class="ri-fullscreen-line"></i>
+                            </a>
+                            <div class="cr-date-range date">
+                                <span>{{ now()->format('M d, Y') }} - {{ now()->format('M d, Y') }}</span>
                             </div>
-                            <div class="metric-details">
+                        </div>
+                    </div>
+                    <div class="cr-card-content">
+                        <div class="cr-chart-header">
+                            <div class="block">
                                 <h6>Orders</h6>
-                                <h3>{{ number_format($totalOrders) }}</h3>
+                                <h5>{{ $totalOrders }}</h5>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4">
-                    <div class="cr-card metric-card">
-                        <div class="cr-card-content">
-                            <div class="metric-icon revenue-icon">
-                                <i class="ri-money-dollar-circle-line"></i>
-                            </div>
-                            <div class="metric-details">
+                            <div class="block">
                                 <h6>Actual Revenue</h6>
-                                <h3>${{ number_format($totalRevenue, 2) }}</h3>
+                                <h5>{{ $totalRevenue < 0 ? '-' : '' }}${{ number_format(abs($totalRevenue/1000), 1) }}k
+                                </h5>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4">
-                    <div class="cr-card metric-card">
-                        <div class="cr-card-content">
-                            <div class="metric-icon cancel-icon">
-                                <i class="ri-close-circle-line"></i>
-                            </div>
-                            <div class="metric-details">
-                                <h6>Cancelled Orders</h6>
-                                <h3>${{ number_format($totalCancelled, 2) }}</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4">
-                    <div class="cr-card metric-card">
-                        <div class="cr-card-content">
-                            <div class="metric-icon pending-icon">
-                                <i class="ri-time-line"></i>
-                            </div>
-                            <div class="metric-details">
+                            <div class="block">
                                 <h6>Pending Revenue</h6>
-                                <h3>${{ number_format($pendingRevenue, 2) }}</h3>
+                                <h5>{{ $pendingRevenue < 0 ? '-' : '' }}${{ number_format(abs($pendingRevenue/1000), 1) }}k
+                                </h5>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4">
-                    <div class="cr-card metric-card">
-                        <div class="cr-card-content">
-                            <div class="metric-icon net-icon">
-                                <i class="ri-coins-line"></i>
-                            </div>
-                            <div class="metric-details">
+                            <div class="block">
                                 <h6>Net Revenue</h6>
-                                <h3>${{ number_format($netRevenue, 2) }}</h3>
+                                <h5>{{ $netRevenue < 0 ? '-' : '' }}${{ number_format(abs($netRevenue/1000), 1) }}k</h5>
+                            </div>
+                        </div>
+                        <div class="cr-chart-content">
+                            <div id="revenueChart" style="min-height: 365px; width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-4 col-xl-6 col-md-12">
+                <div class="cr-card" id="daily-revenue">
+                    <div class="cr-card-header">
+                        <h4 class="cr-card-title">Daily Revenue Analysis</h4>
+                        <div class="header-tools">
+                            <div class="cr-date-range dots">
+                                <span>{{ now()->format('M d, Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cr-card-content">
+                        <div class="cr-chart-content">
+                            <div id="dailyRevenueChart" style="min-height: 350px; width: 100%;"></div>
+                        </div>
+                        <div class="cr-chart-header-2">
+                            <div class="block">
+                                <h6>Peak Day</h6>
+                                <h5><span id="peak-day"></span> <span id="peak-value" class="value"></span></h5>
+                            </div>
+                            <div class="block">
+                                <h6>Daily Avg</h6>
+                                <h5><span id="average-revenue" class="value"></span></h5>
+                            </div>
+                            <div class="block">
+                                <h6>Lowest Day</h6>
+                                <h5><span id="lowest-day"></span> <span id="lowest-value" class="value"></span></h5>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="row">
-                <div class="col-xxl-8 col-xl-12">
-                    <div class="cr-card revenue-overview">
-                        <div class="cr-card-header header-575">
-                            <h4 class="cr-card-title">Revenue Overview</h4>
-                            <div class="header-tools">
-                                <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen">
-                                    <i class="ri-fullscreen-line"></i>
-                                </a>
-                                <div class="cr-date-range date">
-                                    <span>{{ now()->format('M d, Y') }} - {{ now()->format('M d, Y') }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cr-card-content">
-                            <div class="cr-chart-header">
-                                <div class="block">
-                                    <h6>Orders</h6>
-                                    <h5>{{ $totalOrders }}</h5>
-                                </div>
-                                <div class="block">
-                                    <h6>Actual Revenue</h6>
-                                    <h5>{{ $totalRevenue < 0 ? '-' : '' }}${{ number_format(abs($totalRevenue/1000), 1) }}k</h5>
-                                </div>
-                                <div class="block">
-                                    <h6>Pending Revenue</h6>
-                                    <h5>{{ $pendingRevenue < 0 ? '-' : '' }}${{ number_format(abs($pendingRevenue/1000), 1) }}k</h5>
-                                </div>
-                                <div class="block">
-                                    <h6>Net Revenue</h6>
-                                    <h5>{{ $netRevenue < 0 ? '-' : '' }}${{ number_format(abs($netRevenue/1000), 1) }}k</h5>
-                                </div>
-                            </div>
-                            <div class="cr-chart-content">
-                                <div id="revenueChart" style="min-height: 365px; width: 100%;"></div>
+        </div>
+        <div class="row">
+            <div class="col-xxl-6 col-xl-12">
+                <div class="cr-card" id="best_seller_tbl">
+                    <div class="cr-card-header">
+                        <h4 class="cr-card-title">Best Sellers</h4>
+                        <div class="header-tools">
+                            <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
+                                    class="ri-fullscreen-line"></i></a>
+                            <div class="cr-date-range dots">
+                                <span></span>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-xxl-4 col-xl-6 col-md-12">
-                    <div class="cr-card" id="daily-revenue">
-                        <div class="cr-card-header">
-                            <h4 class="cr-card-title">Daily Revenue Analysis</h4>
-                            <div class="header-tools">
-                                <div class="cr-date-range dots">
-                                    <span>{{ now()->format('M d, Y') }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cr-card-content">
-                            <div class="cr-chart-content">
-                                <div id="dailyRevenueChart" style="min-height: 350px; width: 100%;"></div>
-                            </div>
-                            <div class="cr-chart-header-2">
-                                <div class="block">
-                                    <h6>Peak Day</h6>
-                                    <h5><span id="peak-day"></span> <span id="peak-value" class="value"></span></h5>
-                                </div>
-                                <div class="block">
-                                    <h6>Daily Avg</h6>
-                                    <h5><span id="average-revenue" class="value"></span></h5>
-                                </div>
-                                <div class="block">
-                                    <h6>Lowest Day</h6>
-                                    <h5><span id="lowest-day"></span> <span id="lowest-value" class="value"></span></h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xxl-6 col-xl-12">
-                    <div class="cr-card" id="best_seller_tbl">
-                        <div class="cr-card-header">
-                            <h4 class="cr-card-title">Best Sellers</h4>
-                            <div class="header-tools">
-                                <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
-                                        class="ri-fullscreen-line"></i></a>
-                                <div class="cr-date-range dots">
-                                    <span></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cr-card-content card-default">
-                            <div class="best-seller-table">
-                                <div class="table-responsive">
-                                    <table id="best_seller_data_table" class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Category</th>
-                                                <th>Products</th>
-                                                <th>Stock</th>
-                                                <th>Sales</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($bestSellers as $category)
-                                            <tr>
-                                                <td>
-                                                    <img class="cat-thumb" src="{{ $category->image ?? '/be/assets/img/clients/1.jpg' }}"
-                                                        alt="Category Image">
-                                                    <span class="name">{{ $category->name }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="cat">
-                                                        @foreach($category->products->take(3) as $product)
-                                                            <a href="{{ route('admin.product.edit', $product->id) }}">{{ $product->name }}</a>
-                                                        @endforeach
-                                                    </span>
-                                                </td>
-                                                <td>{{ $category->products->sum(function($product) { 
+                    <div class="cr-card-content card-default">
+                        <div class="best-seller-table">
+                            <div class="table-responsive">
+                                <table id="best_seller_data_table" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th>Products</th>
+                                            <th>Stock</th>
+                                            <th>Sales</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($bestSellers as $category)
+                                        <tr>
+                                            <td>
+                                                <img class="cat-thumb"
+                                                    src="{{ $category->image ?? '/be/assets/img/clients/1.jpg' }}"
+                                                    alt="Category Image">
+                                                <span class="name">{{ $category->name }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="cat">
+                                                    @foreach($category->products->take(3) as $product)
+                                                    <a
+                                                        href="{{ route('admin.product.edit', $product->id) }}">{{ $product->name }}</a>
+                                                    @endforeach
+                                                </span>
+                                            </td>
+                                            <td>{{ $category->products->sum(function($product) { 
                                                     return $product->variations->sum('stock'); 
                                                 }) }}</td>
-                                                <td>${{ number_format($category->sales_count * 100, 2) }}</td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xxl-6 col-xl-12">
-                    <div class="cr-card" id="top_product_tbl">
-                        <div class="cr-card-header">
-                            <h4 class="cr-card-title">Top Products</h4>
-                            <div class="header-tools">
-                                <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
-                                        class="ri-fullscreen-line"></i></a>
-                                <div class="cr-date-range dots">
-                                    <span></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cr-card-content card-default">
-                            <div class="top-product-table">
-                                <div class="table-responsive">
-                                    <table id="top_product_data_table" class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Product</th>
-                                                <th>Price</th>
-                                                <th>Orders</th>
-                                                <th>Stock</th>
-                                                <th>Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($topProducts as $product)
-                                            <tr>
-                                                <td>
-                                                    <img class="cat-thumb" src="{{ asset(Storage::url($product->images->first()->url ?? '')) ?? '/be/assets/img/product/1.jpg' }}"
-                                                        alt="Product Image">
-                                                    <span class="name">{{ $product->name }}</span>
-                                                </td>
-                                                <td>${{ number_format($product->variations->min('price'), 2) }}</td>
-                                                <td>{{ $product->ordered_count }}</td>
-                                                <td>{{ $product->variations->sum('stock') }}</td>
-                                                <td>${{ number_format($product->ordered_count * $product->variations->min('price'), 2) }}</td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                                            <td>${{ number_format($category->sales_count * 100, 2) }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xxl-12 col-xl-12">
-                    <div class="cr-card" id="status-revenue">
-                        <div class="cr-card-header">
-                            <h4 class="cr-card-title">Doanh số theo trạng thái đơn hàng</h4>
-                            <div class="header-tools">
-                                <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
-                                        class="ri-fullscreen-line"></i></a>
+            <div class="col-xxl-6 col-xl-12">
+                <div class="cr-card" id="top_product_tbl">
+                    <div class="cr-card-header">
+                        <h4 class="cr-card-title">Top Products</h4>
+                        <div class="header-tools">
+                            <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
+                                    class="ri-fullscreen-line"></i></a>
+                            <div class="cr-date-range dots">
+                                <span></span>
                             </div>
                         </div>
-                        <div class="cr-card-content">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Trạng thái</th>
-                                                    <th>Số lượng đơn hàng</th>
-                                                    <th>Doanh số</th>
-                                                    <th>Tỷ lệ</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @php 
-                                                    $totalAmount = array_sum(array_column($revenueByStatus, 'amount'));
-                                                    $totalCount = array_sum(array_column($revenueByStatus, 'count'));
-                                                @endphp
-                                                @foreach($orderStatuses as $status)
-                                                    @php
-                                                        $statusData = $revenueByStatus[$status->id];
-                                                        $percentage = $totalAmount > 0 ? ($statusData['amount'] / $totalAmount) * 100 : 0;
-                                                        $countPercentage = $totalCount > 0 ? ($statusData['count'] / $totalCount) * 100 : 0;
-                                                    @endphp
-                                                    <tr>
-                                                        <td>{{ $status->id }}</td>
-                                                        <td>{{ $status->status_name }}</td>
-                                                        <td>
-                                                            {{ $statusData['count'] }}
-                                                            <div class="progress" style="height: 6px;">
-                                                                <div class="progress-bar" role="progressbar" style="width: {{ $countPercentage }}%;" aria-valuenow="{{ $countPercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                                            </div>
-                                                        </td>
-                                                        <td>${{ number_format($statusData['amount'], 2) }}</td>
-                                                        <td>
-                                                            {{ number_format($percentage, 1) }}%
-                                                            <div class="progress" style="height: 6px;">
-                                                                <div class="progress-bar" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                                <tr class="table-active">
-                                                    <td colspan="2"><strong>Tổng cộng</strong></td>
-                                                    <td><strong>{{ $totalCount }}</strong></td>
-                                                    <td><strong>${{ number_format($totalAmount, 2) }}</strong></td>
-                                                    <td><strong>100%</strong></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div id="statusPieChart" style="min-height: 350px;"></div>
-                                </div>
+                    </div>
+                    <div class="cr-card-content card-default">
+                        <div class="top-product-table">
+                            <div class="table-responsive">
+                                <table id="top_product_data_table" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Price</th>
+                                            <th>Orders</th>
+                                            <th>Stock</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($topProducts as $product)
+                                        <tr>
+                                            <td>
+                                                <img class="cat-thumb"
+                                                    src="{{ asset(Storage::url($product->images->first()->url ?? '')) ?? '/be/assets/img/product/1.jpg' }}"
+                                                    alt="Product Image">
+                                                <span class="name">{{ $product->name }}</span>
+                                            </td>
+                                            <td>${{ number_format($product->variations->min('price'), 2) }}</td>
+                                            <td>{{ $product->ordered_count }}</td>
+                                            <td>{{ $product->variations->sum('stock') }}</td>
+                                            <td>${{ number_format($product->ordered_count * $product->variations->min('price'), 2) }}
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xxl-12 col-xl-12">
-                    <div class="cr-card" id="ordertbl">
-                        <div class="cr-card-header">
-                            <h4 class="cr-card-title">Recent Orders</h4>
-                            <div class="header-tools">
-                                <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
-                                        class="ri-fullscreen-line"></i></a>
-                                <div class="cr-date-range dots">
-                                    <span></span>
-                                </div>
-                            </div>
+        </div>
+        <div class="row">
+            <div class="col-xxl-12 col-xl-12">
+                <div class="cr-card" id="status-revenue">
+                    <div class="cr-card-header">
+                        <h4 class="cr-card-title">Doanh số theo trạng thái đơn hàng</h4>
+                        <div class="header-tools">
+                            <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
+                                    class="ri-fullscreen-line"></i></a>
                         </div>
-                        <div class="cr-card-content card-default">
-                            <div class="order-table">
+                    </div>
+                    <div class="cr-card-content">
+                        <div class="row">
+                            <div class="col-md-8">
                                 <div class="table-responsive">
-                                    <table id="recent_order_data_table" class="table">
+                                    <table class="table table-hover">
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Product</th>
-                                                <th>Customer</th>
-                                                <th>Amount</th>
-                                                <th>Status</th>
-                                                <th>Date</th>
+                                                <th>Trạng thái</th>
+                                                <th>Số lượng đơn hàng</th>
+                                                <th>Doanh số</th>
+                                                <th>Tỷ lệ</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($recentOrders as $order)
+                                            @php
+                                            $totalAmount = array_sum(array_column($revenueByStatus, 'amount'));
+                                            $totalCount = array_sum(array_column($revenueByStatus, 'count'));
+                                            @endphp
+                                            @foreach($orderStatuses as $status)
+                                            @php
+                                            $statusData = $revenueByStatus[$status->id];
+                                            $percentage = $totalAmount > 0 ? ($statusData['amount'] / $totalAmount) *
+                                            100 : 0;
+                                            $countPercentage = $totalCount > 0 ? ($statusData['count'] / $totalCount) *
+                                            100 : 0;
+                                            @endphp
                                             <tr>
-                                                <td class="token">{{ $order->order_code }}</td>
+                                                <td>{{ $status->id }}</td>
+                                                <td>{{ $status->status_name }}</td>
                                                 <td>
-                                                    @if($order->items->isNotEmpty() && $order->items->first()->variation && $order->items->first()->variation->product)
-                                                        <img class="cat-thumb" 
-                                                            src="{{ asset(Storage::url($order->items->first()->variation->product->images->first()->url ?? '')) ?? '/be/assets/img/product/1.jpg' }}"
-                                                            alt="Product Image">
-                                                        <span class="name">{{ $order->items->first()->variation->product->name ?? 'Product' }}</span>
-                                                    @else
-                                                        <span class="name">No product details</span>
-                                                    @endif
+                                                    {{ $statusData['count'] }}
+                                                    <div class="progress" style="height: 6px;">
+                                                        <div class="progress-bar" role="progressbar"
+                                                            style="width: {{ $countPercentage }}%;"
+                                                            aria-valuenow="{{ $countPercentage }}" aria-valuemin="0"
+                                                            aria-valuemax="100"></div>
+                                                    </div>
                                                 </td>
-                                                <td>{{ $order->user_name ?? ($order->user->name ?? 'Guest') }}</td>
-                                                <td>${{ number_format($order->total_amount, 2) }}</td>
-                                                <td class="{{ strtolower($order->status->status_name ?? 'unknown') }}">
-                                                    {{ $order->status->status_name ?? 'Unknown' }}
+                                                <td>${{ number_format($statusData['amount'], 2) }}</td>
+                                                <td>
+                                                    {{ number_format($percentage, 1) }}%
+                                                    <div class="progress" style="height: 6px;">
+                                                        <div class="progress-bar" role="progressbar"
+                                                            style="width: {{ $percentage }}%;"
+                                                            aria-valuenow="{{ $percentage }}" aria-valuemin="0"
+                                                            aria-valuemax="100"></div>
+                                                    </div>
                                                 </td>
-                                                <td>{{ $order->created_at->format('M d, Y') }}</td>
                                             </tr>
                                             @endforeach
+                                            <tr class="table-active">
+                                                <td colspan="2"><strong>Tổng cộng</strong></td>
+                                                <td><strong>{{ $totalCount }}</strong></td>
+                                                <td><strong>${{ number_format($totalAmount, 2) }}</strong></td>
+                                                <td><strong>100%</strong></td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div id="statusPieChart" style="min-height: 350px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xxl-12 col-xl-12">
+                <div class="cr-card" id="ordertbl">
+                    <div class="cr-card-header">
+                        <h4 class="cr-card-title">Recent Orders</h4>
+                        <div class="header-tools">
+                            <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
+                                    class="ri-fullscreen-line"></i></a>
+                            <div class="cr-date-range dots">
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cr-card-content card-default">
+                        <div class="order-table">
+                            <div class="table-responsive">
+                                <table id="recent_order_data_table" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Product</th>
+                                            <th>Customer</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($recentOrders as $order)
+                                        <tr>
+                                            <td class="token">{{ $order->order_code }}</td>
+                                            <td>
+                                                @if($order->items->isNotEmpty() && $order->items->first()->variation &&
+                                                $order->items->first()->variation->product)
+                                                <img class="cat-thumb"
+                                                    src="{{ asset(Storage::url($order->items->first()->variation->product->images->first()->url ?? '')) ?? '/be/assets/img/product/1.jpg' }}"
+                                                    alt="Product Image">
+                                                <span
+                                                    class="name">{{ $order->items->first()->variation->product->name ?? 'Product' }}</span>
+                                                @else
+                                                <span class="name">No product details</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $order->user_name ?? ($order->user->name ?? 'Guest') }}</td>
+                                            <td>${{ number_format($order->total_amount, 2) }}</td>
+                                            <td class="{{ strtolower($order->status->status_name ?? 'unknown') }}">
+                                                {{ $order->status->status_name ?? 'Unknown' }}
+                                            </td>
+                                            <td>{{ $order->created_at->format('M d, Y') }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -425,6 +440,7 @@
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -453,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         initCharts();
         setupDateRangePicker();
-        
+
         // Cập nhật số liệu tóm tắt ban đầu từ dữ liệu thực
         updateSummaryStatistics(realData);
     }, 500); // Delay initialization to ensure all resources are loaded
@@ -463,47 +479,59 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateSummaryStatistics(data) {
     // Cập nhật thông tin tổng quát
     const metricCards = document.querySelectorAll('.metric-card');
-    
+
     if (metricCards.length >= 6) {
         // Cập nhật Customers
         let metricDetails = metricCards[0].querySelector('.metric-details');
         metricDetails.querySelector('h3').textContent = data.totalCustomers.toLocaleString();
-        
+
         // Cập nhật Orders
         metricDetails = metricCards[1].querySelector('.metric-details');
         metricDetails.querySelector('h3').textContent = data.totalOrders.toLocaleString();
-        
+
         // Cập nhật Actual Revenue
         metricDetails = metricCards[2].querySelector('.metric-details');
-        metricDetails.querySelector('h3').textContent = '$' + data.totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        
+        metricDetails.querySelector('h3').textContent = '$' + data.totalRevenue.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
         // Cập nhật Cancelled Orders
         metricDetails = metricCards[3].querySelector('.metric-details');
-        metricDetails.querySelector('h3').textContent = '$' + data.totalCancelled.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        
+        metricDetails.querySelector('h3').textContent = '$' + data.totalCancelled.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
         // Cập nhật Pending Revenue
         metricDetails = metricCards[4].querySelector('.metric-details');
-        metricDetails.querySelector('h3').textContent = '$' + data.pendingRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        
+        metricDetails.querySelector('h3').textContent = '$' + data.pendingRevenue.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
         // Cập nhật Net Revenue
         metricDetails = metricCards[5].querySelector('.metric-details');
-        metricDetails.querySelector('h3').textContent = '$' + data.netRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        metricDetails.querySelector('h3').textContent = '$' + data.netRevenue.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
     }
-    
+
     // Cập nhật Revenue Overview header
-    document.querySelector('.cr-chart-header .block:nth-child(1) h5').innerHTML = 
+    document.querySelector('.cr-chart-header .block:nth-child(1) h5').innerHTML =
         data.totalOrders.toLocaleString();
-    
+
     // Cập nhật Actual Revenue
-    document.querySelector('.cr-chart-header .block:nth-child(2) h5').innerHTML = 
+    document.querySelector('.cr-chart-header .block:nth-child(2) h5').innerHTML =
         `${data.totalRevenue < 0 ? '-' : ''}$${(Math.abs(data.totalRevenue)/1000).toFixed(1)}k`;
-    
+
     // Cập nhật Pending Revenue
-    document.querySelector('.cr-chart-header .block:nth-child(3) h5').innerHTML = 
+    document.querySelector('.cr-chart-header .block:nth-child(3) h5').innerHTML =
         `${data.pendingRevenue < 0 ? '-' : ''}$${(Math.abs(data.pendingRevenue)/1000).toFixed(1)}k`;
-    
+
     // Cập nhật Net Revenue
-    document.querySelector('.cr-chart-header .block:nth-child(4) h5').innerHTML = 
+    document.querySelector('.cr-chart-header .block:nth-child(4) h5').innerHTML =
         `${data.netRevenue < 0 ? '-' : ''}$${(Math.abs(data.netRevenue)/1000).toFixed(1)}k`;
 }
 
@@ -592,8 +620,7 @@ const timeRangeData = {
 
 function initRevenueChart() {
     let options = {
-        series: [
-            {
+        series: [{
                 name: 'Gross Revenue',
                 type: 'line',
                 data: realData.revenueChartData.map(val => parseFloat(val))
@@ -603,7 +630,8 @@ function initRevenueChart() {
                 type: 'line',
                 data: realData.revenueChartData.map((val, index) => {
                     // Calculate net revenue (revenue minus expense)
-                    return Math.max(0, parseFloat(val) - parseFloat(realData.expenseChartData[index] || 0));
+                    return Math.max(0, parseFloat(val) - parseFloat(realData.expenseChartData[index] ||
+                        0));
                 })
             },
             {
@@ -684,7 +712,9 @@ function initRevenueChart() {
             shared: true,
             intersect: false,
             y: {
-                formatter: function(val, { seriesIndex }) {
+                formatter: function(val, {
+                    seriesIndex
+                }) {
                     if (seriesIndex === 2) { // Orders series
                         return val + " orders";
                     }
@@ -701,7 +731,7 @@ function initRevenueChart() {
             offsetY: 0
         }
     };
-    
+
     var chart = new ApexCharts(document.getElementById('revenueChart'), options);
     chart.render();
     return chart;
@@ -713,7 +743,7 @@ function setupDateRangePicker() {
         const dateRangeButton = dateRangeContainer.querySelector('.cr-date-range');
         const dropdown = dateRangeContainer.querySelector('.date-range-dropdown');
         const dateRangeDisplay = dateRangeButton.querySelector('span');
-        
+
         // Toggle dropdown
         dateRangeButton.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -732,17 +762,17 @@ function setupDateRangePicker() {
         dateOptions.forEach(option => {
             option.addEventListener('click', function() {
                 const range = this.textContent.trim().toLowerCase().replace(/\s+/g, '');
-                
+
                 // Update active option
                 dateOptions.forEach(opt => opt.classList.remove('active'));
                 this.classList.add('active');
-                
+
                 // Update date display
                 updateDateDisplay(range, dateRangeDisplay);
-                
+
                 // Update dashboard data - sử dụng AJAX để lấy dữ liệu theo khoảng thời gian (chưa triển khai)
                 // updateDashboardData(range);
-                
+
                 // Close dropdown
                 dropdown.classList.remove('show');
             });
@@ -753,8 +783,8 @@ function setupDateRangePicker() {
 function updateDateDisplay(range, displayElement) {
     const today = new Date();
     let startDate, endDate;
-    
-    switch(range) {
+
+    switch (range) {
         case 'today':
             startDate = endDate = today;
             break;
@@ -783,18 +813,22 @@ function updateDateDisplay(range, displayElement) {
         default:
             startDate = endDate = today;
     }
-    
+
     const formatDate = (date) => {
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
     };
-    
+
     displayElement.textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
 }
 
 function updateDashboardData(range) {
     // Cập nhật dữ liệu tóm tắt dựa trên khoảng thời gian đã chọn
     updateSummaryStatistics(timeRangeData[range] || timeRangeData['last30days']);
-    
+
     // Lưu ý: Trong phiên bản hoàn chỉnh, chúng ta sẽ gửi AJAX request để lấy dữ liệu thực tế
     // cho khoảng thời gian đã chọn, sau đó cập nhật lại biểu đồ
     // 
@@ -821,16 +855,16 @@ function initCharts() {
     const revenueChartEl = document.getElementById('revenueChart');
     const dailyRevenueChartEl = document.getElementById('dailyRevenueChart');
     const statusPieChartEl = document.getElementById('statusPieChart');
-    
+
     if (revenueChartEl) {
         // Initialize with default data (last 30 days)
         window.revenueChart = initRevenueChart();
     }
-    
+
     if (dailyRevenueChartEl) {
         window.dailyRevenueChart = initDailyRevenueChart();
     }
-    
+
     if (statusPieChartEl) {
         window.statusPieChart = initStatusPieChart();
     }
@@ -841,8 +875,8 @@ function initDailyRevenueChart() {
         // Sample data for daily revenue (đơn vị: nghìn đô)
         var dailyRevenueData = {!! isset($dailyRevenue) ? json_encode($dailyRevenue) : '[3100, 4200, 4500, 5200, 5700, 8200, 6500]' !!};
         var dailyOrdersData = {!! isset($dailyOrders) ? json_encode($dailyOrders) : '[12, 19, 22, 27, 30, 45, 35]' !!};
-        var weekDays = {!! isset($dayNames) ? json_encode($dayNames) : "['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" !!};
-        
+        var weekDays = {!! isset($dayNames) ? json_encode($dayNames) : '["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]' !!};
+
         // Cập nhật các số liệu thống kê doanh thu theo ngày
         const peakDayIndex = dailyRevenueData.indexOf(Math.max(...dailyRevenueData));
         const lowestDayIndex = dailyRevenueData.indexOf(Math.min(...dailyRevenueData));
@@ -851,18 +885,18 @@ function initDailyRevenueChart() {
         const peakDayValue = dailyRevenueData[peakDayIndex];
         const lowestDayValue = dailyRevenueData[lowestDayIndex];
         const avgValue = dailyRevenueData.reduce((a, b) => a + b, 0) / dailyRevenueData.length;
-        
+
         // Cập nhật thông tin hiển thị Peak Day, Daily Avg, Lowest Day
         setTimeout(() => {
             document.getElementById('peak-day').textContent = peakDay;
             document.getElementById('peak-value').textContent = '$' + peakDayValue.toLocaleString();
-            
+
             document.getElementById('average-revenue').textContent = '$' + avgValue.toLocaleString();
-            
+
             document.getElementById('lowest-day').textContent = lowestDay;
             document.getElementById('lowest-value').textContent = '$' + lowestDayValue.toLocaleString();
         }, 100);
-        
+
         var options = {
             series: [{
                 name: 'Revenue',
@@ -888,7 +922,9 @@ function initDailyRevenueChart() {
             },
             dataLabels: {
                 enabled: true,
-                formatter: function(val, { seriesIndex }) {
+                formatter: function(val, {
+                    seriesIndex
+                }) {
                     if (seriesIndex === 0) {
                         return '$' + val.toLocaleString();
                     }
@@ -931,8 +967,7 @@ function initDailyRevenueChart() {
                     }
                 }
             },
-            yaxis: [
-                {
+            yaxis: [{
                     title: {
                         text: "Revenue ($)"
                     },
@@ -958,7 +993,9 @@ function initDailyRevenueChart() {
                 shared: true,
                 intersect: false,
                 y: {
-                    formatter: function(val, { seriesIndex }) {
+                    formatter: function(val, {
+                        seriesIndex
+                    }) {
                         if (seriesIndex === 1) {
                             return val + ' orders';
                         }
@@ -970,7 +1007,7 @@ function initDailyRevenueChart() {
                 position: 'top'
             }
         };
-        
+
         var chart = new ApexCharts(document.getElementById('dailyRevenueChart'), options);
         chart.render();
         return chart;
@@ -984,11 +1021,11 @@ function initStatusPieChart() {
     // Lấy dữ liệu doanh số theo trạng thái
     const statusData = @json($revenueByStatus);
     const orderStatuses = @json($orderStatuses);
-    
+
     const series = [];
     const labels = [];
     const colors = ['#6571ff', '#4bc0c0', '#36cfff', '#ff6b6b', '#ffb800', '#2fc781', '#a55eea', '#fd7e14'];
-    
+
     // Chuẩn bị dữ liệu cho biểu đồ
     orderStatuses.forEach((status, index) => {
         if (statusData[status.id] && statusData[status.id].amount > 0) {
@@ -996,7 +1033,7 @@ function initStatusPieChart() {
             labels.push(status.status_name);
         }
     });
-    
+
     let options = {
         series: series,
         chart: {
@@ -1052,7 +1089,7 @@ function initStatusPieChart() {
             }
         }]
     };
-    
+
     const chart = new ApexCharts(document.getElementById('statusPieChart'), options);
     chart.render();
     return chart;
@@ -1253,7 +1290,8 @@ function initStatusPieChart() {
     color: #343a40;
 }
 
-#revenueChart, #dailyRevenueChart {
+#revenueChart,
+#dailyRevenueChart {
     margin-top: 10px;
 }
 
@@ -1269,20 +1307,23 @@ function initStatusPieChart() {
     min-width: 120px;
 }
 
-.cr-chart-header h6, .cr-chart-header-2 h6 {
+.cr-chart-header h6,
+.cr-chart-header-2 h6 {
     font-size: 0.8rem;
     color: #6c757d;
     margin-bottom: 4px;
 }
 
-.cr-chart-header h5, .cr-chart-header-2 h5 {
+.cr-chart-header h5,
+.cr-chart-header-2 h5 {
     font-size: 1.1rem;
     font-weight: 600;
     display: flex;
     align-items: center;
 }
 
-.cr-chart-header span, .cr-chart-header-2 span {
+.cr-chart-header span,
+.cr-chart-header-2 span {
     font-size: 0.75rem;
     margin-left: 6px;
     padding: 2px 6px;
@@ -1299,4 +1340,3 @@ function initStatusPieChart() {
     color: #ff6b6b;
 }
 </style>
-@endpush

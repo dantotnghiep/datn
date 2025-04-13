@@ -3,7 +3,7 @@
     <div class="px-5 ml-110 mt-100">
         <div class="row">
             <div class="col-12">
-                <h2 class="mb-4">My Orders</h2>
+                <h2 class="mb-4">My Orders</h2>               
 
                 @if ($orders->isEmpty())
                     <div class="alert alert-info">
@@ -131,11 +131,11 @@
             showNotification('Cập nhật đơn hàng', 'Đơn hàng ' + order.order_code + ' đã được cập nhật');
         });
 
-        // Xử lý nút hủy đơn hàng
-        $('.cancel-order-btn').click(function() {
-            if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
-                return;
-            }
+            // Xử lý nút hủy đơn hàng
+            $('.cancel-order-btn').click(function() {
+                if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+                    return;
+                }
 
             const orderId = $(this).data('order-id');
             const button = $(this);

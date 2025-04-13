@@ -6,8 +6,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6">
                     <div class="register-switcher text-center">
-                        <a href="{{ route('register') }}" class="resister-btn">Register</a>
-                        <a href="{{ route('login') }}" class="login-btn active">Login</a>
+                        <a href="{{ route('register') }}" class="resister-btn">Đăng ký</a>
+                        <a href="{{ route('login') }}" class="login-btn active">Đăng nhập</a>
                     </div>
                 </div>
             </div>
@@ -15,14 +15,33 @@
                 <div class="col-xxl-6 col-xl-6 col-lg-8 col-md-10">
                     <div class="reg-login-forms">
                         <h4 class="reg-login-title text-center">
-                            Login Your Account
+                            Đăng nhập tài khoản
                         </h4>
 
-                        @if(session('error'))
-                            <div class="alert alert-danger">
-                                {{ session('error') }}
+                    <!-- Modal thông báo -->
+                    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="errorModalLabel">Thông báo</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p id="modal-error-text"></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đóng</button>
+                                </div>
                             </div>
-                        @endif
+                        </div>
+                    </div>
+
+                    <!-- Lỗi validation -->
+                    @if ($errors->any())
+                    <div class="alert alert-danger">
+                        {{ $errors->first() }}
+                    </div>
+                    @endif
 
                         <form action="{{ route('login.post') }}" method="POST">
                             @csrf
@@ -37,7 +56,7 @@
                                 @enderror
                             </div>
                             <div class="reg-input-group">
-                                <label for="password">Password *</label>
+                                <label for="password">Mật khẩu *</label>
                                 <input type="password" id="password" name="password" 
                                        class="@error('password') is-invalid @enderror">
                                 @error('password')
@@ -49,14 +68,14 @@
                             <div class="password-recover-group d-flex justify-content-between">
                                 <div class="reg-input-group reg-check-input d-flex align-items-center">
                                     <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                                    <label for="remember">Remember Me</label>
+                                    <label for="remember">Ghi nhớ đăng nhập</label>
                                 </div>
                                 <div class="forgot-password-link">
-                                    <a href="{{ route('forgot-password') }}">Forgot Password?</a>
+                                    <a href="{{ route('forgot-password') }}">Quên mật khẩu?</a>
                                 </div>
                             </div>
                             <div class="reg-input-group reg-submit-input d-flex align-items-center">
-                                <button type="submit" class="btn btn-primary w-100">LOG IN</button>
+                                <button type="submit" class="btn btn-primary w-100">ĐĂNG NHẬP</button>
                             </div>
                         </form>
                     </div>
@@ -65,4 +84,49 @@
         </div>
     </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- <script>
+    window.onload = function() {
+        // Truyền session('error') trực tiếp và escape để tránh lỗi
+        const errorMessage = "{{ session('error') ? addslashes(session('error')) : '' }}";
+        if (errorMessage) {
+            console.log("Error: " + errorMessage);
+            const modalElement = document.getElementById('errorModal');
+            const modalErrorText = document.getElementById('modal-error-text');
+
+            if (modalElement && modalErrorText) {
+                modalErrorText.textContent = errorMessage;
+                try {
+                    const errorModal = new bootstrap.Modal(modalElement);
+                    errorModal.show();
+                } catch (e) {
+                    console.error("Error showing modal: ", e);
+                }
+            } else {
+                console.error("Modal element not found: ", { modalElement, modalErrorText });
+            }
+        }
+    };
+</script> -->
+
+<script>
+    window.onload = function() {
+        const errorMessage = "{{ session('error') ? addslashes(session('error')) : '' }}";
+        if (errorMessage && errorMessage.trim() !== '') { // Kiểm tra không rỗng
+            console.log("Error: " + errorMessage);
+            const modalElement = document.getElementById('errorModal');
+            const modalErrorText = document.getElementById('modal-error-text');
+
+            if (modalElement && modalErrorText) {
+                modalErrorText.textContent = errorMessage;
+                try {
+                    const errorModal = new bootstrap.Modal(modalElement);
+                    errorModal.show();
+                } catch (e) {
+                    console.error("Error showing modal: ", e);
+                }
+            }
+        }
+    };
+</script>
 @endsection

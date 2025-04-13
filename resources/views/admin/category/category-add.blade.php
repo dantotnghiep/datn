@@ -1,4 +1,3 @@
-
 @extends('admin.layouts.master')
 
 @section('content')
@@ -14,18 +13,18 @@
                 </ul>
             </div>
         </div>
+
         @if (session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
         </div>
         @endif
+
         @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            @foreach ($errors->all() as $error)
+            <div style="margin-bottom: 5px;">{{ $error }}</div>
+            @endforeach
         </div>
         @endif
 
@@ -44,7 +43,7 @@
                                             <label>Name</label>
                                             <div class="col-12">
                                                 <input id="slug" onkeyup="ChangeToSlug();" name="name"
-                                                    class="form-control here slug-title" type="text value="{{ old('name') }}">
+                                                    class="form-control here slug-title" type="text" value="{{ old('name') }}">
                                             </div>
                                         </div>
 
@@ -55,7 +54,6 @@
                                                     type="text">
                                             </div>
                                         </div>
-
 
                                         <div class="form-group row">
                                             <label>Full Description</label>
@@ -90,7 +88,7 @@
             </div>
             <div class="col-xl-8 col-lg-12">
                 <div class="cr-cat-list cr-card card-default">
-                    <div class="cr-card-content ">
+                    <div class="cr-card-content">
                         <div class="table-responsive tbl-800">
                             <table id="cat_data_table" class="table">
                                 <thead>
@@ -103,7 +101,7 @@
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($categories as $category )
+                                    @foreach ($categories as $category)
                                     <tr>
                                         <td>{{ $category->name }}</td>
                                         <td>
@@ -121,7 +119,6 @@
                                                     style="border: none;padding: 15px 30px;font-size: 20px;background-color: white;"
                                                     data-bs-toggle="dropdown" aria-haspopup="true"
                                                     aria-expanded="false" data-display="static">
-                                                    
                                                 </button>
 
                                                 <div class="dropdown-menu">
