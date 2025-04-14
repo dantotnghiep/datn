@@ -134,7 +134,7 @@ class OrderController extends Controller
             DB::beginTransaction();
             
             // Tìm đơn hàng của người dùng hiện tại
-            $order = Order::with(['status', 'user'])
+            $order = Order::with(['status', 'user', 'items.variation'])
                          ->where('id', $id)
                          ->first();
             
@@ -165,8 +165,18 @@ class OrderController extends Controller
                 ], 400);
             }
 
+            // Hoàn lại số lượng sản phẩm vào kho
+            foreach ($order->items as $item) {
+                if ($item->variation) {
+                    $item->variation->stock += $item->quantity;
+                    $item->variation->save();
+                } else {
+                    \Log::warning('Variation not found for order item ID ' . $item->id);
+                }
+            }
+
             // Cập nhật trạng thái hủy (3)
-            $order->status_id = 4; // Giữ nguyên giá trị 4 để nhất quán với code hiện có
+            $order->status_id = 3; // Trạng thái hủy là 3, không phải 4
             $order->save();
             
             // Load lại relationship để đảm bảo dữ liệu mới nhất
@@ -185,7 +195,7 @@ class OrderController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Đơn hàng đã được hủy thành công',
+                'message' => 'Đơn hàng đã được hủy thành công và số lượng sản phẩm đã được hoàn lại',
                 'order' => $order
             ]);
 

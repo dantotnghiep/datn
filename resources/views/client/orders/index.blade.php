@@ -68,11 +68,6 @@
 <script>
     $(document).ready(function() {
         // Log Pusher configuration for debugging
-        console.log('Pusher Configuration:', {
-            key: '{{ env("PUSHER_APP_KEY") }}',
-            cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-            encrypted: true
-        });
         
         // Khởi tạo Pusher
         const pusher = new Pusher('{{ env("PUSHER_APP_KEY") }}', {
@@ -143,7 +138,7 @@
             console.log('Sending cancel request for order:', orderId);
             
             $.ajax({
-                url: `{{ url('/orders') }}/${orderId}/cancel`,
+                url: `{{ url('orders') }}/${orderId}/cancel`,
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
