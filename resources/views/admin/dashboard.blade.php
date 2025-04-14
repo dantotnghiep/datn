@@ -43,8 +43,18 @@
         </div>
         @endif
 
+        @if(isset($usingDemoData) && $usingDemoData)
         <div class="row">
-            <div class="col-xl-2 col-md-4">
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <i class="ri-information-line"></i> Đang hiển thị một số dữ liệu mẫu do chưa có đủ dữ liệu thực tế.
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <div class="row">
+            <div class="col-xl-6 col-md-4">
                 <div class="cr-card metric-card">
                     <div class="cr-card-content">
                         <div class="metric-icon customer-icon">
@@ -57,7 +67,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-2 col-md-4">
+            <div class="col-xl-6 col-md-4">
                 <div class="cr-card metric-card">
                     <div class="cr-card-content">
                         <div class="metric-icon order-icon">
@@ -70,7 +80,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-2 col-md-4">
+            <div class="col-xl-4 col-md-4">
                 <div class="cr-card metric-card">
                     <div class="cr-card-content">
                         <div class="metric-icon revenue-icon">
@@ -83,7 +93,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-2 col-md-4">
+            <div class="col-xl-4 col-md-4">
                 <div class="cr-card metric-card">
                     <div class="cr-card-content">
                         <div class="metric-icon cancel-icon">
@@ -96,7 +106,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-2 col-md-4">
+            <div class="col-xl-4 col-md-4">
                 <div class="cr-card metric-card">
                     <div class="cr-card-content">
                         <div class="metric-icon pending-icon">
@@ -109,19 +119,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-2 col-md-4">
-                <div class="cr-card metric-card">
-                    <div class="cr-card-content">
-                        <div class="metric-icon net-icon">
-                            <i class="ri-coins-line"></i>
-                        </div>
-                        <div class="metric-details">
-                            <h6>Net Revenue</h6>
-                            <h3>${{ number_format($netRevenue, 2) }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
+           
         </div>
 
         <div class="row">
@@ -154,10 +152,7 @@
                                 <h5>{{ $pendingRevenue < 0 ? '-' : '' }}${{ number_format(abs($pendingRevenue/1000), 1) }}k
                                 </h5>
                             </div>
-                            <div class="block">
-                                <h6>Net Revenue</h6>
-                                <h5>{{ $netRevenue < 0 ? '-' : '' }}${{ number_format(abs($netRevenue/1000), 1) }}k</h5>
-                            </div>
+                            
                         </div>
                         <div class="cr-chart-content">
                             <div id="revenueChart" style="min-height: 365px; width: 100%;"></div>
@@ -537,73 +532,11 @@ function updateSummaryStatistics(data) {
 
 // Định nghĩa data theo khoảng thời gian
 const timeRangeData = {
-    // Dữ liệu cho mỗi khoảng thời gian sử dụng dữ liệu thực từ controller
+    // FIX: Hiện tại tất cả các khoảng thời gian đều dùng cùng một dữ liệu
+    // Trong môi trường sản xuất, dữ liệu sẽ được tải thông qua AJAX
+    
+    // Dữ liệu mặc định cho "Hôm nay"
     today: {
-        totalOrders: {{ $totalOrders ?? 0 }},
-        totalOrderValue: {{ $totalOrderValue ?? 0 }},
-        totalRevenue: {{ $totalRevenue ?? 0 }},
-        totalRefunds: {{ $totalRefunds ?? 0 }},
-        totalCancelled: {{ $totalCancelled ?? 0 }},
-        pendingRevenue: {{ $pendingRevenue ?? 0 }},
-        netRevenue: {{ $netRevenue ?? 0 }},
-        totalExpenses: {{ $totalExpenses ?? 0 }},
-        totalProfit: {{ $totalProfit ?? 0 }},
-        orderGrowth: {{ $orderGrowth ?? 0 }},
-        revenueGrowth: {{ $revenueGrowth ?? 0 }}
-    },
-    yesterday: {
-        totalOrders: {{ $totalOrders ?? 0 }},
-        totalOrderValue: {{ $totalOrderValue ?? 0 }},
-        totalRevenue: {{ $totalRevenue ?? 0 }},
-        totalRefunds: {{ $totalRefunds ?? 0 }},
-        totalCancelled: {{ $totalCancelled ?? 0 }},
-        pendingRevenue: {{ $pendingRevenue ?? 0 }},
-        netRevenue: {{ $netRevenue ?? 0 }},
-        totalExpenses: {{ $totalExpenses ?? 0 }},
-        totalProfit: {{ $totalProfit ?? 0 }},
-        orderGrowth: {{ $orderGrowth ?? 0 }},
-        revenueGrowth: {{ $revenueGrowth ?? 0 }}
-    },
-    last7days: {
-        totalOrders: {{ $totalOrders ?? 0 }},
-        totalOrderValue: {{ $totalOrderValue ?? 0 }},
-        totalRevenue: {{ $totalRevenue ?? 0 }},
-        totalRefunds: {{ $totalRefunds ?? 0 }},
-        totalCancelled: {{ $totalCancelled ?? 0 }},
-        pendingRevenue: {{ $pendingRevenue ?? 0 }},
-        netRevenue: {{ $netRevenue ?? 0 }},
-        totalExpenses: {{ $totalExpenses ?? 0 }},
-        totalProfit: {{ $totalProfit ?? 0 }},
-        orderGrowth: {{ $orderGrowth ?? 0 }},
-        revenueGrowth: {{ $revenueGrowth ?? 0 }}
-    },
-    last30days: {
-        totalOrders: {{ $totalOrders ?? 0 }},
-        totalOrderValue: {{ $totalOrderValue ?? 0 }},
-        totalRevenue: {{ $totalRevenue ?? 0 }},
-        totalRefunds: {{ $totalRefunds ?? 0 }},
-        totalCancelled: {{ $totalCancelled ?? 0 }},
-        pendingRevenue: {{ $pendingRevenue ?? 0 }},
-        netRevenue: {{ $netRevenue ?? 0 }},
-        totalExpenses: {{ $totalExpenses ?? 0 }},
-        totalProfit: {{ $totalProfit ?? 0 }},
-        orderGrowth: {{ $orderGrowth ?? 0 }},
-        revenueGrowth: {{ $revenueGrowth ?? 0 }}
-    },
-    thisMonth: {
-        totalOrders: {{ $totalOrders ?? 0 }},
-        totalOrderValue: {{ $totalOrderValue ?? 0 }},
-        totalRevenue: {{ $totalRevenue ?? 0 }},
-        totalRefunds: {{ $totalRefunds ?? 0 }},
-        totalCancelled: {{ $totalCancelled ?? 0 }},
-        pendingRevenue: {{ $pendingRevenue ?? 0 }},
-        netRevenue: {{ $netRevenue ?? 0 }},
-        totalExpenses: {{ $totalExpenses ?? 0 }},
-        totalProfit: {{ $totalProfit ?? 0 }},
-        orderGrowth: {{ $orderGrowth ?? 0 }},
-        revenueGrowth: {{ $revenueGrowth ?? 0 }}
-    },
-    lastMonth: {
         totalOrders: {{ $totalOrders ?? 0 }},
         totalOrderValue: {{ $totalOrderValue ?? 0 }},
         totalRevenue: {{ $totalRevenue ?? 0 }},
@@ -617,6 +550,107 @@ const timeRangeData = {
         revenueGrowth: {{ $revenueGrowth ?? 0 }}
     }
 };
+
+// Sao chép dữ liệu mặc định cho các khoảng thời gian khác
+// Trong môi trường sản xuất, mỗi khoảng thời gian sẽ có dữ liệu riêng từ API
+timeRangeData.yesterday = { ...timeRangeData.today };
+timeRangeData.last7days = { ...timeRangeData.today };
+timeRangeData.last30days = { ...timeRangeData.today };
+timeRangeData.thisMonth = { ...timeRangeData.today };
+timeRangeData.lastMonth = { ...timeRangeData.today };
+
+function updateDateDisplay(range, displayElement) {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch (range) {
+        case 'today':
+            startDate = endDate = today;
+            break;
+        case 'yesterday':
+            startDate = endDate = new Date(today);
+            startDate.setDate(today.getDate() - 1);
+            break;
+        case 'last7days':
+            endDate = today;
+            startDate = new Date(today);
+            startDate.setDate(today.getDate() - 6);
+            break;
+        case 'last30days':
+            endDate = today;
+            startDate = new Date(today);
+            startDate.setDate(today.getDate() - 29);
+            break;
+        case 'thismonth':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = today;
+            break;
+        case 'lastmonth':
+            startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+            break;
+        default:
+            startDate = endDate = today;
+    }
+
+    const formatDate = (date) => {
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    };
+
+    displayElement.textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+}
+
+function updateDashboardData(range) {
+    // FIX: Cập nhật dữ liệu tóm tắt dựa trên khoảng thời gian đã chọn
+    updateSummaryStatistics(timeRangeData[range] || timeRangeData['today']);
+    
+    // Hiển thị thông báo cho người dùng về việc API chưa được triển khai
+    const notification = document.createElement('div');
+    notification.className = 'alert alert-info alert-dismissible fade show';
+    notification.innerHTML = `
+        <strong>Thông báo:</strong> Đã chọn dữ liệu cho khoảng thời gian: <strong>${range}</strong>. 
+        Trong phiên bản hoàn chỉnh, dữ liệu sẽ được tải qua API.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Chèn thông báo vào trang
+    const existingNotification = document.querySelector('.alert-info');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    document.querySelector('.cr-page-title').insertAdjacentElement('afterend', notification);
+    
+    // Tự động ẩn thông báo sau 5 giây
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+
+    // Lưu ý: Trong phiên bản hoàn chỉnh, chúng ta sẽ gửi AJAX request để lấy dữ liệu thực tế
+    // cho khoảng thời gian đã chọn, sau đó cập nhật lại biểu đồ
+    // 
+    // Ví dụ:
+    // $.ajax({
+    //     url: '/admin/dashboard/data',
+    //     data: { range: range },
+    //     success: function(response) {
+    //         // Cập nhật biểu đồ với dữ liệu mới từ response
+    //         updateSummaryStatistics(response.summary);
+    //         // Cập nhật các biểu đồ
+    //         if (window.revenueChart) {
+    //             window.revenueChart.updateOptions({
+    //                 series: [{...}],
+    //                 xaxis: {categories: response.chartLabels}
+    //             });
+    //         }
+    //     }
+    // });
+}
 
 function initRevenueChart() {
     let options = {
@@ -761,7 +795,9 @@ function setupDateRangePicker() {
         const dateOptions = dropdown.querySelectorAll('button');
         dateOptions.forEach(option => {
             option.addEventListener('click', function() {
-                const range = this.textContent.trim().toLowerCase().replace(/\s+/g, '');
+                // FIX: Chuẩn hóa range format để so khớp với thuộc tính của timeRangeData
+                const rangeText = this.textContent.trim();
+                const range = rangeText.toLowerCase().replace(/\s+/g, '');
 
                 // Update active option
                 dateOptions.forEach(opt => opt.classList.remove('active'));
@@ -770,84 +806,19 @@ function setupDateRangePicker() {
                 // Update date display
                 updateDateDisplay(range, dateRangeDisplay);
 
-                // Update dashboard data - sử dụng AJAX để lấy dữ liệu theo khoảng thời gian (chưa triển khai)
-                // updateDashboardData(range);
+                // FIX: Đảm bảo tên khoảng thời gian khớp với thuộc tính của đối tượng timeRangeData
+                let timeRangeKey = range;
+                if (range === 'thismonth') timeRangeKey = 'thisMonth';
+                if (range === 'lastmonth') timeRangeKey = 'lastMonth';
+                
+                // Update dashboard data based on selected time range
+                updateDashboardData(timeRangeKey); 
 
                 // Close dropdown
                 dropdown.classList.remove('show');
             });
         });
     }
-}
-
-function updateDateDisplay(range, displayElement) {
-    const today = new Date();
-    let startDate, endDate;
-
-    switch (range) {
-        case 'today':
-            startDate = endDate = today;
-            break;
-        case 'yesterday':
-            startDate = endDate = new Date(today);
-            startDate.setDate(today.getDate() - 1);
-            break;
-        case 'last7days':
-            endDate = today;
-            startDate = new Date(today);
-            startDate.setDate(today.getDate() - 6);
-            break;
-        case 'last30days':
-            endDate = today;
-            startDate = new Date(today);
-            startDate.setDate(today.getDate() - 29);
-            break;
-        case 'thismonth':
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            endDate = today;
-            break;
-        case 'lastmonth':
-            startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-            break;
-        default:
-            startDate = endDate = today;
-    }
-
-    const formatDate = (date) => {
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
-    };
-
-    displayElement.textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
-}
-
-function updateDashboardData(range) {
-    // Cập nhật dữ liệu tóm tắt dựa trên khoảng thời gian đã chọn
-    updateSummaryStatistics(timeRangeData[range] || timeRangeData['last30days']);
-
-    // Lưu ý: Trong phiên bản hoàn chỉnh, chúng ta sẽ gửi AJAX request để lấy dữ liệu thực tế
-    // cho khoảng thời gian đã chọn, sau đó cập nhật lại biểu đồ
-    // 
-    // Ví dụ:
-    // $.ajax({
-    //     url: '/admin/dashboard/data',
-    //     data: { range: range },
-    //     success: function(response) {
-    //         // Cập nhật biểu đồ với dữ liệu mới từ response
-    //         updateSummaryStatistics(response.summary);
-    //         // Cập nhật các biểu đồ
-    //         if (window.revenueChart) {
-    //             window.revenueChart.updateOptions({
-    //                 series: [{...}],
-    //                 xaxis: {categories: response.chartLabels}
-    //             });
-    //         }
-    //     }
-    // });
 }
 
 function initCharts() {
@@ -1034,6 +1005,15 @@ function initStatusPieChart() {
         }
     });
 
+    // FIX: Tính tổng doanh thu để tính toán phần trăm chính xác
+    const totalAmount = series.reduce((sum, amount) => sum + amount, 0);
+    
+    // FIX: Tạo dữ liệu hiển thị tỉ lệ phần trăm
+    const formattedLabels = labels.map((label, index) => {
+        const percentage = ((series[index] / totalAmount) * 100).toFixed(1);
+        return `${label} (${percentage}%)`;
+    });
+
     let options = {
         series: series,
         chart: {
@@ -1041,7 +1021,7 @@ function initStatusPieChart() {
             height: 350,
             fontFamily: 'Inter, sans-serif',
         },
-        labels: labels,
+        labels: formattedLabels, // FIX: Sử dụng labels đã định dạng để hiển thị phần trăm
         colors: colors,
         legend: {
             position: 'bottom',
@@ -1060,14 +1040,19 @@ function initStatusPieChart() {
         tooltip: {
             y: {
                 formatter: function(val) {
-                    return '$' + parseFloat(val).toLocaleString();
+                    // FIX: Hiển thị cả số tiền và phần trăm trong tooltip
+                    const percentage = ((val / totalAmount) * 100).toFixed(1);
+                    return `$${parseFloat(val).toLocaleString()} (${percentage}% of total)`;
                 }
             }
         },
         dataLabels: {
             enabled: true,
             formatter: function(val, opts) {
-                return Math.round(val) + '%';
+                // FIX: Hiển thị phần trăm chính xác
+                const value = parseFloat(series[opts.seriesIndex]);
+                const percentage = ((value / totalAmount) * 100).toFixed(1);
+                return `${percentage}%`;
             },
             style: {
                 fontSize: '12px',

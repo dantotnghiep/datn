@@ -119,9 +119,10 @@ class ProductController extends Controller
                             ->get();
             
             // Calculate monthly statistics
-            // Lấy tháng hiện tại và tháng trước
-            $currentMonth = now()->format('Y-m');
-            $lastMonth = now()->subMonth()->format('Y-m');
+            // Lấy tháng hiện tại và tháng trước - FIX: Using clone to avoid modifying now()
+            $now = now();
+            $currentMonth = $now->format('Y-m');
+            $lastMonth = (clone $now)->subMonth()->format('Y-m');
             
             // Đếm đơn hàng theo tháng
             $ordersByMonth = \App\Models\Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count')
@@ -172,12 +173,18 @@ class ProductController extends Controller
                 $chartLabels = $months;
             }
             
-            // Khởi tạo mảng dữ liệu với giá trị 0 cho mỗi tháng
-            foreach ($months as $index => $month) {
-                // Doanh thu gộp của tháng - tạo dữ liệu mẫu nếu không có dữ liệu thực
-                $monthlyRevenue = isset($revenueByMonth[$month]) && $revenueByMonth[$month] > 0 
-                                 ? $revenueByMonth[$month] 
-                                 : rand(50000, 200000);
+            // FIX: Khởi tạo mảng dữ liệu cho mỗi tháng - Cải thiện logic tìm kiếm dữ liệu thực tế
+            foreach ($months as $index => $monthKey) {
+                // Tìm tháng trong dữ liệu thực tế - Cần xử lý format tháng cho đúng
+                // $monthKey là 'Y-m' format, nhưng chúng ta chỉ hiển thị 'M' format trong chart
+                
+                // Doanh thu gộp của tháng - chỉ sử dụng dữ liệu mẫu khi không có dữ liệu thực
+                $monthlyRevenue = $revenueByMonth[$monthKey] ?? 0;
+                
+                // Chỉ dùng dữ liệu mẫu nếu thực sự không có dữ liệu thực
+                if ($monthlyRevenue == 0 && empty($revenueByMonth)) {
+                    $monthlyRevenue = rand(50000, 200000);
+                }
                 
                 // Tính chi phí hàng tháng (40% doanh thu thực tế)
                 $monthlyExpenses = $monthlyRevenue * 0.4;
@@ -186,9 +193,12 @@ class ProductController extends Controller
                 $monthlyProfit = $monthlyRevenue - $monthlyExpenses;
                 
                 // Đếm số đơn hàng của tháng
-                $monthlyOrderCount = isset($ordersByMonth[$month]) && $ordersByMonth[$month] > 0
-                                   ? $ordersByMonth[$month]
-                                   : rand(5, 30);
+                $monthlyOrderCount = $ordersByMonth[$monthKey] ?? 0;
+                
+                // Chỉ dùng dữ liệu mẫu nếu thực sự không có dữ liệu thực
+                if ($monthlyOrderCount == 0 && empty($ordersByMonth)) {
+                    $monthlyOrderCount = rand(5, 30);
+                }
                 
                 // Thêm dữ liệu vào mảng kết quả (chuyển đổi sang đơn vị nghìn để dễ đọc)
                 $revenueChartData[] = round($monthlyRevenue / 1000, 1);
@@ -202,7 +212,7 @@ class ProductController extends Controller
             
             // Lấy dữ liệu doanh thu 7 ngày gần nhất
             $endDate = now();
-            $startDate = now()->subDays(6)->startOfDay();
+            $startDate = (clone $endDate)->subDays(6)->startOfDay(); // FIX: Using clone
             
             // Lấy doanh thu từng ngày trong tuần vừa qua (chỉ đơn hàng thành công)
             $dailyRevenueQuery = \App\Models\Order::where('status_id', $completedStatusId)
@@ -237,10 +247,14 @@ class ProductController extends Controller
             }
             
             // Nếu không có dữ liệu thực, tạo dữ liệu mẫu để kiểm tra giao diện
-            if (array_sum($dailyRevenue) == 0) {
+            // FIX: Chỉ dùng dữ liệu mẫu khi thực sự không có dữ liệu thực
+            if (array_sum($dailyRevenue) == 0 && empty($dailyRevenueQuery)) {
                 $dailyRevenue = [5000, 6200, 3800, 7500, 9200, 8400, 6700];
                 $dailyOrders = [15, 18, 12, 22, 27, 25, 20];
             }
+            
+            // FIX: Thêm flag để đánh dấu dữ liệu có phải dữ liệu mẫu
+            $usingDemoData = (empty($revenueByMonth) || array_sum($dailyRevenue) == 0);
             
             // Campaign data
             $campaignSources = ['Direct', 'Social', 'Email', 'Referral', 'Organic'];
@@ -277,7 +291,8 @@ class ProductController extends Controller
                 'dailyOrders',
                 'dayNames',
                 'revenueByStatus',
-                'orderStatuses'
+                'orderStatuses',
+                'usingDemoData'
             ));
         } catch (\Exception $e) {
             // Log the error and return a simple dashboard with error message
