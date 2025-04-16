@@ -1,21 +1,21 @@
 @extends('admin.layouts.master')
 
 @section('content')
-    <!-- main content -->
+    <!-- Nội dung chính -->
     <div class="cr-main-content">
         <div class="container-fluid">
-            <!-- Page title & breadcrumb -->
+            <!-- Tiêu đề trang & breadcrumb -->
             <div class="cr-page-title cr-page-title-2">
                 <div class="cr-breadcrumb">
-                    <h5>Attribute Values</h5>
+                    <h5>Giá trị thuộc tính</h5>
                     <ul>
                         <li><a href="index.html">Carrot</a></li>
-                        <li>Attribute Values</li>
+                        <li>Giá trị thuộc tính</li>
                     </ul>
                 </div>
             </div>
 
-            <!-- Hiển thị thông báo -->
+            <!-- Thông báo -->
             @if (session('success'))
                 <div class="alert alert-success">
                     {{ session('success') }}
@@ -32,21 +32,21 @@
             @endif
 
             <div class="row cr-category">
-                <!-- Form thêm Attribute Value -->
+                <!-- Form thêm giá trị thuộc tính -->
                 <div class="col-xl-4 col-lg-12">
                     <div class="team-sticky-bar">
                         <div class="col-md-12">
                             <div class="cr-cat-list cr-card card-default mb-24px">
                                 <div class="cr-card-content">
                                     <div class="cr-cat-form">
-                                        <h3>Add Attribute Value</h3>
+                                        <h3>Thêm giá trị thuộc tính</h3>
                                         <form action="{{ route('admin.attribute-values.store') }}" method="POST">
                                             @csrf
                                             <div class="form-group">
-                                                <label>Attribute</label>
+                                                <label>Thuộc tính</label>
                                                 <div class="col-12">
                                                     <select name="attribute_id" class="form-control form-select" required>
-                                                        <option value="">Select Attribute</option>
+                                                        <option value="">Chọn thuộc tính</option>
                                                         @foreach ($attributes as $attribute)
                                                             <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
                                                         @endforeach
@@ -55,15 +55,15 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <label>Attribute Value</label>
+                                                <label>Giá trị thuộc tính</label>
                                                 <div class="col-12">
-                                                    <input name="value" class="form-control here slug-title" type="text" placeholder="Enter Attribute Value" required>
+                                                    <input name="value" class="form-control here slug-title" type="text" placeholder="Nhập giá trị thuộc tính" required>
                                                 </div>
                                             </div>
 
                                             <div class="row">
                                                 <div class="col-12 d-flex">
-                                                    <button type="submit" class="cr-btn-primary">Submit</button>
+                                                    <button type="submit" class="cr-btn-primary">Thêm mới</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -74,7 +74,7 @@
                     </div>
                 </div>
 
-                <!-- Danh sách Attribute Values -->
+                <!-- Danh sách giá trị thuộc tính -->
                 <div class="col-xl-8 col-lg-12">
                     <div class="cr-cat-list cr-card card-default">
                         <div class="cr-card-content">
@@ -82,10 +82,10 @@
                                 <table id="cat_data_table" class="table">
                                     <thead>
                                         <tr>
-                                            <th>Attribute Value</th>
+                                            <th>Giá trị</th>
                                             <th>Slug</th>
-                                            <th>Attribute</th>
-                                            <th>Action</th>
+                                            <th>Thuộc tính</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
 
@@ -103,8 +103,8 @@
                                                             <span class="sr-only"><i class="ri-settings-3-line"></i></span>
                                                         </button>
                                                         <div class="dropdown-menu">
-                                                            <a class="dropdown-item" href="#">Edit</a>
-                                                            <a class="dropdown-item" href="#">Delete</a>
+                                                            <a class="dropdown-item" href="#">Chỉnh sửa</a>
+                                                            <a class="dropdown-item" href="#">Xoá</a>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -113,10 +113,10 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- Hiển thị thông báo nếu không có dữ liệu -->
+                            <!-- Thông báo nếu không có dữ liệu -->
                             @if ($attributeValues->isEmpty())
                                 <div class="alert alert-info mt-3">
-                                    No Attribute Values found.
+                                    Không có giá trị thuộc tính nào.
                                 </div>
                             @endif
                         </div>
