@@ -378,7 +378,7 @@
             }
 
             function updateCartTotal() {
-                // Tính tổng cho các mục đã chọn (cho quá trình thanh toán)
+                // Tính tổng cho các mục đã chọn
                 let selectedTotal = 0;
                 const selectedItems = document.querySelectorAll('.select-item:checked');
 
@@ -390,33 +390,23 @@
                     selectedTotal += quantity * price;
                 });
 
-                // Tính tổng cho tất cả các mục trong giỏ hàng
-                let allItemsTotal = 0;
-                const allQuantityInputs = document.querySelectorAll('.quantity-input');
-
-                allQuantityInputs.forEach(input => {
-                    const quantity = parseInt(input.value) || 0;
-                    const price = parseFloat(input.dataset.price) || 0;
-                    allItemsTotal += quantity * price;
-                });
-
-                // Cập nhật Cart Subtotal với tổng tất cả mục
+                // Cập nhật Cart Subtotal với tổng các mục đã chọn
                 const subtotalElement = document.querySelector('.total-table tbody tr:first-child .tt-right');
                 if (subtotalElement) {
-                    subtotalElement.textContent = `${numberFormat(allItemsTotal)} VND`;
+                    subtotalElement.textContent = `${numberFormat(selectedTotal)} VND`;
                 }
 
                 // Cập nhật Final Total
                 const finalTotalElement = document.querySelector('.total-table tbody tr:last-child .tt-right strong');
                 if (finalTotalElement) {
-                    let finalTotal = allItemsTotal;
+                    let finalTotal = selectedTotal;
 
                     // Kiểm tra và áp dụng giảm giá nếu có
                     const discountRow = document.querySelector('.total-table tbody tr:nth-child(2)');
                     if (discountRow && discountRow.querySelector('.tt-left').textContent.includes('Discount')) {
                         const discountText = discountRow.querySelector('.tt-right').textContent;
                         const discountAmount = parseFloat(discountText.replace(/[^0-9]/g, '')) || 0;
-                        finalTotal = allItemsTotal - discountAmount;
+                        finalTotal = selectedTotal - discountAmount;
                     }
 
                     finalTotalElement.textContent = `${numberFormat(finalTotal)} VND`;
