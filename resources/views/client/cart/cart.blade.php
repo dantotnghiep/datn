@@ -2,22 +2,38 @@
 @section('content')
     @include('client.layouts.partials.lelf-navbar')
 
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999 !important;">
+        @if(session('success'))
+        <div id="successToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: rgba(25, 135, 84, 0.95); color: white;">
+            <div class="toast-header" style="background-color: rgba(25, 135, 84, 0.95); color: white;">
+                <strong class="me-auto">Thành công!</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {{ session('success') }}
+            </div>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: rgba(220, 53, 69, 0.95); color: white;">
+            <div class="toast-header" style="background-color: rgba(220, 53, 69, 0.95); color: white;">
+                <strong class="me-auto">Lỗi!</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {!! session('error') !!}
+            </div>
+        </div>
+        @endif
+    </div>
 
     <!-- =============== Cart area start =============== -->
     <div class="cart-area mt-100 ml-110">
         <div class="container">
             <!-- Add CSRF token meta tag -->
             <meta name="csrf-token" content="{{ csrf_token() }}">
-
-            <!-- Add this alert section -->
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-
-            @if (session('error'))
-                <div class="alert alert-danger">{!! session('error') !!}</div>
-            @endif
-            <!-- End alert section -->
 
             <div class="row justify-content-center">
                 <div class="col-xxl-12 col-xl-12 col-md-12 col-sm-8">
@@ -169,7 +185,7 @@
                             </div>
 
                             <!-- Form checkout tách biệt -->
-                            <form action="{{ route('cart.checkout') }}" method="GET" id="checkout-form">
+                            <form action="{{ route('cart.checkout') }}" method="GET" id="checkout-form" onsubmit="return validateCheckout()">
                                 <!-- Hidden inputs để chứa item đã chọn -->
                                 @foreach ($cartItems as $item)
                                     <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
@@ -417,6 +433,15 @@
                 return new Intl.NumberFormat('vi-VN').format(Math.round(number));
             }
         });
+
+        function validateCheckout() {
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            if (selectedItems.length === 0) {
+                alert('Vui lòng chọn ít nhất một sản phẩm để tiến hành thanh toán!');
+                return false;
+            }
+            return true;
+        }
     </script>
 
     <style>
@@ -484,17 +509,40 @@
 
 <style>
     /* Toast styles */
-    .toast.show {
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    #stockErrorToast {
-        min-width: 350px;
-    }
-    .position-fixed {
-        position: fixed !important;
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
     }
     
+    .toast {
+        min-width: 300px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+        opacity: 1 !important;
+    }
+    
+    .toast.show {
+        display: block;
+        opacity: 1;
+    }
+    
+    .toast-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem;
+    }
+    
+    .toast-body {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn-close-white {
+        filter: brightness(0) invert(1);
+    }
+
     /* Các style khác giữ nguyên */
     .select-item {
         display: block;
@@ -532,3 +580,31 @@
         background-color: #e9ecef;
     }
 </style>
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý toast notifications
+        const toasts = document.querySelectorAll('.toast');
+        toasts.forEach(toast => {
+            const closeBtn = toast.querySelector('.btn-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    toast.style.display = 'none';
+                });
+            }
+            
+            // Tự động ẩn toast sau 5 giây
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300);
+            }, 5000);
+        });
+
+        // Các script khác giữ nguyên
+        // ... existing scripts ...
+    });
+</script>
+@endsection

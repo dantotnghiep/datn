@@ -162,9 +162,9 @@ class OrderController extends Controller
             
             if ($result['success']) {
                 return redirect()->route('cart.index')
-                    ->with('success', $result['message']);
+                    ->with('success', 'Đặt hàng thành công! Đơn hàng của bạn sẽ được giao trong thời gian sớm nhất. Cảm ơn bạn đã mua hàng!');
             } else {
-                return back()->with('error', $result['message'])->withInput();
+                return back()->with('error', 'Đặt hàng thất bại: ' . $result['message'])->withInput();
             }
         } catch (\Exception $e) {
             \Log::error('Order process failed: ' . $e->getMessage(), [
@@ -279,15 +279,15 @@ class OrderController extends Controller
             
             if ($result['success']) {
                 return redirect()->route('cart.index')
-                    ->with('success', $result['message']);
+                    ->with('success', 'Thanh toán thành công! Đơn hàng của bạn đã được xác nhận và sẽ được giao trong thời gian sớm nhất. Cảm ơn bạn đã mua hàng!');
             } else {
                 return redirect()->route('cart.index')
-                    ->with('error', $result['message']);
+                    ->with('error', 'Thanh toán thất bại: ' . $result['message']);
             }
         } catch (\Exception $e) {
             \Log::error('VNPay order creation failed: ' . $e->getMessage());
             return redirect()->route('cart.checkout')
-                ->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage());
+                ->with('error', 'Có lỗi xảy ra trong quá trình thanh toán: ' . $e->getMessage());
         }
     }
 }
