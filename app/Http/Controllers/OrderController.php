@@ -70,6 +70,7 @@ class OrderController extends Controller
                 'address_id' => 'required|exists:addresses,id,user_id,' . auth()->id(),
                 'user_email' => 'required|email|max:255',
                 'payment_method' => 'required|in:cod,vnpay',
+                'selected_items' => 'required|array|min:1',
             ]);
 
             // Lấy thông tin địa chỉ
@@ -78,10 +79,14 @@ class OrderController extends Controller
                 ->firstOrFail();
             $shippingAddress = implode(', ', [$address->street, $address->ward, $address->district, $address->province]);
 
-            // Lấy thông tin giỏ hàng
-            $cartItems = Cart::where('user_id', auth()->id())->get();
+            // Lấy thông tin giỏ hàng - CHỈ lấy các sản phẩm được chọn từ request
+            $selectedItems = $request->input('selected_items', []);
+            $cartItems = Cart::where('user_id', auth()->id())
+                            ->whereIn('id', $selectedItems)
+                            ->get();
+
             if ($cartItems->isEmpty()) {
-                return back()->with('error', 'Giỏ hàng trống!');
+                return back()->with('error', 'Vui lòng chọn sản phẩm để thanh toán!');
             }
 
             // Tính tổng tiền

@@ -73,8 +73,10 @@ class OrderProcessingService
                 }
             }
 
-            // Xóa giỏ hàng
-            Cart::where('user_id', $userId)->delete();
+            // Chỉ xóa những sản phẩm đã được mua khỏi giỏ hàng
+            Cart::where('user_id', $userId)
+                ->whereIn('variation_id', array_column($cartItems, 'variation_id'))
+                ->delete();
 
             DB::commit();
             

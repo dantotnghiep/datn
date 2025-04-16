@@ -22,6 +22,10 @@
             <div class="col-xxl-8 col-xl-8">
                 <form id="payment-form" action="{{ route('order.store') }}" method="POST">
                     @csrf
+                    <!-- Thêm input hidden để truyền selected_items -->
+                    @foreach ($cartItems as $item)
+                        <input type="hidden" name="selected_items[]" value="{{ $item->id }}">
+                    @endforeach
                     <!-- Thông báo -->
                     @if (session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>

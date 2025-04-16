@@ -180,6 +180,9 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
         }
 
+        // Lưu selected_items vào session
+        session(['selected_items' => $selectedItems]);
+
         $cartItems = Cart::whereIn('id', $selectedItems)->get();
         $user = Auth::user();
 
