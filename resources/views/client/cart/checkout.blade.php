@@ -1,200 +1,303 @@
 @extends('client.layouts.master')
 @section('content')
-    @include('client.layouts.partials.lelf-navbar')
+@include('client.layouts.partials.lelf-navbar')
 
-    <div class="checkout-area ml-110 mt-100">
-        <div class="container">
-            <div class="row">
-                <div class="col-xxl-8 col-xl-8">
-                    <form id="payment-form" action="{{ route('order.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="payment_intent_id" id="payment_intent_id">
-                        <!-- Hiển thị lỗi validation nếu có -->
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
+@if(session('stock_error') || (session('error') && strpos(session('error'), 'không đủ số lượng') !== false))
+<!-- Toast notification đơn giản -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999 !important;">
+    <div id="stockErrorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" style="display: block; background-color: rgba(220, 53, 69, 0.85); color: white; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); min-width: 250px; border-radius: 4px;">
+        <div class="toast-header" style="background-color: rgba(220, 53, 69, 0.9); color: white;">
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <p style="color: white; margin-bottom: 0;">Không thể đặt hàng! Một số sản phẩm không đủ số lượng.</p>
+        </div>
+    </div>
+</div>
+@endif
+
+<div class="checkout-area ml-110 mt-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-xxl-8 col-xl-8">
+                <form id="payment-form" action="{{ route('order.store') }}" method="POST">
+                    @csrf
+                    <!-- Thông báo -->
+                    @if (session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
+                    @if (session('error'))
+                    <div class="alert alert-danger">{!! session('error') !!}</div>
+                    @endif
+                    @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                    <h5 class="checkout-title">Billing Details</h5>
+                    <div class="mb-4">
+                        <h5>Người đặt hàng</h5>
+                        <p><strong>Tên:</strong> {{ $user->name }}</p>
+                        <p><strong>Email:</strong> {{ $user->email }}</p>
+                        <p><strong>Số điện thoại:</strong> {{ $user->phone ?? 'Chưa cung cấp' }}</p>
+                    </div>
+                    @if ($addresses->isEmpty())
+                    <div class="alert alert-warning">
+                        Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ để tiếp tục!
+                    </div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                        Thêm địa chỉ mới
+                    </button>
+                    @else
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="eg-input-group">
+                                <label for="address_id">Chọn địa chỉ giao hàng</label>
+                                <select name="address_id" id="address_id" class="form-select" required>
+                                    @foreach ($addresses as $address)
+                                    <option value="{{ $address->id }}"
+                                        {{ $address->is_default ? 'selected' : '' }}>
+                                        {{ $address->recipient_name }} - {{ $address->phone }} -
+                                        {{ $address->street }}, {{ $address->ward }}, {{ $address->district }}, {{ $address->province }}
+                                    </option>
                                     @endforeach
-                                </ul>
+                                </select>
                             </div>
-                        @endif
+                            <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                                Thêm địa chỉ mới
+                            </button>
 
-                        <!-- Hiển thị thông báo success/error -->
-                        @if (session('success'))
-                            <div class="alert alert-success">
-                                {{ session('success') }}
-                            </div>
-                        @endif
-
-                        @if (session('error'))
-                            <div class="alert alert-danger">
-                                {{ session('error') }}
-                            </div>
-                        @endif
-
-                        <h5 class="checkout-title">Billing Details</h5>
-                        <div class="row">
-                            <div class="col-lg-12">
+                            <!-- Thêm trường email -->
+                            <div class="col-lg-12 mt-3">
                                 <div class="eg-input-group">
-                                    <label for="user_name">User Name</label>
-                                    <input type="text" id="user_name" name="user_name" placeholder="Your full name"
-                                        value="{{ old('user_name', Auth::user()->name ?? '') }}" required>
+                                    <label for="user_email">Email</label>
+                                    <input type="email" class="form-control" id="user_email" name="user_email" value="{{ $userEmail }}" required>
+                                    @error('user_email')
+                                    <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
-                            <div class="col-lg-12">
-                                <div class="eg-input-group">
-                                    <label>Phone Number</label>
-                                    <input type="text" name="user_phone" placeholder="Your Phone Number"
-                                        value="{{ old('user_phone', Auth::user()->phone ?? '') }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Phương thức thanh toán -->
+                    <div class="payment-methods mt-4">
+                        <div class="form-check payment-check">
+                            <input class="form-check-input" type="radio" name="payment_method" id="paymentCOD" value="cod" checked>
+                            <label class="form-check-label" for="paymentCOD">Cash on Delivery</label>
+                            <p>Pay with cash upon delivery.</p>
+                        </div>
+                        <div class="form-check payment-check">
+                            <input class="form-check-input" type="radio" name="payment_method" id="paymentVNPay" value="vnpay">
+                            <label class="form-check-label" for="paymentVNPay">Thanh toán qua VNPay</label>
+                            <p>Thanh toán an toàn với VNPay.</p>
+                        </div>
+                    </div>
+
+                    <div class="place-order-btn mt-4">
+                        <button type="submit" class="place-order-btn">Place Order</button>
+                    </div>
+                    @endif
+                </form>
+
+                <!-- Modal thêm địa chỉ -->
+                <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="{{ route('order.storeAddress') }}" method="POST">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addAddressModalLabel">Thêm địa chỉ mới</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <div class="eg-input-group">
-                                    <label>Email Address</label>
-                                    <input type="email" name="user_email" placeholder="Your Email Address"
-                                        value="{{ old('user_email', Auth::user()->email ?? '') }}" required>
-                                </div>
-                                <div class="col-lg-12">
-                                    <div class="eg-input-group">
-                                        <label>Shipping Address</label>
-                                        <input type="text" name="shipping_address" placeholder="House and street name"
-                                            value="{{ old('shipping_address') }}" required>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="recipient_name" class="form-label">Tên người nhận</label>
+                                        <input type="text" class="form-control" id="recipient_name" name="recipient_name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Số điện thoại</label>
+                                        <input type="text" class="form-control" id="phone" name="phone" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="street" class="form-label">Đường</label>
+                                        <input type="text" class="form-control" id="street" name="street" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="ward" class="form-label">Phường/Xã</label>
+                                        <input type="text" class="form-control" id="ward" name="ward" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="district" class="form-label">Quận/Huyện</label>
+                                        <input type="text" class="form-control" id="district" name="district" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="province" class="form-label">Tỉnh/Thành phố</label>
+                                        <input type="text" class="form-control" id="province" name="province" required>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="is_default" name="is_default" value="1">
+                                        <label class="form-check-label" for="is_default">Đặt làm địa chỉ mặc định</label>
                                     </div>
                                 </div>
-                                <div class="payment-methods">
-                                    <div class="form-check payment-check">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="paymentCOD"
-                                            value="cod" checked>
-                                        <label class="form-check-label" for="paymentCOD">
-                                            Cash on Delivery
-                                        </label>
-                                        <p>Pay with cash upon delivery.</p>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                    <button type="submit" class="btn btn-primary">Lưu địa chỉ</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Giữ nguyên phần Order Summary -->
+            <div class="col-xxl-4 col-xl-4">
+                <div class="order-summary">
+                    <div class="added-product-summary">
+                        <h5 class="checkout-title">Order Summary</h5>
+                        <ul class="added-products">
+                            @foreach ($cartItems as $item)
+                            @php
+                            $product = $item->variation->product ?? null;
+                            $mainImage = $product ? $product->images->where('is_main', 1)->first() : null;
+                            @endphp
+                            <li class="single-product">
+                                <div class="product-img">
+                                    <img src="{{ $mainImage ? asset($mainImage->url) : asset('default-image.jpg') }}"
+                                        alt="{{ $item->product_name }}">
+                                </div>
+                                <div class="product-info">
+                                    <h5 class="product-title"><a href="#">{{ $item->product_name }}</a></h5>
+                                    <div class="product-total">
+                                        <div class="quantity">
+                                            <span>Số lượng: {{ $item->quantity }}</span>
+                                        </div>
                                     </div>
-                                    <div class="form-check payment-check">
-                                        <input class="form-check-input" type="radio" name="payment_method"
-                                            id="paymentVNPay" value="vnpay">
-                                        <label class="form-check-label" for="paymentVNPay">
-                                            Thanh toán qua VNPay
-                                        </label>
-                                        <p>Thanh toán an toàn với VNPay.</p>
+                                    <div class="quantity">
+                                        <strong>Giá: <span class="product-price">{{ number_format($item->price, 2) }}</span></strong>
                                     </div>
                                 </div>
-                                <div class="place-order-btn">
-                                    <button type="submit" class="place-order-btn">Place Order</button>
-                                </div>
-                            </div>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <div class="total-cost-summary">
+                        <ul>
+                            <li class="subtotal">Subtotal <span>{{ number_format($subtotal, 2) }}</span></li>
+                            @if ($discountAmount > 0)
+                            <li>Discount <span>-{{ number_format($discountAmount, 2) }}</span></li>
+                            @endif
+                            <li>Total <span>{{ number_format($finalTotal, 2) }}</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Giữ nguyên newsletter -->
+<div class="newslatter-area ml-110 mt-100">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="newslatter-wrap text-center">
+                    <h5>Connect To EG</h5>
+                    <h2 class="newslatter-title">Join Our Newsletter</h2>
+                    <p>Hey you, sign up it only, Get this limited-edition T-shirt Free!</p>
+                    <form action="#" method="POST">
+                        <div class="newslatter-form">
+                            <input type="text" placeholder="Type Your Email">
+                            <button type="submit">Send <i class="bi bi-envelope-fill"></i></button>
                         </div>
                     </form>
                 </div>
-
-                <div class="col-xxl-4 col-xl-4">
-                    <div class="order-summary">
-                        <div class="added-product-summary">
-                            <h5 class="checkout-title">Order Summary</h5>
-                            <ul class="added-products">
-                                @foreach ($cartItems as $item)
-                                    @php
-                                        $product = $item->variation->product ?? null;
-                                        $mainImage = $product ? $product->images->where('is_main', 1)->first() : null;
-                                    @endphp
-                                    <li class="single-product">
-                                        <div class="product-img">
-                                            <img src="{{ $mainImage ? asset($mainImage->url) : asset('default-image.jpg') }}"
-                                                alt="{{ $item->product_name }}">
-                                        </div>
-                                        <div class="product-info">
-                                            <h5 class="product-title"><a href="#">{{ $item->product_name }}</a></h5>
-                                            <div class="product-total">
-                                                <div class="quantity">
-                                                    <span>Số lượng: {{ $item->quantity }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="quantity">
-                                                <strong>Giá: <span
-                                                        class="product-price">{{ number_format($item->price, 2) }}</span></strong>
-                                            </div>
-                                        </div>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-
-                        <div class="total-cost-summary">
-                            <ul>
-                                <li class="subtotal">Subtotal <span>{{ number_format($subtotal, 2) }}</span></li>
-                                @if ($discountAmount > 0)
-                                    <li>Discount <span>-{{ number_format($discountAmount, 2) }}</span></li>
-                                @endif
-                                <li>Total <span>{{ number_format($finalTotal, 2) }}</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ===============  newslatter area start  =============== -->
-    <div class="newslatter-area ml-110 mt-100">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="newslatter-wrap text-center">
-                        <h5>Connect To EG</h5>
-                        <h2 class="newslatter-title">Join Our Newsletter</h2>
-                        <p>Hey you, sign up it only, Get this limited-edition T-shirt Free!</p>
-                        <form action="#" method="POST">
-                            <div class="newslatter-form">
-                                <input type="text" placeholder="Type Your Email">
-                                <button type="submit">Send <i class="bi bi-envelope-fill"></i></button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- ===============  newslatter area end  =============== -->
+<style>
+    /* Toast styles */
+    .toast.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    #stockErrorToast {
+        min-width: 350px;
+    }
+    .position-fixed {
+        position: fixed !important;
+    }
+    
+    /* Existing styles */
+    #card-element {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: white;
+        margin-top: 10px;
+    }
 
-    <style>
-        #card-element {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background: white;
-            margin-top: 10px;
+    #card-errors {
+        color: #dc3545;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+
+    .place-order-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle toast close button
+        var toastEl = document.getElementById('stockErrorToast');
+        if (toastEl) {
+            var closeBtn = toastEl.querySelector('.btn-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    toastEl.style.display = 'none';
+                });
+            }
+
+            // Auto hide toast after 10 seconds
+            setTimeout(function() {
+                toastEl.style.display = 'none';
+            }, 10000);
         }
 
-        #card-errors {
-            color: #dc3545;
-            margin-top: 5px;
-            font-size: 14px;
-        }
-
-        .place-order-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('payment-form');
-            const paymentMethodInputs = document.querySelectorAll('input[name="payment_method"]');
-
+        // Form validation và các xử lý khác
+        const form = document.getElementById('payment-form');
+        if (form) {
             form.addEventListener('submit', function(event) {
-                const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked')
-                    .value;
-
-                // Nếu là VNPay hoặc COD, submit form trực tiếp
-                if (selectedPaymentMethod === 'vnpay' || selectedPaymentMethod === 'cod') {
-                    return; // Tiếp tục submit form
+                const addressId = document.getElementById('address_id');
+                if (addressId && !addressId.value) {
+                    event.preventDefault();
+                    alert('Vui lòng chọn hoặc thêm địa chỉ giao hàng!');
+                    return;
                 }
 
-                // Nếu không phải VNPay hoặc COD, ngăn submit để xử lý Stripe (nếu có)
-                event.preventDefault();
-                alert('Phương thức thanh toán này chưa được hỗ trợ!');
-            });
-        });
-    </script>
+                const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
+                if (!selectedPaymentMethod) {
+                    event.preventDefault();
+                    alert('Vui lòng chọn phương thức thanh toán!');
+                    return;
+                }
 
+                if (selectedPaymentMethod !== 'vnpay' && selectedPaymentMethod !== 'cod') {
+                    event.preventDefault();
+                    alert('Phương thức thanh toán này chưa được hỗ trợ!');
+                }
+            });
+        }
+    });
+</script>
 @endsection

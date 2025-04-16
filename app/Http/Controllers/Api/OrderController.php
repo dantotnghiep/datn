@@ -134,12 +134,13 @@ class OrderController extends Controller
             DB::beginTransaction();
             
             // Tìm đơn hàng của người dùng hiện tại
-            $order = Order::with(['status', 'user'])
+            $order = Order::with(['status', 'user', 'items.variation'])
                          ->where('id', $id)
                          ->first();
             
             // Kiểm tra nếu đơn hàng không tồn tại
             if (!$order) {
+                \Log::error('Order not found: ID ' . $id);
                 return response()->json([
                     'success' => false,
                     'message' => 'Đơn hàng không tồn tại'
@@ -148,6 +149,7 @@ class OrderController extends Controller
             
             // Kiểm tra quyền hủy đơn hàng
             if (Auth::id() != $order->user_id && !Auth::user()->is_admin) {
+                \Log::warning('Unauthorized order cancellation attempt: User ' . Auth::id() . ' for Order ' . $id);
                 return response()->json([
                     'success' => false,
                     'message' => 'Bạn không có quyền hủy đơn hàng này'
@@ -155,15 +157,26 @@ class OrderController extends Controller
             }
             
             // Kiểm tra trạng thái đơn hàng
-            if ($order->status_id != 1) {
+            if ($order->status_id != 1 && $order->status_id != 2) {
+                \Log::warning('Attempt to cancel order with invalid status: Order ' . $id . ' Status ' . $order->status_id);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Chỉ có thể hủy đơn hàng ở trạng thái chờ xác nhận'
+                    'message' => 'Chỉ có thể hủy đơn hàng ở trạng thái chờ xác nhận hoặc đang vận chuyển'
                 ], 400);
             }
 
+            // Hoàn lại số lượng sản phẩm vào kho
+            foreach ($order->items as $item) {
+                if ($item->variation) {
+                    $item->variation->stock += $item->quantity;
+                    $item->variation->save();
+                } else {
+                    \Log::warning('Variation not found for order item ID ' . $item->id);
+                }
+            }
+
             // Cập nhật trạng thái hủy (3)
-            $order->status_id = 4;
+            $order->status_id = 3; // Trạng thái hủy là 3, không phải 4
             $order->save();
             
             // Load lại relationship để đảm bảo dữ liệu mới nhất
@@ -172,19 +185,23 @@ class OrderController extends Controller
             DB::commit();
             
             // Broadcast event
-            if (class_exists('App\Events\OrderStatusUpdated')) {
+            try {
                 broadcast(new OrderStatusUpdated($order))->toOthers();
+                \Log::info('Order cancelled successfully: ID ' . $id);
+            } catch (\Exception $e) {
+                \Log::error('Failed to broadcast order cancellation: ' . $e->getMessage());
+                // Continue execution even if broadcasting fails
             }
             
             return response()->json([
                 'success' => true,
-                'message' => 'Đơn hàng đã được hủy thành công',
+                'message' => 'Đơn hàng đã được hủy thành công và số lượng sản phẩm đã được hoàn lại',
                 'order' => $order
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error cancelling order: ' . $e->getMessage());
+            Log::error('Error cancelling order: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,

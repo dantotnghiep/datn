@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\Variation;
+use Auth;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -180,6 +181,7 @@ class CartController extends Controller
         }
 
         $cartItems = Cart::whereIn('id', $selectedItems)->get();
+        $user = Auth::user();
 
         // Tính tổng tiền trước giảm giá
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
@@ -204,8 +206,7 @@ class CartController extends Controller
                 $finalTotal = $subtotal - $discountAmount;
             }
         }
-
-        return view('client.cart.checkout', compact('cartItems', 'subtotal', 'finalTotal', 'discountAmount', 'discountCode'));
+        return view('client.cart.checkout', compact('cartItems', 'user', 'subtotal', 'finalTotal', 'discountAmount', 'discountCode'));
     }
 
     public function order()

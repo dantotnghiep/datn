@@ -2,6 +2,7 @@
 @section('content')
     @include('client.layouts.partials.lelf-navbar')
 
+
     <!-- =============== Cart area start =============== -->
     <div class="cart-area mt-100 ml-110">
         <div class="container">
@@ -10,17 +11,11 @@
 
             <!-- Add this alert section -->
             @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
             @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <div class="alert alert-danger">{!! session('error') !!}</div>
             @endif
             <!-- End alert section -->
 
@@ -474,3 +469,76 @@
         /* No need for browser spinner removal since we're using text input */
     </style>
 @endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle toast close button
+        var toastEl = document.getElementById('stockErrorToast');
+        if (toastEl) {
+            var closeBtn = toastEl.querySelector('.btn-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    toastEl.style.display = 'none';
+                });
+            }
+
+            // Auto hide toast after 10 seconds
+            setTimeout(function() {
+                toastEl.style.display = 'none';
+            }, 10000);
+        }
+    });
+</script>
+@endsection
+
+<style>
+    /* Toast styles */
+    .toast.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    #stockErrorToast {
+        min-width: 350px;
+    }
+    .position-fixed {
+        position: fixed !important;
+    }
+    
+    /* Các style khác giữ nguyên */
+    .select-item {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .quantity {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-input {
+        width: 50px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        margin: 0 5px;
+    }
+
+    .quantity-btn {
+        width: 30px;
+        height: 30px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .quantity-btn:hover {
+        background-color: #e9ecef;
+    }
+</style>

@@ -48,4 +48,20 @@ class Order extends Model
             $order->order_code = 'ORD' . time() . rand(1000,9999);
         });
     }
+
+    public function canUpdateStatus($newStatusId, $user)
+    {
+        // Admin có thể cập nhật bất kỳ trạng thái nào
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        // Khách hàng chỉ có thể hủy đơn hàng khi ở trạng thái chờ xác nhận hoặc đang vận chuyển
+        if ($user->role === 'customer' && $newStatusId == 5) {
+            return $this->status_id == 1 || $this->status_id == 2;
+        }
+
+        // Khách hàng không thể cập nhật các trạng thái khác
+        return false;
+    }
 }

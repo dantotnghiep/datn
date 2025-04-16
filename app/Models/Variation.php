@@ -64,4 +64,9 @@ class Variation extends Model
             'attribute_value_id' // Khóa ngoại trong bảng pivot
         );
     }
+
+    public function orderItems()
+    {
+        return $this->hasMany(Order_item::class);
+    }
 } 
