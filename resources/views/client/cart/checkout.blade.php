@@ -2,6 +2,33 @@
 @section('content')
 @include('client.layouts.partials.lelf-navbar')
 
+<!-- Toast Notifications -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999 !important;">
+    @if(session('success'))
+    <div id="successToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: rgba(25, 135, 84, 0.95); color: white;">
+        <div class="toast-header" style="background-color: rgba(25, 135, 84, 0.95); color: white;">
+            <strong class="me-auto">Thành công!</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            {{ session('success') }}
+        </div>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: rgba(220, 53, 69, 0.95); color: white;">
+        <div class="toast-header" style="background-color: rgba(220, 53, 69, 0.95); color: white;">
+            <strong class="me-auto">Lỗi!</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            {!! session('error') !!}
+        </div>
+    </div>
+    @endif
+</div>
+
 @if(session('stock_error') || (session('error') && strpos(session('error'), 'không đủ số lượng') !== false))
 <!-- Toast notification đơn giản -->
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999 !important;">
@@ -228,55 +255,61 @@
 
 <style>
     /* Toast styles */
-    .toast.show {
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    #stockErrorToast {
-        min-width: 350px;
-    }
-    .position-fixed {
-        position: fixed !important;
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
     }
     
-    /* Existing styles */
-    #card-element {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background: white;
-        margin-top: 10px;
+    .toast {
+        min-width: 300px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+        opacity: 1 !important;
     }
-
-    #card-errors {
-        color: #dc3545;
-        margin-top: 5px;
-        font-size: 14px;
+    
+    .toast.show {
+        display: block;
+        opacity: 1;
     }
-
-    .place-order-btn:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
+    
+    .toast-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem;
+    }
+    
+    .toast-body {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn-close-white {
+        filter: brightness(0) invert(1);
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle toast close button
-        var toastEl = document.getElementById('stockErrorToast');
-        if (toastEl) {
-            var closeBtn = toastEl.querySelector('.btn-close');
+        // Xử lý đóng toast
+        const toasts = document.querySelectorAll('.toast');
+        toasts.forEach(toast => {
+            const closeBtn = toast.querySelector('.btn-close');
             if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
-                    toastEl.style.display = 'none';
+                closeBtn.addEventListener('click', () => {
+                    toast.style.display = 'none';
                 });
             }
-
-            // Auto hide toast after 10 seconds
-            setTimeout(function() {
-                toastEl.style.display = 'none';
-            }, 10000);
-        }
+            
+            // Tự động ẩn toast sau 5 giây
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300);
+            }, 5000);
+        });
 
         // Form validation và các xử lý khác
         const form = document.getElementById('payment-form');
