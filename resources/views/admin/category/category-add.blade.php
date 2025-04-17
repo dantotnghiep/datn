@@ -3,13 +3,13 @@
 @section('content')
 <div class="cr-main-content">
     <div class="container-fluid">
-        <!-- Page title & breadcrumb -->
+        <!-- Tiêu đề trang & breadcrumb -->
         <div class="cr-page-title cr-page-title-2">
             <div class="cr-breadcrumb">
-                <h5>Category</h5>
+                <h5>Danh mục</h5>
                 <ul>
                     <li><a href="index.html">Carrot</a></li>
-                    <li>Category</li>
+                    <li>Danh mục</li>
                 </ul>
             </div>
         </div>
@@ -35,12 +35,12 @@
                         <div class="cr-cat-list cr-card card-default mb-24px">
                             <div class="cr-card-content">
                                 <div class="cr-cat-form">
-                                    <h3>Add New Category</h3>
+                                    <h3>Thêm danh mục mới</h3>
 
                                     <form method="POST" action="{{ route('admin.category.store') }}">
                                         @csrf
                                         <div class="form-group">
-                                            <label>Name</label>
+                                            <label>Tên danh mục</label>
                                             <div class="col-12">
                                                 <input id="slug" onkeyup="ChangeToSlug();" name="name"
                                                     class="form-control here slug-title" type="text" value="{{ old('name') }}">
@@ -56,7 +56,7 @@
                                         </div>
 
                                         <div class="form-group row">
-                                            <label>Full Description</label>
+                                            <label>Mô tả chi tiết</label>
                                             <div class="col-12">
                                                 <textarea id="description" name="description" cols="40"
                                                     rows="4" class="form-control"></textarea>
@@ -64,17 +64,17 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="status">Status</label>
+                                            <label for="status">Trạng thái</label>
                                             <div class="col-12">
                                                 <select id="status" name="status" class="form-control">
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
+                                                    <option value="active">Kích hoạt</option>
+                                                    <option value="inactive">Không kích hoạt</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-12 d-flex">
-                                                <button type="submit" class="cr-btn-primary">Submit</button>
+                                                <button type="submit" class="cr-btn-primary">Xác nhận</button>
                                             </div>
                                         </div>
 
@@ -93,10 +93,10 @@
                             <table id="cat_data_table" class="table">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Description</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
+                                        <th>Tên danh mục</th>
+                                        <th>Mô tả</th>
+                                        <th>Trạng thái</th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
 
@@ -110,7 +110,7 @@
                                             </span>
                                         </td>
 
-                                        <td class="{{ $category->status === 'active' ? 'active' : 'inactive' }}">{{ ucfirst($category->status) }}</td>
+                                        <td class="{{ $category->status === 'active' ? 'active' : 'inactive' }}">{{ $category->status === 'active' ? 'Kích hoạt' : 'Không kích hoạt' }}</td>
 
                                         <td>
                                             <div>
@@ -122,12 +122,12 @@
                                                 </button>
 
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="{{ route('admin.category.edit', $category->id) }}">Edit</a>
+                                                    <a class="dropdown-item" href="{{ route('admin.category.edit', $category->id) }}">Chỉnh sửa</a>
                                                     <form method="POST" action="{{ route('admin.category.destroy', $category->id) }}" style="display:inline;">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to delete this category?')">
-                                                            Delete
+                                                        <button type="submit" class="dropdown-item" onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này không?')">
+                                                            Xóa
                                                         </button>
                                                     </form>
                                                 </div>
