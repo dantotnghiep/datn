@@ -2,6 +2,7 @@
 @section('content')
     @include('client.layouts.partials.lelf-navbar')
 
+
     <!-- =============== Cart area start =============== -->
     <div class="cart-area mt-100 ml-110">
         <div class="container">
@@ -10,17 +11,11 @@
 
             <!-- Add this alert section -->
             @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
             @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <div class="alert alert-danger">{!! session('error') !!}</div>
             @endif
             <!-- End alert section -->
 
@@ -35,12 +30,12 @@
                                 <thead>
                                     <tr>
                                         <th scope="col"></th>
-                                        <th scope="col">Hình ảnh</th>
-                                        <th scope="col">Chi tiết sản phẩm</th>
-                                        <th scope="col">Giá</th>
-                                        <th scope="col">Số lượng</th>
-                                        <th scope="col">Thành tiền</th>
-                                        <th scope="col">Thao tác</th>
+                                        <th scope="col">Image</th>
+                                        <th scope="col">Product Details</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Subtotal</th>
+                                        <th scope="col">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -65,8 +60,8 @@
                                             <td class="product-col">
                                                 <div class="product-details">
                                                     <h5>{{ $item->product_name }}</h5>
-                                                    <p>Màu sắc: {{ $item->color }}</p>
-                                                    <p>Kích thước: {{ $item->size }}</p>
+                                                    <p>Color: {{ $item->color }}</p>
+                                                    <p>Size: {{ $item->size }}</p>
                                                 </div>
                                             </td>
                                             <td class="price-col">
@@ -111,7 +106,7 @@
                             <div class="row mt-60">
                                 <div class="col-xxl-4 col-lg-4">
                                     <div class="cart-coupon-input">
-                                        <h5 class="coupon-title">Mã giảm giá</h5>
+                                        <h5 class="coupon-title">Coupon Code</h5>
 
                                         <form action="{{ route('cart.apply-coupon') }}" method="POST"
                                             class="coupon-input">
@@ -134,14 +129,14 @@
 
                                         <!-- Thêm debug info -->
                                         <div style="display: none;">
-                                            <p>Thông tin gỡ lỗi:</p>
-                                            <p>Thời gian hiện tại: {{ now() }}</p>
-                                            <p>Số lượng mã giảm giá có sẵn: {{ $discounts->count() }}</p>
+                                            <p>Debug Info:</p>
+                                            <p>Current time: {{ now() }}</p>
+                                            <p>Available discounts: {{ $discounts->count() }}</p>
                                             @foreach ($discounts as $discount)
                                                 <p>
-                                                    Mã giảm giá: {{ $discount->code }} <br>
-                                                    Bắt đầu: {{ $discount->startDate }} <br>
-                                                    Kết thúc: {{ $discount->endDate }}
+                                                    Code: {{ $discount->code }} <br>
+                                                    Start: {{ $discount->startDate }} <br>
+                                                    End: {{ $discount->endDate }}
                                                 </p>
                                             @endforeach
                                         </div>
@@ -151,19 +146,19 @@
                                     <table class="table total-table">
                                         <tbody>
                                             <tr>
-                                                <td class="tt-left">Tạm tính giỏ hàng</td>
+                                                <td class="tt-left">Cart Subtotal</td>
                                                 <td></td>
                                                 <td class="tt-right">{{ number_format($total) }} VND</td>
                                             </tr>
                                             @if (isset($discountAmount) && $discountAmount > 0)
                                                 <tr>
-                                                    <td class="tt-left">Giảm giá ({{ session('discount_code') }})</td>
+                                                    <td class="tt-left">Discount ({{ session('discount_code') }})</td>
                                                     <td></td>
                                                     <td class="tt-right">-{{ number_format($discountAmount) }} VND</td>
                                                 </tr>
                                             @endif
                                             <tr>
-                                                <td class="tt-left">Tổng cộng</td>
+                                                <td class="tt-left">Total</td>
                                                 <td></td>
                                                 <td class="tt-right"><strong>{{ number_format($finalTotal) }} VND</strong>
                                                 </td>
@@ -182,15 +177,15 @@
                                 @endforeach
 
                                 <div class="cart-proceed-btns mt-4">
-                                    <button type="submit" class="cart-proceed">Thanh toán</button>
-                                    <a href="{{ route('client.index') }}" class="continue-shop">Tiếp tục mua sắm</a>
+                                    <button type="submit" class="cart-proceed">Checkout</button>
+                                    <a href="{{ route('client.index') }}" class="continue-shop">Continue Shopping</a>
                                 </div>
                             </form>
                         </div>
                     @else
                         <div class="text-center">
-                            <h3>Giỏ hàng của bạn hiện đang trống</h3>
-                            <a href="{{ route('client.index') }}" class="btn btn-primary mt-3">Tiếp tục mua sắm</a>
+                            <h3>Your cart is empty</h3>
+                            <a href="{{ route('client.index') }}" class="btn btn-primary mt-3">Continue Shopping</a>
                         </div>
                     @endif
                 </div>
@@ -205,14 +200,14 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="newslatter-wrap text-center">
-                        <h5>Kết nối với EG</h5>
-                        <h2 class="newslatter-title">Tham gia Bản Tin Của Chúng Tôi</h2>
-                        <p>Chào bạn, đăng ký ngay để nhận chiếc áo thun phiên bản giới hạn miễn phí!</p>
+                        <h5>Connect To EG</h5>
+                        <h2 class="newslatter-title">Join Our Newsletter</h2>
+                        <p>Hey you, sign up it only, Get this limited-edition T-shirt Free!</p>
 
                         <form action="#" method="POST">
                             <div class="newslatter-form">
                                 <input type="text" placeholder="Type Your Email">
-                                <button type="submit">Gửi<i class="bi bi-envelope-fill"></i></button>
+                                <button type="submit">Send <i class="bi bi-envelope-fill"></i></button>
                             </div>
                         </form>
                     </div>
@@ -383,7 +378,7 @@
             }
 
             function updateCartTotal() {
-                // Tính tổng cho các mục đã chọn (cho quá trình thanh toán)
+                // Tính tổng cho các mục đã chọn
                 let selectedTotal = 0;
                 const selectedItems = document.querySelectorAll('.select-item:checked');
 
@@ -395,33 +390,23 @@
                     selectedTotal += quantity * price;
                 });
 
-                // Tính tổng cho tất cả các mục trong giỏ hàng
-                let allItemsTotal = 0;
-                const allQuantityInputs = document.querySelectorAll('.quantity-input');
-
-                allQuantityInputs.forEach(input => {
-                    const quantity = parseInt(input.value) || 0;
-                    const price = parseFloat(input.dataset.price) || 0;
-                    allItemsTotal += quantity * price;
-                });
-
-                // Cập nhật Cart Subtotal với tổng tất cả mục
+                // Cập nhật Cart Subtotal với tổng các mục đã chọn
                 const subtotalElement = document.querySelector('.total-table tbody tr:first-child .tt-right');
                 if (subtotalElement) {
-                    subtotalElement.textContent = `${numberFormat(allItemsTotal)} VND`;
+                    subtotalElement.textContent = `${numberFormat(selectedTotal)} VND`;
                 }
 
                 // Cập nhật Final Total
                 const finalTotalElement = document.querySelector('.total-table tbody tr:last-child .tt-right strong');
                 if (finalTotalElement) {
-                    let finalTotal = allItemsTotal;
+                    let finalTotal = selectedTotal;
 
                     // Kiểm tra và áp dụng giảm giá nếu có
                     const discountRow = document.querySelector('.total-table tbody tr:nth-child(2)');
                     if (discountRow && discountRow.querySelector('.tt-left').textContent.includes('Discount')) {
                         const discountText = discountRow.querySelector('.tt-right').textContent;
                         const discountAmount = parseFloat(discountText.replace(/[^0-9]/g, '')) || 0;
-                        finalTotal = allItemsTotal - discountAmount;
+                        finalTotal = selectedTotal - discountAmount;
                     }
 
                     finalTotalElement.textContent = `${numberFormat(finalTotal)} VND`;
@@ -474,3 +459,76 @@
         /* No need for browser spinner removal since we're using text input */
     </style>
 @endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle toast close button
+        var toastEl = document.getElementById('stockErrorToast');
+        if (toastEl) {
+            var closeBtn = toastEl.querySelector('.btn-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    toastEl.style.display = 'none';
+                });
+            }
+
+            // Auto hide toast after 10 seconds
+            setTimeout(function() {
+                toastEl.style.display = 'none';
+            }, 10000);
+        }
+    });
+</script>
+@endsection
+
+<style>
+    /* Toast styles */
+    .toast.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    #stockErrorToast {
+        min-width: 350px;
+    }
+    .position-fixed {
+        position: fixed !important;
+    }
+    
+    /* Các style khác giữ nguyên */
+    .select-item {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .quantity {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-input {
+        width: 50px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        margin: 0 5px;
+    }
+
+    .quantity-btn {
+        width: 30px;
+        height: 30px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .quantity-btn:hover {
+        background-color: #e9ecef;
+    }
+</style>
