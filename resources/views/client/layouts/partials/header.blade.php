@@ -46,35 +46,14 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="has-child-menu">
-                            <a href="javascript:void(0)">Trang</a>
-                            <i class="fl flaticon-plus">+</i>
-                            <ul class="sub-menu">
-
-                                <li><a href="cart.html">Giỏ hàng</a></li>
-                                <li><a href="checkout.html">Thanh toán</a></li>
-                                <li><a href="login.html">Đăng nhập</a></li>
-                                <li><a href="register.html">Đăng ký</a></li>
-                                <li><a href="profile.html">Trang cá nhân</a></li>
-                                <li><a href="dashboard.html">Bảng điều khiển</a></li>
-                                <li><a href="order.html">Đơn hàng</a></li>
-                                <li><a href="setting.html">Cài đặt</a></li>
-                                <li><a href="coming-soon.html">Sắp ra mắt</a></li>
-                                <li><a href="faq.html">FAQ</a></li>
-                                <li><a href="404.html">404</a></li>
-
-                            </ul>
+                        <li class="">
+                            <a href="{{ route('home.contact') }}">Liên hệ</a>                         
                         </li>
 
-                        <li class="has-child-menu">
-                            <a href="javascript:void(0)">Blogs</a>
-                            <i class="fl flaticon-plus">+</i>
-                            <ul class="sub-menu">
-                                <li><a href="blog-grid">Blog Grid</a></li>
-                                <li><a href="blog-sidebar">Blog Sidebar</a></li>
-                                <li><a href="blog-details">Blog Details</a></li>
-                            </ul>
+                        <li class="">
+                            <a href="{{ route('home.about') }}">Về chúng tôi</a>                         
                         </li>
+
                         {{-- <li><a href="contact.html">Contact Us</a></li> --}}
                         {{-- <li class="has-child-menu">
                             <a href="javascript:void(0)">Tài khoản</a>

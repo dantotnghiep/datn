@@ -17,9 +17,22 @@ class HomeController extends Controller
     {
         $categories = Category::all(); // Lấy tất cả danh mục
 
-        $hotProducts = HotProduct::with(['product.images', 'product.variations'])
-        ->take(8)
-        ->get();
+        // Lấy 8 sản phẩm có lượt mua nhiều nhất
+        $hotProducts = Product::with([
+            'images' => function ($query) {
+                $query->where('is_main', true);
+            },
+            'variations'
+        ])
+            ->join('variations', 'products.id', '=', 'variations.product_id')
+            ->join('order_items', 'variations.id', '=', 'order_items.variation_id')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.payment_status', 'completed') // Chỉ tính đơn hàng đã hoàn thành
+            ->groupBy('products.id')
+            ->orderByRaw('SUM(order_items.quantity) DESC')
+            ->select('products.*')
+            ->take(8)
+            ->get();
 
         // Lấy 8 sản phẩm mới nhất
         $products = Product::with([
@@ -55,7 +68,7 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        return view('client.index', compact('categories','hotProducts', 'products', 'discountedProducts', 'selectedCategory'));
+        return view('client.index', compact('categories', 'hotProducts', 'products', 'discountedProducts', 'selectedCategory'));
     }
 
     public function category()
@@ -63,5 +76,78 @@ class HomeController extends Controller
         // Hiển thị danh sách danh mục
         return view('client.categories');
     }
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $categoryId = $request->input('category_id');
 
+        $productsQuery = Product::with([
+            'images' => function ($q) {
+                $q->where('is_main', true);
+            },
+            'variations'
+        ])
+            ->where('status', 'active');
+
+        // Apply category filter if selected
+        if ($categoryId) {
+            $productsQuery->where('category_id', $categoryId);
+        }
+
+        // Apply search query if provided
+        if ($query) {
+            $productsQuery->where(function ($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('description', 'LIKE', "%{$query}%")
+                    ->orWhereHas('category', function ($q) use ($query) {
+                        $q->where('name', 'LIKE', "%{$query}%");
+                    });
+            });
+        }
+
+        $products = $productsQuery->take(20)->get();
+        $categories = Category::where('status', 'active')->get();
+
+        return view('client.home.search', compact('products', 'query', 'categoryId', 'categories'));
+    }
+
+    public function searchSuggestions(Request $request)
+    {
+        $query = $request->input('query');
+        $suggestions = [];
+
+        if (strlen($query) >= 2) {
+            // Product suggestions
+            $productSuggestions = Product::where('name', 'LIKE', "%{$query}%")
+                ->where('status', 'active')
+                ->take(3)
+                ->pluck('name')
+                ->map(function ($name) {
+                    return ['type' => 'product', 'value' => $name];
+                });
+
+            // Category suggestions
+            $categorySuggestions = Category::where('name', 'LIKE', "%{$query}%")
+                ->where('status', 'active')
+                ->take(2)
+                ->pluck('name')
+                ->map(function ($name) {
+                    return ['type' => 'category', 'value' => $name];
+                });
+
+            $suggestions = $productSuggestions->merge($categorySuggestions)->take(5)->toArray();
+        }
+
+        return response()->json($suggestions);
+    }
+
+    public function contact()
+    {
+        return view('client.home.contact');
+    }
+
+    public function about()
+    {
+        return view('client.home.about');
+    }
 }

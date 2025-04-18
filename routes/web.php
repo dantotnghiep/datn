@@ -38,6 +38,10 @@ use Pusher\Pusher;
 
 Route::get('/', [HomeController::class, 'dashboard'])->name('client.index');
 Route::get('/categories', [HomeController::class, 'category'])->name('categories.index');
+Route::get('/search', [HomeController::class, 'search'])->name('client.search');
+Route::get('/search-suggestions', [HomeController::class, 'searchSuggestions'])->name('client.search-suggestions');
+Route::get('/contact', [HomeController::class, 'contact'])->name('home.contact');
+Route::get('/about', [HomeController::class, 'about'])->name('home.about');
 
 // Route::get('/order', [CartController::class, 'order'])->name('cart.order');
 
