@@ -13,20 +13,10 @@
                 </div>
             </div>
 
-            <!-- Debug -->
-            @if($errors->any())
-                <div style="background-color: #000; color: #fff; padding: 15px; margin-bottom: 20px;">
-                    <p>Debug: {{ count($errors->all()) }} errors found</p>
-                    @foreach($errors->all() as $error)
-                        <p>- {{ $error }}</p>
-                    @endforeach
-                </div>
-            @endif
-
             @if ($errors->any())
-                <div id="error-anchor" style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <div id="error-container" class="alert alert-info">
                     @foreach ($errors->all() as $error)
-                        <div style="margin-bottom: 5px;">{{ $error }}</div>
+                        <div>{{ $error }}</div>
                     @endforeach
                 </div>
             @endif
@@ -36,7 +26,6 @@
                     {{ session('success') }}
                 </div>
             @endif
-
 
             @if (session('error'))
                 <div class="alert alert-danger">
@@ -54,16 +43,16 @@
                                     <div class="col-md-6">
                                         <label for="name">Product Name</label>
                                         <input type="text" name="name" class="form-control" id="slug"
-                                            onkeyup="ChangeToSlug();" required value="{{ old('name') }}">
+                                            onkeyup="ChangeToSlug();"  value="{{ old('name') }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="slug">Slug</label>
                                         <input type="text" name="slug" class="form-control" id="convert_slug"
-                                            required value="{{ old('slug') }}">
+                                             value="{{ old('slug') }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="category_id">Category</label>
-                                        <select name="category_id" id="category_id" class="form-control" required>
+                                        <select name="category_id" id="category_id" class="form-control" >
                                             <option value="">-- Select Category --</option>
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
@@ -72,7 +61,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label for="status">Status</label>
-                                        <select name="status" id="status" class="form-control" required>
+                                        <select name="status" id="status" class="form-control" >
                                             <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
                                             <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                                         </select>
@@ -87,8 +76,7 @@
 
                                     <div class="col-md-6">
                                         <label for="main_image">Main Image</label>
-                                        <input type="file" name="main_image" class="form-control" accept="image/*"
-                                            required>
+                                        <input type="file" name="main_image" class="form-control" accept="image/*">
                                         <div class="mt-2" id="main_image_preview"></div>
                                     </div>
                                     <div class="col-md-6">
@@ -138,16 +126,32 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Debug logs
-            console.log('Errors object:', {!! json_encode($errors->all()) !!});
-            console.log('Errors count:', {!! $errors->count() !!});
-            console.log('Has errors:', {!! $errors->any() ? 'true' : 'false' !!});
-            
             // Image preview functionality
             const mainImageInput = document.querySelector('input[name="main_image"]');
             const additionalImagesInput = document.querySelector('input[name="additional_images[]"]');
             const mainImagePreview = document.getElementById('main_image_preview');
             const additionalImagesPreview = document.getElementById('additional_images_preview');
+
+            // Thêm xử lý slug tự động từ tên sản phẩm
+            const nameInput = document.getElementById('slug');
+            const slugInput = document.getElementById('convert_slug');
+            
+            if (nameInput && slugInput) {
+                // Hàm chuyển đổi tên thành slug
+                function ChangeToSlug() {
+                    let title = nameInput.value;
+                    let slug = title.toLowerCase()
+                        .replace(/[^\w ]+/g, '')
+                        .replace(/ +/g, '-');
+                    slugInput.value = slug;
+                }
+                
+                // Gán hàm vào sự kiện input để cập nhật slug khi đang nhập tên
+                nameInput.addEventListener('input', ChangeToSlug);
+                
+                // Gán hàm vào window để sử dụng với onkeyup đã có trong HTML
+                window.ChangeToSlug = ChangeToSlug;
+            }
 
             mainImageInput.addEventListener('change', function(e) {
                 mainImagePreview.innerHTML = '';
@@ -200,11 +204,6 @@
                     }
                 });
 
-                if (selectedAttributes.length === 0) {
-                    alert('Please select at least one attribute value before generating variations.');
-                    return;
-                }
-
                 let combinations = generateCombinations(selectedAttributes);
                 const variationsContainer = document.getElementById('variations-container');
                 variationsContainer.innerHTML = '';
@@ -223,15 +222,15 @@
                             </div>
                             <div class='col-md-6 mb-2'>
                                 <label>SKU</label>
-                                <input type='text' name='variations[${index}][sku]' class='form-control' required>
+                                <input type='text' name='variations[${index}][sku]' class='form-control' >
                             </div>
                             <div class='col-md-6 mb-2'>
                                 <label>Stock</label>
-                                <input type='number' name='variations[${index}][stock]' class='form-control' required min='0'>
+                                <input type='number' name='variations[${index}][stock]' class='form-control'  min='0'>
                             </div>
                             <div class='col-md-6 mb-2'>
                                 <label>Price</label>
-                                <input type='number' name='variations[${index}][price]' class='form-control' step='0.01' required min='0'>
+                                <input type='number' name='variations[${index}][price]' class='form-control' step='0.01'  min='0'>
                             </div>
                             <div class='col-md-6 mb-2'>
                                 <label>Sale Price</label>
@@ -258,15 +257,6 @@
                         variationItem.remove();
                         reindexVariations();
                     });
-                });
-                
-                // Add form validation - make sure user can't submit without generating variations
-                document.querySelector('form').addEventListener('submit', function(e) {
-                    const variations = document.querySelectorAll('.variation-item');
-                    if (variations.length === 0) {
-                        e.preventDefault();
-                        alert('Please generate at least one variation before submitting the form.');
-                    }
                 });
             }
 
@@ -313,14 +303,16 @@
             }
 
             // Scroll to error section if there are errors
-            if (document.getElementById('error-anchor')) {
-                const errorAnchor = document.getElementById('error-anchor');
-                const yOffset = -100; // Adjust offset to better display
-                const y = errorAnchor.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                window.scrollTo({top: y, behavior: 'smooth'});
+            if (document.getElementById('error-container')) {
+                setTimeout(function() {
+                    const errorContainer = document.getElementById('error-container');
+                    const yOffset = -100; // Adjust offset to better display
+                    const y = errorContainer.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                }, 300);
             }
             
-            // Lưu vị trí cuộn trước khi submit
+            // Setup form submit to save scroll position
             const form = document.querySelector('form');
             if (form) {
                 form.addEventListener('submit', function() {
@@ -328,13 +320,22 @@
                 });
             }
             
-            // Phục hồi vị trí cuộn nếu có lỗi xảy ra
+            // Restore scroll position if there are errors
             if ({{ $errors->any() ? 'true' : 'false' }}) {
-                const savedPosition = sessionStorage.getItem('scrollPosition');
-                if (savedPosition) {
-                    window.scrollTo(0, savedPosition);
-                    sessionStorage.removeItem('scrollPosition');
-                }
+                setTimeout(function() {
+                    const errorContainer = document.getElementById('error-container');
+                    if (errorContainer) {
+                        const yOffset = -100;
+                        const y = errorContainer.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        window.scrollTo({top: y, behavior: 'smooth'});
+                    } else {
+                        const savedPosition = sessionStorage.getItem('scrollPosition');
+                        if (savedPosition) {
+                            window.scrollTo(0, parseInt(savedPosition));
+                            sessionStorage.removeItem('scrollPosition');
+                        }
+                    }
+                }, 300);
             }
         });
     </script>
@@ -355,6 +356,31 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 5px;
+        }
+                
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+
+        #error-container {
+            font-size: 15px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 6px;
+            background-color:rgba(255, 109, 109, 0.67);
+            border: 1px solid #dee2e6;
+            color: #333;
+        }
+        
+        #error-container div {
+            margin-bottom: 5px;
         }
     </style>
 

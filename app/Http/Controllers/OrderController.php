@@ -101,16 +101,12 @@ class OrderController extends Controller
             // Kiểm tra tồn kho trước khi tiếp tục
             $stockValidation = $this->orderProcessingService->validateStock($cartItemsData);
             if (!$stockValidation['valid']) {
-                $errorMessage = "Không thể đặt hàng! Một số sản phẩm không đủ số lượng:<ul>";
-                foreach ($stockValidation['errors'] as $error) {
-                    $errorMessage .= "<li>{$error}</li>";
-                }
-                $errorMessage .= "</ul>";
+                $errorMessage = "Không thể đặt hàng! Một số sản phẩm không đủ số lượng";
                 
                 // Log lỗi để debug
                 \Log::error('Stock validation failed when placing order: ' . json_encode($stockValidation['errors']));
                 
-                // Đánh dấu session để hiển thị toast
+                // Đánh dấu session để hiển thị thông báo lỗi
                 session()->flash('stock_error', true);
                 
                 return back()->with('error', $errorMessage)->withInput();
@@ -118,6 +114,26 @@ class OrderController extends Controller
 
             // Xử lý theo phương thức thanh toán
             if ($validated['payment_method'] === 'vnpay') {
+                // Reserve tồn kho khi thanh toán qua VNPay
+                $reservedItems = [];
+                foreach ($cartItemsData as $item) {
+                    $variation = \App\Models\Variation::find($item['variation_id']);
+                    if ($variation) {
+                        // Lưu trữ thông tin stock cũ trước khi trừ
+                        $reservedItems[] = [
+                            'variation_id' => $variation->id,
+                            'old_stock' => $variation->stock,
+                            'quantity' => $item['quantity']
+                        ];
+                        
+                        // Trừ tồn kho
+                        $variation->stock -= $item['quantity'];
+                        $variation->save();
+                        
+                        \Log::info('Reserved stock for variation ID: ' . $variation->id . ' - New stock: ' . $variation->stock);
+                    }
+                }
+                
                 // Lưu thông tin đơn hàng vào session để dùng sau khi thanh toán
                 session([
                     'pending_order' => [
@@ -128,8 +144,12 @@ class OrderController extends Controller
                         'payment_method' => 'vnpay',
                         'cart_items' => $cartItemsData,
                         'total_amount' => $totalAmount
-                    ]
+                    ],
+                    'reserved_items' => $reservedItems // Lưu thông tin các items đã reserve
                 ]);
+
+                // Hiển thị thông báo trước khi chuyển đến VNPay
+                session()->flash('vnpay_info', true);
 
                 // Tạo URL thanh toán VNPay
                 $tempOrderCode = 'TEMP_' . time() . '_' . auth()->id();
@@ -218,35 +238,20 @@ class OrderController extends Controller
     {
         // Validate response từ VNPay
         if (!$this->vnpayService->validateResponse($request)) {
-            return redirect()->route('cart.checkout')->with('error', 'Invalid VNPay response');
+            // Khôi phục lại tồn kho khi thanh toán thất bại
+            $this->restoreReservedStock();
+            
+            return redirect()->route('cart.index')->with('error', 'Thanh toán VNPay không thành công. Vui lòng thử lại.');
         }
 
         try {
             // Lấy thông tin đơn hàng từ session
             $pendingOrder = session('pending_order');
             if (!$pendingOrder) {
+                // Khôi phục lại tồn kho nếu không tìm thấy đơn hàng
+                $this->restoreReservedStock();
+                
                 throw new \Exception('Không tìm thấy thông tin đơn hàng');
-            }
-
-            // Kiểm tra tồn kho trước khi tiếp tục
-            $stockValidation = $this->orderProcessingService->validateStock($pendingOrder['cart_items']);
-            if (!$stockValidation['valid']) {
-                $errorMessage = "Không thể đặt hàng! Một số sản phẩm không đủ số lượng:<ul>";
-                foreach ($stockValidation['errors'] as $error) {
-                    $errorMessage .= "<li>{$error}</li>";
-                }
-                $errorMessage .= "</ul>";
-                
-                // Xóa thông tin đơn hàng tạm từ session
-                session()->forget('pending_order');
-                
-                // Log lỗi để debug
-                \Log::error('Stock validation failed when processing VNPay return: ' . json_encode($stockValidation['errors']));
-                
-                // Đánh dấu session để hiển thị toast
-                session()->flash('stock_error', true);
-                
-                return redirect()->route('cart.index')->with('error', $errorMessage);
             }
 
             // Chuẩn bị data cho order
@@ -262,8 +267,8 @@ class OrderController extends Controller
                 'vnpay_payment_date' => $request->vnp_PayDate
             ];
 
-            // Xử lý đơn hàng trực tiếp
-            $result = $this->orderProcessingService->processOrder(
+            // Xử lý đơn hàng trực tiếp mà không cần kiểm tra tồn kho (đã trừ stock ở bước tạo VNPay)
+            $result = $this->orderProcessingService->processOrderWithoutStockCheck(
                 $orderData, 
                 $pendingOrder['cart_items'], 
                 auth()->id()
@@ -271,18 +276,55 @@ class OrderController extends Controller
             
             // Xóa thông tin đơn hàng tạm từ session
             session()->forget('pending_order');
+            session()->forget('reserved_items');
             
             if ($result['success']) {
                 return redirect()->route('cart.index')
                     ->with('success', $result['message']);
             } else {
+                // Nếu xử lý đơn hàng thất bại, khôi phục lại tồn kho
+                $this->restoreReservedStock();
+                
                 return redirect()->route('cart.index')
                     ->with('error', $result['message']);
             }
         } catch (\Exception $e) {
+            // Khôi phục lại tồn kho khi có lỗi
+            $this->restoreReservedStock();
+            
             \Log::error('VNPay order creation failed: ' . $e->getMessage());
-            return redirect()->route('cart.checkout')
-                ->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage());
+            return redirect()->route('cart.index')
+                ->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng sau khi thanh toán: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Khôi phục lại tồn kho từ các mục đã reserve trong session
+     */
+    private function restoreReservedStock()
+    {
+        $reservedItems = session('reserved_items', []);
+        
+        if (!empty($reservedItems)) {
+            foreach ($reservedItems as $item) {
+                try {
+                    $variation = \App\Models\Variation::find($item['variation_id']);
+                    if ($variation) {
+                        // Khôi phục lại stock
+                        $variation->stock = $item['old_stock'];
+                        $variation->save();
+                        
+                        \Log::info('Restored stock for variation ID: ' . $variation->id . ' - Reset to: ' . $variation->stock);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Failed to restore stock for variation ID: ' . $item['variation_id'], [
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+            
+            // Xóa thông tin reserved từ session
+            session()->forget('reserved_items');
         }
     }
 }
