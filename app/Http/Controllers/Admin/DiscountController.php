@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Discount;
+use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -17,7 +19,9 @@ class DiscountController extends Controller
 
     public function create()
     {
-        return view('admin.discounts.create');
+        $products = Product::where('status', 'active')->get();
+        $categories = Category::all();
+        return view('admin.discounts.create', compact('products', 'categories'));
     }
 
     public function store(Request $request)

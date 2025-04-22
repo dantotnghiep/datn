@@ -122,7 +122,7 @@
                             <div class="row mt-60">
                                 <div class="col-xxl-4 col-lg-4">
                                     <div class="cart-coupon-input">
-                                        <h5 class="coupon-title">Coupon Code</h5>
+                                        <h5 class="coupon-title">Mã giảm giá</h5>
 
                                         <form action="{{ route('cart.apply-coupon') }}" method="POST"
                                             class="coupon-input">
@@ -130,54 +130,60 @@
                                             <select name="discount_code" class="form-select" style="min-width: 200px;">
                                                 <option value="">-- Chọn mã giảm giá --</option>
                                                 @foreach ($discounts as $discount)
-                                                    <option value="{{ $discount->code }}">
-                                                        {{ $discount->code }}
-                                                        (Giảm {{ number_format($discount->sale) }}%
+                                                    <option value="{{ $discount->code }}" 
+                                                        {{ session('discount_code') == $discount->code ? 'selected' : '' }}>
+                                                        {{ $discount->code }} -
+                                                        @if($discount->type == 'percentage')
+                                                            Giảm {{ number_format($discount->sale) }}%
+                                                            @if($discount->maxDiscount)
+                                                                (Tối đa {{ number_format($discount->maxDiscount) }}đ)
+                                                            @endif
+                                                        @else
+                                                            Giảm {{ number_format($discount->sale) }}đ
+                                                        @endif
                                                         @if ($discount->minOrderValue > 0)
                                                             - Đơn tối thiểu {{ number_format($discount->minOrderValue) }}đ
-                                                        @endif)
+                                                        @endif
+                                                        @if ($discount->maxUsage)
+                                                            - Còn {{ $discount->maxUsage - $discount->usageCount }} lượt
+                                                        @endif
                                                         - HSD: {{ $discount->endDate->format('d/m/Y') }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                             <button type="submit" class="btn btn-primary">Áp dụng</button>
                                         </form>
-
-                                        <!-- Thêm debug info -->
-                                        <div style="display: none;">
-                                            <p>Debug Info:</p>
-                                            <p>Current time: {{ now() }}</p>
-                                            <p>Available discounts: {{ $discounts->count() }}</p>
-                                            @foreach ($discounts as $discount)
-                                                <p>
-                                                    Code: {{ $discount->code }} <br>
-                                                    Start: {{ $discount->startDate }} <br>
-                                                    End: {{ $discount->endDate }}
-                                                </p>
-                                            @endforeach
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-xxl-8 col-lg-8">
                                     <table class="table total-table">
                                         <tbody>
                                             <tr>
-                                                <td class="tt-left">Cart Subtotal</td>
+                                                <td class="tt-left">Tạm tính</td>
                                                 <td></td>
-                                                <td class="tt-right">{{ number_format($total) }} VND</td>
+                                                <td class="tt-right">{{ number_format($total) }} VNĐ</td>
                                             </tr>
-                                            @if (isset($discountAmount) && $discountAmount > 0)
-                                                <tr>
-                                                    <td class="tt-left">Discount ({{ session('discount_code') }})</td>
-                                                    <td></td>
-                                                    <td class="tt-right">-{{ number_format($discountAmount) }} VND</td>
-                                                </tr>
+                                            @if (session('discount_code'))
+                                                @php
+                                                    $appliedDiscount = $discounts->where('code', session('discount_code'))->first();
+                                                @endphp
+                                                @if($appliedDiscount)
+                                                    <tr>
+                                                        <td class="tt-left">
+                                                            Giảm giá ({{ session('discount_code') }})
+                                                            @if($appliedDiscount->type == 'percentage')
+                                                                ({{ number_format($appliedDiscount->sale) }}%)
+                                                            @endif
+                                                        </td>
+                                                        <td></td>
+                                                        <td class="tt-right text-danger">-{{ number_format($discountAmount) }} VNĐ</td>
+                                                    </tr>
+                                                @endif
                                             @endif
                                             <tr>
-                                                <td class="tt-left">Total</td>
+                                                <td class="tt-left">Tổng tiền</td>
                                                 <td></td>
-                                                <td class="tt-right"><strong>{{ number_format($finalTotal) }} VND</strong>
-                                                </td>
+                                                <td class="tt-right"><strong>{{ number_format($finalTotal) }} VNĐ</strong></td>
                                             </tr>
                                         </tbody>
                                     </table>

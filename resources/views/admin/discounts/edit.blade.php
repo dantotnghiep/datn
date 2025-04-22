@@ -33,9 +33,21 @@
                                     </div>
 
                                     <div class="form-group mb-3">
-                                        <label for="sale">Giá trị giảm (%)</label>
-                                        <input type="number" class="form-control @error('sale') is-invalid @enderror"
+                                        <label for="type">Loại giảm giá</label>
+                                        <select class="form-control @error('type') is-invalid @enderror" id="type" name="type" required>
+                                            <option value="percentage" {{ old('type', $discount->type) == 'percentage' ? 'selected' : '' }}>Theo phần trăm</option>
+                                            <option value="fixed" {{ old('type', $discount->type) == 'fixed' ? 'selected' : '' }}>Số tiền cố định</option>
+                                        </select>
+                                        @error('type')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="sale">Giá trị giảm</label>
+                                        <input type="number" step="0.01" class="form-control @error('sale') is-invalid @enderror"
                                                id="sale" name="sale" value="{{ old('sale', $discount->sale) }}" required>
+                                        <small class="form-text text-muted">Nhập % nếu giảm theo phần trăm, hoặc số tiền nếu giảm cố định</small>
                                         @error('sale')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -50,9 +62,7 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                </div>
 
-                                <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="endDate">Ngày kết thúc</label>
                                         <input type="datetime-local" class="form-control @error('endDate') is-invalid @enderror"
@@ -67,7 +77,31 @@
                                         <label for="maxUsage">Giới hạn sử dụng</label>
                                         <input type="number" class="form-control @error('maxUsage') is-invalid @enderror"
                                                id="maxUsage" name="maxUsage" value="{{ old('maxUsage', $discount->maxUsage) }}">
+                                        <small class="form-text text-muted">Để trống nếu không giới hạn</small>
                                         @error('maxUsage')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="user_limit">Giới hạn sử dụng mỗi người dùng</label>
+                                        <input type="number" class="form-control @error('user_limit') is-invalid @enderror"
+                                               id="user_limit" name="user_limit" value="{{ old('user_limit', $discount->user_limit) }}">
+                                        <small class="form-text text-muted">Để trống nếu không giới hạn</small>
+                                        @error('user_limit')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="is_public">Trạng thái công khai</label>
+                                        <select class="form-control @error('is_public') is-invalid @enderror" id="is_public" name="is_public" required>
+                                            <option value="1" {{ old('is_public', $discount->is_public) ? 'selected' : '' }}>Công khai</option>
+                                            <option value="0" {{ old('is_public', $discount->is_public) ? '' : 'selected' }}>Riêng tư</option>
+                                        </select>
+                                        @error('is_public')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -91,6 +125,42 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="status">Trạng thái</label>
+                                        <select class="form-control @error('status') is-invalid @enderror" id="status" name="status" required>
+                                            <option value="active" {{ old('status', $discount->status) == 'active' ? 'selected' : '' }}>Hoạt động</option>
+                                            <option value="inactive" {{ old('status', $discount->status) == 'inactive' ? 'selected' : '' }}>Tạm dừng</option>
+                                            <option value="expired" {{ old('status', $discount->status) == 'expired' ? 'selected' : '' }}>Hết hạn</option>
+                                        </select>
+                                        @error('status')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="applicable_products">Sản phẩm áp dụng</label>
+                                        <select class="form-control @error('applicable_products') is-invalid @enderror" 
+                                                id="applicable_products" name="applicable_products[]" multiple>
+                                            {{-- Add your product options here --}}
+                                        </select>
+                                        <small class="form-text text-muted">Để trống nếu áp dụng cho tất cả sản phẩm</small>
+                                        @error('applicable_products')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="applicable_categories">Danh mục áp dụng</label>
+                                        <select class="form-control @error('applicable_categories') is-invalid @enderror" 
+                                                id="applicable_categories" name="applicable_categories[]" multiple>
+                                            {{-- Add your category options here --}}
+                                        </select>
+                                        <small class="form-text text-muted">Để trống nếu áp dụng cho tất cả danh mục</small>
+                                        @error('applicable_categories')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
 
@@ -105,4 +175,25 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+$(document).ready(function() {
+    // Initialize select2 for multiple select
+    $('#applicable_products, #applicable_categories').select2({
+        placeholder: 'Chọn...',
+        allowClear: true
+    });
+
+    // Set initial values for applicable_products and applicable_categories
+    @if($discount->applicable_products)
+        $('#applicable_products').val({!! json_encode($discount->applicable_products) !!}).trigger('change');
+    @endif
+
+    @if($discount->applicable_categories)
+        $('#applicable_categories').val({!! json_encode($discount->applicable_categories) !!}).trigger('change');
+    @endif
+});
+</script>
 @endsection

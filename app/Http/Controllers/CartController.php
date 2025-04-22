@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\Variation;
+use App\Models\Discount;
 use Auth;
 use Illuminate\Http\Request;
 
@@ -13,40 +14,24 @@ class CartController extends Controller
     {
         $cartItems = Cart::where('user_id', auth()->id())->get();
 
-        // Sửa lại query lấy discounts
+        // Lấy các mã giảm giá hợp lệ
         $now = now();
-        \Log::info('Current time:', ['now' => $now->toDateTimeString()]);
-
-        $discounts = \App\Models\Discount::query()
+        $discounts = Discount::query()
             ->whereNull('deleted_at')
-            ->where('endDate', '>', $now->format('Y-m-d H:i:s'))  // Format datetime
-            ->where('startDate', '<=', $now->format('Y-m-d H:i:s'))  // Format datetime
+            ->where('status', 'active')
+            ->where('endDate', '>', $now)
+            ->where('startDate', '<=', $now)
             ->where(function($query) {
                 $query->whereNull('maxUsage')
                       ->orWhereRaw('maxUsage > usageCount');
             })
+            ->where(function($query) {
+                $query->where('is_public', true)
+                      ->orWhereHas('users', function($q) {
+                          $q->where('user_id', auth()->id());
+                      });
+            })
             ->get();
-
-        // Log full query để debug
-        \Log::info('SQL Query:', [
-            'sql' => \App\Models\Discount::query()
-                ->whereNull('deleted_at')
-                ->where('endDate', '>', $now->format('Y-m-d H:i:s'))
-                ->where('startDate', '<=', $now->format('Y-m-d H:i:s'))
-                ->where(function($query) {
-                    $query->whereNull('maxUsage')
-                          ->orWhereRaw('maxUsage > usageCount');
-                })
-                ->toSql(),
-            'bindings' => [
-                'now' => $now->format('Y-m-d H:i:s')
-            ]
-        ]);
-
-        \Log::info('Discounts found:', [
-            'count' => $discounts->count(),
-            'discounts' => $discounts->toArray()
-        ]);
 
         // Tính tổng giá trị giỏ hàng
         $total = $cartItems->sum(function($item) {
@@ -60,17 +45,51 @@ class CartController extends Controller
         // Kiểm tra và áp dụng mã giảm giá từ session
         $discountCode = session('discount_code');
         if ($discountCode) {
-            $discount = \App\Models\Discount::where('code', $discountCode)
+            $discount = Discount::where('code', $discountCode)
+                ->where('status', 'active')
                 ->where('startDate', '<=', now())
                 ->where('endDate', '>', now())
                 ->first();
 
-            if ($discount && $total >= $discount->minOrderValue) {
-                $discountAmount = ($total * $discount->sale) / 100;
-                if ($discount->maxDiscount > 0) {
-                    $discountAmount = min($discountAmount, $discount->maxDiscount);
+            if ($discount) {
+                // Kiểm tra điều kiện áp dụng
+                $canApply = true;
+
+                // Kiểm tra giá trị đơn hàng tối thiểu
+                if ($discount->minOrderValue && $total < $discount->minOrderValue) {
+                    $canApply = false;
                 }
-                $finalTotal = $total - $discountAmount;
+
+                // Kiểm tra giới hạn sử dụng
+                if ($discount->maxUsage && $discount->usageCount >= $discount->maxUsage) {
+                    $canApply = false;
+                }
+
+                // Kiểm tra giới hạn sử dụng cho mỗi user
+                if ($discount->user_limit) {
+                    $userUsageCount = \DB::table('orders')
+                        ->where('user_id', auth()->id())
+                        ->where('discount_code', $discount->code)
+                        ->count();
+                    if ($userUsageCount >= $discount->user_limit) {
+                        $canApply = false;
+                    }
+                }
+
+                if ($canApply) {
+                    if ($discount->type == 'percentage') {
+                        $discountAmount = ($total * $discount->sale) / 100;
+                        if ($discount->maxDiscount > 0) {
+                            $discountAmount = min($discountAmount, $discount->maxDiscount);
+                        }
+                    } else {
+                        $discountAmount = $discount->sale;
+                    }
+                    $finalTotal = $total - $discountAmount;
+                } else {
+                    // Nếu không thể áp dụng, xóa mã giảm giá khỏi session
+                    session()->forget('discount_code');
+                }
             }
         }
 
@@ -196,17 +215,51 @@ class CartController extends Controller
         // Kiểm tra và áp dụng mã giảm giá từ session
         $discountCode = session('discount_code');
         if ($discountCode) {
-            $discount = \App\Models\Discount::where('code', $discountCode)
+            $discount = Discount::where('code', $discountCode)
+                ->where('status', 'active')
                 ->where('startDate', '<=', now())
                 ->where('endDate', '>', now())
                 ->first();
 
-            if ($discount && $subtotal >= $discount->minOrderValue) {
-                $discountAmount = ($subtotal * $discount->sale) / 100;
-                if ($discount->maxDiscount > 0) {
-                    $discountAmount = min($discountAmount, $discount->maxDiscount);
+            if ($discount) {
+                // Kiểm tra điều kiện áp dụng
+                $canApply = true;
+
+                // Kiểm tra giá trị đơn hàng tối thiểu
+                if ($discount->minOrderValue && $subtotal < $discount->minOrderValue) {
+                    $canApply = false;
                 }
-                $finalTotal = $subtotal - $discountAmount;
+
+                // Kiểm tra giới hạn sử dụng
+                if ($discount->maxUsage && $discount->usageCount >= $discount->maxUsage) {
+                    $canApply = false;
+                }
+
+                // Kiểm tra giới hạn sử dụng cho mỗi user
+                if ($discount->user_limit) {
+                    $userUsageCount = \DB::table('orders')
+                        ->where('user_id', auth()->id())
+                        ->where('discount_code', $discount->code)
+                        ->count();
+                    if ($userUsageCount >= $discount->user_limit) {
+                        $canApply = false;
+                    }
+                }
+
+                if ($canApply) {
+                    if ($discount->type == 'percentage') {
+                        $discountAmount = ($subtotal * $discount->sale) / 100;
+                        if ($discount->maxDiscount > 0) {
+                            $discountAmount = min($discountAmount, $discount->maxDiscount);
+                        }
+                    } else {
+                        $discountAmount = $discount->sale;
+                    }
+                    $finalTotal = $subtotal - $discountAmount;
+                } else {
+                    // Nếu không thể áp dụng, xóa mã giảm giá khỏi session
+                    session()->forget('discount_code');
+                }
             }
         }
         return view('client.cart.checkout', compact('cartItems', 'user', 'subtotal', 'finalTotal', 'discountAmount', 'discountCode'));
@@ -223,10 +276,11 @@ class CartController extends Controller
             'discount_code' => 'required|exists:discounts,code'
         ]);
 
-        // Xóa mã giảm giá cũ trong session (nếu có)
+        // Xóa mã giảm giá cũ trong session
         session()->forget('discount_code');
 
-        $discount = \App\Models\Discount::where('code', $request->discount_code)
+        $discount = Discount::where('code', $request->discount_code)
+            ->where('status', 'active')
             ->where('startDate', '<=', now())
             ->where('endDate', '>', now())
             ->first();
@@ -235,9 +289,25 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ hoặc đã hết hạn!');
         }
 
-        // Kiểm tra số lần sử dụng
-        if ($discount->maxUsage > 0 && $discount->usageCount >= $discount->maxUsage) {
+        // Kiểm tra mã giảm giá có phải public hoặc được assign cho user không
+        if (!$discount->is_public && !$discount->users()->where('user_id', auth()->id())->exists()) {
+            return redirect()->back()->with('error', 'Bạn không có quyền sử dụng mã giảm giá này!');
+        }
+
+        // Kiểm tra số lần sử dụng tổng
+        if ($discount->maxUsage && $discount->usageCount >= $discount->maxUsage) {
             return redirect()->back()->with('error', 'Mã giảm giá đã hết lượt sử dụng!');
+        }
+
+        // Kiểm tra số lần sử dụng của user
+        if ($discount->user_limit) {
+            $userUsageCount = \DB::table('orders')
+                ->where('user_id', auth()->id())
+                ->where('discount_code', $discount->code)
+                ->count();
+            if ($userUsageCount >= $discount->user_limit) {
+                return redirect()->back()->with('error', 'Bạn đã sử dụng hết số lần được phép dùng mã này!');
+            }
         }
 
         // Tính tổng giá trị đơn hàng
@@ -245,11 +315,11 @@ class CartController extends Controller
             ->sum(\DB::raw('price * quantity'));
 
         // Kiểm tra giá trị đơn hàng tối thiểu
-        if ($cartTotal < $discount->minOrderValue) {
+        if ($discount->minOrderValue && $cartTotal < $discount->minOrderValue) {
             return redirect()->back()->with('error', 'Giá trị đơn hàng chưa đạt mức tối thiểu!');
         }
 
-        // Lưu mã giảm giá mới vào session
+        // Lưu mã giảm giá vào session
         session(['discount_code' => $discount->code]);
 
         return redirect()->back()->with('success', 'Áp dụng mã giảm giá thành công!');
