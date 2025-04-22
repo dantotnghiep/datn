@@ -168,12 +168,18 @@
                                                     $appliedDiscount = $discounts->where('code', session('discount_code'))->first();
                                                 @endphp
                                                 @if($appliedDiscount)
-                                                    <tr>
+                                                    <tr class="discount-row">
                                                         <td class="tt-left">
                                                             Giảm giá ({{ session('discount_code') }})
                                                             @if($appliedDiscount->type == 'percentage')
                                                                 ({{ number_format($appliedDiscount->sale) }}%)
                                                             @endif
+                                                            <form action="{{ route('cart.remove-coupon') }}" method="POST" style="display: inline;">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-sm btn-link text-danger" style="text-decoration: none;">
+                                                                    <i class="bi bi-x-circle"></i> Hủy
+                                                                </button>
+                                                            </form>
                                                         </td>
                                                         <td></td>
                                                         <td class="tt-right text-danger" data-discount-type="{{ $appliedDiscount->type }}" 
@@ -425,32 +431,32 @@
                 // Cập nhật số tiền giảm giá nếu có
                 const discountRow = document.querySelector('.total-table tbody tr:nth-child(2)');
                 let discountAmount = 0;
+                let finalTotal = selectedTotal; // Khởi tạo finalTotal bằng selectedTotal
 
-                if (discountRow) {
+                if (discountRow && discountRow.classList.contains('discount-row')) {
                     const discountCell = discountRow.querySelector('.tt-right');
                     if (discountCell) {
                         const discountType = discountCell.dataset.discountType;
-                        const discountValue = parseFloat(discountCell.dataset.discountValue);
-                        const maxDiscount = parseFloat(discountCell.dataset.maxDiscount);
+                        const discountValue = parseFloat(discountCell.dataset.discountValue) || 0;
+                        const maxDiscount = parseFloat(discountCell.dataset.maxDiscount) || 0;
 
                         if (discountType === 'percentage') {
                             discountAmount = (selectedTotal * discountValue) / 100;
                             if (maxDiscount > 0 && discountAmount > maxDiscount) {
                                 discountAmount = maxDiscount;
                             }
-                        } else {
+                        } else if (discountType === 'fixed') {
                             discountAmount = discountValue;
                         }
 
                         discountCell.textContent = `-${numberFormat(discountAmount)} VNĐ`;
-                        discountCell.classList.add('text-danger');
+                        finalTotal = selectedTotal - discountAmount;
                     }
                 }
 
                 // Cập nhật Final Total
                 const finalTotalElement = document.querySelector('.total-table tbody tr:last-child .tt-right strong');
                 if (finalTotalElement) {
-                    const finalTotal = selectedTotal - discountAmount;
                     finalTotalElement.textContent = `${numberFormat(finalTotal)} VNĐ`;
                 }
             }

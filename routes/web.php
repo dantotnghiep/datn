@@ -166,6 +166,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
     Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
+    Route::post('/cart/remove-coupon', [CartController::class, 'removeCoupon'])->name('cart.remove-coupon');
 
     // Routes cho checkout và thanh toán
     Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');

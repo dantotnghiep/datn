@@ -296,4 +296,10 @@ class CartController extends Controller
 
         return redirect()->back()->with('success', 'Áp dụng mã giảm giá thành công!');
     }
+
+    public function removeCoupon()
+    {
+        session()->forget('discount_code');
+        return redirect()->back()->with('success', 'Đã hủy mã giảm giá!');
+    }
 }
