@@ -176,7 +176,11 @@
                                                             @endif
                                                         </td>
                                                         <td></td>
-                                                        <td class="tt-right text-danger">-{{ number_format($discountAmount) }} VNĐ</td>
+                                                        <td class="tt-right text-danger" data-discount-type="{{ $appliedDiscount->type }}" 
+                                                            data-discount-value="{{ $appliedDiscount->sale }}"
+                                                            data-max-discount="{{ $appliedDiscount->maxDiscount ?? 0 }}">
+                                                            -{{ number_format($discountAmount) }} VNĐ
+                                                        </td>
                                                     </tr>
                                                 @endif
                                             @endif
@@ -415,23 +419,39 @@
                 // Cập nhật Cart Subtotal với tổng các mục đã chọn
                 const subtotalElement = document.querySelector('.total-table tbody tr:first-child .tt-right');
                 if (subtotalElement) {
-                    subtotalElement.textContent = `${numberFormat(selectedTotal)} VND`;
+                    subtotalElement.textContent = `${numberFormat(selectedTotal)} VNĐ`;
+                }
+
+                // Cập nhật số tiền giảm giá nếu có
+                const discountRow = document.querySelector('.total-table tbody tr:nth-child(2)');
+                let discountAmount = 0;
+
+                if (discountRow) {
+                    const discountCell = discountRow.querySelector('.tt-right');
+                    if (discountCell) {
+                        const discountType = discountCell.dataset.discountType;
+                        const discountValue = parseFloat(discountCell.dataset.discountValue);
+                        const maxDiscount = parseFloat(discountCell.dataset.maxDiscount);
+
+                        if (discountType === 'percentage') {
+                            discountAmount = (selectedTotal * discountValue) / 100;
+                            if (maxDiscount > 0 && discountAmount > maxDiscount) {
+                                discountAmount = maxDiscount;
+                            }
+                        } else {
+                            discountAmount = discountValue;
+                        }
+
+                        discountCell.textContent = `-${numberFormat(discountAmount)} VNĐ`;
+                        discountCell.classList.add('text-danger');
+                    }
                 }
 
                 // Cập nhật Final Total
                 const finalTotalElement = document.querySelector('.total-table tbody tr:last-child .tt-right strong');
                 if (finalTotalElement) {
-                    let finalTotal = selectedTotal;
-
-                    // Kiểm tra và áp dụng giảm giá nếu có
-                    const discountRow = document.querySelector('.total-table tbody tr:nth-child(2)');
-                    if (discountRow && discountRow.querySelector('.tt-left').textContent.includes('Discount')) {
-                        const discountText = discountRow.querySelector('.tt-right').textContent;
-                        const discountAmount = parseFloat(discountText.replace(/[^0-9]/g, '')) || 0;
-                        finalTotal = selectedTotal - discountAmount;
-                    }
-
-                    finalTotalElement.textContent = `${numberFormat(finalTotal)} VND`;
+                    const finalTotal = selectedTotal - discountAmount;
+                    finalTotalElement.textContent = `${numberFormat(finalTotal)} VNĐ`;
                 }
             }
 

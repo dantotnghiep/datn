@@ -219,13 +219,61 @@
                     </div>
                     <div class="total-cost-summary">
                         <ul>
-                            <li class="subtotal">Subtotal <span>{{ number_format($subtotal, 2) }}</span></li>
-                            @if ($discountAmount > 0)
-                            <li>Discount <span>-{{ number_format($discountAmount, 2) }}</span></li>
+                            <li class="subtotal">Tạm tính <span>{{ number_format($subtotal) }} VNĐ</span></li>
+                            @if(session('discount_code'))
+                                @php
+                                    $discount = \App\Models\Discount::where('code', session('discount_code'))
+                                        ->where('status', 'active')
+                                        ->where('startDate', '<=', now())
+                                        ->where('endDate', '>=', now())
+                                        ->first();
+                                    
+                                    $discountAmount = 0;
+                                    if ($discount) {
+                                        // Kiểm tra điều kiện đơn hàng tối thiểu
+                                        if (!$discount->minOrderValue || $subtotal >= $discount->minOrderValue) {
+                                            if ($discount->type == 'percentage') {
+                                                $discountAmount = ($subtotal * $discount->sale) / 100;
+                                                // Kiểm tra giới hạn giảm giá tối đa
+                                                if ($discount->maxDiscount && $discountAmount > $discount->maxDiscount) {
+                                                    $discountAmount = $discount->maxDiscount;
+                                                }
+                                            } else {
+                                                $discountAmount = $discount->sale;
+                                            }
+                                        }
+                                        $finalTotal = $subtotal - $discountAmount;
+                                    }
+                                @endphp
+                                @if($discount)
+                                    <li class="discount">
+                                        <div>
+                                            Giảm giá ({{ $discount->code }})
+                                            @if($discount->type == 'percentage')
+                                                ({{ number_format($discount->sale, 0) }}%
+                                                @if($discount->maxDiscount)
+                                                    - Tối đa {{ number_format($discount->maxDiscount) }} VNĐ
+                                                @endif
+                                                )
+                                            @endif
+                                        </div>
+                                        <span class="text-danger">-{{ number_format($discountAmount) }} VNĐ</span>
+                                    </li>
+                                    @if($discount->minOrderValue && $subtotal < $discount->minOrderValue)
+                                        <li class="text-warning">
+                                            <small>* Đơn hàng tối thiểu {{ number_format($discount->minOrderValue) }} VNĐ để áp dụng mã giảm giá</small>
+                                        </li>
+                                    @endif
+                                @endif
                             @endif
-                            <li>Total <span>{{ number_format($finalTotal, 2) }}</span></li>
+                            <li class="total"><strong>Tổng tiền</strong> <span><strong>{{ number_format(isset($finalTotal) ? $finalTotal : $subtotal) }} VNĐ</strong></span></li>
                         </ul>
                     </div>
+
+                    <!-- Thêm input hidden để lưu mã giảm giá -->
+                    @if(session('discount_code'))
+                        <input type="hidden" name="discount_code" value="{{ session('discount_code') }}">
+                    @endif
                 </div>
             </div>
         </div>

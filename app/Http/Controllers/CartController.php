@@ -27,9 +27,7 @@ class CartController extends Controller
             })
             ->where(function($query) {
                 $query->where('is_public', true)
-                      ->orWhereHas('users', function($q) {
-                          $q->where('user_id', auth()->id());
-                      });
+                      ->orWhere('is_public', false); // Tạm thời lấy cả private discounts
             })
             ->get();
 
@@ -65,22 +63,12 @@ class CartController extends Controller
                     $canApply = false;
                 }
 
-                // Kiểm tra giới hạn sử dụng cho mỗi user
-                if ($discount->user_limit) {
-                    $userUsageCount = \DB::table('orders')
-                        ->where('user_id', auth()->id())
-                        ->where('discount_code', $discount->code)
-                        ->count();
-                    if ($userUsageCount >= $discount->user_limit) {
-                        $canApply = false;
-                    }
-                }
-
                 if ($canApply) {
                     if ($discount->type == 'percentage') {
                         $discountAmount = ($total * $discount->sale) / 100;
-                        if ($discount->maxDiscount > 0) {
-                            $discountAmount = min($discountAmount, $discount->maxDiscount);
+                        // Kiểm tra giới hạn giảm giá tối đa
+                        if ($discount->maxDiscount && $discountAmount > $discount->maxDiscount) {
+                            $discountAmount = $discount->maxDiscount;
                         }
                     } else {
                         $discountAmount = $discount->sale;
@@ -279,44 +267,28 @@ class CartController extends Controller
         // Xóa mã giảm giá cũ trong session
         session()->forget('discount_code');
 
-        $discount = Discount::where('code', $request->discount_code)
-            ->where('status', 'active')
-            ->where('startDate', '<=', now())
-            ->where('endDate', '>', now())
-            ->first();
+        $discount = Discount::where('code', $request->discount_code)->first();
 
         if (!$discount) {
-            return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ hoặc đã hết hạn!');
-        }
-
-        // Kiểm tra mã giảm giá có phải public hoặc được assign cho user không
-        if (!$discount->is_public && !$discount->users()->where('user_id', auth()->id())->exists()) {
-            return redirect()->back()->with('error', 'Bạn không có quyền sử dụng mã giảm giá này!');
-        }
-
-        // Kiểm tra số lần sử dụng tổng
-        if ($discount->maxUsage && $discount->usageCount >= $discount->maxUsage) {
-            return redirect()->back()->with('error', 'Mã giảm giá đã hết lượt sử dụng!');
-        }
-
-        // Kiểm tra số lần sử dụng của user
-        if ($discount->user_limit) {
-            $userUsageCount = \DB::table('orders')
-                ->where('user_id', auth()->id())
-                ->where('discount_code', $discount->code)
-                ->count();
-            if ($userUsageCount >= $discount->user_limit) {
-                return redirect()->back()->with('error', 'Bạn đã sử dụng hết số lần được phép dùng mã này!');
-            }
+            return redirect()->back()->with('error', 'Mã giảm giá không tồn tại!');
         }
 
         // Tính tổng giá trị đơn hàng
         $cartTotal = Cart::where('user_id', auth()->id())
             ->sum(\DB::raw('price * quantity'));
 
-        // Kiểm tra giá trị đơn hàng tối thiểu
-        if ($discount->minOrderValue && $cartTotal < $discount->minOrderValue) {
-            return redirect()->back()->with('error', 'Giá trị đơn hàng chưa đạt mức tối thiểu!');
+        if (!$discount->canApplyToCart($cartTotal, auth()->id())) {
+            $message = match(true) {
+                $discount->status !== 'active' => 'Mã giảm giá không hoạt động!',
+                now() < $discount->startDate => 'Mã giảm giá chưa đến thời gian sử dụng!',
+                now() > $discount->endDate => 'Mã giảm giá đã hết hạn!',
+                $discount->maxUsage && $discount->usageCount >= $discount->maxUsage => 'Mã giảm giá đã hết lượt sử dụng!',
+                !$discount->is_public => 'Bạn không có quyền sử dụng mã giảm giá này!',
+                $discount->minOrderValue && $cartTotal < $discount->minOrderValue => 
+                    'Giá trị đơn hàng chưa đạt mức tối thiểu ' . number_format($discount->minOrderValue) . ' VNĐ!',
+                default => 'Không thể áp dụng mã giảm giá!'
+            };
+            return redirect()->back()->with('error', $message);
         }
 
         // Lưu mã giảm giá vào session

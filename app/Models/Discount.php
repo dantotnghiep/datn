@@ -81,4 +81,81 @@ class Discount extends Model
     {
         return \Carbon\Carbon::parse($value);
     }
+
+    /**
+     * Check if discount can be applied to cart
+     */
+    public function canApplyToCart($cartTotal, $userId = null)
+    {
+        // Kiểm tra trạng thái
+        if ($this->status !== 'active') {
+            return false;
+        }
+
+        // Kiểm tra thời gian
+        $now = now();
+        if ($now < $this->startDate || $now > $this->endDate) {
+            return false;
+        }
+
+        // Kiểm tra giá trị đơn hàng tối thiểu
+        if ($this->minOrderValue && $cartTotal < $this->minOrderValue) {
+            return false;
+        }
+
+        // Kiểm tra số lần sử dụng tổng
+        if ($this->maxUsage && $this->usageCount >= $this->maxUsage) {
+            return false;
+        }
+
+        // Kiểm tra quyền sử dụng
+        if (!$this->is_public && $userId) {
+            // Nếu là mã private, kiểm tra user có được assign không
+            if (!$this->isAssignedToUser($userId)) {
+                return false;
+            }
+        }
+
+        // Kiểm tra giới hạn sử dụng của user
+        if ($this->user_limit && $userId) {
+            $userUsageCount = \DB::table('orders')
+                ->where('user_id', $userId)
+                ->where('discount_code', $this->code)
+                ->count();
+            if ($userUsageCount >= $this->user_limit) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Calculate discount amount for cart total
+     */
+    public function calculateDiscountAmount($cartTotal)
+    {
+        if ($this->type === self::TYPE_PERCENTAGE) {
+            $amount = ($cartTotal * $this->sale) / 100;
+            if ($this->maxDiscount > 0) {
+                return min($amount, $this->maxDiscount);
+            }
+            return $amount;
+        }
+        
+        return $this->sale; // Fixed amount
+    }
+
+    /**
+     * Check if discount is assigned to user
+     */
+    protected function isAssignedToUser($userId)
+    {
+        // Implement your logic to check if discount is assigned to user
+        // For example, if you have a pivot table discount_user:
+        // return $this->users()->where('user_id', $userId)->exists();
+        
+        // For now, we'll return true if the discount is public
+        return $this->is_public;
+    }
 }
