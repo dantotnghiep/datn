@@ -17,18 +17,37 @@
                         </h4>
 
                         <div class="card-body">
-                            @if (session('resent'))
+                            @if (session('success'))
+                                <div class="alert alert-success" role="alert">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+
+                            {{-- Error --}}
+                            @if (session('error'))
+                                <div class="alert alert-danger" role="alert">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+
+                            {{-- Warning --}}
+                            @if (session('warning'))
+                                <div class="alert alert-warning" role="alert">
+                                    {{ session('warning') }}
+                                </div>
+                            @endif
+                            @if (session('success'))
                                 <div class="alert alert-success" role="alert">
                                     Một liên kết xác minh mới đã được gửi đến địa chỉ email của bạn.
                                 </div>
                             @endif
 
                             Trước khi tiếp tục, vui lòng kiểm tra email của bạn để lấy liên kết xác minh.<br>
-                            Nếu bạn không nhận được email, 
-                            <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
+                            Nếu bạn không nhận được email,
+                            <form class="d-inline" method="POST" action="{{ route('postVerify') }}">
                                 @csrf
-                                <button type="submit"
-                                    class="btn btn-link p-0 m-0 align-baseline">bấm vào đây để nhận lại email!</button>.
+                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline">bấm vào đây để nhận lại
+                                    email!</button>.
                             </form>
                         </div>
 

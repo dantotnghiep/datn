@@ -5,7 +5,6 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6">
                     <div class="register-switcher text-center">
-                        <a href="{{ route('register') }}" class="resister-btn">Đăng ký</a>
                         <a href="{{ route('login') }}" class="login-btn active">Đăng nhập</a>
                     </div>
                 </div>
@@ -14,9 +13,8 @@
                 <div class="col-xxl-6 col-xl-6 col-lg-8 col-md-10">
                     <div class="reg-login-forms">
                         <h4 class="reg-login-title text-center">
-                            Đăng nhập tài khoản
+                            Khôi phục mật khẩu
                         </h4>
-
 
 
                         <!-- Lỗi validation -->
@@ -37,42 +35,35 @@
                                 {{ session('error') }}
                             </div>
                         @endif
-                        <form action="{{ route('login.post') }}" method="POST">
-                            @csrf
-                            <div class="reg-input-group">
-                                <label for="email">Email *</label>
-                                <input type="email" id="email" name="email" value="{{ old('email') }}"
-                                    class="@error('email') is-invalid @enderror">
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
+
+                        {{-- Warning --}}
+                        @if (session('warning'))
+                            <div class="alert alert-warning" role="alert">
+                                {{ session('warning') }}
                             </div>
-                            <div class="reg-input-group">
-                                <label for="password">Mật khẩu *</label>
-                                <input type="password" id="password" name="password"
-                                    class="@error('password') is-invalid @enderror">
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                            <div class="password-recover-group d-flex justify-content-between">
-                                <div class="reg-input-group reg-check-input d-flex align-items-center">
-                                    <input type="checkbox" name="remember" id="remember"
-                                        {{ old('remember') ? 'checked' : '' }}>
-                                    <label for="remember">Ghi nhớ đăng nhập</label>
+                        @endif
+                        @if ($status)
+                            <form action="{{ route('reset-password.post') }}" method="POST">
+                                @csrf
+                                <div class="reg-input-group">
+                                    <label for="password">Mật khẩu mới *</label>
+                                    <input type="passowrd" id="password" name="password" value="{{ old('password') }}"
+                                        class="@error('password') is-invalid @enderror">
+                                    @error('password')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
                                 </div>
-                                <div class="forgot-password-link">
-                                    <a href="{{ route('forgot-password') }}">Quên mật khẩu?</a>
+                                <div class="reg-input-group reg-submit-input d-flex align-items-center">
+                                    <button type="submit" class="btn btn-primary w-100">Xác nhận</button>
                                 </div>
+                            </form>
+                        @else
+                            <div class="alert alert-warning" role="alert">
+                                Liên kết không đúng hoặc đã hết hạn.
                             </div>
-                            <div class="reg-input-group reg-submit-input d-flex align-items-center">
-                                <button type="submit" class="btn btn-primary w-100">ĐĂNG NHẬP</button>
-                            </div>
-                        </form>
+                        @endif
                     </div>
                 </div>
             </div>

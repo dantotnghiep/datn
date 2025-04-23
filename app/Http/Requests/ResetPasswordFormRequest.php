@@ -4,35 +4,32 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginRequest extends FormRequest
+class ResetPasswordFormRequest extends FormRequest
 {
     public function authorize(): bool
     {
         return true;
     }
-
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required|string|min:6',
         ];
     }
+
     public function messages(): array
     {
         return [
             '*.required' => ':attribute là bắt buộc.',
-            '*.email' => ':attribute không hợp lệ.',
+            '*.string' => ':attribute phải là chuỗi.',
+            '*.min' => ':attribute phải có ít nhất :min ký tự.',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'email' => 'Địa chỉ email',
-            'password' => 'Mật khẩu'
+            'password' => 'Mật khẩu mới',
         ];
     }
-
-
 }
