@@ -25,7 +25,7 @@ class OrderController extends Controller
             $order = Order::query()->where('user_id', Auth::id())->where('id', $id)->first();
             if ($order) {
                 if ($order->status_id == '1' || $order->status_id == '2') {
-                    $order->update(['status_id' => 3]);
+                    $order->update(['status_id' => 4]);
 
                     Order_cancellation::create([
                         'order_id' => $order->id,
