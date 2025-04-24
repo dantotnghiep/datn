@@ -16,6 +16,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Models\AttributeValue;
 use App\Models\Product_image;
 use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class ProductController extends Controller
 {
@@ -87,6 +88,18 @@ class ProductController extends Controller
             
             // Tính lợi nhuận
             $totalProfit = $totalRevenue - $totalExpenses;
+            
+            // Lấy dữ liệu tổng hợp toàn thời gian cho Revenue Overview
+            // Dùng biến riêng để đảm bảo không bị ảnh hưởng khi filter theo ngày
+            $allTimeStats = [
+                'totalOrders' => \App\Models\Order::count(),
+                'totalRevenue' => \App\Models\Order::where('status_id', $completedStatusId)->sum('total_amount'),
+                'pendingRevenue' => \App\Models\Order::whereIn('status_id', [$pendingStatusId, $shippingStatusId])->sum('total_amount'),
+                'totalOrderValue' => \App\Models\Order::sum('total_amount'),
+                'totalRefunds' => \App\Models\Order::where('status_id', $cancelledStatusId)->sum('total_amount'),
+                'totalCancelled' => \App\Models\Order::where('status_id', $cancelledStatusId)->sum('total_amount'),
+                'netRevenue' => \App\Models\Order::where('status_id', $completedStatusId)->sum('total_amount'),
+            ];
             
             // Get top selling products
             $topProducts = \App\Models\Product::with(['images', 'category'])
@@ -292,7 +305,8 @@ class ProductController extends Controller
                 'dayNames',
                 'revenueByStatus',
                 'orderStatuses',
-                'usingDemoData'
+                'usingDemoData',
+                'allTimeStats'
             ));
         } catch (\Exception $e) {
             // Log the error and return a simple dashboard with error message
@@ -512,6 +526,70 @@ class ProductController extends Controller
         return view('admin.variation.variation-list-of-product', compact('product'));
     }
 
+    public function storeVariation(Request $request, $productId)
+    {
+        $validator = \Validator::make($request->all(), [
+            'variations' => 'required|array',
+            'variations.*.sku' => 'required|string|unique:variations,sku',
+            'variations.*.price' => 'required|numeric|min:0',
+            'variations.*.sale_price' => 'nullable|numeric|min:0',
+            'variations.*.stock' => 'required|integer|min:0',
+            'variations.*.sale_start' => 'nullable|date',
+            'variations.*.sale_end' => 'nullable|date',
+            'variations.*.attribute_values' => 'required|array',
+            'variations.*.attribute_values.*' => 'exists:attribute_values,id',
+        ], [
+            'variations.required' => 'Phải có ít nhất một biến thể.',
+            'variations.*.sku.required' => 'SKU là bắt buộc.',
+            'variations.*.sku.unique' => 'SKU đã tồn tại.',
+            'variations.*.price.required' => 'Giá là bắt buộc.',
+            'variations.*.price.numeric' => 'Giá phải là số.',
+            'variations.*.price.min' => 'Giá phải lớn hơn hoặc bằng 0.',
+            'variations.*.sale_price.numeric' => 'Giá khuyến mãi phải là số.',
+            'variations.*.sale_price.min' => 'Giá khuyến mãi phải lớn hơn hoặc bằng 0.',
+            'variations.*.stock.required' => 'Số lượng là bắt buộc.',
+            'variations.*.stock.integer' => 'Số lượng phải là số nguyên.',
+            'variations.*.stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
+            'variations.*.sale_start.date' => 'Ngày bắt đầu khuyến mãi không hợp lệ.',
+            'variations.*.sale_end.date' => 'Ngày kết thúc khuyến mãi không hợp lệ.',
+            'variations.*.attribute_values.required' => 'Phải chọn ít nhất một thuộc tính.',
+            'variations.*.attribute_values.*.exists' => 'Giá trị thuộc tính không hợp lệ.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            DB::transaction(function () use ($request, $productId) {
+                foreach ($request->variations as $variationData) {
+                    $variation = Variation::create([
+                        'product_id' => $productId,
+                        'sku' => $variationData['sku'],
+                        'price' => $variationData['price'],
+                        'sale_price' => $variationData['sale_price'] ?? null,
+                        'stock' => $variationData['stock'],
+                        'sale_start' => $variationData['sale_start'] ?? null,
+                        'sale_end' => $variationData['sale_end'] ?? null,
+                    ]);
+
+                    // Attach attribute values
+                    if (isset($variationData['attribute_values'])) {
+                        $variation->attributeValues()->attach($variationData['attribute_values']);
+                    }
+                }
+            });
+
+            return redirect()->back()->with('success', 'Các biến thể đã được thêm thành công!');
+        } catch (\Exception $e) {
+            Log::error('Error creating variations: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Có lỗi xảy ra khi tạo biến thể: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 
     public function edit(Product $product)
     {
@@ -625,6 +703,133 @@ class ProductController extends Controller
             return redirect()->back()->with('success', 'Sản phẩm đã được xóa thành công!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cung cấp dữ liệu dashboard cho các khoảng thời gian khác nhau
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dashboardData(Request $request)
+    {
+        try {
+            $range = $request->input('range', 'today');
+            
+            // Xác định khoảng thời gian dựa trên tham số
+            $endDate = now();
+            $startDate = now(); // Mặc định là ngày hôm nay
+            
+            // Nếu là khoảng thời gian tùy chỉnh
+            if ($range === 'customRange') {
+                if ($request->has('startDate') && $request->has('endDate')) {
+                    $startDate = \Carbon\Carbon::parse($request->input('startDate'))->startOfDay();
+                    $endDate = \Carbon\Carbon::parse($request->input('endDate'))->endOfDay();
+                } else {
+                    return response()->json([
+                        'error' => 'Thiếu tham số startDate hoặc endDate cho khoảng thời gian tùy chỉnh'
+                    ], 400);
+                }
+            } else if ($range === 'all') {
+                // Không giới hạn thời gian - lấy từ đơn hàng đầu tiên
+                $firstOrder = \App\Models\Order::orderBy('created_at', 'asc')->first();
+                if ($firstOrder) {
+                    $startDate = Carbon::parse($firstOrder->created_at)->startOfDay();
+                } else {
+                    // Nếu không có đơn hàng nào, lấy từ đầu tháng trước
+                    $startDate = now()->subMonth()->startOfMonth();
+                }
+            } else {
+                switch ($range) {
+                    case 'yesterday':
+                        $startDate = now()->subDay()->startOfDay();
+                        $endDate = now()->subDay()->endOfDay();
+                        break;
+                    case 'last7days':
+                        $startDate = now()->subDays(6)->startOfDay();
+                        break;
+                    case 'last30days':
+                        $startDate = now()->subDays(29)->startOfDay();
+                        break;
+                    case 'thisMonth':
+                        $startDate = now()->startOfMonth();
+                        break;
+                    case 'lastMonth':
+                        $startDate = now()->subMonth()->startOfMonth();
+                        $endDate = now()->subMonth()->endOfMonth();
+                        break;
+                    case 'today':
+                    default:
+                        $startDate = now()->startOfDay();
+                        $endDate = now()->endOfDay();
+                        break;
+                }
+            }
+            
+            // Đặt ID của các trạng thái quan trọng theo cấu trúc database
+            $pendingStatusId = 1;    // Chờ xử lý - ID 1
+            $shippingStatusId = 2;   // Đang vận chuyển - ID 2
+            $completedStatusId = 3;  // Thành công - ID 3
+            $cancelledStatusId = 4;  // Đã hủy - ID 4
+            
+            // Lấy số lượng khách hàng trong khoảng thời gian
+            $totalCustomers = \App\Models\User::where('role', 'user')
+                                ->whereBetween('created_at', [$startDate, $endDate])
+                                ->count();
+            
+            // Lấy số lượng đơn hàng trong khoảng thời gian
+            $totalOrders = \App\Models\Order::whereBetween('created_at', [$startDate, $endDate])
+                                ->count();
+            
+            // Doanh thu thực tế (chỉ tính các đơn đã hoàn thành) trong khoảng thời gian
+            $totalRevenue = \App\Models\Order::where('status_id', $completedStatusId)
+                                ->whereBetween('created_at', [$startDate, $endDate])
+                                ->sum('total_amount');
+            
+            // Tổng số tiền từ đơn đã hủy trong khoảng thời gian
+            $totalCancelled = \App\Models\Order::where('status_id', $cancelledStatusId)
+                                ->whereBetween('created_at', [$startDate, $endDate])
+                                ->sum('total_amount');
+            
+            // Doanh thu chờ xử lý (đơn đang chờ xử lý và đang vận chuyển) trong khoảng thời gian
+            $pendingRevenue = \App\Models\Order::whereIn('status_id', [$pendingStatusId, $shippingStatusId])
+                                ->whereBetween('created_at', [$startDate, $endDate])
+                                ->sum('total_amount');
+            
+            // Hoàn tiền trong khoảng thời gian (trong trường hợp này, cũng chính là giá trị đơn đã hủy)
+            $totalRefunds = $totalCancelled;
+            
+            // Doanh thu ròng (doanh thu thực tế) trong khoảng thời gian
+            $netRevenue = $totalRevenue;
+            
+            // Tính chi phí (40% của doanh thu thực tế cho demo)
+            $totalExpenses = $totalRevenue * 0.4;
+            
+            // Tính lợi nhuận
+            $totalProfit = $totalRevenue - $totalExpenses;
+            
+            // Dữ liệu trả về
+            return response()->json([
+                'totalCustomers' => $totalCustomers,
+                'totalOrders' => $totalOrders,
+                'totalRevenue' => $totalRevenue,
+                'totalRefunds' => $totalRefunds,
+                'totalCancelled' => $totalCancelled,
+                'pendingRevenue' => $pendingRevenue,
+                'netRevenue' => $netRevenue,
+                'totalExpenses' => $totalExpenses,
+                'totalProfit' => $totalProfit,
+                'range' => $range,
+                'timeRange' => [
+                    'startDate' => $startDate->format('Y-m-d H:i:s'),
+                    'endDate' => $endDate->format('Y-m-d H:i:s')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
