@@ -20,14 +20,26 @@
                     </div>
                     <div class="date-range-dropdown">
                         <ul>
-                            <li><button class="active">Today</button></li>
-                            <li><button>Yesterday</button></li>
-                            <li><button>Last 7 Days</button></li>
-                            <li><button>Last 30 Days</button></li>
-                            <li><button>This Month</button></li>
-                            <li><button>Last Month</button></li>
-                            <li><button>Custom Range</button></li>
+                            <li><button class="active">Hôm nay</button></li>
+                            <li><button>Hôm qua</button></li>
+                            <li><button>7 ngày qua</button></li>
+                            <li><button>30 ngày qua</button></li>
+                            <li><button>Tháng này</button></li>
+                            <li><button>Tháng trước</button></li>
+                            <li><button>Tất cả</button></li>
+                            <li><button id="custom-range-btn">Tùy chỉnh</button></li>
                         </ul>
+                        <div class="custom-range-picker" style="display: none; padding: 10px;">
+                            <div class="mb-2">
+                                <label class="form-label">Từ ngày:</label>
+                                <input type="date" id="custom-range-start" class="form-control">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Đến ngày:</label>
+                                <input type="date" id="custom-range-end" class="form-control">
+                            </div>
+                            <button id="apply-custom-range" class="btn btn-sm btn-primary w-100">Áp dụng</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -472,10 +484,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Cập nhật số liệu tóm tắt từ dữ liệu thực
 function updateSummaryStatistics(data) {
-    // Cập nhật thông tin tổng quát
+    // Cập nhật thông tin tổng quát - CHỈ cập nhật các thẻ metric ở đầu trang
     const metricCards = document.querySelectorAll('.metric-card');
 
-    if (metricCards.length >= 6) {
+    if (metricCards.length >= 5) {
         // Cập nhật Customers
         let metricDetails = metricCards[0].querySelector('.metric-details');
         metricDetails.querySelector('h3').textContent = data.totalCustomers.toLocaleString();
@@ -504,41 +516,30 @@ function updateSummaryStatistics(data) {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-
-        // Cập nhật Net Revenue
-        metricDetails = metricCards[5].querySelector('.metric-details');
-        metricDetails.querySelector('h3').textContent = '$' + data.netRevenue.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
     }
 
-    // Cập nhật Revenue Overview header
-    document.querySelector('.cr-chart-header .block:nth-child(1) h5').innerHTML =
-        data.totalOrders.toLocaleString();
+    // Cập nhật Revenue Overview header summary - cũng nằm ở đầu trang
+    const chartHeaderBlocks = document.querySelectorAll('.cr-chart-header .block');
+    if (chartHeaderBlocks.length >= 3) {
+        // Orders summary
+        chartHeaderBlocks[0].querySelector('h5').textContent = data.totalOrders.toLocaleString();
 
-    // Cập nhật Actual Revenue
-    document.querySelector('.cr-chart-header .block:nth-child(2) h5').innerHTML =
-        `${data.totalRevenue < 0 ? '-' : ''}$${(Math.abs(data.totalRevenue)/1000).toFixed(1)}k`;
+        // Actual Revenue summary
+        chartHeaderBlocks[1].querySelector('h5').textContent = 
+            `${data.totalRevenue < 0 ? '-' : ''}$${(Math.abs(data.totalRevenue)/1000).toFixed(1)}k`;
 
-    // Cập nhật Pending Revenue
-    document.querySelector('.cr-chart-header .block:nth-child(3) h5').innerHTML =
-        `${data.pendingRevenue < 0 ? '-' : ''}$${(Math.abs(data.pendingRevenue)/1000).toFixed(1)}k`;
-
-    // Cập nhật Net Revenue
-    document.querySelector('.cr-chart-header .block:nth-child(4) h5').innerHTML =
-        `${data.netRevenue < 0 ? '-' : ''}$${(Math.abs(data.netRevenue)/1000).toFixed(1)}k`;
+        // Pending Revenue summary
+        chartHeaderBlocks[2].querySelector('h5').textContent = 
+            `${data.pendingRevenue < 0 ? '-' : ''}$${(Math.abs(data.pendingRevenue)/1000).toFixed(1)}k`;
+    }
 }
 
 // Định nghĩa data theo khoảng thời gian
 const timeRangeData = {
-    // FIX: Hiện tại tất cả các khoảng thời gian đều dùng cùng một dữ liệu
-    // Trong môi trường sản xuất, dữ liệu sẽ được tải thông qua AJAX
-    
-    // Dữ liệu mặc định cho "Hôm nay"
+    // Dữ liệu mặc định - sẽ được thay thế bằng dữ liệu thực khi có API
     today: {
+        totalCustomers: {{ $totalCustomers ?? 0 }},
         totalOrders: {{ $totalOrders ?? 0 }},
-        totalOrderValue: {{ $totalOrderValue ?? 0 }},
         totalRevenue: {{ $totalRevenue ?? 0 }},
         totalRefunds: {{ $totalRefunds ?? 0 }},
         totalCancelled: {{ $totalCancelled ?? 0 }},
@@ -551,8 +552,7 @@ const timeRangeData = {
     }
 };
 
-// Sao chép dữ liệu mặc định cho các khoảng thời gian khác
-// Trong môi trường sản xuất, mỗi khoảng thời gian sẽ có dữ liệu riêng từ API
+// Tạo tạm các khoảng thời gian khác (sẽ được thay thế bằng API trong tương lai)
 timeRangeData.yesterday = { ...timeRangeData.today };
 timeRangeData.last7days = { ...timeRangeData.today };
 timeRangeData.last30days = { ...timeRangeData.today };
@@ -562,41 +562,55 @@ timeRangeData.lastMonth = { ...timeRangeData.today };
 function updateDateDisplay(range, displayElement) {
     const today = new Date();
     let startDate, endDate;
-
-    switch (range) {
-        case 'today':
-            startDate = endDate = today;
-            break;
-        case 'yesterday':
-            startDate = endDate = new Date(today);
-            startDate.setDate(today.getDate() - 1);
-            break;
-        case 'last7days':
-            endDate = today;
-            startDate = new Date(today);
-            startDate.setDate(today.getDate() - 6);
-            break;
-        case 'last30days':
-            endDate = today;
-            startDate = new Date(today);
-            startDate.setDate(today.getDate() - 29);
-            break;
-        case 'thismonth':
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            endDate = today;
-            break;
-        case 'lastmonth':
-            startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-            break;
-        default:
-            startDate = endDate = today;
+    
+    // Đối với custom range, chúng ta sẽ sử dụng giá trị đã chọn
+    if (typeof range === 'object' && range.startDate && range.endDate) {
+        startDate = new Date(range.startDate);
+        endDate = new Date(range.endDate);
+    } else {
+        switch (range) {
+            case 'homqua':
+            case 'yesterday':
+                startDate = endDate = new Date(today);
+                startDate.setDate(today.getDate() - 1);
+                break;
+            case '7ngayqua':
+            case 'last7days':
+                endDate = today;
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 6);
+                break;
+            case '30ngayqua':
+            case 'last30days':
+                endDate = today;
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 29);
+                break;
+            case 'thangnay':
+            case 'thismonth':
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = today;
+                break;
+            case 'thangtruoc':
+            case 'lastmonth':
+                startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                break;
+            case 'all':
+                // Hiển thị "Tất cả" thay vì ngày cụ thể
+                displayElement.textContent = "Tất cả";
+                return; // Return để không chạy phần code hiển thị ngày dưới
+            case 'today':
+            case 'homnay':
+            default:
+                startDate = endDate = today;
+        }
     }
 
     const formatDate = (date) => {
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
+        return date.toLocaleDateString('vi-VN', {
             day: 'numeric',
+            month: 'numeric',
             year: 'numeric'
         });
     };
@@ -604,52 +618,44 @@ function updateDateDisplay(range, displayElement) {
     displayElement.textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
 }
 
-function updateDashboardData(range) {
-    // FIX: Cập nhật dữ liệu tóm tắt dựa trên khoảng thời gian đã chọn
-    updateSummaryStatistics(timeRangeData[range] || timeRangeData['today']);
+function updateDashboardData(range, customDateRange) {
+    // Cập nhật hiển thị ngày tháng
+    const allDateRangeDisplays = document.querySelectorAll('.cr-date-range span');
+    allDateRangeDisplays.forEach(display => {
+        if (customDateRange) {
+            updateDateDisplay(customDateRange, display);
+        } else {
+            updateDateDisplay(range, display);
+        }
+    });
     
-    // Hiển thị thông báo cho người dùng về việc API chưa được triển khai
-    const notification = document.createElement('div');
-    notification.className = 'alert alert-info alert-dismissible fade show';
-    notification.innerHTML = `
-        <strong>Thông báo:</strong> Đã chọn dữ liệu cho khoảng thời gian: <strong>${range}</strong>. 
-        Trong phiên bản hoàn chỉnh, dữ liệu sẽ được tải qua API.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
+    // Chuẩn bị tham số cho request
+    const requestData = {
+        range: range
+    };
     
-    // Chèn thông báo vào trang
-    const existingNotification = document.querySelector('.alert-info');
-    if (existingNotification) {
-        existingNotification.remove();
+    // Thêm thông tin custom date range nếu có
+    if (range === 'customRange' && customDateRange) {
+        requestData.startDate = customDateRange.startDate;
+        requestData.endDate = customDateRange.endDate;
     }
     
-    document.querySelector('.cr-page-title').insertAdjacentElement('afterend', notification);
-    
-    // Tự động ẩn thông báo sau 5 giây
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 5000);
-
-    // Lưu ý: Trong phiên bản hoàn chỉnh, chúng ta sẽ gửi AJAX request để lấy dữ liệu thực tế
-    // cho khoảng thời gian đã chọn, sau đó cập nhật lại biểu đồ
-    // 
-    // Ví dụ:
-    // $.ajax({
-    //     url: '/admin/dashboard/data',
-    //     data: { range: range },
-    //     success: function(response) {
-    //         // Cập nhật biểu đồ với dữ liệu mới từ response
-    //         updateSummaryStatistics(response.summary);
-    //         // Cập nhật các biểu đồ
-    //         if (window.revenueChart) {
-    //             window.revenueChart.updateOptions({
-    //                 series: [{...}],
-    //                 xaxis: {categories: response.chartLabels}
-    //             });
-    //         }
-    //     }
-    // });
+    // Gọi Ajax để lấy dữ liệu từ server
+    fetch('/admin/dashboard/data', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateSummaryStatistics(data);
+    })
+    .catch(error => {
+        updateSummaryStatistics(timeRangeData[range] || timeRangeData['today']);
+    });
 }
 
 function initRevenueChart() {
@@ -777,6 +783,16 @@ function setupDateRangePicker() {
         const dateRangeButton = dateRangeContainer.querySelector('.cr-date-range');
         const dropdown = dateRangeContainer.querySelector('.date-range-dropdown');
         const dateRangeDisplay = dateRangeButton.querySelector('span');
+        const customRangeBtn = document.getElementById('custom-range-btn');
+        const customRangePicker = document.querySelector('.custom-range-picker');
+        const customRangeStart = document.getElementById('custom-range-start');
+        const customRangeEnd = document.getElementById('custom-range-end');
+        const applyCustomRange = document.getElementById('apply-custom-range');
+        
+        // Thiết lập giá trị mặc định cho các input date
+        const today = new Date();
+        customRangeStart.valueAsDate = today;
+        customRangeEnd.valueAsDate = today;
 
         // Toggle dropdown
         dateRangeButton.addEventListener('click', function(e) {
@@ -784,20 +800,92 @@ function setupDateRangePicker() {
             dropdown.classList.toggle('show');
         });
 
+        // Toggle custom range picker
+        customRangeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            customRangePicker.style.display = customRangePicker.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Apply custom range
+        applyCustomRange.addEventListener('click', function() {
+            const startDate = customRangeStart.value;
+            const endDate = customRangeEnd.value;
+            
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Ngày bắt đầu phải trước ngày kết thúc');
+                return;
+            }
+            
+            // Cập nhật hiển thị date range
+            dateOptions.forEach(opt => opt.classList.remove('active'));
+            customRangeBtn.classList.add('active');
+            
+            const customRange = {
+                startDate: startDate,
+                endDate: endDate
+            };
+            
+            // Cập nhật hiển thị date range
+            updateDateDisplay(customRange, dateRangeDisplay);
+            
+            // Gọi API để lấy dữ liệu theo khoảng thời gian tùy chỉnh
+            updateDashboardData('customRange', customRange);
+            
+            // Ẩn dropdown sau khi áp dụng
+            customRangePicker.style.display = 'none';
+            dropdown.classList.remove('show');
+        });
+
         // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
             if (!dateRangeContainer.contains(e.target)) {
                 dropdown.classList.remove('show');
+                customRangePicker.style.display = 'none';
             }
         });
 
         // Set active date range when option clicked
-        const dateOptions = dropdown.querySelectorAll('button');
+        const dateOptions = dropdown.querySelectorAll('ul button');
         dateOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                // FIX: Chuẩn hóa range format để so khớp với thuộc tính của timeRangeData
+            option.addEventListener('click', function(e) {
+                if (this.id === 'custom-range-btn') {
+                    return; // Xử lý riêng cho custom range button
+                }
+                
+                // Chuyển đổi tên tiếng Việt sang key cho API
                 const rangeText = this.textContent.trim();
-                const range = rangeText.toLowerCase().replace(/\s+/g, '');
+                let range;
+                
+                switch (rangeText) {
+                    case 'Hôm nay':
+                        range = 'today';
+                        break;
+                    case 'Hôm qua':
+                        range = 'yesterday';
+                        break;
+                    case '7 ngày qua':
+                        range = 'last7days';
+                        break;
+                    case '30 ngày qua':
+                        range = 'last30days';
+                        break;
+                    case 'Tháng này':
+                        range = 'thisMonth';
+                        break;
+                    case 'Tháng trước':
+                        range = 'lastMonth';
+                        break;
+                    case 'Tất cả':
+                        range = 'all';
+                        break;
+                    default:
+                        range = 'today';
+                }
 
                 // Update active option
                 dateOptions.forEach(opt => opt.classList.remove('active'));
@@ -805,19 +893,19 @@ function setupDateRangePicker() {
 
                 // Update date display
                 updateDateDisplay(range, dateRangeDisplay);
-
-                // FIX: Đảm bảo tên khoảng thời gian khớp với thuộc tính của đối tượng timeRangeData
-                let timeRangeKey = range;
-                if (range === 'thismonth') timeRangeKey = 'thisMonth';
-                if (range === 'lastmonth') timeRangeKey = 'lastMonth';
                 
                 // Update dashboard data based on selected time range
-                updateDashboardData(timeRangeKey); 
+                updateDashboardData(range);
 
                 // Close dropdown
                 dropdown.classList.remove('show');
+                customRangePicker.style.display = 'none';
             });
         });
+        
+        // Hiển thị dữ liệu mặc định - Ngày hôm nay
+        updateDateDisplay('today', dateRangeDisplay);
+        updateDashboardData('today');
     }
 }
 
@@ -1323,5 +1411,38 @@ function initStatusPieChart() {
 
 .down {
     color: #ff6b6b;
+}
+
+/* Styles for custom range picker */
+.custom-range-picker {
+    border-top: 1px solid #eaeaea;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.custom-range-picker .form-control {
+    font-size: 14px;
+    padding: 6px 10px;
+}
+
+.custom-range-picker .btn-primary {
+    background-color: #6571ff;
+    border-color: #5b67fa;
+    font-size: 14px;
+    padding: 6px 12px;
+}
+
+.date-range-dropdown button {
+    transition: all 0.2s;
+}
+
+.date-range-dropdown button:hover {
+    color: #6571ff;
+}
+
+.date-range-dropdown button.active {
+    color: #6571ff;
+    font-weight: 600;
+    background-color: rgba(101, 113, 255, 0.1);
 }
 </style>

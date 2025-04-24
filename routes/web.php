@@ -103,6 +103,7 @@ Route::prefix('admin')->group(function () {
 
     Route::middleware(['admin'])->group(function () {
         Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
+        Route::post('/dashboard/data', [ProductController::class, 'dashboardData'])->name('admin.dashboard.data');
     });
 
     Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
