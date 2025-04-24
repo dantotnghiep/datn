@@ -89,6 +89,18 @@ class ProductController extends Controller
             // Tính lợi nhuận
             $totalProfit = $totalRevenue - $totalExpenses;
             
+            // Lấy dữ liệu tổng hợp toàn thời gian cho Revenue Overview
+            // Dùng biến riêng để đảm bảo không bị ảnh hưởng khi filter theo ngày
+            $allTimeStats = [
+                'totalOrders' => \App\Models\Order::count(),
+                'totalRevenue' => \App\Models\Order::where('status_id', $completedStatusId)->sum('total_amount'),
+                'pendingRevenue' => \App\Models\Order::whereIn('status_id', [$pendingStatusId, $shippingStatusId])->sum('total_amount'),
+                'totalOrderValue' => \App\Models\Order::sum('total_amount'),
+                'totalRefunds' => \App\Models\Order::where('status_id', $cancelledStatusId)->sum('total_amount'),
+                'totalCancelled' => \App\Models\Order::where('status_id', $cancelledStatusId)->sum('total_amount'),
+                'netRevenue' => \App\Models\Order::where('status_id', $completedStatusId)->sum('total_amount'),
+            ];
+            
             // Get top selling products
             $topProducts = \App\Models\Product::with(['images', 'category'])
                         ->withCount(['variations as ordered_count' => function($query) {
@@ -293,7 +305,8 @@ class ProductController extends Controller
                 'dayNames',
                 'revenueByStatus',
                 'orderStatuses',
-                'usingDemoData'
+                'usingDemoData',
+                'allTimeStats'
             ));
         } catch (\Exception $e) {
             // Log the error and return a simple dashboard with error message

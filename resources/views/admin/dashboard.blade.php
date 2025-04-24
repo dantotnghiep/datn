@@ -138,33 +138,22 @@
             <div class="col-xxl-8 col-xl-12">
                 <div class="cr-card revenue-overview">
                     <div class="cr-card-header header-575">
-                        <h4 class="cr-card-title">Revenue Overview</h4>
-                        <div class="header-tools">
-                            <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen">
-                                <i class="ri-fullscreen-line"></i>
-                            </a>
-                            <div class="cr-date-range date">
-                                <span>{{ now()->format('M d, Y') }} - {{ now()->format('M d, Y') }}</span>
-                            </div>
-                        </div>
+                        <h4 class="cr-card-title">Revenue Overview (All Time)</h4>
                     </div>
                     <div class="cr-card-content">
                         <div class="cr-chart-header">
                             <div class="block">
                                 <h6>Orders</h6>
-                                <h5>{{ $totalOrders }}</h5>
+                                <h5 id="total-orders">{{ $allTimeStats['totalOrders'] ?? $totalOrders }}</h5>
                             </div>
                             <div class="block">
                                 <h6>Actual Revenue</h6>
-                                <h5>{{ $totalRevenue < 0 ? '-' : '' }}${{ number_format(abs($totalRevenue/1000), 1) }}k
-                                </h5>
+                                <h5 id="total-revenue">{{ ($allTimeStats['totalRevenue'] ?? $totalRevenue) < 0 ? '-' : '' }}${{ number_format(abs(($allTimeStats['totalRevenue'] ?? $totalRevenue)/1000), 1) }}k</h5>
                             </div>
                             <div class="block">
                                 <h6>Pending Revenue</h6>
-                                <h5>{{ $pendingRevenue < 0 ? '-' : '' }}${{ number_format(abs($pendingRevenue/1000), 1) }}k
-                                </h5>
+                                <h5 id="pending-revenue">{{ ($allTimeStats['pendingRevenue'] ?? $pendingRevenue) < 0 ? '-' : '' }}${{ number_format(abs(($allTimeStats['pendingRevenue'] ?? $pendingRevenue)/1000), 1) }}k</h5>
                             </div>
-                            
                         </div>
                         <div class="cr-chart-content">
                             <div id="revenueChart" style="min-height: 365px; width: 100%;"></div>
@@ -176,11 +165,6 @@
                 <div class="cr-card" id="daily-revenue">
                     <div class="cr-card-header">
                         <h4 class="cr-card-title">Daily Revenue Analysis</h4>
-                        <div class="header-tools">
-                            <div class="cr-date-range dots">
-                                <span>{{ now()->format('M d, Y') }}</span>
-                            </div>
-                        </div>
                     </div>
                     <div class="cr-card-content">
                         <div class="cr-chart-content">
@@ -518,20 +502,8 @@ function updateSummaryStatistics(data) {
         });
     }
 
-    // Cập nhật Revenue Overview header summary - cũng nằm ở đầu trang
-    const chartHeaderBlocks = document.querySelectorAll('.cr-chart-header .block');
-    if (chartHeaderBlocks.length >= 3) {
-        // Orders summary
-        chartHeaderBlocks[0].querySelector('h5').textContent = data.totalOrders.toLocaleString();
-
-        // Actual Revenue summary
-        chartHeaderBlocks[1].querySelector('h5').textContent = 
-            `${data.totalRevenue < 0 ? '-' : ''}$${(Math.abs(data.totalRevenue)/1000).toFixed(1)}k`;
-
-        // Pending Revenue summary
-        chartHeaderBlocks[2].querySelector('h5').textContent = 
-            `${data.pendingRevenue < 0 ? '-' : ''}$${(Math.abs(data.pendingRevenue)/1000).toFixed(1)}k`;
-    }
+    // KHÔNG cập nhật Revenue Overview vì chúng ta muốn nó hiển thị dữ liệu toàn thời gian
+    // Phần này được loại bỏ
 }
 
 // Định nghĩa data theo khoảng thời gian
@@ -651,7 +623,11 @@ function updateDashboardData(range, customDateRange) {
     })
     .then(response => response.json())
     .then(data => {
+        // Chỉ cập nhật các thẻ metric, KHÔNG cập nhật Revenue Overview
         updateSummaryStatistics(data);
+        
+        // Phần cập nhật biểu đồ Revenue Overview đã bị loại bỏ vì chúng ta muốn 
+        // nó hiển thị dữ liệu toàn thời gian, không phụ thuộc vào bộ lọc ngày
     })
     .catch(error => {
         updateSummaryStatistics(timeRangeData[range] || timeRangeData['today']);
@@ -659,25 +635,39 @@ function updateDashboardData(range, customDateRange) {
 }
 
 function initRevenueChart() {
+    // Lấy dữ liệu thống kê toàn thời gian, không phụ thuộc vào bộ lọc ngày
+    // Dữ liệu này được lấy từ PHP và không thay đổi khi filter theo ngày
+    const allTimeChartData = {
+        totalOrders: {{ $allTimeStats['totalOrders'] ?? $totalOrders }},
+        totalRevenue: {{ $allTimeStats['totalRevenue'] ?? $totalRevenue }},
+        pendingRevenue: {{ $allTimeStats['pendingRevenue'] ?? $pendingRevenue }},
+        totalExpenses: {{ ($allTimeStats['totalRevenue'] ?? $totalRevenue) * 0.4 }}, // 40% của doanh thu
+        chartLabels: {!! isset($chartLabels) ? json_encode($chartLabels) : '[]' !!},
+        revenueChartData: {!! isset($revenueChartData) ? json_encode($revenueChartData) : '[]' !!},
+        orderCountChartData: {!! isset($orderCountChartData) ? json_encode($orderCountChartData) : '[]' !!},
+        expenseChartData: {!! isset($expenseChartData) ? json_encode($expenseChartData) : '[]' !!},
+        profitChartData: {!! isset($profitChartData) ? json_encode($profitChartData) : '[]' !!}
+    };
+
     let options = {
         series: [{
                 name: 'Gross Revenue',
                 type: 'line',
-                data: realData.revenueChartData.map(val => parseFloat(val))
+                data: allTimeChartData.revenueChartData.map(val => parseFloat(val))
             },
             {
                 name: 'Net Revenue',
                 type: 'line',
-                data: realData.revenueChartData.map((val, index) => {
+                data: allTimeChartData.revenueChartData.map((val, index) => {
                     // Calculate net revenue (revenue minus expense)
-                    return Math.max(0, parseFloat(val) - parseFloat(realData.expenseChartData[index] ||
+                    return Math.max(0, parseFloat(val) - parseFloat(allTimeChartData.expenseChartData[index] ||
                         0));
                 })
             },
             {
                 name: 'Orders',
                 type: 'line',
-                data: realData.orderCountChartData.map(val => parseInt(val))
+                data: allTimeChartData.orderCountChartData.map(val => parseInt(val))
             }
         ],
         chart: {
@@ -728,7 +718,7 @@ function initRevenueChart() {
             }
         },
         xaxis: {
-            categories: realData.chartLabels,
+            categories: allTimeChartData.chartLabels,
             labels: {
                 style: {
                     fontSize: '12px'
