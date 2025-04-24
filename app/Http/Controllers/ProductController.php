@@ -512,6 +512,70 @@ class ProductController extends Controller
         return view('admin.variation.variation-list-of-product', compact('product'));
     }
 
+    public function storeVariation(Request $request, $productId)
+    {
+        $validator = \Validator::make($request->all(), [
+            'variations' => 'required|array',
+            'variations.*.sku' => 'required|string|unique:variations,sku',
+            'variations.*.price' => 'required|numeric|min:0',
+            'variations.*.sale_price' => 'nullable|numeric|min:0',
+            'variations.*.stock' => 'required|integer|min:0',
+            'variations.*.sale_start' => 'nullable|date',
+            'variations.*.sale_end' => 'nullable|date',
+            'variations.*.attribute_values' => 'required|array',
+            'variations.*.attribute_values.*' => 'exists:attribute_values,id',
+        ], [
+            'variations.required' => 'Phải có ít nhất một biến thể.',
+            'variations.*.sku.required' => 'SKU là bắt buộc.',
+            'variations.*.sku.unique' => 'SKU đã tồn tại.',
+            'variations.*.price.required' => 'Giá là bắt buộc.',
+            'variations.*.price.numeric' => 'Giá phải là số.',
+            'variations.*.price.min' => 'Giá phải lớn hơn hoặc bằng 0.',
+            'variations.*.sale_price.numeric' => 'Giá khuyến mãi phải là số.',
+            'variations.*.sale_price.min' => 'Giá khuyến mãi phải lớn hơn hoặc bằng 0.',
+            'variations.*.stock.required' => 'Số lượng là bắt buộc.',
+            'variations.*.stock.integer' => 'Số lượng phải là số nguyên.',
+            'variations.*.stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
+            'variations.*.sale_start.date' => 'Ngày bắt đầu khuyến mãi không hợp lệ.',
+            'variations.*.sale_end.date' => 'Ngày kết thúc khuyến mãi không hợp lệ.',
+            'variations.*.attribute_values.required' => 'Phải chọn ít nhất một thuộc tính.',
+            'variations.*.attribute_values.*.exists' => 'Giá trị thuộc tính không hợp lệ.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            DB::transaction(function () use ($request, $productId) {
+                foreach ($request->variations as $variationData) {
+                    $variation = Variation::create([
+                        'product_id' => $productId,
+                        'sku' => $variationData['sku'],
+                        'price' => $variationData['price'],
+                        'sale_price' => $variationData['sale_price'] ?? null,
+                        'stock' => $variationData['stock'],
+                        'sale_start' => $variationData['sale_start'] ?? null,
+                        'sale_end' => $variationData['sale_end'] ?? null,
+                    ]);
+
+                    // Attach attribute values
+                    if (isset($variationData['attribute_values'])) {
+                        $variation->attributeValues()->attach($variationData['attribute_values']);
+                    }
+                }
+            });
+
+            return redirect()->back()->with('success', 'Các biến thể đã được thêm thành công!');
+        } catch (\Exception $e) {
+            Log::error('Error creating variations: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Có lỗi xảy ra khi tạo biến thể: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 
     public function edit(Product $product)
     {

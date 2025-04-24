@@ -251,3 +251,6 @@ Route::resource('/admin/users', UserController::class);
 // });
 
 Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
+
+// Product Variation Routes
+Route::post('/admin/variation/{productId}', [ProductController::class, 'storeVariation'])->name('admin.variation.store');
