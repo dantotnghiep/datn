@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Mail\CustomVerifyEmail;
+use App\Mail\ThemeMail;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Laravel\Sanctum\HasApiTokens;
 
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -24,12 +29,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone',
         'address',
-        'status',
         'role',
         'gender',
         'birthday',
         'avatar',
         'locked_at',
+        'email_verified'
     ];
 
     /**
@@ -55,8 +60,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->setAttribute('status', $this->status ?? 'active');
-        $this->setAttribute('role', $this->role ?? 'user');
     }
 
 
@@ -97,5 +100,34 @@ class User extends Authenticatable implements MustVerifyEmail
     public function activities()
     {
         return $this->hasMany(UserActivity::class);
+    }
+    public function sendEmailVerificationNotificationCustom()
+    {
+        $verificationUrl = $this->createCustomVerificationUrl();
+        $dataMail = [
+            'name' => $this->name ?? NULL,
+            'veirfyLink' => $verificationUrl ?? NULL,
+            'email' => $this->email ?? NULL,
+            'phone' => $this->phone ?? NULL,
+        ];
+
+        Mail::to($this->email)
+            ->send((new ThemeMail($dataMail, 'verify'))->subject('Xác minh tài khoản'));
+    }
+    protected function createCustomVerificationUrl()
+    {
+        $hashedId = Crypt::encryptString($this->getKey());
+        return URL::temporarySignedRoute(
+            'verification.verify',
+            Carbon::now()->addMinutes(60),
+            ['id' => $hashedId, 'hash' => sha1($this->getEmailForVerification())]
+        );
+    }
+
+    public function markEmailAsVerifiedCustom()
+    {
+        return $this->update([
+            'email_verified' => 1
+        ]);
     }
 }

@@ -1,27 +1,35 @@
-<!-- App favicon -->
-<link rel="shortcut icon" href="/be/assets/img/favicon/favicon.ico">
-
 <!-- Icon CSS -->
-<link href="/be/assets/css/vendor/materialdesignicons.min.css" rel="stylesheet">
-<link href="/be/assets/css/vendor/remixicon.css" rel="stylesheet">
-<link href="/be/assets/css/vendor/owl.carousel.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('assets/admin/vendor/fonts/fontawesome.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/admin/vendor/fonts/tabler-icons.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/admin/vendor/fonts/flag-icons.css') }}" />
+<link href="{{ asset('assets/admin/css/vendor/materialdesignicons.min.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/admin/css/vendor/remixicon.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/admin/css/vendor/owl.carousel.min.css') }}" rel="stylesheet">
 
 <!-- Vendor CSS -->
-<link href='/be/assets/css/vendor/datatables.bootstrap5.min.css' rel='stylesheet'>
-<link href='/be/assets/css/vendor/responsive.datatables.min.css' rel='stylesheet'>
-<link href='/be/assets/css/vendor/daterangepicker.css' rel='stylesheet'>
-<link href="/be/assets/css/vendor/simplebar.css" rel="stylesheet">
-<link href="/be/assets/css/vendor/bootstrap.min.css" rel="stylesheet">
-<link href="/be/assets/css/vendor/apexcharts.css" rel="stylesheet">
-<link href="/be/assets/css/vendor/jquery-jvectormap-1.2.2.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('assets/admin/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
+<link rel="stylesheet"
+    href="{{ asset('assets/admin/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
+<link rel="stylesheet"
+    href="{{ asset('assets/admin/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css') }}" />
+<link href='{{ asset('assets/admin/css/vendor/daterangepicker.css') }}' rel='stylesheet'>
+<link href="{{ asset('assets/admin/css/vendor/simplebar.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/admin/css/vendor/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/admin/css/bootstrap.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/admin/css/vendor/apexcharts.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/admin/css/vendor/jquery-jvectormap-1.2.2.css') }}" rel="stylesheet">
+
+<!-- Main CSS -->
+<link id="main-css" href="{{ asset('assets/admin/css/style.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+    integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
 
-<!-- Main CSS -->
-<link id="main-css" href="/be/assets/css/style.css" rel="stylesheet">
 <!-- SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
