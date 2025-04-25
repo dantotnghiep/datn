@@ -56,9 +56,18 @@ Route::middleware(['checkaccount'])->group(function () {
         return auth()->check() ? auth()->user() : abort(403);
     });
 
+
     //client/product
     Route::get('/list-product', [ProductController::class, 'listproduct'])->name('client.product.list-product');
     Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('client.product.product-details');
+
+Route::get('/', [HomeController::class, 'dashboard'])->name('client.index');
+Route::get('/categories', [HomeController::class, 'category'])->name('categories.index');
+Route::get('/search', [HomeController::class, 'search'])->name('client.search');
+Route::get('/search-suggestions', [HomeController::class, 'searchSuggestions'])->name('client.search-suggestions');
+Route::get('/contact', [HomeController::class, 'contact'])->name('home.contact');
+Route::get('/about', [HomeController::class, 'about'])->name('home.about');
+
 
     // Auth
     Route::get('/login', [App\Http\Controllers\Client\AuthController::class, 'showLoginForm'])->name('login');
@@ -92,10 +101,16 @@ Route::middleware(['checkaccount'])->group(function () {
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
 
 
+
         Route::get('/order', [OrderController::class, 'order'])->name('order');
         Route::prefix('orders')->group(function () {
             Route::get('/', [App\Http\Controllers\Client\OrderController::class, 'index'])->name('orders.index');
         });
+
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
+        Route::post('/dashboard/data', [ProductController::class, 'dashboardData'])->name('admin.dashboard.data');
+
     });
 
 
@@ -285,3 +300,8 @@ Route::middleware(['checkaccount'])->group(function () {
 
     Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
 });
+Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
+
+// Product Variation Routes
+Route::post('/admin/variation/{productId}', [ProductController::class, 'storeVariation'])->name('admin.variation.store');
+

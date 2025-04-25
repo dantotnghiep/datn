@@ -8,6 +8,7 @@ use App\Models\Order_item;
 use App\Models\Variation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\CartItem;
 
 class OrderProcessingService
 {
@@ -35,43 +36,21 @@ class OrderProcessingService
         try {
             DB::beginTransaction();
 
-            // Tạo đơn hàng
-            $order = Order::create([
-                'user_id' => $userId,
-                'user_name' => $orderData['user_name'],
-                'user_phone' => $orderData['user_phone'],
-                'user_email' => $orderData['user_email'],
-                'shipping_address' => $orderData['shipping_address'],
-                'payment_method' => $orderData['payment_method'],
-                'total_amount' => $orderData['total_amount'],
-                'status_id' => 1,
-                'payment_status' => $orderData['payment_status'] ?? 'pending',
-            ]);
-
-            // Nếu là thanh toán VNPay, thêm thông tin giao dịch
-            if (isset($orderData['vnpay_transaction_no'])) {
-                $order->vnpay_transaction_no = $orderData['vnpay_transaction_no'];
-                $order->vnpay_payment_date = $orderData['vnpay_payment_date'];
-                $order->save();
-            }
-
-            // Tạo các item cho đơn hàng và trừ số lượng tồn kho
+            // Format cart items for order line validation
+            $orderItems = [];
             foreach ($cartItems as $item) {
-                // Tạo order item
-                Order_item::create([
-                    'order_id' => $order->id,
+                $orderItems[] = [
                     'variation_id' => $item['variation_id'],
                     'quantity' => $item['quantity'],
                     'price' => $item['price']
-                ]);
-                
-                // Trừ số lượng tồn kho
-                $variation = Variation::find($item['variation_id']);
-                if ($variation) {
-                    $variation->stock -= $item['quantity'];
-                    $variation->save();
-                }
+                ];
             }
+
+            // Tạo đơn hàng
+            $order = $this->createOrder($orderData, $userId);
+            
+            // Tạo các item cho đơn hàng và trừ số lượng tồn kho
+            $this->createOrderItems($order, $orderItems, true);
 
             // Xóa giỏ hàng
             Cart::where('user_id', $userId)->delete();
@@ -234,6 +213,130 @@ class OrderProcessingService
             Log::error('Failed to process queued order', [
                 'error' => $result['error'] ?? 'Unknown error'
             ]);
+        }
+    }
+
+    /**
+     * Process order without checking stock (for VNPay after successful payment)
+     * 
+     * @param array $orderData Order information
+     * @param array $cartItems Cart items to process
+     * @param int|null $userId User ID (optional)
+     * @return array Result with success status and message
+     */
+    public function processOrderWithoutStockCheck(array $orderData, array $cartItems, ?int $userId = null): array
+    {
+        try {
+            \DB::beginTransaction();
+            
+            // Format cart items for order line validation
+            $orderItems = [];
+            foreach ($cartItems as $item) {
+                $orderItems[] = [
+                    'variation_id' => $item['variation_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price']
+                ];
+            }
+            
+            // Create order record
+            $order = $this->createOrder($orderData, $userId);
+            
+            // Create order items without updating stock
+            $this->createOrderItems($order, $orderItems, false);
+            
+            // Xóa cart sau khi đặt hàng thành công
+            if ($userId) {
+                $cart = Cart::where('user_id', $userId)->first();
+                if ($cart) {
+                    // Xóa tất cả các cart items
+                    CartItem::where('cart_id', $cart->id)->delete();
+                }
+            }
+            
+            \DB::commit();
+            
+            // Gửi email thông báo
+            try {
+                // Thêm phần gửi email thông báo ở đây nếu cần
+            } catch (\Exception $e) {
+                \Log::error('Failed to send order confirmation email: ' . $e->getMessage());
+            }
+            
+            return [
+                'success' => true,
+                'message' => 'Đặt hàng thành công. Cảm ơn bạn đã mua hàng!',
+                'order_id' => $order->id
+            ];
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Order processing failed (without stock check): ' . $e->getMessage());
+            
+            return [
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Helper method to create order
+     * 
+     * @param array $orderData Order information
+     * @param int|null $userId User ID
+     * @return Order Created order instance
+     */
+    private function createOrder(array $orderData, ?int $userId): Order
+    {
+        $order = Order::create([
+            'user_id' => $userId,
+            'user_name' => $orderData['user_name'],
+            'user_phone' => $orderData['user_phone'],
+            'user_email' => $orderData['user_email'],
+            'shipping_address' => $orderData['shipping_address'],
+            'payment_method' => $orderData['payment_method'],
+            'total_amount' => $orderData['total_amount'],
+            'status_id' => 1,
+            'payment_status' => $orderData['payment_status'] ?? 'pending',
+        ]);
+
+        // Nếu là thanh toán VNPay, thêm thông tin giao dịch
+        if (isset($orderData['vnpay_transaction_no'])) {
+            $order->vnpay_transaction_no = $orderData['vnpay_transaction_no'];
+            $order->vnpay_payment_date = $orderData['vnpay_payment_date'];
+            $order->save();
+        }
+
+        return $order;
+    }
+
+    /**
+     * Helper method to create order items
+     * 
+     * @param Order $order Order instance
+     * @param array $orderItems Array of order items
+     * @param bool $updateStock Whether to update stock or not
+     * @return void
+     */
+    private function createOrderItems(Order $order, array $orderItems, bool $updateStock = true): void
+    {
+        foreach ($orderItems as $item) {
+            // Tạo order item
+            Order_item::create([
+                'order_id' => $order->id,
+                'variation_id' => $item['variation_id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price']
+            ]);
+            
+            // Trừ số lượng tồn kho nếu yêu cầu
+            if ($updateStock) {
+                $variation = Variation::find($item['variation_id']);
+                if ($variation) {
+                    $variation->stock -= $item['quantity'];
+                    $variation->save();
+                }
+            }
         }
     }
 } 
