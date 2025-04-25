@@ -13,7 +13,7 @@
 
     <!-- Đảm bảo Bootstrap CSS hiện diện -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Thêm Stripe.js -->
     <script src="https://js.stripe.com/v3/"></script>
 </head>
@@ -40,7 +40,29 @@
     @include('client.layouts.partials.js')
 
     @stack('scripts')
+    <script src="{{ asset('botman/widget.js') }}"></script>
+    <script>
+        var botmanWidget = {
+            chatServer: "{{ route('botman') }}",
+            title: 'Trợ lý',
+            placeholderText: "Nhập tin nhắn...",
+            aboutText: "SHOP",
+            displayMessageTime: true,
+        }
 
+        window.addEventListener("load", function() {
+            const iframe = document.getElementById('botmanWidgetRoot');
+            iframe.addEventListener('click', function() {
+                iframe.classList.add('clicked');
+                if (iframe && iframe.classList.contains('clicked')) {
+                    const iframe2 = document.getElementById('chatBotManFrame');
+                    if (iframe2) {
+                        window.sharedBotmanWidgetData = botmanChatWidget;
+                    }
+                }
+            });
+        });
+    </script>
     <!-- Đảm bảo có phần này để load scripts -->
     @yield('scripts')
 </body>
