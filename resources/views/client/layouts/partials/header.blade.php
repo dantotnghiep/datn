@@ -42,19 +42,19 @@
                             <ul class="sub-menu">
                                 <li><a href="{{ route('client.product.list-product') }}">Sản phẩm</a></li>
                                 <li>
-                                    {{-- <a href="{{ route('client.product.product-details') }}">Product Details</a> --}}
+                                    {{-- <a href="{{ route('client.product.product-details') }}">Chi tiết sản phẩm</a> --}}
                                 </li>
                             </ul>
                         </li>
                         <li class="">
-                            <a href="{{ route('home.contact') }}">Liên hệ</a>                         
+                            <a href="{{ route('home.contact') }}">Liên hệ</a>
                         </li>
 
                         <li class="">
-                            <a href="{{ route('home.about') }}">Về chúng tôi</a>                         
+                            <a href="{{ route('home.about') }}">Về chúng tôi</a>
                         </li>
 
-                        {{-- <li><a href="contact.html">Contact Us</a></li> --}}
+                        {{-- <li><a href="contact.html">Liên hệ</a></li> --}}
                         {{-- <li class="has-child-menu">
                             <a href="javascript:void(0)">Tài khoản</a>
                             <i class="fl flaticon-plus">+</i>
@@ -91,7 +91,7 @@
             </div>
             <div class="col-xl-2 col-2 d-none d-xl-flex p-0 align-items-center justify-content-center">
                 <div class="nav-right text-center">
-                    
+
                     <h5>Giảm giá sản phẩm tới 20%</h5>
                 </div>
             </div>

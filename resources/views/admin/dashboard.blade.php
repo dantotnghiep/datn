@@ -6,10 +6,10 @@
 
         <div class="cr-page-title">
             <div class="cr-breadcrumb">
-                <h5>eCommerce</h5>
+                <h5>Thương mại điện tử</h5>
                 <ul>
-                    <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    <li>eCommerce</li>
+                    <li><a href="{{ route('admin.dashboard') }}">Bảng điều khiển</a></li>
+                    <li>Thương mại điện tử</li>
                 </ul>
             </div>
             <div class="cr-tools">
@@ -73,7 +73,7 @@
                             <i class="ri-shield-user-line"></i>
                         </div>
                         <div class="metric-details">
-                            <h6>Customers</h6>
+                            <h6>Khách hàng</h6>
                             <h3>{{ number_format($totalCustomers) }}</h3>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                             <i class="ri-shopping-bag-3-line"></i>
                         </div>
                         <div class="metric-details">
-                            <h6>Orders</h6>
+                            <h6>Đơn hàng</h6>
                             <h3>{{ number_format($totalOrders) }}</h3>
                         </div>
                     </div>
@@ -99,7 +99,7 @@
                             <i class="ri-money-dollar-circle-line"></i>
                         </div>
                         <div class="metric-details">
-                            <h6>Actual Revenue</h6>
+                            <h6>Doanh thu thực tế</h6>
                             <h3>${{ number_format($totalRevenue, 2) }}</h3>
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                             <i class="ri-close-circle-line"></i>
                         </div>
                         <div class="metric-details">
-                            <h6>Cancelled Orders</h6>
+                            <h6>Đơn hàng đã hủy</h6>
                             <h3>${{ number_format($totalCancelled, 2) }}</h3>
                         </div>
                     </div>
@@ -125,33 +125,33 @@
                             <i class="ri-time-line"></i>
                         </div>
                         <div class="metric-details">
-                            <h6>Pending Revenue</h6>
+                            <h6>Doanh thu đang chờ</h6>
                             <h3>${{ number_format($pendingRevenue, 2) }}</h3>
                         </div>
                     </div>
                 </div>
             </div>
-           
+
         </div>
 
         <div class="row">
             <div class="col-xxl-8 col-xl-12">
                 <div class="cr-card revenue-overview">
                     <div class="cr-card-header header-575">
-                        <h4 class="cr-card-title">Revenue Overview (All Time)</h4>
+                        <h4 class="cr-card-title">Tổng quan doanh thu (Tất cả thời gian)</h4>
                     </div>
                     <div class="cr-card-content">
                         <div class="cr-chart-header">
                             <div class="block">
-                                <h6>Orders</h6>
+                                <h6>Đơn hàng</h6>
                                 <h5 id="total-orders">{{ $allTimeStats['totalOrders'] ?? $totalOrders }}</h5>
                             </div>
                             <div class="block">
-                                <h6>Actual Revenue</h6>
+                                <h6>Doanh thu thực tế</h6>
                                 <h5 id="total-revenue">{{ ($allTimeStats['totalRevenue'] ?? $totalRevenue) < 0 ? '-' : '' }}${{ number_format(abs(($allTimeStats['totalRevenue'] ?? $totalRevenue)/1000), 1) }}k</h5>
                             </div>
                             <div class="block">
-                                <h6>Pending Revenue</h6>
+                                <h6>Doanh thu đang chờ</h6>
                                 <h5 id="pending-revenue">{{ ($allTimeStats['pendingRevenue'] ?? $pendingRevenue) < 0 ? '-' : '' }}${{ number_format(abs(($allTimeStats['pendingRevenue'] ?? $pendingRevenue)/1000), 1) }}k</h5>
                             </div>
                         </div>
@@ -164,7 +164,7 @@
             <div class="col-xxl-4 col-xl-6 col-md-12">
                 <div class="cr-card" id="daily-revenue">
                     <div class="cr-card-header">
-                        <h4 class="cr-card-title">Daily Revenue Analysis</h4>
+                        <h4 class="cr-card-title">Phân tích doanh thu hàng ngày</h4>
                     </div>
                     <div class="cr-card-content">
                         <div class="cr-chart-content">
@@ -172,15 +172,15 @@
                         </div>
                         <div class="cr-chart-header-2">
                             <div class="block">
-                                <h6>Peak Day</h6>
+                                <h6>Ngày cao điểm</h6>
                                 <h5><span id="peak-day"></span> <span id="peak-value" class="value"></span></h5>
                             </div>
                             <div class="block">
-                                <h6>Daily Avg</h6>
+                                <h6>Trung bình ngày</h6>
                                 <h5><span id="average-revenue" class="value"></span></h5>
                             </div>
                             <div class="block">
-                                <h6>Lowest Day</h6>
+                                <h6>Ngày thấp nhất</h6>
                                 <h5><span id="lowest-day"></span> <span id="lowest-value" class="value"></span></h5>
                             </div>
                         </div>
@@ -192,7 +192,7 @@
             <div class="col-xxl-6 col-xl-12">
                 <div class="cr-card" id="best_seller_tbl">
                     <div class="cr-card-header">
-                        <h4 class="cr-card-title">Best Sellers</h4>
+                        <h4 class="cr-card-title">Sản phẩm bán chạy</h4>
                         <div class="header-tools">
                             <a href="javascript:void(0)" class="m-r-10 cr-full-card" title="Full Screen"><i
                                     class="ri-fullscreen-line"></i></a>
@@ -230,8 +230,8 @@
                                                     @endforeach
                                                 </span>
                                             </td>
-                                            <td>{{ $category->products->sum(function($product) { 
-                                                    return $product->variations->sum('stock'); 
+                                            <td>{{ $category->products->sum(function($product) {
+                                                    return $product->variations->sum('stock');
                                                 }) }}</td>
                                             <td>${{ number_format($category->sales_count * 100, 2) }}</td>
                                         </tr>
@@ -534,7 +534,7 @@ timeRangeData.lastMonth = { ...timeRangeData.today };
 function updateDateDisplay(range, displayElement) {
     const today = new Date();
     let startDate, endDate;
-    
+
     // Đối với custom range, chúng ta sẽ sử dụng giá trị đã chọn
     if (typeof range === 'object' && range.startDate && range.endDate) {
         startDate = new Date(range.startDate);
@@ -600,18 +600,18 @@ function updateDashboardData(range, customDateRange) {
             updateDateDisplay(range, display);
         }
     });
-    
+
     // Chuẩn bị tham số cho request
     const requestData = {
         range: range
     };
-    
+
     // Thêm thông tin custom date range nếu có
     if (range === 'customRange' && customDateRange) {
         requestData.startDate = customDateRange.startDate;
         requestData.endDate = customDateRange.endDate;
     }
-    
+
     // Gọi Ajax để lấy dữ liệu từ server
     fetch('/admin/dashboard/data', {
         method: 'POST',
@@ -625,8 +625,8 @@ function updateDashboardData(range, customDateRange) {
     .then(data => {
         // Chỉ cập nhật các thẻ metric, KHÔNG cập nhật Revenue Overview
         updateSummaryStatistics(data);
-        
-        // Phần cập nhật biểu đồ Revenue Overview đã bị loại bỏ vì chúng ta muốn 
+
+        // Phần cập nhật biểu đồ Revenue Overview đã bị loại bỏ vì chúng ta muốn
         // nó hiển thị dữ liệu toàn thời gian, không phụ thuộc vào bộ lọc ngày
     })
     .catch(error => {
@@ -778,7 +778,7 @@ function setupDateRangePicker() {
         const customRangeStart = document.getElementById('custom-range-start');
         const customRangeEnd = document.getElementById('custom-range-end');
         const applyCustomRange = document.getElementById('apply-custom-range');
-        
+
         // Thiết lập giá trị mặc định cho các input date
         const today = new Date();
         customRangeStart.valueAsDate = today;
@@ -800,32 +800,32 @@ function setupDateRangePicker() {
         applyCustomRange.addEventListener('click', function() {
             const startDate = customRangeStart.value;
             const endDate = customRangeEnd.value;
-            
+
             if (!startDate || !endDate) {
                 alert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc');
                 return;
             }
-            
+
             if (new Date(startDate) > new Date(endDate)) {
                 alert('Ngày bắt đầu phải trước ngày kết thúc');
                 return;
             }
-            
+
             // Cập nhật hiển thị date range
             dateOptions.forEach(opt => opt.classList.remove('active'));
             customRangeBtn.classList.add('active');
-            
+
             const customRange = {
                 startDate: startDate,
                 endDate: endDate
             };
-            
+
             // Cập nhật hiển thị date range
             updateDateDisplay(customRange, dateRangeDisplay);
-            
+
             // Gọi API để lấy dữ liệu theo khoảng thời gian tùy chỉnh
             updateDashboardData('customRange', customRange);
-            
+
             // Ẩn dropdown sau khi áp dụng
             customRangePicker.style.display = 'none';
             dropdown.classList.remove('show');
@@ -846,11 +846,11 @@ function setupDateRangePicker() {
                 if (this.id === 'custom-range-btn') {
                     return; // Xử lý riêng cho custom range button
                 }
-                
+
                 // Chuyển đổi tên tiếng Việt sang key cho API
                 const rangeText = this.textContent.trim();
                 let range;
-                
+
                 switch (rangeText) {
                     case 'Hôm nay':
                         range = 'today';
@@ -883,7 +883,7 @@ function setupDateRangePicker() {
 
                 // Update date display
                 updateDateDisplay(range, dateRangeDisplay);
-                
+
                 // Update dashboard data based on selected time range
                 updateDashboardData(range);
 
@@ -892,7 +892,7 @@ function setupDateRangePicker() {
                 customRangePicker.style.display = 'none';
             });
         });
-        
+
         // Hiển thị dữ liệu mặc định - Ngày hôm nay
         updateDateDisplay('today', dateRangeDisplay);
         updateDashboardData('today');
@@ -1085,7 +1085,7 @@ function initStatusPieChart() {
 
     // FIX: Tính tổng doanh thu để tính toán phần trăm chính xác
     const totalAmount = series.reduce((sum, amount) => sum + amount, 0);
-    
+
     // FIX: Tạo dữ liệu hiển thị tỉ lệ phần trăm
     const formattedLabels = labels.map((label, index) => {
         const percentage = ((series[index] / totalAmount) * 100).toFixed(1);
