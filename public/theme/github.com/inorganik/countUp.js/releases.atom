@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xml:lang="en-US">
+  <id>tag:github.com,2008:https://github.com/inorganik/countUp.js/releases</id>
+  <link type="text/html" rel="alternate" href="https://github.com/inorganik/countUp.js/releases"/>
+  <link type="application/atom+xml" rel="self" href="https://github.com/inorganik/countUp.js/releases.atom"/>
+  <title>Release notes from countUp.js</title>
+  <updated>2025-04-25T12:58:17Z</updated>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.8.2</id>
+    <updated>2025-04-25T13:05:03Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.8.2"/>
+    <title>2.8.2</title>
+    <content type="html">&lt;p&gt;Added types to exports in package.json, thanks to &lt;a class=&quot;user-mention notranslate&quot; data-hovercard-type=&quot;user&quot; data-hovercard-url=&quot;/users/axelthat/hovercard&quot; data-octo-click=&quot;hovercard-link-click&quot; data-octo-dimensions=&quot;link_type:self&quot; href=&quot;https://github.com/axelthat&quot;&gt;@axelthat&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.8.1</id>
+    <updated>2025-04-23T13:36:43Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.8.1"/>
+    <title>2.8.1</title>
+    <content type="html">&lt;p&gt;Provide package.json &quot;exports&quot; for compatibility with modern build systems.&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.8.0</id>
+    <updated>2023-08-25T16:56:45Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.8.0"/>
+    <title>2.8.0</title>
+    <content type="html">&lt;p&gt;Added &lt;code&gt;onStartCallback&lt;/code&gt; option, useful for when scroll spy is enabled, thanks to &lt;a class=&quot;user-mention notranslate&quot; data-hovercard-type=&quot;user&quot; data-hovercard-url=&quot;/users/cherrol/hovercard&quot; data-octo-click=&quot;hovercard-link-click&quot; data-octo-dimensions=&quot;link_type:self&quot; href=&quot;https://github.com/cherrol&quot;&gt;@cherrol&lt;/a&gt; !&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.7.0</id>
+    <updated>2023-06-28T17:10:45Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.7.0"/>
+    <title>2.7.0</title>
+    <content type="html">&lt;p&gt;Reverted change which made &quot;main&quot; in package.json point to the module file, instead of the umd file. It now points again at the umd file.&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.6.2</id>
+    <updated>2023-05-01T20:48:19Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.6.2"/>
+    <title>2.6.2</title>
+    <content type="html">&lt;p&gt;When revamping the build, I tried to resolve a rollup warning that had been occurring on the build for a long time:&lt;/p&gt;
+&lt;div class=&quot;snippet-clipboard-content notranslate position-relative overflow-auto&quot; data-snippet-clipboard-copy-content=&quot;&amp;quot;(!) `this` has been rewritten to `undefined`&quot;&gt;&lt;pre class=&quot;notranslate&quot;&gt;&lt;code&gt;&quot;(!) `this` has been rewritten to `undefined`
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It occurs because of typescript&#39;s Object.assign polyfill, which uses &lt;code&gt;this&lt;/code&gt; on the global scope. If you set &lt;code&gt;context: &#39;window&#39;&lt;/code&gt; in the rollup config, it will silence the warning, but it will cause issues if CountUp is not run in the browser. Allowing rollup to rewrite this to undefined on just the global scope is harmless and doesn&#39;t break anything, so I reverted the change.&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.6.1</id>
+    <updated>2023-04-30T14:55:52Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.6.1"/>
+    <title>2.6.1</title>
+    <content type="html">&lt;p&gt;This release doesn&#39;t change the CountUp code at all, just the distribution files - The requestAnimationFrame polyfill is no longer bundled with CountUp but served separately. The other files in dist remain the same. More details in the PR: &lt;a class=&quot;issue-link js-issue-link&quot; data-error-text=&quot;Failed to load title&quot; data-id=&quot;1689241056&quot; data-permission-text=&quot;Title is private&quot; data-url=&quot;https://github.com/inorganik/countUp.js/issues/311&quot; data-hovercard-type=&quot;pull_request&quot; data-hovercard-url=&quot;/inorganik/countUp.js/pull/311/hovercard&quot; href=&quot;https://github.com/inorganik/countUp.js/pull/311&quot;&gt;#311&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.6.0</id>
+    <updated>2023-03-13T22:12:13Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.6.0"/>
+    <title>2.6.0</title>
+    <content type="html">&lt;p&gt;Support animation plugins:  A plugin is a class instance or object passed in options for the &lt;code&gt;plugin&lt;/code&gt; param that implements a render method:&lt;/p&gt;
+&lt;div class=&quot;highlight highlight-source-ts notranslate position-relative overflow-auto&quot; data-snippet-clipboard-copy-content=&quot;export declare interface CountUpPlugin {
+  render(elem: HTMLElement, formatted: string): void;
+}&quot;&gt;&lt;pre&gt;&lt;span class=&quot;pl-k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;pl-k&quot;&gt;declare&lt;/span&gt; &lt;span class=&quot;pl-k&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;pl-smi&quot;&gt;CountUpPlugin&lt;/span&gt; &lt;span class=&quot;pl-kos&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;pl-c1&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;pl-kos&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pl-s1&quot;&gt;elem&lt;/span&gt;: &lt;span class=&quot;pl-smi&quot;&gt;HTMLElement&lt;/span&gt;&lt;span class=&quot;pl-kos&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pl-s1&quot;&gt;formatted&lt;/span&gt;: &lt;span class=&quot;pl-smi&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pl-kos&quot;&gt;)&lt;/span&gt;: &lt;span class=&quot;pl-smi&quot;&gt;&lt;span class=&quot;pl-k&quot;&gt;void&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;pl-kos&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;pl-kos&quot;&gt;}&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The plugin&#39;s render method will be called on each frame to display the formatted value instead of CountUp&#39;s.&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/2.5.0</id>
+    <updated>2023-03-01T20:43:33Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/2.5.0"/>
+    <title>v2.5.0</title>
+    <content type="html">&lt;p&gt;Added new option, &lt;code&gt;onCompleteCallback&lt;/code&gt; which gets called when the animation completes. You can still pass a callback to the start method, and it will override whatever is passed in the options.&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.4.2</id>
+    <updated>2023-01-28T17:58:15Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.4.2"/>
+    <title>2.4.2</title>
+    <content type="html">&lt;p&gt;Make it so when scroll spy is enabled, and &lt;code&gt;scrollSpyOnce&lt;/code&gt; is false, CountUp will re-animate when scrolling up, as well as down, thanks to &lt;a class=&quot;user-mention notranslate&quot; data-hovercard-type=&quot;user&quot; data-hovercard-url=&quot;/users/paidge/hovercard&quot; data-octo-click=&quot;hovercard-link-click&quot; data-octo-dimensions=&quot;link_type:self&quot; href=&quot;https://github.com/paidge&quot;&gt;@paidge&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/2.4.1</id>
+    <updated>2023-01-24T13:14:51Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/2.4.1"/>
+    <title>2.4.1</title>
+    <content type="html">&lt;ul&gt;
+&lt;li&gt;Added Indian separators option &lt;code&gt;useIndianSeparators&lt;/code&gt; which will format a number like &quot;1,00,000&quot; instead of &quot;100,000&quot;&lt;/li&gt;
+&lt;li&gt;Added null check in &lt;code&gt;printValue&lt;/code&gt; method to potentially fix react issue&lt;/li&gt;
+&lt;/ul&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+</feed>

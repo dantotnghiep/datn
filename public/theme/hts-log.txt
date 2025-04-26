@@ -1,0 +1,41 @@
+HTTrack3.49-2+htsswf+htsjava launched on Fri, 25 Apr 2025 22:30:47 at https://prium.github.io/phoenix/v1.22.0/index.html +*.png +*.gif +*.jpg +*.jpeg +*.css +*.js -ad.doubleclick.net/* -mime:application/foobar
+(winhttrack -qwC2%Ps2u1%s%uN0%I0p3DaK0H0%kf2A25000%f#f -F "Mozilla/4.5 (compatible; HTTrack 3.0x; Windows 98)" -%F "<!-- Mirrored from %s%s by HTTrack Website Copier/3.x [XR&CO'2014], %s -->" -%l "en, *" https://prium.github.io/phoenix/v1.22.0/index.html -O1 "C:\Users\admin\Downloads\Ban-hang" +*.png +*.gif +*.jpg +*.jpeg +*.css +*.js -ad.doubleclick.net/* -mime:application/foobar )
+
+Information, Warnings and Errors reported for this mirror:
+note:	the hts-log.txt file, and hts-cache folder, may contain sensitive information,
+	such as username/password authentication for websites mirrored in this project
+	do not share these files/folders if you want these information to remain private
+
+22:42:11	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/assets/css/generic/59.png (from https://prium.github.io/phoenix/v1.22.0/assets/css/theme-rtl.min.css)
+22:42:11	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/vendors/leaflet/images/layers.png (from https://prium.github.io/phoenix/v1.22.0/vendors/leaflet/leaflet.css)
+22:42:11	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/vendors/leaflet/images/layers-2x.png (from https://prium.github.io/phoenix/v1.22.0/vendors/leaflet/leaflet.css)
+22:42:11	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/vendors/leaflet/images/marker-icon.png (from https://prium.github.io/phoenix/v1.22.0/vendors/leaflet/leaflet.css)
+22:42:14	Error: 	"Service Unavailable" (503) at link https://prium.github.io/phoenix/v1.22.0/assets/img/chat/4.png (from https://prium.github.io/phoenix/v1.22.0/apps/chat.html)
+22:42:14	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/apps/file-manager/img/file-manager/9.png (from https://prium.github.io/phoenix/v1.22.0/apps/file-manager/grid-view.html)
+22:42:14	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/apps/file-manager/img/file-manager/11.png (from https://prium.github.io/phoenix/v1.22.0/apps/file-manager/grid-view.html)
+22:42:14	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/apps/file-manager/img/file-manager/12.png (from https://prium.github.io/phoenix/v1.22.0/apps/file-manager/grid-view.html)
+22:42:14	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/apps/file-manager/img/file-manager/13.png (from https://prium.github.io/phoenix/v1.22.0/apps/file-manager/grid-view.html)
+22:42:14	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/apps/file-manager/img/file-manager/15.png (from https://prium.github.io/phoenix/v1.22.0/apps/file-manager/grid-view.html)
+22:42:14	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/apps/file-manager/img/file-manager/16.png (from https://prium.github.io/phoenix/v1.22.0/apps/file-manager/grid-view.html)
+22:42:14	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/assets/js/ecommerce-dashboard.js (from https://prium.github.io/phoenix/v1.22.0/modules/echarts/how-to-use.html)
+22:42:14	Error: 	"Not Found" (404) at link https://prium.github.io/phoenix/v1.22.0/assets/js/crm-dashboard.js (from https://prium.github.io/phoenix/v1.22.0/modules/echarts/how-to-use.html)
+22:43:10	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/inorganik/CountUp.js/hovercards/citation/sidebar_partial?tree_name=master
+22:43:44	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/inorganik/countUp.js/hovercards/citation/sidebar_partial?tree_name=master
+22:43:52	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/signup_check/username?suggest_usernames=true
+22:47:59	Error: 	"Not Found" (404) at link https://github.com/inorganik/countUp.js/security/overall-count (from https://github.com/inorganik/CountUp.js)
+22:53:15	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/inorganik/ngx-countUp/hovercards/citation/sidebar_partial?tree_name=master
+22:53:19	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/inorganik/ngx-countUp/used_by_list
+22:54:10	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/inorganik/countUp.js-angular1/hovercards/citation/sidebar_partial?tree_name=master
+22:54:13	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/inorganik/countUp.js-angular1/used_by_list
+22:56:50	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/msoler75/odometer_countup.js/hovercards/citation/sidebar_partial?tree_name=master
+22:56:53	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/msoler75/odometer_countup.js/used_by_list
+22:56:56	Error: 	"Not Found" (404) at link https://github.com/inorganik/"./main.js" (from https://github.com/inorganik/CountUp.js)
+22:56:56	Error: 	"Not Found" (404) at link https://github.com/inorganik/"js/countUp.umd.js"></script> (from https://github.com/inorganik/CountUp.js)
+22:56:56	Error: 	"Not Found" (404) at link https://github.com/inorganik/"js/main-for-legacy.js"></script>" (from https://github.com/inorganik/CountUp.js)
+22:59:07	Warning: 	Link https://github.com/inorganik/countUp.js/releases/tag/v2.8.2 not scanned (follow robots meta tag)
+23:00:15	Error: 	"Not Found" (404) at link https://github.com/email_validity_checks (from https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E&source=header-repo&source_repo=inorganik%2FcountUp.js)
+23:00:15	Error: 	"Not Found" (404) at link https://github.com/password_validity_checks?hide_password_validity_pills=true&hide_strength_sentence=true (from https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E&source=header-repo&source_repo=inorganik%2FcountUp.js)
+23:33:17	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/ExodusMovement/countUp.js/hovercards/citation/sidebar_partial?tree_name=master
+23:35:11	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/178320934/countUp.js/hovercards/citation/sidebar_partial?tree_name=master
+23:35:41	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/cherrol/countUp.js/hovercards/citation/sidebar_partial?tree_name=master
+23:36:14	Warning: 	file not stored in cache due to bogus state (incomplete type with Not Acceptable (200), size 0): https://github.com/fareed069417/countUp.js/hovercards/citation/sidebar_partial?tree_name=master

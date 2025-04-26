@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xml:lang="en-US">
+  <id>tag:github.com,2008:https://github.com/inorganik/countUp.js/releases</id>
+  <link type="text/html" rel="alternate" href="https://github.com/inorganik/countUp.js/releases"/>
+  <link type="application/atom+xml" rel="self" href="https://github.com/inorganik/countUp.js/releases.atom"/>
+  <title>Tags from countUp.js</title>
+  <updated>2025-04-25T12:58:17Z</updated>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.8.2</id>
+    <updated>2025-04-25T13:05:03Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.8.2"/>
+    <title>2.8.2</title>
+    <content></content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.8.1</id>
+    <updated>2025-04-23T13:36:43Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.8.1"/>
+    <title>2.8.1</title>
+    <content></content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.8.0</id>
+    <updated>2023-08-25T16:56:45Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.8.0"/>
+    <title>2.8.0</title>
+    <content></content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.7.0</id>
+    <updated>2023-06-28T17:10:45Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.7.0"/>
+    <title>2.7.0</title>
+    <content></content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.6.2</id>
+    <updated>2023-05-01T20:48:19Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.6.2"/>
+    <title>2.6.2</title>
+    <content></content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.6.1</id>
+    <updated>2023-04-30T14:55:52Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.6.1"/>
+    <title>2.6.1</title>
+    <content type="html">&lt;p&gt;Rollup build (&lt;a class=&quot;issue-link js-issue-link&quot; href=&quot;https://github.com/inorganik/countUp.js/pull/311&quot;&gt;#311&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;* replace gulp build with rollup&lt;/p&gt;
+
+&lt;p&gt;* bump version&lt;/p&gt;
+
+&lt;p&gt;* point main to es6 module&lt;/p&gt;
+
+&lt;p&gt;* revert change to test umd&lt;/p&gt;
+
+&lt;p&gt;* remove browserify&lt;/p&gt;
+
+&lt;p&gt;* update eslint config&lt;/p&gt;
+
+&lt;p&gt;* fix rollup error&lt;/p&gt;
+
+&lt;p&gt;* update readme&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.6.0</id>
+    <updated>2023-03-13T22:12:13Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.6.0"/>
+    <title>2.6.0</title>
+    <content type="html">&lt;p&gt;Support plugins (&lt;a class=&quot;issue-link js-issue-link&quot; href=&quot;https://github.com/inorganik/countUp.js/pull/307&quot;&gt;#307&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;* support plugins&lt;/p&gt;
+
+&lt;p&gt;* add plugin test&lt;/p&gt;
+
+&lt;p&gt;* Update README&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/2.5.0</id>
+    <updated>2023-03-01T20:43:33Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/2.5.0"/>
+    <title>v2.5.0</title>
+    <content type="html">&lt;p&gt;Add onCompleteCallback option (&lt;a class=&quot;issue-link js-issue-link&quot; href=&quot;https://github.com/inorganik/countUp.js/pull/303&quot;&gt;#303&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;* add onCompleteCallback option&lt;/p&gt;
+
+&lt;p&gt;* update demo&lt;/p&gt;
+
+&lt;p&gt;* new tests&lt;/p&gt;
+
+&lt;p&gt;* update docs&lt;/p&gt;
+
+&lt;p&gt;* update index&lt;/p&gt;</content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/v2.4.2</id>
+    <updated>2023-01-28T17:58:15Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/v2.4.2"/>
+    <title>2.4.2</title>
+    <content></content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/15536831/2.4.1</id>
+    <updated>2023-01-24T13:14:51Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/inorganik/countUp.js/releases/tag/2.4.1"/>
+    <title>2.4.1</title>
+    <content></content>
+    <author>
+      <name>inorganik</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/109553?s=60&amp;v=4"/>
+  </entry>
+</feed>
