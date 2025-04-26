@@ -1,113 +1,110 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductImageController;
+use App\Http\Controllers\Admin\ProductVariationController;
 
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return view('admin.components.dashboard');
+    })->name('dashboard');
 
-Route::get('/', function () {
-    return view('admin.components.dashboard');
+    // CRUD routes cho danh mục (category)
+    Route::prefix('categories')->name('categories.')->group(function () {
+        // Hiển thị danh sách
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+
+        // Form tạo mớiimage.png
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+
+        // Lưu dữ liệu mới
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+
+        // Form chỉnh sửa
+        Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
+
+        // Cập nhật dữ liệu
+        Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
+
+        // Xóa mềm
+        Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
+
+        // Khôi phục từ thùng rác
+        Route::put('/{id}/restore', [CategoryController::class, 'restore'])->name('restore');
+    });
+
+    // CRUD routes for products
+    Route::prefix('products')->name('products.')->group(function () {
+        // List
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [ProductController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [ProductController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [ProductController::class, 'restore'])->name('restore');
+    });
+
+    // CRUD routes for product images
+    Route::prefix('product-images')->name('product-images.')->group(function () {
+        // List
+        Route::get('/', [ProductImageController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [ProductImageController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [ProductImageController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [ProductImageController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [ProductImageController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [ProductImageController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [ProductImageController::class, 'restore'])->name('restore');
+    });
+
+    // CRUD routes for product variations
+    Route::prefix('product-variations')->name('product-variations.')->group(function () {
+        // List
+        Route::get('/', [ProductVariationController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [ProductVariationController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [ProductVariationController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [ProductVariationController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [ProductVariationController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [ProductVariationController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [ProductVariationController::class, 'restore'])->name('restore');
+    });
+
 });
-
-Route::get('/them-danh-muc', function () {
-    return view('admin.components.categories.create');
-})->name('categories.create');
-
-Route::get('/danh-muc', function () {
-    return view('admin.components.categories.index');
-})->name('categories.index');
-Route::get('/san-pham', function () {
-    return view('admin.components.product.index');
-})->name('product.index');
-Route::get('/them-san-pham', function () {
-    return view('admin.components.product.create');
-})->name('product.create');
-
-Route::get('/khach-hang', function () {
-    return view('admin.components.customers.index');
-})->name('customers.index');
-
-Route::get('/don-hang', function () {
-    return view('admin.components.orders.index');
-})->name('orders.index');
-
-Route::get('/chi-tiet-don-hang', function () {
-    return view('admin.components.orders.details');
-})->name('orders.details');
-
-
-// Route::prefix('admin')->name('admin.')->group(function () {
-//     // Dashboard
-//     Route::get('/', function () {
-//         return view('admin.layouts.app');
-//     })->name('dashboard');
-
-//     // Routes cho Category
-//     Route::prefix('categories')->name('categories.')->group(function () {
-//         // Hiển thị danh sách
-//         Route::get('/', [CategoryController::class, 'index'])->name('index');
-
-//         // Form tạo mới
-//         Route::get('/create', [CategoryController::class, 'create'])->name('create');
-
-//         // Lưu dữ liệu mới
-//         Route::post('/', [CategoryController::class, 'store'])->name('store');
-
-//         // Form chỉnh sửa
-//         Route::get('/{slug}/edit', [CategoryController::class, 'edit'])->name('edit');
-
-//         // Cập nhật dữ liệu
-//         Route::put('/{slug}', [CategoryController::class, 'update'])->name('update');
-
-//         // Xóa mềm
-//         Route::delete('/{slug}', [CategoryController::class, 'destroy'])->name('destroy');
-
-//         // Khôi phục từ thùng rác
-//         Route::put('/{slug}/restore', [CategoryController::class, 'restore'])->name('restore');
-//     });
-
-//     // Routes cho Product
-//     Route::prefix('products')->name('products.')->group(function () {
-//         // Hiển thị danh sách
-//         Route::get('/', [ProductController::class, 'index'])->name('index');
-
-//         // Form tạo mới
-//         Route::get('/create', [ProductController::class, 'create'])->name('create');
-
-//         // Lưu dữ liệu mới
-//         Route::post('/', [ProductController::class, 'store'])->name('store');
-
-//         // Form chỉnh sửa
-//         Route::get('/{slug}/edit', [ProductController::class, 'edit'])->name('edit');
-
-//         // Cập nhật dữ liệu
-//         Route::put('/{slug}', [ProductController::class, 'update'])->name('update');
-
-//         // Xóa mềm
-//         Route::delete('/{slug}', [ProductController::class, 'destroy'])->name('destroy');
-
-//         // Khôi phục từ thùng rác
-//         Route::put('/{slug}/restore', [ProductController::class, 'restore'])->name('restore');
-//     });
-//     // Routes cho Name
-//     Route::prefix('names')->name('names.')->group(function () {
-//         // Hiển thị danh sách
-//         Route::get('/', [NameController::class, 'index'])->name('index');
-
-//         // Form tạo mới
-//         Route::get('/create', [NameController::class, 'create'])->name('create');
-
-//         // Lưu dữ liệu mới
-//         Route::post('/', [NameController::class, 'store'])->name('store');
-
-//         // Form chỉnh sửa
-//         Route::get('/{slug}/edit', [NameController::class, 'edit'])->name('edit');
-
-//         // Cập nhật dữ liệu
-//         Route::put('/{slug}', [NameController::class, 'update'])->name('update');
-
-//         // Xóa mềm
-//         Route::delete('/{slug}', [NameController::class, 'destroy'])->name('destroy');
-
-//         // Khôi phục từ thùng rác
-//         Route::put('/{slug}/restore', [NameController::class, 'restore'])->name('restore');
-//     });
-// });

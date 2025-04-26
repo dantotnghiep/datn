@@ -26,7 +26,7 @@ class ProductVariation extends BaseModel
     {
         return [
             'product_id' => [
-                'label' => 'Sản phẩm',
+                'label' => 'Product',
                 'type' => 'select',
                 'options' => Product::pluck('name', 'id')->toArray(),
                 'filterable' => true,
@@ -34,31 +34,31 @@ class ProductVariation extends BaseModel
                 'sortable' => true
             ],
             'sku' => [
-                'label' => 'Mã biến thể',
+                'label' => 'SKU',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'name' => [
-                'label' => 'Tên biến thể',
+                'label' => 'Variation Name',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'price' => [
-                'label' => 'Giá',
+                'label' => 'Price',
                 'type' => 'number',
                 'step' => '0.01',
                 'sortable' => true
             ],
             'sale_price' => [
-                'label' => 'Giá khuyến mãi',
+                'label' => 'Sale Price',
                 'type' => 'number',
                 'step' => '0.01',
                 'sortable' => true
             ],
             'stock' => [
-                'label' => 'Tồn kho',
+                'label' => 'Stock',
                 'type' => 'number',
                 'sortable' => true
             ]

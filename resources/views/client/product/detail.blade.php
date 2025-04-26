@@ -2,8 +2,6 @@
 @section('content')
 <div class="pt-5 pb-9">
 
-    <!-- ============================================-->
-    <!-- <section> begin ============================-->
     <section class="py-0">
         <div class="container-small">
             <nav class="mb-3" aria-label="breadcrumb">

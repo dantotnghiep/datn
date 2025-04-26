@@ -8,7 +8,7 @@ class Product extends BaseModel
 {
     use SoftDeletes;
     
-    protected $fillable = ['category_id', 'name', 'slug', 'sku', 'description', 'is_hot'];
+    protected $fillable = ['category_id', 'name', 'slug', 'sku', 'description', 'image', 'is_hot'];
 
     public static function rules($id = null)
     {
@@ -18,6 +18,7 @@ class Product extends BaseModel
             'slug' => 'required|string|max:255|unique:products,slug,' . $id,
             'sku' => 'required|string|max:255|unique:products,sku,' . $id,
             'description' => 'nullable|string',
+            'image' => $id ? 'nullable|image|max:2048' : 'required|image|max:2048',
             'is_hot' => 'boolean'
         ];
     }
@@ -26,7 +27,7 @@ class Product extends BaseModel
     {
         return [
             'category_id' => [
-                'label' => 'Danh mục',
+                'label' => 'Category',
                 'type' => 'select',
                 'options' => Category::pluck('name', 'id')->toArray(),
                 'filterable' => true,
@@ -34,7 +35,7 @@ class Product extends BaseModel
                 'sortable' => true
             ],
             'name' => [
-                'label' => 'Tên sản phẩm',
+                'label' => 'Product Name',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
@@ -46,22 +47,28 @@ class Product extends BaseModel
                 'sortable' => true
             ],
             'sku' => [
-                'label' => 'Mã sản phẩm',
+                'label' => 'SKU',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'description' => [
-                'label' => 'Mô tả',
+                'label' => 'Description',
                 'type' => 'textarea',
                 'searchable' => true,
                 'sortable' => false
             ],
+            'image' => [
+                'label' => 'Product Image',
+                'type' => 'file',
+                'sortable' => false
+            ],
             'is_hot' => [
-                'label' => 'Sản phẩm nổi bật',
-                'type' => 'boolean',
+                'label' => 'Featured Product',
+                'type' => 'select',
+                'options' => [0 => 'No', 1 => 'Yes'],
                 'filterable' => true,
-                'filter_options' => [0 => 'Không', 1 => 'Có'],
+                'filter_options' => [0 => 'No', 1 => 'Yes'],
                 'sortable' => true
             ]
         ];

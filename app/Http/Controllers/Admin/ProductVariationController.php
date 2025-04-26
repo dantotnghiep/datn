@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\ProductVariation;
-use Illuminate\Http\Request;
 
 class ProductVariationController extends BaseController
 {
     public function __construct()
     {
         $this->model = ProductVariation::class;
-        $this->viewPath = 'admin.product-variations';
+        $this->viewPath = 'admin.components.crud';
         $this->route = 'admin.product-variations';
         parent::__construct();
     }

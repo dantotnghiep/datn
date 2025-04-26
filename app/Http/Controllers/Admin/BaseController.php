@@ -106,12 +106,12 @@ abstract class BaseController extends Controller
         $this->model::create($validated);
 
         return redirect()->route($this->route . '.index')
-            ->with('success', 'Item created successfully');
+            ->with('success', 'Item created successfully!');
     }
 
-    public function edit($slug)
+    public function edit($id)
     {
-        $item = $this->model::withTrashed()->where('slug', $slug)->firstOrFail();
+        $item = $this->model::withTrashed()->findOrFail($id);
         $fields = $this->model::getFields();
         return view($this->viewPath . '.form', [
             'item' => $item,
@@ -120,9 +120,9 @@ abstract class BaseController extends Controller
         ]);
     }
 
-    public function update(Request $request, $slug)
+    public function update(Request $request, $id)
     {
-        $item = $this->model::withTrashed()->where('slug', $slug)->firstOrFail();
+        $item = $this->model::withTrashed()->findOrFail($id);
         $validated = $request->validate($this->model::rules($item->id));
 
         // Xử lý upload ảnh nếu có
@@ -133,12 +133,12 @@ abstract class BaseController extends Controller
         $item->update($validated);
 
         return redirect()->route($this->route . '.index')
-            ->with('success', 'Item updated successfully');
+            ->with('success', 'Item updated successfully!');
     }
 
-    public function destroy($slug)
+    public function destroy($id)
     {
-        $item = $this->model::where('slug', $slug)->firstOrFail();
+        $item = $this->model::findOrFail($id);
 
         // Xử lý xóa ảnh nếu có
         if ($this->hasImage) {
@@ -148,16 +148,16 @@ abstract class BaseController extends Controller
         $item->delete();
 
         return redirect()->route($this->route . '.index')
-            ->with('success', 'Item moved to trash successfully');
+            ->with('success', 'Item moved to trash successfully!');
     }
 
-    public function restore($slug)
+    public function restore($id)
     {
-        $item = $this->model::onlyTrashed()->where('slug', $slug)->firstOrFail();
+        $item = $this->model::onlyTrashed()->findOrFail($id);
         $item->restore();
 
         return redirect()->route($this->route . '.index')
-            ->with('success', 'Item restored successfully');
+            ->with('success', 'Item restored successfully!');
     }
 
     // Các phương thức xử lý ảnh
