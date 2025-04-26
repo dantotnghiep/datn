@@ -489,7 +489,10 @@
                 }
             });
 
-
+            document.querySelector('.qty-minus').addEventListener('click', () => {
+                let current = parseInt(qtyInput.value);
+                if (current > 1) qtyInput.value = current - 1;
+            });
 
             qtyInput.addEventListener('input', () => {
                 let max = parseInt(qtyInput.max);
