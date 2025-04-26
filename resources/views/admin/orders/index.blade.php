@@ -3,78 +3,61 @@
 @section('content')
     <div class="cr-main-content">
         <div class="container-fluid">
-            <!-- Page title & breadcrumb -->
-            <div class="cr-page-title cr-page-title-2">
-                <div class="cr-breadcrumb">
-                    <h5>Order List</h5>
-                    <ul>
-                        <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li>Order List</li>
-                    </ul>
+            <h1 class="h3 mb-4 text-gray-800">Quản lý Đơn Hàng</h1>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Tất cả Đơn Hàng</h6>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="cr-card" id="ordertbl">
-                        <div class="cr-card-header">
-                            <h4 class="cr-card-title">Recent Orders</h4>
-                            <div class="header-tools">
-                                <a href="javascript:void(0)" class="m-r-10 cr-full-card"><i class="ri-fullscreen-line"></i></a>
-                                <div class="cr-date-range dots">
-                                    <span></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cr-card-content card-default">
-                            <div class="order-table">
-                                <div class="table-responsive tbl-1200">
-                                    <table id="recent_order" class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Order ID</th>
-                                                <th>Customer</th>
-                                                <th>Date</th>
-                                                <th>Total Amount</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($orders as $order)
-                                            <tr id="order-row-{{ $order->id }}">
-                                                <td class="token">#{{ $order->order_code }}</td>
-                                                <td>{{ $order->user_name }}</td>
-                                                <td>{{ $order->created_at->format('M d, Y') }}</td>
-                                                <td>${{ number_format($order->total_amount, 2) }}</td>
-                                                <td>
-                                                    <span id="status-badge-{{ $order->id }}" 
-                                                        class="badge bg-{{ $order->status_id == 1 ? 'warning' : ($order->status_id == 2 ? 'info' : ($order->status_id == 3 ? 'success' : 'danger')) }}">
-                                                        {{ $order->status->status_name ?? 'Processing' }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    @if ($order->status_id == 1)
-                                                        <button type="button" class="btn btn-sm btn-success update-status-btn" 
-                                                            data-order-id="{{ $order->id }}" data-status-id="2">
-                                                            Xác nhận
-                                                        </button>
-                                                    @endif
-                                                    @if ($order->status_id == 2)
-                                                        <button type="button" class="btn btn-sm btn-info update-status-btn" 
-                                                            data-order-id="{{ $order->id }}" data-status-id="3">
-                                                            Hoàn thành
-                                                        </button>
-                                                    @endif
-                                                    <a href="{{ route('admin.orders.show', $order->id) }}" 
-                                                        class="btn btn-sm btn-primary">Xem chi tiết</a>
-                                                </td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Mã Đơn Hàng</th>
+                                    <th>Khách Hàng</th>
+                                    <th>Ngày</th>
+                                    <th>Tổng Tiền</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($orders as $order)
+                                    <tr id="order-row-{{ $order->id }}">
+                                        <td>{{ $order->order_code }}</td>
+                                        <td>{{ $order->user_name }}</td>
+                                        <td>{{ $order->created_at->format('M d, Y') }}</td>
+                                        <td>{{ number_format($order->total_amount, 2) }}</td>
+                                        <td>
+                                            <span id="status-badge-{{ $order->id }}"
+                                                class="badge bg-{{ $order->status_id == 1 ? 'warning' : ($order->status_id == 2 ? 'info' : ($order->status_id == 3 ? 'success' : 'danger')) }}">
+                                                {{ $order->status->status_name ?? 'Đang xử lý' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if ($order->status_id == 1)
+                                                <button type="button" class="btn btn-sm btn-success update-status-btn"
+                                                    data-order-id="{{ $order->id }}" data-status-id="2">
+                                                    Xác nhận
+                                                </button>
+                                            @endif
+                                            @if ($order->status_id == 2)
+                                                <button type="button" class="btn btn-sm btn-info update-status-btn"
+                                                    data-order-id="{{ $order->id }}" data-status-id="3">
+                                                    Hoàn thành
+                                                </button>
+                                            @endif
+                                            <a href="{{ route('admin.orders.show', $order->id) }}"
+                                                class="btn btn-sm btn-primary">Xem chi tiết</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">
+                        {{ $orders->links() }}
                     </div>
                 </div>
             </div>

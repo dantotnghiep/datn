@@ -38,6 +38,10 @@ use Pusher\Pusher;
 
 Route::get('/', [HomeController::class, 'dashboard'])->name('client.index');
 Route::get('/categories', [HomeController::class, 'category'])->name('categories.index');
+Route::get('/search', [HomeController::class, 'search'])->name('client.search');
+Route::get('/search-suggestions', [HomeController::class, 'searchSuggestions'])->name('client.search-suggestions');
+Route::get('/contact', [HomeController::class, 'contact'])->name('home.contact');
+Route::get('/about', [HomeController::class, 'about'])->name('home.about');
 
 // Route::get('/order', [CartController::class, 'order'])->name('cart.order');
 
@@ -61,7 +65,7 @@ Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthControlle
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
 Route::middleware('auth')->group(function () {
-     Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -88,7 +92,7 @@ Route::middleware('auth')->group(function () {
 //ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
 
 Route::prefix('admin')->group(function () {
-    
+
 
     //admin/Auth
     Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
@@ -101,9 +105,9 @@ Route::prefix('admin')->group(function () {
         Route::post('/{order}/update-status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.update_status');
     });
 
-    Route::middleware(['admin'])->group(function () {
-        Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
-    });
+    // Route::middleware(['admin'])->group(function () {});
+    Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
+    Route::post('/dashboard/data', [ProductController::class, 'dashboardData'])->name('admin.dashboard.data');
 
     Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
 
@@ -170,15 +174,15 @@ Route::middleware(['auth'])->group(function () {
     // Routes cho checkout và thanh toán
     Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
     Route::post('/cart/process-checkout', [OrderController::class, 'store'])->name('cart.process-checkout');
-     // Routes cho trang checkout và quản lý địa chỉ
-     Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
-     Route::post('/checkout/address', [OrderController::class, 'storeAddress'])->name('order.storeAddress');
- 
+    // Routes cho trang checkout và quản lý địa chỉ
+    Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
+    Route::post('/checkout/address', [OrderController::class, 'storeAddress'])->name('order.storeAddress');
+
     Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
         ->name('orders.updateStatus');
-    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{id}/cancel', [App\Http\Controllers\Api\OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/vnpay-return', [OrderController::class, 'vnpayReturn'])->name('vnpay.return');
 });
 
@@ -188,7 +192,10 @@ Route::middleware(['auth'])->prefix('admin/users')->group(function () {
     Route::get('/clients', [AdminCustomerController::class, 'index'])->name('admin.users.clients.index');
     Route::get('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
     Route::get('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
-    Route::get('/unlock-users', function () {UnlockUserAfterThreeDays::dispatch(); return 'Job dispatched!';});
+    Route::get('/unlock-users', function () {
+        UnlockUserAfterThreeDays::dispatch();
+        return 'Job dispatched!';
+    });
     Route::get('/clients/{id}', [AdminCustomerController::class, 'show'])->name('admin.users.clients.detail');
     Route::post('/clients', [AdminCustomerController::class, 'store'])->name('admin.users.clients.store');
     Route::post('/clients/{id}/reset-password', [AdminCustomerController::class, 'resetPassword'])->name('admin.users.clients.reset-password');
@@ -204,7 +211,6 @@ Route::middleware(['auth'])->prefix('admin/users')->group(function () {
     Route::delete('/staffs/{id}', [AdminEmployeeController::class, 'destroy'])->name('admin.users.staffs.destroy');
     Route::post('/staffs/{id}/lock', [AdminEmployeeController::class, 'lock'])->name('admin.users.staffs.lock');
     Route::post('/staffs/{id}/unlock', [AdminEmployeeController::class, 'unlock'])->name('admin.users.staffs.unlock');
-
 });
 
 // Thêm route này cho client hủy đơn hàng
@@ -251,3 +257,6 @@ Route::resource('/admin/users', UserController::class);
 // });
 
 Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
+
+// Product Variation Routes
+Route::post('/admin/variation/{productId}', [ProductController::class, 'storeVariation'])->name('admin.variation.store');

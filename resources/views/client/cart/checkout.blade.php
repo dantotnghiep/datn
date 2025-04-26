@@ -2,6 +2,20 @@
 @section('content')
 @include('client.layouts.partials.lelf-navbar')
 
+@if(session('stock_error') || (session('error') && strpos(session('error'), 'không đủ số lượng') !== false))
+<!-- Toast notification đơn giản -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999 !important;">
+    <div id="stockErrorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" style="display: block; background-color: rgba(220, 53, 69, 0.85); color: white; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); min-width: 250px; border-radius: 4px;">
+        <div class="toast-header" style="background-color: rgba(220, 53, 69, 0.9); color: white;">
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <p style="color: white; margin-bottom: 0;">Không thể đặt hàng! Một số sản phẩm không đủ số lượng.</p>
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="checkout-area ml-110 mt-100">
     <div class="container">
         <div class="row">
@@ -13,7 +27,7 @@
                     <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
                     @if (session('error'))
-                    <div class="alert alert-danger">{{ session('error') }}</div>
+                    <div class="alert alert-danger">{!! session('error') !!}</div>
                     @endif
                     @if ($errors->any())
                     <div class="alert alert-danger">
@@ -209,6 +223,19 @@
 </div>
 
 <style>
+    /* Toast styles */
+    .toast.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    #stockErrorToast {
+        min-width: 350px;
+    }
+    .position-fixed {
+        position: fixed !important;
+    }
+    
+    /* Existing styles */
     #card-element {
         padding: 10px;
         border: 1px solid #ccc;
@@ -231,28 +258,46 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Handle toast close button
+        var toastEl = document.getElementById('stockErrorToast');
+        if (toastEl) {
+            var closeBtn = toastEl.querySelector('.btn-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    toastEl.style.display = 'none';
+                });
+            }
+
+            // Auto hide toast after 10 seconds
+            setTimeout(function() {
+                toastEl.style.display = 'none';
+            }, 10000);
+        }
+
+        // Form validation và các xử lý khác
         const form = document.getElementById('payment-form');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                const addressId = document.getElementById('address_id');
+                if (addressId && !addressId.value) {
+                    event.preventDefault();
+                    alert('Vui lòng chọn hoặc thêm địa chỉ giao hàng!');
+                    return;
+                }
 
-        form.addEventListener('submit', function(event) {
-            const addressId = document.getElementById('address_id');
-            if (addressId && !addressId.value) {
-                event.preventDefault();
-                alert('Vui lòng chọn hoặc thêm địa chỉ giao hàng!');
-                return;
-            }
+                const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
+                if (!selectedPaymentMethod) {
+                    event.preventDefault();
+                    alert('Vui lòng chọn phương thức thanh toán!');
+                    return;
+                }
 
-            const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
-            if (!selectedPaymentMethod) {
-                event.preventDefault();
-                alert('Vui lòng chọn phương thức thanh toán!');
-                return;
-            }
-
-            if (selectedPaymentMethod !== 'vnpay' && selectedPaymentMethod !== 'cod') {
-                event.preventDefault();
-                alert('Phương thức thanh toán này chưa được hỗ trợ!');
-            }
-        });
+                if (selectedPaymentMethod !== 'vnpay' && selectedPaymentMethod !== 'cod') {
+                    event.preventDefault();
+                    alert('Phương thức thanh toán này chưa được hỗ trợ!');
+                }
+            });
+        }
     });
 </script>
 @endsection

@@ -11,6 +11,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @include('client.layouts.partials.css')
 
+    <!-- Đảm bảo Bootstrap CSS hiện diện -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Thêm Stripe.js -->
     <script src="https://js.stripe.com/v3/"></script>
 </head>
@@ -28,6 +31,10 @@
 
     <!-- jQuery (đảm bảo sẵn có trước khi các script khác chạy) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Đảm bảo Bootstrap JS hiện diện -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
     <!--Javascript -->
     @include('client.layouts.partials.js')

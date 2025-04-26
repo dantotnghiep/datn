@@ -16,6 +16,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Models\AttributeValue;
 use App\Models\Product_image;
 use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class ProductController extends Controller
 {
@@ -88,6 +89,18 @@ class ProductController extends Controller
             // Tính lợi nhuận
             $totalProfit = $totalRevenue - $totalExpenses;
             
+            // Lấy dữ liệu tổng hợp toàn thời gian cho Revenue Overview
+            // Dùng biến riêng để đảm bảo không bị ảnh hưởng khi filter theo ngày
+            $allTimeStats = [
+                'totalOrders' => \App\Models\Order::count(),
+                'totalRevenue' => \App\Models\Order::where('status_id', $completedStatusId)->sum('total_amount'),
+                'pendingRevenue' => \App\Models\Order::whereIn('status_id', [$pendingStatusId, $shippingStatusId])->sum('total_amount'),
+                'totalOrderValue' => \App\Models\Order::sum('total_amount'),
+                'totalRefunds' => \App\Models\Order::where('status_id', $cancelledStatusId)->sum('total_amount'),
+                'totalCancelled' => \App\Models\Order::where('status_id', $cancelledStatusId)->sum('total_amount'),
+                'netRevenue' => \App\Models\Order::where('status_id', $completedStatusId)->sum('total_amount'),
+            ];
+            
             // Get top selling products
             $topProducts = \App\Models\Product::with(['images', 'category'])
                         ->withCount(['variations as ordered_count' => function($query) {
@@ -119,9 +132,10 @@ class ProductController extends Controller
                             ->get();
             
             // Calculate monthly statistics
-            // Lấy tháng hiện tại và tháng trước
-            $currentMonth = now()->format('Y-m');
-            $lastMonth = now()->subMonth()->format('Y-m');
+            // Lấy tháng hiện tại và tháng trước - FIX: Using clone to avoid modifying now()
+            $now = now();
+            $currentMonth = $now->format('Y-m');
+            $lastMonth = (clone $now)->subMonth()->format('Y-m');
             
             // Đếm đơn hàng theo tháng
             $ordersByMonth = \App\Models\Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count')
@@ -172,12 +186,18 @@ class ProductController extends Controller
                 $chartLabels = $months;
             }
             
-            // Khởi tạo mảng dữ liệu với giá trị 0 cho mỗi tháng
-            foreach ($months as $index => $month) {
-                // Doanh thu gộp của tháng - tạo dữ liệu mẫu nếu không có dữ liệu thực
-                $monthlyRevenue = isset($revenueByMonth[$month]) && $revenueByMonth[$month] > 0 
-                                 ? $revenueByMonth[$month] 
-                                 : rand(50000, 200000);
+            // FIX: Khởi tạo mảng dữ liệu cho mỗi tháng - Cải thiện logic tìm kiếm dữ liệu thực tế
+            foreach ($months as $index => $monthKey) {
+                // Tìm tháng trong dữ liệu thực tế - Cần xử lý format tháng cho đúng
+                // $monthKey là 'Y-m' format, nhưng chúng ta chỉ hiển thị 'M' format trong chart
+                
+                // Doanh thu gộp của tháng - chỉ sử dụng dữ liệu mẫu khi không có dữ liệu thực
+                $monthlyRevenue = $revenueByMonth[$monthKey] ?? 0;
+                
+                // Chỉ dùng dữ liệu mẫu nếu thực sự không có dữ liệu thực
+                if ($monthlyRevenue == 0 && empty($revenueByMonth)) {
+                    $monthlyRevenue = rand(50000, 200000);
+                }
                 
                 // Tính chi phí hàng tháng (40% doanh thu thực tế)
                 $monthlyExpenses = $monthlyRevenue * 0.4;
@@ -186,9 +206,12 @@ class ProductController extends Controller
                 $monthlyProfit = $monthlyRevenue - $monthlyExpenses;
                 
                 // Đếm số đơn hàng của tháng
-                $monthlyOrderCount = isset($ordersByMonth[$month]) && $ordersByMonth[$month] > 0
-                                   ? $ordersByMonth[$month]
-                                   : rand(5, 30);
+                $monthlyOrderCount = $ordersByMonth[$monthKey] ?? 0;
+                
+                // Chỉ dùng dữ liệu mẫu nếu thực sự không có dữ liệu thực
+                if ($monthlyOrderCount == 0 && empty($ordersByMonth)) {
+                    $monthlyOrderCount = rand(5, 30);
+                }
                 
                 // Thêm dữ liệu vào mảng kết quả (chuyển đổi sang đơn vị nghìn để dễ đọc)
                 $revenueChartData[] = round($monthlyRevenue / 1000, 1);
@@ -202,7 +225,7 @@ class ProductController extends Controller
             
             // Lấy dữ liệu doanh thu 7 ngày gần nhất
             $endDate = now();
-            $startDate = now()->subDays(6)->startOfDay();
+            $startDate = (clone $endDate)->subDays(6)->startOfDay(); // FIX: Using clone
             
             // Lấy doanh thu từng ngày trong tuần vừa qua (chỉ đơn hàng thành công)
             $dailyRevenueQuery = \App\Models\Order::where('status_id', $completedStatusId)
@@ -237,10 +260,14 @@ class ProductController extends Controller
             }
             
             // Nếu không có dữ liệu thực, tạo dữ liệu mẫu để kiểm tra giao diện
-            if (array_sum($dailyRevenue) == 0) {
+            // FIX: Chỉ dùng dữ liệu mẫu khi thực sự không có dữ liệu thực
+            if (array_sum($dailyRevenue) == 0 && empty($dailyRevenueQuery)) {
                 $dailyRevenue = [5000, 6200, 3800, 7500, 9200, 8400, 6700];
                 $dailyOrders = [15, 18, 12, 22, 27, 25, 20];
             }
+            
+            // FIX: Thêm flag để đánh dấu dữ liệu có phải dữ liệu mẫu
+            $usingDemoData = (empty($revenueByMonth) || array_sum($dailyRevenue) == 0);
             
             // Campaign data
             $campaignSources = ['Direct', 'Social', 'Email', 'Referral', 'Organic'];
@@ -277,7 +304,9 @@ class ProductController extends Controller
                 'dailyOrders',
                 'dayNames',
                 'revenueByStatus',
-                'orderStatuses'
+                'orderStatuses',
+                'usingDemoData',
+                'allTimeStats'
             ));
         } catch (\Exception $e) {
             // Log the error and return a simple dashboard with error message
@@ -362,12 +391,62 @@ class ProductController extends Controller
     }
 
 
-    public function store(StoreProductRequest $request)
+    public function store(Request $request)
     {
+        // Xóa dd() ở đây để cho phép request tiếp tục xử lý
+        Log::info('Product store request received', ['request_data' => $request->except(['_token', 'main_image', 'additional_images'])]);
+        
+        $validator = \Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:products,slug',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+            'main_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'variations' => 'required|array',
+            'variations.*.sku' => 'required|string|unique:variations,sku',
+            'variations.*.price' => 'required|numeric|min:0',
+            'variations.*.stock' => 'required|integer|min:0',
+        ], [
+            'name.required' => 'Tên sản phẩm là bắt buộc.',
+            'slug.required' => 'Slug là bắt buộc.',
+            'slug.unique' => 'Slug đã tồn tại, vui lòng chọn slug khác.',
+            'category_id.required' => 'Danh mục là bắt buộc.',
+            'main_image.required' => 'Hình ảnh chính là bắt buộc.',
+            'main_image.image' => 'File phải là hình ảnh.',
+            'main_image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg.',
+            'main_image.max' => 'Hình ảnh không được vượt quá 2MB.',
+            'variations.required' => 'Phải có ít nhất một biến thể sản phẩm.',
+            'variations.*.sku.required' => 'SKU là bắt buộc cho mỗi biến thể.',
+            'variations.*.sku.unique' => 'SKU của biến thể đã tồn tại.',
+            'variations.*.price.required' => 'Giá là bắt buộc cho mỗi biến thể.',
+            'variations.*.price.numeric' => 'Giá phải là số.',
+            'variations.*.price.min' => 'Giá phải lớn hơn hoặc bằng 0.',
+            'variations.*.stock.required' => 'Số lượng là bắt buộc cho mỗi biến thể.',
+            'variations.*.stock.integer' => 'Số lượng phải là số nguyên.',
+            'variations.*.stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
+        ]);
+
+        if ($validator->fails()) {
+            Log::info('Validation errors:', $validator->errors()->toArray());
+            
+            // Không hiển thị thông báo lỗi chung
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         try {
             DB::transaction(function () use ($request) {
                 // Tạo sản phẩm
-                $product = Product::create($request->validated());
+                $product = Product::create([
+                    'name' => $request->name,
+                    'slug' => $request->slug,
+                    'category_id' => $request->category_id,
+                    'description' => $request->description,
+                    'status' => $request->status
+                ]);
+
                 // Xử lý upload hình ảnh chính
                 if ($request->hasFile('main_image')) {
                     $mainImage = new ProductImage();
@@ -389,38 +468,53 @@ class ProductController extends Controller
                 }
 
                 // Xử lý biến thể
-                if ($request->has('variations')) {
-                    foreach ($request->variations as $variationData) {
-                        $variation = Variation::create([
-                            'product_id' => $product->id,
-                            'sku' => $variationData['sku'],
-                            'price' => $variationData['price'],
-                            'stock' => $variationData['stock'],
-                            'sale_price' => !empty($variationData['sale_price']) ? $variationData['sale_price'] : null,
-                            'sale_start' => !empty($variationData['sale_start']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_start'])) : null,
-                            'sale_end' => !empty($variationData['sale_end']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_end'])) : null,
-                        ]);
-                        if (isset($variationData['attribute_values']) && is_array($variationData['attribute_values'])) {
-                            $validIds = AttributeValue::whereIn('id', $variationData['attribute_values'])->pluck('id')->toArray();
-                            foreach ($variationData['attribute_values'] as $attributeValueId) {
-                                if (in_array($attributeValueId, $validIds)) {
-                                    try {
-                                        $variation->attributeValues()->attach($attributeValueId);
-                                    } catch (\Exception $e) {
-                                        Log::error('Error attaching attribute value:', ['error' => $e->getMessage()]);
+                if ($request->has('variations') && is_array($request->variations)) {
+                    foreach ($request->variations as $index => $variationData) {
+                        try {
+                            $variation = Variation::create([
+                                'product_id' => $product->id,
+                                'sku' => $variationData['sku'],
+                                'price' => $variationData['price'],
+                                'stock' => $variationData['stock'],
+                                'sale_price' => !empty($variationData['sale_price']) ? $variationData['sale_price'] : null,
+                                'sale_start' => !empty($variationData['sale_start']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_start'])) : null,
+                                'sale_end' => !empty($variationData['sale_end']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_end'])) : null,
+                            ]);
+                            
+                            if (isset($variationData['attribute_values']) && is_array($variationData['attribute_values'])) {
+                                $validIds = AttributeValue::whereIn('id', $variationData['attribute_values'])->pluck('id')->toArray();
+                                foreach ($variationData['attribute_values'] as $attributeValueId) {
+                                    if (in_array($attributeValueId, $validIds)) {
+                                        try {
+                                            $variation->attributeValues()->attach($attributeValueId);
+                                        } catch (\Exception $e) {
+                                            Log::error('Error attaching attribute value:', ['error' => $e->getMessage()]);
+                                            throw new \Exception('Lỗi khi gắn thuộc tính cho biến thể ' . ($index + 1) . ': ' . $e->getMessage());
+                                        }
                                     }
                                 }
                             }
+                        } catch (\Exception $e) {
+                            Log::error('Error creating variation:', ['index' => $index, 'error' => $e->getMessage()]);
+                            throw new \Exception('Lỗi khi tạo biến thể ' . ($index + 1) . ': ' . $e->getMessage());
                         }
                     }
+                } else {
+                    throw new \Exception('Không có biến thể nào được gửi lên. Vui lòng tạo ít nhất một biến thể.');
                 }
             });
 
             return redirect()->route('admin.product.product-list')
                 ->with('success', 'Sản phẩm và biến thể đã được thêm thành công!');
         } catch (\Exception $e) {
+            Log::error('Product creation error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->except(['_token', 'main_image', 'additional_images']),
+            ]);
+            
+            // Hiển thị thông báo lỗi ngắn gọn
             return redirect()->back()
-                ->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage())
+                ->with('error', $e->getMessage())
                 ->withInput();
         }
     }
@@ -432,6 +526,70 @@ class ProductController extends Controller
         return view('admin.variation.variation-list-of-product', compact('product'));
     }
 
+    public function storeVariation(Request $request, $productId)
+    {
+        $validator = \Validator::make($request->all(), [
+            'variations' => 'required|array',
+            'variations.*.sku' => 'required|string|unique:variations,sku',
+            'variations.*.price' => 'required|numeric|min:0',
+            'variations.*.sale_price' => 'nullable|numeric|min:0',
+            'variations.*.stock' => 'required|integer|min:0',
+            'variations.*.sale_start' => 'nullable|date',
+            'variations.*.sale_end' => 'nullable|date',
+            'variations.*.attribute_values' => 'required|array',
+            'variations.*.attribute_values.*' => 'exists:attribute_values,id',
+        ], [
+            'variations.required' => 'Phải có ít nhất một biến thể.',
+            'variations.*.sku.required' => 'SKU là bắt buộc.',
+            'variations.*.sku.unique' => 'SKU đã tồn tại.',
+            'variations.*.price.required' => 'Giá là bắt buộc.',
+            'variations.*.price.numeric' => 'Giá phải là số.',
+            'variations.*.price.min' => 'Giá phải lớn hơn hoặc bằng 0.',
+            'variations.*.sale_price.numeric' => 'Giá khuyến mãi phải là số.',
+            'variations.*.sale_price.min' => 'Giá khuyến mãi phải lớn hơn hoặc bằng 0.',
+            'variations.*.stock.required' => 'Số lượng là bắt buộc.',
+            'variations.*.stock.integer' => 'Số lượng phải là số nguyên.',
+            'variations.*.stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
+            'variations.*.sale_start.date' => 'Ngày bắt đầu khuyến mãi không hợp lệ.',
+            'variations.*.sale_end.date' => 'Ngày kết thúc khuyến mãi không hợp lệ.',
+            'variations.*.attribute_values.required' => 'Phải chọn ít nhất một thuộc tính.',
+            'variations.*.attribute_values.*.exists' => 'Giá trị thuộc tính không hợp lệ.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            DB::transaction(function () use ($request, $productId) {
+                foreach ($request->variations as $variationData) {
+                    $variation = Variation::create([
+                        'product_id' => $productId,
+                        'sku' => $variationData['sku'],
+                        'price' => $variationData['price'],
+                        'sale_price' => $variationData['sale_price'] ?? null,
+                        'stock' => $variationData['stock'],
+                        'sale_start' => $variationData['sale_start'] ?? null,
+                        'sale_end' => $variationData['sale_end'] ?? null,
+                    ]);
+
+                    // Attach attribute values
+                    if (isset($variationData['attribute_values'])) {
+                        $variation->attributeValues()->attach($variationData['attribute_values']);
+                    }
+                }
+            });
+
+            return redirect()->back()->with('success', 'Các biến thể đã được thêm thành công!');
+        } catch (\Exception $e) {
+            Log::error('Error creating variations: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Có lỗi xảy ra khi tạo biến thể: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 
     public function edit(Product $product)
     {
@@ -545,6 +703,133 @@ class ProductController extends Controller
             return redirect()->back()->with('success', 'Sản phẩm đã được xóa thành công!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cung cấp dữ liệu dashboard cho các khoảng thời gian khác nhau
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dashboardData(Request $request)
+    {
+        try {
+            $range = $request->input('range', 'today');
+            
+            // Xác định khoảng thời gian dựa trên tham số
+            $endDate = now();
+            $startDate = now(); // Mặc định là ngày hôm nay
+            
+            // Nếu là khoảng thời gian tùy chỉnh
+            if ($range === 'customRange') {
+                if ($request->has('startDate') && $request->has('endDate')) {
+                    $startDate = \Carbon\Carbon::parse($request->input('startDate'))->startOfDay();
+                    $endDate = \Carbon\Carbon::parse($request->input('endDate'))->endOfDay();
+                } else {
+                    return response()->json([
+                        'error' => 'Thiếu tham số startDate hoặc endDate cho khoảng thời gian tùy chỉnh'
+                    ], 400);
+                }
+            } else if ($range === 'all') {
+                // Không giới hạn thời gian - lấy từ đơn hàng đầu tiên
+                $firstOrder = \App\Models\Order::orderBy('created_at', 'asc')->first();
+                if ($firstOrder) {
+                    $startDate = Carbon::parse($firstOrder->created_at)->startOfDay();
+                } else {
+                    // Nếu không có đơn hàng nào, lấy từ đầu tháng trước
+                    $startDate = now()->subMonth()->startOfMonth();
+                }
+            } else {
+                switch ($range) {
+                    case 'yesterday':
+                        $startDate = now()->subDay()->startOfDay();
+                        $endDate = now()->subDay()->endOfDay();
+                        break;
+                    case 'last7days':
+                        $startDate = now()->subDays(6)->startOfDay();
+                        break;
+                    case 'last30days':
+                        $startDate = now()->subDays(29)->startOfDay();
+                        break;
+                    case 'thisMonth':
+                        $startDate = now()->startOfMonth();
+                        break;
+                    case 'lastMonth':
+                        $startDate = now()->subMonth()->startOfMonth();
+                        $endDate = now()->subMonth()->endOfMonth();
+                        break;
+                    case 'today':
+                    default:
+                        $startDate = now()->startOfDay();
+                        $endDate = now()->endOfDay();
+                        break;
+                }
+            }
+            
+            // Đặt ID của các trạng thái quan trọng theo cấu trúc database
+            $pendingStatusId = 1;    // Chờ xử lý - ID 1
+            $shippingStatusId = 2;   // Đang vận chuyển - ID 2
+            $completedStatusId = 3;  // Thành công - ID 3
+            $cancelledStatusId = 4;  // Đã hủy - ID 4
+            
+            // Lấy số lượng khách hàng trong khoảng thời gian
+            $totalCustomers = \App\Models\User::where('role', 'user')
+                                ->whereBetween('created_at', [$startDate, $endDate])
+                                ->count();
+            
+            // Lấy số lượng đơn hàng trong khoảng thời gian
+            $totalOrders = \App\Models\Order::whereBetween('created_at', [$startDate, $endDate])
+                                ->count();
+            
+            // Doanh thu thực tế (chỉ tính các đơn đã hoàn thành) trong khoảng thời gian
+            $totalRevenue = \App\Models\Order::where('status_id', $completedStatusId)
+                                ->whereBetween('created_at', [$startDate, $endDate])
+                                ->sum('total_amount');
+            
+            // Tổng số tiền từ đơn đã hủy trong khoảng thời gian
+            $totalCancelled = \App\Models\Order::where('status_id', $cancelledStatusId)
+                                ->whereBetween('created_at', [$startDate, $endDate])
+                                ->sum('total_amount');
+            
+            // Doanh thu chờ xử lý (đơn đang chờ xử lý và đang vận chuyển) trong khoảng thời gian
+            $pendingRevenue = \App\Models\Order::whereIn('status_id', [$pendingStatusId, $shippingStatusId])
+                                ->whereBetween('created_at', [$startDate, $endDate])
+                                ->sum('total_amount');
+            
+            // Hoàn tiền trong khoảng thời gian (trong trường hợp này, cũng chính là giá trị đơn đã hủy)
+            $totalRefunds = $totalCancelled;
+            
+            // Doanh thu ròng (doanh thu thực tế) trong khoảng thời gian
+            $netRevenue = $totalRevenue;
+            
+            // Tính chi phí (40% của doanh thu thực tế cho demo)
+            $totalExpenses = $totalRevenue * 0.4;
+            
+            // Tính lợi nhuận
+            $totalProfit = $totalRevenue - $totalExpenses;
+            
+            // Dữ liệu trả về
+            return response()->json([
+                'totalCustomers' => $totalCustomers,
+                'totalOrders' => $totalOrders,
+                'totalRevenue' => $totalRevenue,
+                'totalRefunds' => $totalRefunds,
+                'totalCancelled' => $totalCancelled,
+                'pendingRevenue' => $pendingRevenue,
+                'netRevenue' => $netRevenue,
+                'totalExpenses' => $totalExpenses,
+                'totalProfit' => $totalProfit,
+                'range' => $range,
+                'timeRange' => [
+                    'startDate' => $startDate->format('Y-m-d H:i:s'),
+                    'endDate' => $endDate->format('Y-m-d H:i:s')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
