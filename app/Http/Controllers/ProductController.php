@@ -361,7 +361,6 @@ class ProductController extends Controller
             'relatedProducts'
         ));
     }
-
     public function index()
     {
         $products = Product::with(['variations', 'images', 'category'])->orderBy('created_at', 'desc')->get();
