@@ -287,6 +287,41 @@
                         </div>
                     </div>
                 </div>
+                @if($relatedProducts->isNotEmpty())
+                    <div class="related-products">
+                        <h3>Sản phẩm cùng loại</h3>
+                        <div class="row">
+                            @foreach($relatedProducts as $related)
+                                @php
+                                    $firstVariation = $related->variations->first();
+                                @endphp
+                                <div class="col-md-4" style="max-height: 400px; height:100%;">
+                                    <div class="product-list" >
+                                        <div class="product-card" style="max-width: 300px; border: 1px solid #eee; padding: 10px; text-align: center;">
+                                            <img style="max-height: 300px; max-width:250px" src="{{ $related->images->first()->url ?? 'default.jpg' }}" alt="{{ $related->name }}" style="width: 100%; height: auto;">
+                                            <h3 class="product-title mb-2">
+                                                <a href="{{ route('client.product.product-details', ['id' => $related->id]) }}"
+                                                   class="text-dark text-decoration-none link-primary">{{ $related->name }}</a>
+                                            </h3>
+
+                                            @if ($firstVariation)
+                                                <div>
+                                                    @if ($firstVariation->sale_price && now()->between($firstVariation->sale_start, $firstVariation->sale_end))
+                                                        <del class="text-muted">{{ number_format($firstVariation->price, 0, ',', '.') }}đ</del>
+                                                        <span class="text-danger ms-2">{{ number_format($firstVariation->sale_price, 0, ',', '.') }}đ</span>
+                                                    @else
+                                                        <span class="text-dark">{{ number_format($firstVariation->price, 0, ',', '.') }}đ</span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -444,7 +479,6 @@
                     toast('Chưa chọn biến thể sản phẩm!');
                 }
             });
-
 
             qtyInput.addEventListener('input', () => {
                 let max = parseInt(qtyInput.max);
