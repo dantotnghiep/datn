@@ -479,6 +479,20 @@
                     toast('Chưa chọn biến thể sản phẩm!');
                 }
             });
+            document.querySelector('.qty-plus').addEventListener('click', () => {
+                let current = parseInt(qtyInput.value);
+                let max = parseInt(qtyInput.max);
+                if (current < max) {
+                    qtyInput.value = current + 1;
+                } else {
+                    toast("Không đủ hàng trong kho!");
+                }
+            });
+
+            document.querySelector('.qty-minus').addEventListener('click', () => {
+                let current = parseInt(qtyInput.value);
+                if (current > 1) qtyInput.value = current - 1;
+            });
 
             qtyInput.addEventListener('input', () => {
                 let max = parseInt(qtyInput.max);
