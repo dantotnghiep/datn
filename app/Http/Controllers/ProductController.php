@@ -327,23 +327,39 @@ class ProductController extends Controller
             'images',
             'variations.attributeValues.attribute',
         ])->findOrFail($id);
-    
+
         // Lấy ra tất cả value của từng attribute
         $attributeValues = $product->variations->flatMap(function ($variation) {
             return $variation->attributeValues;
         });
-    
+
         $colorValues = $attributeValues
             ->where('attribute_id', 2)
             ->unique('value')
             ->values();
-    
+
         $sizeValues = $attributeValues
             ->where('attribute_id', 1)
             ->unique('value')
             ->values();
-    
-        return view('client.product.product-details', compact('product', 'colorValues', 'sizeValues'));
+
+        // Lấy thêm sản phẩm cùng loại (cùng category)
+        $relatedProducts = Product::with([
+            'images',
+            'variations',
+        ])
+        ->where('category_id', $product->category_id)
+        ->where('id', '!=', $product->id)
+        ->latest()
+        ->take(4)
+        ->get();
+        
+        return view('client.product.product-details', compact(
+            'product',
+            'colorValues',
+            'sizeValues',
+            'relatedProducts'
+        ));
     }
 
     public function index()

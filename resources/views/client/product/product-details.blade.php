@@ -3,24 +3,22 @@
 @section('content')
     @include('client.layouts.partials.lelf-navbar')
     <style>
-        label.not-available {
+        label.out-of-stock {
             position: relative;
             opacity: 0.5;
-            /* làm mờ 50% */
             cursor: not-allowed;
-            /* con trỏ chuột dạng cấm */
         }
 
-        /* Thêm chữ X ở giữa label */
-        label.not-available::after {
-            content: "X";
+        label.out-of-stock::after {
+            content: "❌";
             position: absolute;
-            color: red;
-            font-weight: bold;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            right: 8px;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: red;
         }
+
 
         .old-price {
             text-decoration: line-through;
@@ -91,38 +89,72 @@
             pointer-events: none;
             background-color: #fff;
         }
+        .breadcrumb {
+            background: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: #6c757d;
+        }
+        .disabled-label {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .disabled-label::after {
+            content: '✕';
+            color: red;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 14px;
+        }
+
     </style>
+
+
     <div class="product-details-area mt-100 ml-110">
         <div class="container">
+            <nav aria-label="breadcrumb" class="my-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('client.index') }}">Trang Chủ</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('client.index') }}">Sản Phẩm</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('client.index') }}">{{ $product->category->name }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ $product->name }}</li>
+                </ol>
+            </nav>
+
             <div class="product-details-wrapper">
                 <div class="row">
                     <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-8">
                         <div class="product-switcher-wrap">
                             <div class="nav product-tab" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                                @foreach ($product->images as $image)
-                                    <div class="product-variation" id="v-pills-home-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-home" role="tab" aria-controls="v-pills-home">
+                                @foreach ($product->images as $index => $image)
+                                    <div class="product-variation {{ $loop->first ? 'active' : '' }}"
+                                         id="v-pills-tab-{{ $index }}"
+                                         data-bs-toggle="pill"
+                                         data-bs-target="#v-pills-pane-{{ $index }}"
+                                         role="tab"
+                                         aria-controls="v-pills-pane-{{ $index }}">
                                         <div class="pd-showcase-img">
                                             <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
-                                            {{-- <img src="{{ asset('storage/' . $image->url) }}" alt="{{ $product->name }}">
-                                    --}}
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
                             <div class="tab-content" id="v-pills-tabContent">
-                                @php
-                                    $mainImage = $product->images->firstWhere('is_main', 1);
-                                @endphp
-
-                                @if ($mainImage)
-                                    <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
-                                        aria-labelledby="v-pills-home-tab">
+                                @foreach ($product->images as $index => $image)
+                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
+                                         id="v-pills-pane-{{ $index }}"
+                                         role="tabpanel"
+                                         aria-labelledby="v-pills-tab-{{ $index }}">
                                         <div class="pd-preview-img">
-                                            <img src="{{ asset($mainImage->url) }}" alt="{{ $product->name }}">
+                                            <img src="{{ asset($image->url) }}" alt="{{ $product->name }}">
                                         </div>
                                     </div>
-                                @endif
+                                @endforeach
                             </div>
 
                         </div>
@@ -130,26 +162,15 @@
                     <div class="col-xxl-6 col-xl-6 col-lg-6">
                         <div class="product-details-wrap">
                             <div class="pd-top">
-                                <ul class="product-rating d-flex align-items-center">
-                                    <li><i class="bi bi-star-fill"></i></li>
-                                    <li><i class="bi bi-star-fill"></i></li>
-                                    <li><i class="bi bi-star-fill"></i></li>
-                                    <li><i class="bi bi-star-fill"></i></li>
-                                    <li><i class="bi bi-star"></i></li>
-
-                                    <li class="count-review">(<span>{{ $product->reviews_count ?? 0 }}</span>Đánh giá)</li>
-                                </ul>
-                                <h3 class="pd-title">{{ $product->name }}</h3>
+                                <h3 class="pd-title">Tên sản phẩm:  {{ $product->name }}</h3>
                                 <h5 class="pd-price">
                                     <span id="js-old-price" class="old-price d-none"></span>
                                     <span id="js-sale-price" class="sale-price d-none"></span>
                                     <span id="js-regular-price"></span>
                                     <span id="js-sale-label" class="sale-label d-none">Giảm giá</span>
                                 </h5>
-
-
                                 <p class="pd-small-info">
-                                    <strong>{{ $product->category->name }} -</strong> {!! $product->description !!}
+                                    <strong>Phân Loại: {{ $product->category->name }} -</strong> {!! $product->description !!}
                                 </p>
                             </div>
                             <div class="pd-quick-discription">
@@ -197,11 +218,11 @@
                                                 @endphp
 
                                                 <input type="radio" name="color" id="color{{ $color->id }}"
-                                                    value="{{ $color->value }}" {{ !$available ? 'disabled' : '' }}>
+                                                       value="{{ $color->value }}" {{ !$available ? 'disabled' : '' }}>
                                                 <label for="color{{ $color->id }}">
                                                     <span class="c1 p-color"
-                                                        style="background-color: {{ $bgColor }}; border: 1px solid {{ $borderColor }};"
-                                                        title="{{ $color->value }}"></span>
+                                                          style="background-color: {{ $bgColor }}; border: 1px solid {{ $borderColor }};"
+                                                          title="{{ $color->value }}"></span>
                                                 </label>
                                             @endforeach
                                         </div>
@@ -223,47 +244,43 @@
                                                 @endphp
 
                                                 <input type="radio" name="size" id="size{{ $size->id }}"
-                                                    value="{{ $size->value }}">
-                                                <label for="size{{ $size->id }}">
+                                                       value="{{ $size->value }}" {{ !$available ? 'disabled' : '' }}>
+                                                <label for="size{{ $size->id }}" class="{{ !$available ? 'disabled-label' : '' }}">
                                                     <span class="p-size">{{ $size->value }}</span>
                                                 </label>
                                             @endforeach
                                         </div>
                                     </li>
-                                    <li class="mt-2 text-left">
-                                        <button id="js-reset-selection"
-                                            class="btn btn-outline-secondary btn-sm">Thay đổi</button>
-                                    </li>
 
                                     <li class="d-flex align-items-center pd-cart-btns">
-                                      
+
 
                                         <form action="{{ route('cart.add') }}" method="POST"
-                                        class="d-flex align-items-center">
-                                        @csrf
-                                        <input type="hidden"  name="variation_id" id="variation_id">
-                                        <input type="hidden"  name="product_name" value="{{ $product->name }}">
-                                        <input type="hidden"  name="color" id="selected_color">
-                                        <input type="hidden"  name="size" id="selected_size">
-                                        <input type="hidden"  name="price" id="selected_price">
+                                              class="d-flex align-items-center">
+                                            @csrf
+                                            <input type="hidden"  name="variation_id" id="variation_id">
+                                            <input type="hidden"  name="product_name" value="{{ $product->name }}">
+                                            <input type="hidden"  name="color" id="selected_color">
+                                            <input type="hidden"  name="size" id="selected_size">
+                                            <input type="hidden"  name="price" id="selected_price">
 
-                                        <div class="quantity-group">
-                                            <button type="button" class="qty-btn qty-minus">−</button>
-                                            <input type="number" id="product-quantity" name="quantity" min="1" max="10"
-                                                step="1" value="1" >
-                                            <button type="button" class="qty-btn qty-plus">+</button>
-                                        </div>
-                                        <button type="submit" class="pd-add-cart">Thêm vào giỏ hàng</button>
-                                    </form>
+                                            <div class="quantity-group">
+                                                <button type="button" class="qty-btn qty-minus">−</button>
+                                                <input type="number" id="product-quantity" name="quantity" min="1" max="10"
+                                                       step="1" value="1" >
+                                                <button type="button" class="qty-btn qty-plus">+</button>
+                                            </div>
+                                            <button type="submit" class="pd-add-cart">Thêm vào giỏ hàng</button>
+                                        </form>
 
-                                     
+
                                     </li>
                                     <li class="pd-type">Loại sản phẩm:<span>{{ $product->category->name }}</span></li>
                                     <li class="pd-type">Danh mục:<span>{{ $product->category->name }}</span></li>
                                     <li class="pd-type">Sẵn có:<span
                                             id="js-stock">{{ $product->variations->first()->stock }}</span></li>
                                     <input type="hidden" id="js-qty" min="1"
-                                        max="{{ $product->variations->first()->stock }}" step="1" value="1">
+                                           max="{{ $product->variations->first()->stock }}" step="1" value="1">
                                     <li class="pd-type">Chất liệu:<span>100% Cotton, Jens</span></li>
                                 </ul>
                             </div>
@@ -271,8 +288,6 @@
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div>
     @php
@@ -301,251 +316,147 @@
     <script>
         window.variationsData = @json($variations);
     </script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const input = document.getElementById('product-quantity');
-            const btnPlus = document.querySelector('.qty-plus');
-            const btnMinus = document.querySelector('.qty-minus');
+        document.addEventListener("DOMContentLoaded", function () {
+            const variations = window.variationsData;
+            const colorInputs = document.querySelectorAll('input[name="color"]');
+            const sizeInputs = document.querySelectorAll('input[name="size"]');
+            const qtyInput = document.getElementById('product-quantity');
+            const addToCartBtn = document.querySelector('.pd-add-cart');
+            const variationIdInput = document.getElementById('variation_id');
+            const selectedColor = document.getElementById('selected_color');
+            const selectedSize = document.getElementById('selected_size');
+            const selectedPrice = document.getElementById('selected_price');
 
-            btnPlus.addEventListener('click', function() {
-                let current = parseInt(input.value);
-                let max = parseInt(input.max) || Infinity;
-                if (current < max) {
-                    input.value = current + 1;
-                    input.dispatchEvent(new Event('change'));
-                }
-            });
+            const oldPrice = document.getElementById('js-old-price');
+            const salePrice = document.getElementById('js-sale-price');
+            const regularPrice = document.getElementById('js-regular-price');
+            const saleLabel = document.getElementById('js-sale-label');
+            const stockDisplay = document.getElementById('js-stock');
 
-            btnMinus.addEventListener('click', function() {
-                let current = parseInt(input.value);
-                let min = parseInt(input.min) || 1;
-                if (current > min) {
-                    input.value = current - 1;
-                    input.dispatchEvent(new Event('change'));
-                }
-            });
-            const formatCurrency = (value) => {
-                return Number(value).toLocaleString('vi-VN') + ' VND';
+            const toast = (msg) => {
+                toastr.error(msg);
             };
 
-            const variations = window.variationsData;
+            const hasColor = colorInputs.length > 0;
+            const hasSize = sizeInputs.length > 0;
 
-            function getCheckedValue(name) {
-                return document.querySelector(`input[name="${name}"]:checked`)?.value;
+            function findSelectedVariation() {
+                const color = document.querySelector('input[name="color"]:checked')?.value;
+                const size = document.querySelector('input[name="size"]:checked')?.value;
+
+                return variations.find(variation => {
+                    const attr = variation.attributes.map(a => a.value);
+                    const hasColorMatch = !hasColor || (color && attr.includes(color));
+                    const hasSizeMatch = !hasSize || (size && attr.includes(size));
+
+                    return hasColorMatch && hasSizeMatch;
+                });
+            }
+            function showDefaultPriceSuggestion() {
+                if (!hasColor && !hasSize) return;
+
+                let prices = variations.map(v => v.sale_price && v.sale_price < v.price ? v.sale_price : v.price);
+                if (prices.length === 0) return;
+
+                let minPrice = Math.min(...prices);
+                regularPrice.textContent =  minPrice.toLocaleString() + "vnđ";
             }
 
-            function updatePrice() {
-                const selectedColor = getCheckedValue('color');
-                const selectedSize = getCheckedValue('size');
+            function updateInfo() {
+                const selectedVariation = findSelectedVariation();
 
-                let matchedVariation = variations.find(v => {
-                    const colorMatch = selectedColor ? v.attributes.some(attr => attr.attribute_id === 2 &&
-                        attr.value === selectedColor) : true;
-                    const sizeMatch = selectedSize ? v.attributes.some(attr => attr.attribute_id === 1 &&
-                        attr.value === selectedSize) : true;
-                    return colorMatch && sizeMatch;
-                });
+                const colorSelected = document.querySelector('input[name="color"]:checked');
+                const sizeSelected = document.querySelector('input[name="size"]:checked');
+                const needColor = hasColor && !colorSelected;
+                const needSize = hasSize && !sizeSelected;
 
-                const oldPrice = document.getElementById('js-old-price');
-                const salePrice = document.getElementById('js-sale-price');
-                const regularPrice = document.getElementById('js-regular-price');
-                const saleLabel = document.getElementById('js-sale-label');
-                const stockElement = document.getElementById('js-stock');
-                const qtyInput = document.getElementById('js-qty');
+                if ((hasColor && hasSize && (needColor || needSize))) {
+                    // Chỉ disable nếu có cả màu và size nhưng chưa chọn đủ
+                    addToCartBtn.style.pointerEvents = "none";
+                    addToCartBtn.style.opacity = "0.5";
+                    variationIdInput.value = "";
+                    selectedColor.value = "";
+                    selectedSize.value = "";
+                    selectedPrice.value = "";
+                    stockDisplay.textContent = 0;
+                    return;
+                }
 
-                if (matchedVariation) {
-                    const {
-                        price,
-                        sale_price,
-                        stock
-                    } = matchedVariation;
-                    if (stockElement) stockElement.textContent = stock;
-                    if (qtyInput) qtyInput.max = stock;
+                if (!selectedVariation) {
+                    addToCartBtn.style.pointerEvents = "none";
+                    addToCartBtn.style.opacity = "0.5";
+                    stockDisplay.textContent = 0;
+                    toast('Sản phẩm đã hết hàng!');
+                    return;
+                }
 
-                    if (sale_price) {
-                        oldPrice.textContent = formatCurrency(price);
-                        salePrice.textContent = formatCurrency(sale_price);
-                        regularPrice.textContent = '';
-                        oldPrice.classList.remove('d-none');
-                        salePrice.classList.remove('d-none');
-                        saleLabel.classList.remove('d-none');
-                    } else {
-                        regularPrice.textContent = formatCurrency(price);
-                        oldPrice.classList.add('d-none');
-                        salePrice.classList.add('d-none');
-                        saleLabel.classList.add('d-none');
-                    }
+                const { id, stock, price, sale_price } = selectedVariation;
+
+                if (sale_price && sale_price < price) {
+                    const discount = Math.round(((price - sale_price) / price) * 100);
+                    oldPrice.textContent = price.toLocaleString() + "đ";
+                    salePrice.textContent = sale_price.toLocaleString() + "đ";
+                    saleLabel.textContent = `Giảm ${discount}%`;
+                    oldPrice.classList.remove("d-none");
+                    salePrice.classList.remove("d-none");
+                    saleLabel.classList.remove("d-none");
+                    regularPrice.textContent = "";
                 } else {
-                    // Không có biến thể phù hợp
-                    if (stockElement) stockElement.textContent = '0';
-                    if (qtyInput) qtyInput.max = 1;
-                    oldPrice.classList.add('d-none');
-                    salePrice.classList.add('d-none');
-                    saleLabel.classList.add('d-none');
-                    regularPrice.textContent = '';
-                }
-                document.getElementById('variation_id').value = matchedVariation.id;
-                    document.getElementById('selected_color').value = selectedColor;
-                    document.getElementById('selected_size').value = selectedSize;
-                    document.getElementById('selected_price').value = matchedVariation.sale_price ||
-                        matchedVariation.price;
-            }
-
-            function filterOptions() {
-                const selectedColor = getCheckedValue('color');
-                const selectedSize = getCheckedValue('size');
-
-                const hasColor = document.querySelectorAll('input[name="color"]').length > 0;
-                const hasSize = document.querySelectorAll('input[name="size"]').length > 0;
-
-                const noSelection = !selectedColor && !selectedSize;
-
-                // ---- Xử lý SIZE ----
-                if (hasSize) {
-                    document.querySelectorAll('input[name="size"]').forEach(input => {
-                        const sizeValue = input.value;
-                        const label = input.nextElementSibling;
-
-                        // Gắn sự kiện bỏ chọn nếu chưa có
-                        if (!input.dataset.uncheckHandlerAdded) {
-                            let wasChecked = false;
-
-                            input.addEventListener('mousedown', () => {
-                                wasChecked = input.checked;
-                            });
-
-                            input.addEventListener('click', e => {
-                                if (wasChecked) {
-                                    input.checked = false;
-                                    e.preventDefault();
-                                    filterOptions();
-                                    updatePrice();
-                                }
-                            });
-
-                            input.dataset.uncheckHandlerAdded = 'true';
-                        }
-
-                        if (noSelection) {
-                            input.disabled = false;
-                            label.classList.remove('not-available');
-                            return;
-                        }
-
-                        const matched = variations.find(v =>
-                            v.stock > 0 &&
-                            v.attributes.some(attr => attr.attribute_id === 1 && attr.value ===
-                                sizeValue) &&
-                            (!selectedColor || v.attributes.some(attr => attr.attribute_id === 2 && attr
-                                .value === selectedColor))
-                        );
-
-                        if (matched) {
-                            input.disabled = false;
-                            label.classList.remove('not-available');
-                        } else {
-                            input.disabled = true;
-                            input.checked = false;
-                            label.classList.add('not-available');
-                        }
-                    });
+                    regularPrice.textContent = price.toLocaleString() + "đ";
+                    oldPrice.classList.add("d-none");
+                    salePrice.classList.add("d-none");
+                    saleLabel.classList.add("d-none");
                 }
 
-                // ---- Xử lý COLOR ----
-                if (hasColor) {
-                    document.querySelectorAll('input[name="color"]').forEach(input => {
-                        const colorValue = input.value;
-                        const label = input.nextElementSibling;
+                stockDisplay.textContent = stock;
+                qtyInput.max = stock;
+                if (parseInt(qtyInput.value) > stock) qtyInput.value = stock;
 
-                        // Gắn sự kiện bỏ chọn nếu chưa có
-                        if (!input.dataset.uncheckHandlerAdded) {
-                            let wasChecked = false;
-
-                            input.addEventListener('mousedown', () => {
-                                wasChecked = input.checked;
-                            });
-
-                            input.addEventListener('click', e => {
-                                if (wasChecked) {
-                                    input.checked = false;
-                                    e.preventDefault();
-                                    filterOptions();
-                                    updatePrice();
-                                }
-                            });
-
-                            input.dataset.uncheckHandlerAdded = 'true';
-                        }
-
-                        if (noSelection) {
-                            input.disabled = false;
-                            label.classList.remove('not-available');
-                            return;
-                        }
-
-                        const matched = variations.find(v =>
-                            v.stock > 0 &&
-                            v.attributes.some(attr => attr.attribute_id === 2 && attr.value ===
-                                colorValue) &&
-                            (!selectedSize || v.attributes.some(attr => attr.attribute_id === 1 && attr
-                                .value === selectedSize))
-                        );
-
-                        if (matched) {
-                            input.disabled = false;
-                            label.classList.remove('not-available');
-                        } else {
-                            input.disabled = true;
-                            input.checked = false;
-                            label.classList.add('not-available');
-                        }
-                    });
+                if (stock > 0) {
+                    addToCartBtn.style.pointerEvents = "";
+                    addToCartBtn.style.opacity = "";
+                } else {
+                    addToCartBtn.style.pointerEvents = "none";
+                    addToCartBtn.style.opacity = "0.5";
+                    toast('Sản phẩm đã hết hàng!');
                 }
-            }
 
-            function preventOutOfStockClick() {
-                document.querySelectorAll('input[name="color"], input[name="size"]').forEach(input => {
-                    input.addEventListener('click', (e) => {
-                        if (input.disabled) {
-                            e.preventDefault();
-                            const label = input.nextElementSibling?.innerText || 'Sản phẩm';
-                            showToast(`${label} đã hết hàng!`);
-                        }
-                    });
-                });
+                variationIdInput.value = id;
+                selectedColor.value = colorSelected?.value || '';
+                selectedSize.value = sizeSelected?.value || '';
+                selectedPrice.value = sale_price && sale_price < price ? sale_price : price;
             }
-
-            // Gắn sự kiện onchange
-            document.querySelectorAll('input[name="color"], input[name="size"]').forEach(input => {
-                input.addEventListener('change', () => {
-                    updatePrice();
-                    filterOptions();
-                    preventOutOfStockClick();
-                });
+            [...colorInputs, ...sizeInputs].forEach(input => {
+                input.addEventListener('change', updateInfo);
             });
 
-            // ✅ Nút "Bỏ chọn"
-            const resetBtn = document.getElementById('js-reset-selection');
-            if (resetBtn) {
-                resetBtn.addEventListener('click', () => {
-                    document.querySelectorAll('input[name="color"]:checked, input[name="size"]:checked')
-                        .forEach(input => {
-                            input.checked = false;
-                        });
+            // Ngăn người dùng bấm nếu chưa chọn đầy đủ
+            addToCartBtn.addEventListener('click', function (e) {
+                const colorSelected = document.querySelector('input[name="color"]:checked');
+                const sizeSelected = document.querySelector('input[name="size"]:checked');
 
-                    const qtyInput = document.getElementById('js-qty');
-                    if (qtyInput) qtyInput.value = 1;
+                const needColor = hasColor && !colorSelected;
+                const needSize = hasSize && !sizeSelected;
 
-                    updatePrice();
-                    filterOptions();
-                });
-            }
+                if (needColor || needSize || !variationIdInput.value) {
+                    e.preventDefault();
+                    toast('Chưa chọn biến thể sản phẩm!');
+                }
+            });
 
-            // Gọi lúc ban đầu
-            updatePrice();
-            filterOptions();
-            preventOutOfStockClick();
+
+            qtyInput.addEventListener('input', () => {
+                let max = parseInt(qtyInput.max);
+                if (parseInt(qtyInput.value) > max) {
+                    qtyInput.value = max;
+                    toast("Không đủ hàng trong kho!");
+                }
+            });
+            showDefaultPriceSuggestion();
+            updateInfo();
         });
+
     </script>
+
 @endsection
