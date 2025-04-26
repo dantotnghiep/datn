@@ -4,7 +4,7 @@ namespace App\Models;
 
 class OrderRefund extends BaseModel
 {
-    protected $fillable = ['order_id', 'amount', 'reason', 'notes', 'status', 'user_id'];
+    protected $fillable = ['order_id', 'amount', 'reason', 'notes', 'status', 'user_id', 'bank', 'bank_number', 'bank_name', 'is_active'];
 
     protected $casts = [
         'amount' => 'decimal:2'
@@ -18,7 +18,11 @@ class OrderRefund extends BaseModel
             'reason' => 'required|string|max:255',
             'notes' => 'nullable|string',
             'status' => 'required|in:pending,approved,rejected',
-            'user_id' => 'required|exists:users,id'
+            'user_id' => 'required|exists:users,id',
+            'bank' => 'nullable|string|max:255',
+            'bank_number' => 'nullable|string|max:255',
+            'bank_name' => 'nullable|string|max:255',
+            'is_active' => 'required|boolean'
         ];
     }
 
@@ -75,6 +79,25 @@ class OrderRefund extends BaseModel
                 'filter_options' => User::pluck('name', 'id')->toArray(),
                 'sortable' => true
             ],
+            'bank' => [
+                'label' => 'Ngân hàng',
+                'type' => 'text',
+                'searchable' => true,
+                'sortable' => true
+            ],  
+            'bank_number' => [  
+                'label' => 'Số tài khoản',
+                'type' => 'text',
+                'searchable' => true,
+                'sortable' => true
+            ],
+            'bank_name' => [
+                'label' => 'Tên ngân hàng',
+                'type' => 'text',
+                'searchable' => true,
+                'sortable' => true
+            ],
+            
             'created_at' => [
                 'label' => 'Thời gian tạo',
                 'type' => 'datetime',

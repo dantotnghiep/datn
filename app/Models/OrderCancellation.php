@@ -4,7 +4,7 @@ namespace App\Models;
 
 class OrderCancellation extends BaseModel
 {
-    protected $fillable = ['order_id', 'reason', 'notes', 'user_id'];
+    protected $fillable = ['order_id', 'reason', 'notes'];
 
     public static function rules($id = null)
     {
@@ -12,7 +12,6 @@ class OrderCancellation extends BaseModel
             'order_id' => 'required|exists:orders,id',
             'reason' => 'required|string|max:255',
             'notes' => 'nullable|string',
-            'user_id' => 'required|exists:users,id'
         ];
     }
 
@@ -39,14 +38,6 @@ class OrderCancellation extends BaseModel
                 'searchable' => true,
                 'sortable' => false
             ],
-            'user_id' => [
-                'label' => 'Người thực hiện',
-                'type' => 'select',
-                'options' => User::pluck('name', 'id')->toArray(),
-                'filterable' => true,
-                'filter_options' => User::pluck('name', 'id')->toArray(),
-                'sortable' => true
-            ],
             'created_at' => [
                 'label' => 'Thời gian hủy',
                 'type' => 'datetime',
@@ -60,8 +51,4 @@ class OrderCancellation extends BaseModel
         return $this->belongsTo(Order::class);
     }
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 } 

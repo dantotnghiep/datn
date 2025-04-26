@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->comment('Staff who processed the refund');
             $table->decimal('amount', 12, 2);
-            $table->string('refund_method');
             $table->string('refund_status')->default('pending');
             $table->text('reason')->nullable();
             $table->string('bank')->nullable();

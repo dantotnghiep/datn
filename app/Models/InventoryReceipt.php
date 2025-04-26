@@ -80,4 +80,4 @@ class InventoryReceipt extends BaseModel
     {
         return $this->hasMany(InventoryReceiptItem::class);
     }
-} 
+}

@@ -4,7 +4,15 @@ namespace App\Models;
 
 class Location extends BaseModel
 {
-    protected $fillable = ['province', 'district', 'ward', 'address', 'user_id', 'is_default', 'recipient_name', 'recipient_phone'];
+    protected $fillable = [
+        'province', 
+        'district', 
+        'ward', 
+        'address', 
+        'user_id', 
+        'is_default',
+        'country'
+    ];
 
     public static function rules($id = null)
     {
@@ -15,8 +23,7 @@ class Location extends BaseModel
             'address' => 'required|string|max:255',
             'user_id' => 'required|exists:users,id',
             'is_default' => 'boolean',
-            'recipient_name' => 'required|string|max:255',
-            'recipient_phone' => 'required|string|max:20'
+            'country' => 'required|string|max:255'
         ];
     }
 
@@ -47,6 +54,12 @@ class Location extends BaseModel
                 'searchable' => true,
                 'sortable' => false
             ],
+            'country' => [
+                'label' => 'Quốc gia',
+                'type' => 'text',
+                'searchable' => true,
+                'sortable' => true
+            ],
             'user_id' => [
                 'label' => 'Người dùng',
                 'type' => 'select',
@@ -60,18 +73,6 @@ class Location extends BaseModel
                 'type' => 'boolean',
                 'filterable' => true,
                 'filter_options' => [0 => 'Không', 1 => 'Có'],
-                'sortable' => true
-            ],
-            'recipient_name' => [
-                'label' => 'Tên người nhận',
-                'type' => 'text',
-                'searchable' => true,
-                'sortable' => true
-            ],
-            'recipient_phone' => [
-                'label' => 'Số điện thoại người nhận',
-                'type' => 'text',
-                'searchable' => true,
                 'sortable' => true
             ]
         ];

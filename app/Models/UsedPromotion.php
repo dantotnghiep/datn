@@ -4,7 +4,7 @@ namespace App\Models;
 
 class UsedPromotion extends BaseModel
 {
-    protected $fillable = ['promotion_id', 'order_id', 'discount_amount'];
+    protected $fillable = ['promotion_id', 'order_id', 'user_id', 'discount_amount'];
 
     protected $casts = [
         'discount_amount' => 'decimal:2'
@@ -15,6 +15,7 @@ class UsedPromotion extends BaseModel
         return [
             'promotion_id' => 'required|exists:promotions,id',
             'order_id' => 'required|exists:orders,id',
+            'user_id' => 'required',
             'discount_amount' => 'required|numeric|min:0'
         ];
     }
@@ -55,5 +56,9 @@ class UsedPromotion extends BaseModel
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 } 

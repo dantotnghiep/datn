@@ -8,7 +8,7 @@ class Category extends BaseModel
 {
     use SoftDeletes;
     
-    protected $fillable = ['name', 'slug', 'description', 'parent_id'];
+    protected $fillable = ['name', 'slug', 'description'];
 
     public static function rules($id = null)
     {
@@ -16,7 +16,6 @@ class Category extends BaseModel
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:categories,slug,' . $id,
             'description' => 'nullable|string',
-            'parent_id' => 'nullable|exists:categories,id',
         ];
     }
 
@@ -41,15 +40,13 @@ class Category extends BaseModel
                 'searchable' => true,
                 'sortable' => false
             ],
-            'parent_id' => [
-                'label' => 'Danh mục cha',
-                'type' => 'select',
-                'options' => self::pluck('name', 'id')->toArray(),
-                'filterable' => true,
-                'filter_options' => self::pluck('name', 'id')->toArray(),
-                'sortable' => true
-            ]
+
         ];
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
     }
 
 }
