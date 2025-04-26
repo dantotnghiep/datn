@@ -13,13 +13,13 @@
                                 class="swiper-slide hero-slider-item slider-item1 d-flex justify-content-center align-items-center position-relative">
                                 <div class="slider-image-layer"></div>
                                 <div class="slider-content position-relative text-center">
-                                    <h5 class="slider-sub-title">Trending Product</h5>
+                                    <h5 class="slider-sub-title">Sản phẩm nổi bật</h5>
                                     <h2 class="slider-main-title">
-                                        Awesome Collection for your Fashion
+                                        Bộ sưu tập tuyệt vời cho thời trang của bạn
                                     </h2>
                                     <div class="banner-btn">
                                         <a href="product.html" class="eg-btn-xl">
-                                            View All Collection</a>
+                                            Xem tất cả bộ sưu tập</a>
                                     </div>
                                 </div>
                             </div>
@@ -27,13 +27,13 @@
                                 class="swiper-slide hero-slider-item slider-item2 d-flex justify-content-center align-items-center position-relative">
                                 <div class="slider-image-layer"></div>
                                 <div class="slider-content position-relative text-center">
-                                    <h5 class="slider-sub-title">Trending Product</h5>
+                                    <h5 class="slider-sub-title">Sản phẩm nổi bật</h5>
                                     <h2 class="slider-main-title">
-                                        Awesome Collection for your Fashion
+                                        Bộ sưu tập tuyệt vời cho thời trang của bạn
                                     </h2>
                                     <div class="banner-btn">
                                         <a href="product.html" class="eg-btn-xl-v2">
-                                            View All Collection</a>
+                                            Xem tất cả bộ sưu tập</a>
                                     </div>
                                 </div>
                             </div>
@@ -41,13 +41,13 @@
                                 class="swiper-slide hero-slider-item slider-item3 d-flex justify-content-center align-items-center position-relative">
                                 <div class="slider-image-layer"></div>
                                 <div class="slider-content position-relative text-center">
-                                    <h5 class="slider-sub-title">Trending Product</h5>
+                                    <h5 class="slider-sub-title">Sản phẩm nổi bật</h5>
                                     <h2 class="slider-main-title">
-                                        Awesome Collection for your Fashion
+                                        Bộ sưu tập tuyệt vời cho thời trang của bạn
                                     </h2>
                                     <div class="banner-btn">
                                         <a href="product.html" class="eg-btn-xl-v2">
-                                            View All Collection</a>
+                                            Xem tất cả bộ sưu tập</a>
                                     </div>
                                 </div>
                             </div>
@@ -79,9 +79,9 @@
                         <div class="feature-icon">
                             <i class="flaticon-shipping"></i>
                         </div>
-                        <p>Our Quality</p>
+                        <p>Chất lượng của chúng tôi</p>
                     </div>
-                    <h5>Most Advanced Features</h5>
+                    <h5>Tính năng tiên tiến nhất</h5>
                 </div>
                 <div class="banner-feature-item position-relative">
                     <div class="b-feature-shape">
@@ -92,9 +92,9 @@
                         <div class="feature-icon">
                             <i class="flaticon-price-tag"></i>
                         </div>
-                        <p>Price System</p>
+                        <p>Hệ thống giá</p>
                     </div>
-                    <h5>Very Reasonable Price</h5>
+                    <h5>Giá cả hợp lý</h5>
                 </div>
                 <div class="banner-feature-item position-relative">
                     <div class="b-feature-shape">
@@ -105,9 +105,9 @@
                         <div class="feature-icon">
                             <i class="flaticon-puzzle"></i>
                         </div>
-                        <p>Delivery System</p>
+                        <p>Hệ thống giao hàng</p>
                     </div>
-                    <h5>Product Frist Delivery</h5>
+                    <h5>Giao hàng nhanh chóng</h5>
                 </div>
                 <div class="banner-feature-item position-relative">
                     <div class="b-feature-shape">
@@ -118,9 +118,9 @@
                         <div class="feature-icon">
                             <i class="flaticon-headphones"></i>
                         </div>
-                        <p>Customer Support</p>
+                        <p>Hỗ trợ khách hàng</p>
                     </div>
-                    <h5>24/7 Live Support</h5>
+                    <h5>Hỗ trợ 24/7</h5>
                 </div>
             </div>
         </div>
@@ -132,19 +132,19 @@
             <div class="input-group w-50">
                 <!-- Category Dropdown -->
                 <select name="category_id" class="form-select rounded-start" style="max-width: 200px;">
-                    <option value="">Select your choice</option>
+                    <option value="">Chọn danh mục</option>
                     @foreach ($categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
                 <!-- Search Input -->
                 <input type="text" id="search-input" name="query" class="form-control"
-                    placeholder="Search Your Products" autocomplete="off">
+                    placeholder="Tìm kiếm sản phẩm" autocomplete="off">
                 <!-- Suggestions Dropdown -->
                 <div id="suggestions" class="position-absolute w-100 bg-white border rounded shadow-sm"
                     style="display: none; z-index: 1000; top: 100%; left: 200px;"></div>
                 <!-- Search Button -->
-                <button type="submit" class="btn btn-dark rounded-end">SEARCH</button>
+                <button type="submit" class="btn btn-dark rounded-end">TÌM KIẾM</button>
             </div>
         </form>
     </div>
