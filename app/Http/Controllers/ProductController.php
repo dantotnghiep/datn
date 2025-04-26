@@ -379,8 +379,9 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
-        // Validate the request manually
+        // Xóa dd() ở đây để cho phép request tiếp tục xử lý
+        Log::info('Product store request received', ['request_data' => $request->except(['_token', 'main_image', 'additional_images'])]);
+        
         $validator = \Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:products,slug',
@@ -399,17 +400,23 @@ class ProductController extends Controller
             'category_id.required' => 'Danh mục là bắt buộc.',
             'main_image.required' => 'Hình ảnh chính là bắt buộc.',
             'main_image.image' => 'File phải là hình ảnh.',
+            'main_image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg.',
+            'main_image.max' => 'Hình ảnh không được vượt quá 2MB.',
             'variations.required' => 'Phải có ít nhất một biến thể sản phẩm.',
             'variations.*.sku.required' => 'SKU là bắt buộc cho mỗi biến thể.',
             'variations.*.sku.unique' => 'SKU của biến thể đã tồn tại.',
             'variations.*.price.required' => 'Giá là bắt buộc cho mỗi biến thể.',
             'variations.*.price.numeric' => 'Giá phải là số.',
+            'variations.*.price.min' => 'Giá phải lớn hơn hoặc bằng 0.',
             'variations.*.stock.required' => 'Số lượng là bắt buộc cho mỗi biến thể.',
             'variations.*.stock.integer' => 'Số lượng phải là số nguyên.',
+            'variations.*.stock.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
         ]);
 
         if ($validator->fails()) {
             Log::info('Validation errors:', $validator->errors()->toArray());
+            
+            // Không hiển thị thông báo lỗi chung
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -447,40 +454,53 @@ class ProductController extends Controller
                 }
 
                 // Xử lý biến thể
-                if ($request->has('variations')) {
-                    foreach ($request->variations as $variationData) {
-                        $variation = Variation::create([
-                            'product_id' => $product->id,
-                            'sku' => $variationData['sku'],
-                            'price' => $variationData['price'],
-                            'stock' => $variationData['stock'],
-                            'sale_price' => !empty($variationData['sale_price']) ? $variationData['sale_price'] : null,
-                            'sale_start' => !empty($variationData['sale_start']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_start'])) : null,
-                            'sale_end' => !empty($variationData['sale_end']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_end'])) : null,
-                        ]);
-                        if (isset($variationData['attribute_values']) && is_array($variationData['attribute_values'])) {
-                            $validIds = AttributeValue::whereIn('id', $variationData['attribute_values'])->pluck('id')->toArray();
-                            foreach ($variationData['attribute_values'] as $attributeValueId) {
-                                if (in_array($attributeValueId, $validIds)) {
-                                    try {
-                                        $variation->attributeValues()->attach($attributeValueId);
-                                    } catch (\Exception $e) {
-                                        Log::error('Error attaching attribute value:', ['error' => $e->getMessage()]);
+                if ($request->has('variations') && is_array($request->variations)) {
+                    foreach ($request->variations as $index => $variationData) {
+                        try {
+                            $variation = Variation::create([
+                                'product_id' => $product->id,
+                                'sku' => $variationData['sku'],
+                                'price' => $variationData['price'],
+                                'stock' => $variationData['stock'],
+                                'sale_price' => !empty($variationData['sale_price']) ? $variationData['sale_price'] : null,
+                                'sale_start' => !empty($variationData['sale_start']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_start'])) : null,
+                                'sale_end' => !empty($variationData['sale_end']) ? date('Y-m-d H:i:s', strtotime($variationData['sale_end'])) : null,
+                            ]);
+                            
+                            if (isset($variationData['attribute_values']) && is_array($variationData['attribute_values'])) {
+                                $validIds = AttributeValue::whereIn('id', $variationData['attribute_values'])->pluck('id')->toArray();
+                                foreach ($variationData['attribute_values'] as $attributeValueId) {
+                                    if (in_array($attributeValueId, $validIds)) {
+                                        try {
+                                            $variation->attributeValues()->attach($attributeValueId);
+                                        } catch (\Exception $e) {
+                                            Log::error('Error attaching attribute value:', ['error' => $e->getMessage()]);
+                                            throw new \Exception('Lỗi khi gắn thuộc tính cho biến thể ' . ($index + 1) . ': ' . $e->getMessage());
+                                        }
                                     }
                                 }
                             }
+                        } catch (\Exception $e) {
+                            Log::error('Error creating variation:', ['index' => $index, 'error' => $e->getMessage()]);
+                            throw new \Exception('Lỗi khi tạo biến thể ' . ($index + 1) . ': ' . $e->getMessage());
                         }
                     }
+                } else {
+                    throw new \Exception('Không có biến thể nào được gửi lên. Vui lòng tạo ít nhất một biến thể.');
                 }
             });
 
             return redirect()->route('admin.product.product-list')
                 ->with('success', 'Sản phẩm và biến thể đã được thêm thành công!');
         } catch (\Exception $e) {
-            Log::error('Product creation error: ' . $e->getMessage());
+            Log::error('Product creation error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->except(['_token', 'main_image', 'additional_images']),
+            ]);
             
+            // Hiển thị thông báo lỗi ngắn gọn
             return redirect()->back()
-                ->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage())
+                ->with('error', $e->getMessage())
                 ->withInput();
         }
     }
