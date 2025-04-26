@@ -13,7 +13,6 @@
                 </div>
             </div>
 
-<<<<<<< HEAD
             @if($errors->any())
                 <div style="background-color: #000; color: #fff; padding: 15px; margin-bottom: 20px;">
                     <p>Gỡ lỗi: Tìm thấy {{ count($errors->all()) }} lỗi</p>
@@ -23,8 +22,6 @@
                 </div>
             @endif
 
-=======
->>>>>>> 7873a8d61dfe17657eabee634e0f46c7364efe7c
             @if ($errors->any())
                 <div id="error-container" class="alert alert-info">
                     @foreach ($errors->all() as $error)
@@ -63,32 +60,19 @@
                                              value="{{ old('slug') }}">
                                     </div>
                                     <div class="col-md-6">
-<<<<<<< HEAD
                                         <label for="category_id">Danh mục</label>
                                         <select name="category_id" id="category_id" class="form-control" required>
                                             <option value="">-- Chọn danh mục --</option>
-=======
-                                        <label for="category_id">Category</label>
-                                        <select name="category_id" id="category_id" class="form-control" >
-                                            <option value="">-- Select Category --</option>
->>>>>>> 7873a8d61dfe17657eabee634e0f46c7364efe7c
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-<<<<<<< HEAD
                                         <label for="status">Trạng thái</label>
                                         <select name="status" id="status" class="form-control" required>
                                             <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Kích hoạt</option>
                                             <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Ẩn</option>
-=======
-                                        <label for="status">Status</label>
-                                        <select name="status" id="status" class="form-control" >
-                                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
->>>>>>> 7873a8d61dfe17657eabee634e0f46c7364efe7c
                                         </select>
                                     </div>
                                     <div class="col-md-12">
@@ -100,8 +84,7 @@
                                     <h4>Hình ảnh</h4>
 
                                     <div class="col-md-6">
-
-                                        <label for="main_image">Main Image</label>
+                                        <label for="main_image">Ảnh chính</label>
                                         <input type="file" name="main_image" class="form-control" accept="image/*">
 
                                         <div class="mt-2" id="main_image_preview"></div>
@@ -148,9 +131,6 @@
             </div>
         </div>
     </div>
-<<<<<<< HEAD
-@endsection
-=======
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -163,7 +143,7 @@
             // Thêm xử lý slug tự động từ tên sản phẩm
             const nameInput = document.getElementById('slug');
             const slugInput = document.getElementById('convert_slug');
-            
+
             if (nameInput && slugInput) {
                 // Hàm chuyển đổi tên thành slug
                 function ChangeToSlug() {
@@ -173,10 +153,10 @@
                         .replace(/ +/g, '-');
                     slugInput.value = slug;
                 }
-                
+
                 // Gán hàm vào sự kiện input để cập nhật slug khi đang nhập tên
                 nameInput.addEventListener('input', ChangeToSlug);
-                
+
                 // Gán hàm vào window để sử dụng với onkeyup đã có trong HTML
                 window.ChangeToSlug = ChangeToSlug;
             }
@@ -339,7 +319,7 @@
                     window.scrollTo({top: y, behavior: 'smooth'});
                 }, 300);
             }
-            
+
             // Setup form submit to save scroll position
             const form = document.querySelector('form');
             if (form) {
@@ -347,7 +327,7 @@
                     sessionStorage.setItem('scrollPosition', window.pageYOffset);
                 });
             }
-            
+
             // Restore scroll position if there are errors
             if ({{ $errors->any() ? 'true' : 'false' }}) {
                 setTimeout(function() {
@@ -385,14 +365,14 @@
             border-radius: 4px;
             padding: 5px;
         }
-                
+
         .invalid-feedback {
             display: block;
             color: #dc3545;
             font-size: 14px;
             margin-top: 5px;
         }
-        
+
         .is-invalid {
             border-color: #dc3545 !important;
         }
@@ -406,11 +386,10 @@
             border: 1px solid #dee2e6;
             color: #333;
         }
-        
+
         #error-container div {
             margin-bottom: 5px;
         }
     </style>
 
 @endsection
->>>>>>> 7873a8d61dfe17657eabee634e0f46c7364efe7c
