@@ -1,6 +1,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Phoenix</title>
 <link rel="apple-touch-icon" sizes="180x180"
     href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/favicons/apple-touch-icon.png') }}">
