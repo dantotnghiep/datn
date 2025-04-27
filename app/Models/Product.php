@@ -15,7 +15,6 @@ class Product extends BaseModel
         return [
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:products,slug,' . $id,
             'sku' => 'required|string|max:255|unique:products,sku,' . $id,
             'description' => 'nullable|string',
             'image' => $id ? 'nullable|image|max:2048' : 'required|image|max:2048',
@@ -36,12 +35,6 @@ class Product extends BaseModel
             ],
             'name' => [
                 'label' => 'Product Name',
-                'type' => 'text',
-                'searchable' => true,
-                'sortable' => true
-            ],
-            'slug' => [
-                'label' => 'Slug',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
