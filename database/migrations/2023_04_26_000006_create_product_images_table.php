@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('image_path');
             $table->boolean('is_primary')->default(false);
             $table->integer('order')->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
