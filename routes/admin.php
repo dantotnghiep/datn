@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariationController;
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\AttributeValueController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
@@ -106,5 +108,56 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Restore from trash
         Route::put('/{id}/restore', [ProductVariationController::class, 'restore'])->name('restore');
     });
-    
+
+    // Attribute routes
+    Route::prefix('attributes')->name('attributes.')->group(function () {
+        // List
+        Route::get('/', [AttributeController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [AttributeController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [AttributeController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [AttributeController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [AttributeController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [AttributeController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [AttributeController::class, 'restore'])->name('restore');
+
+        // Get values for a specific attribute
+        Route::get('/{id}/values', [AttributeController::class, 'getValues'])->name('values');
+    });
+
+    // Attribute Value routes
+    Route::prefix('attribute-values')->name('attribute-values.')->group(function () {
+        // List
+        Route::get('/', [AttributeValueController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [AttributeValueController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [AttributeValueController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [AttributeValueController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [AttributeValueController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [AttributeValueController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [AttributeValueController::class, 'restore'])->name('restore');
+    });
+
 });
