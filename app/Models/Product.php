@@ -17,7 +17,7 @@ class Product extends BaseModel
             'name' => 'required|string|max:255',
             'sku' => 'required|string|max:255|unique:products,sku,' . $id,
             'description' => 'nullable|string',
-            'image' => $id ? 'nullable|image|max:2048' : 'required|image|max:2048',
+            'images.*' => $id ? 'nullable|image|max:2048' : 'nullable|image|max:2048',
             'is_hot' => 'boolean'
         ];
     }

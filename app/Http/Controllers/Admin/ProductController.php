@@ -30,6 +30,17 @@ class ProductController extends BaseController
         $fields = $this->model::getFields();
         $attributes = Attribute::with('values')->get();
         
+        // Debug for testing
+        if ($attributes->isEmpty()) {
+            dump('No attributes found. Please check your database.');
+        } else {
+            foreach ($attributes as $attr) {
+                if ($attr->values->isEmpty()) {
+                    dump('No values found for attribute: ' . $attr->name);
+                }
+            }
+        }
+        
         return view($this->viewPath . '.form', [
             'fields' => $fields,
             'route' => $this->route,
@@ -51,7 +62,16 @@ class ProductController extends BaseController
             
             // Handle product images
             if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $index => $image) {
+                $images = $request->file('images');
+                
+                // Validate that all files are valid images
+                foreach ($images as $image) {
+                    if (!$image->isValid() || !in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+                        throw new \Exception('Invalid image file uploaded.');
+                    }
+                }
+                
+                foreach ($images as $index => $image) {
                     $imagePath = $image->store('products', 'public');
                     
                     ProductImage::create([
@@ -125,14 +145,25 @@ class ProductController extends BaseController
             
             // Handle product images
             if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $index => $image) {
+                $images = $request->file('images');
+                
+                // Validate that all files are valid images
+                foreach ($images as $image) {
+                    if (!$image->isValid() || !in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+                        throw new \Exception('Invalid image file uploaded.');
+                    }
+                }
+                
+                $maxOrder = ProductImage::where('product_id', $id)->max('order') ?? 0;
+                
+                foreach ($images as $index => $image) {
                     $imagePath = $image->store('products', 'public');
                     
                     ProductImage::create([
                         'product_id' => $id,
                         'image_path' => $imagePath,
                         'is_primary' => false, // Never make new images primary when updating
-                        'order' => ProductImage::where('product_id', $id)->max('order') + $index + 1
+                        'order' => $maxOrder + $index + 1
                     ]);
                 }
             }
