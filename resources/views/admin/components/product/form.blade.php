@@ -424,6 +424,9 @@
                             e.preventDefault();
                             e.stopPropagation();
 
+                            // Ensure variant data is collected before submission
+                            collectVariantData();
+
                             // If no files to upload, submit form normally
                             if (myDropzone.getQueuedFiles().length === 0) {
                                 form.submit();
@@ -558,6 +561,47 @@
                     disableMobile: true
                 });
             }
+
+            // Function to collect variant data
+            function collectVariantData() {
+                // Collect all variant options data
+                const variantOptions = [];
+
+                document.querySelectorAll('.variant-option').forEach(optionEl => {
+                    const optionNumber = optionEl.getAttribute('data-option');
+                    const attributeSelect = optionEl.querySelector('.attribute-select');
+                    const attributeId = attributeSelect.value;
+                    const attributeName = attributeSelect.options[attributeSelect.selectedIndex]?.text || '';
+
+                    if (!attributeId) return;
+
+                    const selectedValues = [];
+                    optionEl.querySelectorAll('.selected-value-chip').forEach(chip => {
+                        selectedValues.push({
+                            id: chip.getAttribute('data-value-id'),
+                            value: chip.querySelector('span').innerText
+                        });
+                    });
+
+                    if (selectedValues.length === 0) return;
+
+                    variantOptions.push({
+                        option: optionNumber,
+                        attribute_id: attributeId,
+                        attribute_name: attributeName,
+                        values: selectedValues
+                    });
+                });
+
+                // Update the hidden input with variant data
+                document.getElementById('variants-data').value = JSON.stringify(variantOptions);
+                console.log("Variant data collected:", document.getElementById('variants-data').value);
+            }
+
+            // Handle form submission - collect variant data
+            document.querySelector('form').addEventListener('submit', function(e) {
+                collectVariantData();
+            });
         });
     </script>
     {{--  variants handling --}}
@@ -871,41 +915,6 @@
 
                 // Update attribute selects to reflect current selections
                 updateAttributeSelects();
-            });
-
-            // Handle form submission - collect variant data
-            document.querySelector('form').addEventListener('submit', function(e) {
-                // Collect all variant options data
-                const variantOptions = [];
-
-                document.querySelectorAll('.variant-option').forEach(optionEl => {
-                    const optionNumber = optionEl.getAttribute('data-option');
-                    const attributeSelect = optionEl.querySelector('.attribute-select');
-                    const attributeId = attributeSelect.value;
-                    const attributeName = attributeSelect.options[attributeSelect.selectedIndex]?.text || '';
-
-                    if (!attributeId) return;
-
-                    const selectedValues = [];
-                    optionEl.querySelectorAll('.selected-value-chip').forEach(chip => {
-                        selectedValues.push({
-                            id: chip.getAttribute('data-value-id'),
-                            value: chip.querySelector('span').innerText
-                        });
-                    });
-
-                    if (selectedValues.length === 0) return;
-
-                    variantOptions.push({
-                        option: optionNumber,
-                        attribute_id: attributeId,
-                        attribute_name: attributeName,
-                        values: selectedValues
-                    });
-                });
-
-                // Update the hidden input with variant data
-                document.getElementById('variants-data').value = JSON.stringify(variantOptions);
             });
         });
     </script>

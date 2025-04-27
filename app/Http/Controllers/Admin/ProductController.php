@@ -54,10 +54,15 @@ class ProductController extends BaseController
 
     public function store(Request $request)
     {
-        // Validate basic product data
+        // Log request data for debugging
+        Log::info('Product store request', [
+            'has_variants' => $request->has('variants'),
+            'variants_data' => $request->variants
+        ]);
+
         $validated = $request->validate($this->model::rules());
 
-        // Begin transaction to ensure all related operations succeed or fail together
+        // Begin transaction
         DB::beginTransaction();
 
         try {
@@ -130,12 +135,24 @@ class ProductController extends BaseController
             }
 
             // Handle product variations
-            if ($request->has('variants')) {
+            if ($request->has('variants') && !empty($request->variants)) {
                 $variantsData = json_decode($request->variants, true);
 
-                if (!empty($variantsData)) {
+                // Log the decoded data
+                Log::info('Decoded variants data', [
+                    'data' => $variantsData,
+                    'is_array' => is_array($variantsData),
+                    'is_null' => is_null($variantsData)
+                ]);
+
+                if (!empty($variantsData) && is_array($variantsData)) {
                     // Generate all possible combinations of attribute values
                     $combinations = $this->generateVariantCombinations($variantsData);
+
+                    // Log combinations result
+                    Log::info('Generated combinations result', [
+                        'count' => count($combinations)
+                    ]);
 
                     // Create a variation for each combination
                     foreach ($combinations as $index => $combination) {
@@ -215,17 +232,25 @@ class ProductController extends BaseController
         $item = $this->model::with(['images', 'variations.attributeValues'])->findOrFail($id);
         $fields = $this->model::getFields();
         $attributes = Attribute::with('values')->get();
+        $attributeValues = AttributeValue::all();
 
         return view($this->viewPath . '.form', [
             'item' => $item,
             'fields' => $fields,
             'route' => $this->route,
-            'attributes' => $attributes
+            'attributes' => $attributes,
+            'attributeValues' => $attributeValues
         ]);
     }
 
     public function update(Request $request, $id)
     {
+        // Log request data for debugging
+        Log::info('Product update request', [
+            'has_variants' => $request->has('variants'),
+            'variants_data' => $request->variants
+        ]);
+
         $item = $this->model::findOrFail($id);
         $validated = $request->validate($this->model::rules($id));
 
@@ -354,15 +379,27 @@ class ProductController extends BaseController
             }
 
             // Handle product variations
-            if ($request->has('variants')) {
+            if ($request->has('variants') && !empty($request->variants)) {
                 $variantsData = json_decode($request->variants, true);
 
-                if (!empty($variantsData)) {
+                // Log the decoded data
+                Log::info('Decoded variants data in update', [
+                    'data' => $variantsData,
+                    'is_array' => is_array($variantsData),
+                    'is_null' => is_null($variantsData)
+                ]);
+
+                if (!empty($variantsData) && is_array($variantsData)) {
                     // First, soft delete all existing variations
                     ProductVariation::where('product_id', $id)->delete();
 
                     // Generate all possible combinations of attribute values
                     $combinations = $this->generateVariantCombinations($variantsData);
+
+                    // Log combinations result
+                    Log::info('Generated combinations result in update', [
+                        'count' => count($combinations)
+                    ]);
 
                     // Create a variation for each combination
                     foreach ($combinations as $index => $combination) {
@@ -455,17 +492,28 @@ class ProductController extends BaseController
      */
     protected function generateVariantCombinations(array $variantsData)
     {
+        // Log input data for debugging
+        Log::info('Generating variant combinations', [
+            'input_data' => $variantsData
+        ]);
+
         // Extract attribute values for each option
         $attributeValueSets = [];
 
         foreach ($variantsData as $option) {
             if (isset($option['values']) && !empty($option['values'])) {
                 $attributeValueSets[] = $option['values'];
+                Log::debug('Added attribute values', [
+                    'option' => $option['option'],
+                    'attribute_id' => $option['attribute_id'],
+                    'values_count' => count($option['values'])
+                ]);
             }
         }
 
         // If no attribute values, return empty array
         if (empty($attributeValueSets)) {
+            Log::warning('No attribute value sets found');
             return [];
         }
 
@@ -483,6 +531,10 @@ class ProductController extends BaseController
 
             $combinations = $result;
         }
+
+        Log::info('Generated combinations', [
+            'combinations_count' => count($combinations)
+        ]);
 
         return $combinations;
     }
