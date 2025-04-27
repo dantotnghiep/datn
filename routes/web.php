@@ -43,6 +43,14 @@ Route::get('/search-suggestions', [HomeController::class, 'searchSuggestions'])-
 Route::get('/contact', [HomeController::class, 'contact'])->name('home.contact');
 Route::get('/about', [HomeController::class, 'about'])->name('home.about');
 
+Route::match(['get', 'post'], '/tim-kiem', [HomeController::class, 'timKiem'])->name('timKiem');
+
+Route::match(['get', 'post'], '/loc', [HomeController::class, 'loc'])->name('loc');
+
+Route::post('/autocomplete-ajax', [HomeController::class, 'autocomplete'])->name('autocomplete');
+
+Route::match(['get', 'post'], '/locdanhmuc', [HomeController::class, 'locdanhmuc'])->name('locdanhmuc');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return view('admin.dashboard');
