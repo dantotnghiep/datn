@@ -31,7 +31,7 @@
                     <div class="row">
                         <div class="col-lg-12 mt-2">
                             <div class="sidebar-searchbar-wrap">
-                                <form action="{{ route('search') }}" method="POST" autocomplete="off"
+                                <form action="{{ route('timKiem') }}" method="POST" autocomplete="off"
                                     class="sidebar-searchbar-form">
                                     @csrf
                                     <input type="text" name="keywords_submit" id="keywords"

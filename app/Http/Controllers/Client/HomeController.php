@@ -71,10 +71,152 @@ class HomeController extends Controller
         return view('client.index', compact('categories', 'hotProducts', 'products', 'discountedProducts', 'selectedCategory'));
     }
 
+    public function locdanhmuc(Request $request)
+    {
+        // Lấy slug từ cả GET hoặc POST
+        $slug = $request->input('category_slug');
+
+        // Tìm danh mục theo slug
+        $category = Category::where('slug', $slug)->first();
+
+        if (!$category) {
+            return redirect()->back()->with('error', 'Danh mục không tồn tại');
+        }
+
+        // Lấy sản phẩm theo danh mục (giả sử quan hệ: category -> products)
+        $products = $category->products()->with(['images', 'variations'])->paginate(1);
+
+        // Duy trì slug trong query string cho phân trang
+        $products->appends(['category_slug' => $slug]);
+
+        // Load lại view sản phẩm cùng sidebar
+        $categories = Category::all();
+
+        return view('client.product.locdanhmuc', compact('products', 'categories', 'slug'));
+    }
+
     public function category()
     {
         // Hiển thị danh sách danh mục
         return view('client.categories');
+    }
+
+    public function loc(Request $request)
+    {
+        // Lấy giá trị price_range từ cả GET và POST
+        $priceRange = $request->input('price_range');
+
+        // Trường hợp chưa chọn khoảng giá
+        if (empty($priceRange)) {
+            $categories = Category::all();
+
+            return view('client.product.loc', [
+                'locs' => collect(),
+                'message' => 'Vui lòng chọn khoảng giá để lọc sản phẩm.',
+                'priceRange' => null,
+                'categories' => $categories,
+            ]);
+        }
+
+        // Query sản phẩm
+        $query = Product::with(['variations', 'images', 'category']);
+
+        $query->whereHas('variations', function ($q) use ($priceRange) {
+            $q->where(function ($sub) use ($priceRange) {
+                switch ($priceRange) {
+                    case 1:
+                        $sub->where(function ($s) {
+                            $s->whereNotNull('sale_price')->where('sale_price', '<', 100000)
+                                ->orWhere(function ($q) {
+                                    $q->whereNull('sale_price')->where('price', '<', 100000);
+                                });
+                        });
+                        break;
+                    case 2:
+                        $sub->where(function ($s) {
+                            $s->whereNotNull('sale_price')->whereBetween('sale_price', [100000, 300000])
+                                ->orWhere(function ($q) {
+                                    $q->whereNull('sale_price')->whereBetween('price', [100000, 300000]);
+                                });
+                        });
+                        break;
+                    case 3:
+                        $sub->where(function ($s) {
+                            $s->whereNotNull('sale_price')->whereBetween('sale_price', [300000, 500000])
+                                ->orWhere(function ($q) {
+                                    $q->whereNull('sale_price')->whereBetween('price', [300000, 500000]);
+                                });
+                        });
+                        break;
+                    case 4:
+                        $sub->where(function ($s) {
+                            $s->whereNotNull('sale_price')->whereBetween('sale_price', [500000, 1000000])
+                                ->orWhere(function ($q) {
+                                    $q->whereNull('sale_price')->whereBetween('price', [500000, 1000000]);
+                                });
+                        });
+                        break;
+                    case 5:
+                        $sub->where(function ($s) {
+                            $s->whereNotNull('sale_price')->where('sale_price', '>', 1000000)
+                                ->orWhere(function ($q) {
+                                    $q->whereNull('sale_price')->where('price', '>', 1000000);
+                                });
+                        });
+                        break;
+                }
+            });
+        });
+
+        // Phân trang và giữ lại price_range trên URL khi chuyển trang
+        $locs = $query->paginate(2)->appends(['price_range' => $priceRange]);
+
+        $categories = Category::all();
+
+        return view('client.product.loc', compact('locs', 'priceRange', 'categories'));
+    }
+
+    public function timKiem(Request $request)
+    {
+        $keywords = $request->keywords_submit;
+        $categories = Category::all();
+
+        // Nếu không có từ khóa thì gán kết quả tìm kiếm là collection rỗng
+        if (empty($keywords)) {
+            $search_product = collect(); // Trả về collection rỗng
+        } else {
+            $search_product = Product::with(['variations', 'images', 'category'])
+                ->where('name', 'like', '%' . $keywords . '%')
+                ->paginate(2)->appends(['keywords_submit' => $keywords]); // giữ lại từ khóa khi phân trang
+        }
+
+        return view('client.product.search', compact('categories', 'search_product', 'keywords'));
+    }
+
+    public function autocomplete(Request $request)
+    {
+        $query = $request->input('query');
+
+        if ($query) {
+            $products = Product::where('name', 'LIKE', '%' . $query . '%')->get();
+
+            $output = '<ul class="dropdown-menu" style="display:block; position:relative;">';
+            // foreach ($products as $product) {
+            //     $output .= '<li class="li_search_ajax dropdown-item">' . $product->name . '</li>';
+            // }
+            if ($products->count() > 0) {
+                foreach ($products as $product) {
+                    $output .= '<li class="li_search_ajax dropdown-item">' . $product->name . '</li>';
+                }
+            } else {
+                $output .= '<li class="dropdown-item text-muted">Không có sản phẩm nào phù hợp</li>';
+            }
+            $output .= '</ul>';
+
+            return response($output);
+        }
+
+        return response('');
     }
     public function search(Request $request)
     {
