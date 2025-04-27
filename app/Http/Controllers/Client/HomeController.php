@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -12,10 +13,15 @@ class HomeController extends Controller
      */
     public function index()
     {
-        //
-        return view('client.home.index');
+        // Lấy sản phẩm hot
+        $hotProducts = Product::where('is_hot', 1)->take(6)->get();
+        
+        // Lấy sản phẩm không hot
+        $normalProducts = Product::where('is_hot', 0)->take(6)->get();
+        
+        return view('client.home.index', compact('hotProducts', 'normalProducts'));
     }
-
+    
     /**
      * Show the form for creating a new resource.
      */
