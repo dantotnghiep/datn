@@ -1,0 +1,17 @@
+/* Admin styles */
+.submenu-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding-left: 2rem;
+}
+
+.submenu-container.open {
+    max-height: 200px; /* Adjust based on your submenu size */
+}
+
+.submenu-item {
+    margin-left: 1rem;
+    border-left: 1px solid rgba(156, 163, 175, 0.3);
+    border-radius: 0;
+} 
