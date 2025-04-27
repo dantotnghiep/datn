@@ -106,5 +106,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Restore from trash
         Route::put('/{id}/restore', [ProductVariationController::class, 'restore'])->name('restore');
     });
-
+    
 });

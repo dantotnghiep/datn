@@ -1,15 +1,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- ===============================================-->
-<!--    Document Title-->
-<!-- ===============================================-->
 <title>Phoenix</title>
-
-<!-- ===============================================-->
-<!--    Favicons-->
-<!-- ===============================================-->
 <link rel="apple-touch-icon" sizes="180x180"
     href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/favicons/apple-touch-icon.png') }}">
 <link rel="icon" type="image/png" sizes="32x32"
@@ -24,10 +16,6 @@
 <meta name="theme-color" content="#ffffff">
 <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/simplebar/simplebar.min.js') }}"></script>
 <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/js/config.js') }}"></script>
-
-<!-- ===============================================-->
-<!--    Stylesheets-->
-<!-- ===============================================-->
 <link rel="preconnect" href="https://fonts.googleapis.com/">
 <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap"

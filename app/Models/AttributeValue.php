@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class AttributeValue extends BaseModel
 {
+    use SoftDeletes;
+
     protected $fillable = ['attribute_id', 'value'];
 
     public static function rules($id = null)
