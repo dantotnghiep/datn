@@ -39,62 +39,83 @@
                     <div class="auth-form-box">
                         <div class="text-center mb-7"><a
                                 class="d-flex flex-center text-decoration-none mb-4"
-                                href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/index.html') }}">
+                                href="{{ route('home') }}">
                                 <div class="d-flex align-items-center fw-bolder fs-3 d-inline-block">
                                     <img src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/logo.png') }}"
                                         alt="phoenix" width="58" /></div>
                             </a>
                             <h3 class="text-body-highlight">Sign Up</h3>
                             <p class="text-body-tertiary">Create your account today</p>
-                        </div><button class="btn btn-phoenix-secondary w-100 mb-3"><span
-                                class="fab fa-google text-danger me-2 fs-9"></span>Sign up with
-                            google</button><button class="btn btn-phoenix-secondary w-100"><span
-                                class="fab fa-facebook text-primary me-2 fs-9"></span>Sign up with
-                            facebook</button>
-                        <div class="position-relative mt-4">
-                            <hr class="bg-body-secondary" />
-                            <div class="divider-content-center bg-body-emphasis">or use email</div>
                         </div>
-                        <form>
+
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('register') }}">
+                            @csrf
                             <div class="mb-3 text-start"><label class="form-label"
-                                    for="name">Name</label><input class="form-control"
-                                    id="name" type="text" placeholder="Name" /></div>
+                                    for="name">Name</label><input class="form-control @error('name') is-invalid @enderror"
+                                    id="name" type="text" name="name" value="{{ old('name') }}" required autocomplete="name" placeholder="Name" />
+                                @error('name')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
                             <div class="mb-3 text-start"><label class="form-label"
-                                    for="email">Email address</label><input class="form-control"
-                                    id="email" type="email" placeholder="name@example.com" />
+                                    for="email">Email address</label><input class="form-control @error('email') is-invalid @enderror"
+                                    id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="name@example.com" />
+                                @error('email')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                            <div class="mb-3 text-start">
+                                <label class="form-label" for="phone">Phone Number</label>
+                                <input class="form-control @error('phone') is-invalid @enderror" id="phone" type="text" 
+                                       name="phone" value="{{ old('phone') }}" required autocomplete="phone" placeholder="Phone number" />
+                                @error('phone')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
                             <div class="row g-3 mb-3">
                                 <div class="col-sm-6"><label class="form-label"
                                         for="password">Password</label>
-                                    <div class="position-relative" data-password="data-password">
-                                        <input class="form-control form-icon-input pe-6"
-                                            id="password" type="password" placeholder="Password"
-                                            data-password-input="data-password-input" /><button
-                                            class="btn px-3 py-0 h-100 position-absolute top-0 end-0 fs-7 text-body-tertiary"
-                                            data-password-toggle="data-password-toggle"><span
-                                                class="uil uil-eye show"></span><span
-                                                class="uil uil-eye-slash hide"></span></button></div>
+                                    <div class="position-relative">
+                                        <input class="form-control @error('password') is-invalid @enderror"
+                                            id="password" type="password" name="password" required autocomplete="new-password" placeholder="Password" />
+                                        @error('password')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
                                 </div>
                                 <div class="col-sm-6"><label class="form-label"
-                                        for="confirmPassword">Confirm Password</label>
-                                    <div class="position-relative" data-password="data-password">
-                                        <input class="form-control form-icon-input pe-6"
-                                            id="confirmPassword" type="password"
-                                            placeholder="Confirm Password"
-                                            data-password-input="data-password-input" /><button
-                                            class="btn px-3 py-0 h-100 position-absolute top-0 end-0 fs-7 text-body-tertiary"
-                                            data-password-toggle="data-password-toggle"><span
-                                                class="uil uil-eye show"></span><span
-                                                class="uil uil-eye-slash hide"></span></button></div>
+                                        for="password-confirm">Confirm Password</label>
+                                    <div class="position-relative">
+                                        <input class="form-control" id="password-confirm" type="password" 
+                                               name="password_confirmation" required autocomplete="new-password" placeholder="Confirm Password" />
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-check mb-3"><input class="form-check-input"
-                                    id="termsService" type="checkbox" /><label
+                                    id="termsService" type="checkbox" required /><label
                                     class="form-label fs-9 text-transform-none" for="termsService">I
                                     accept the <a href="#!">terms </a>and <a
                                         href="#!">privacy policy</a></label></div><button
-                                class="btn btn-primary w-100 mb-3">Sign up</button>
-                            <div class="text-center"><a class="fs-9 fw-bold" href="sign-in.html">Sign
+                                type="submit" class="btn btn-primary w-100 mb-3">Sign up</button>
+                            <div class="text-center"><a class="fs-9 fw-bold" href="{{ route('login') }}">Sign
                                     in to an existing account</a></div>
                         </form>
                     </div>

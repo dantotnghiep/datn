@@ -27,29 +27,54 @@
                                     class="text-body-tertiary fw-semibold">Responsive</span></li>
                         </ul>
                     </div>
-                    <div class="position-relative z-n1 mb-6 d-none d-md-block text-center mt-md-5"><img
-                            class="auth-title-box-img d-dark-none"
-                            src="{{asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/spot-illustrations/auth.png')}}" alt="" /><img
-                            class="auth-title-box-img d-light-none"
-                            src="{{asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/spot-illustrations/auth-dark.png')}}" alt="" /></div>
+                    <div class="position-relative z-n1 mb-6 d-none d-md-block text-center mt-md-5">
+                        <img class="auth-title-box-img d-dark-none"
+                            src="{{asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/spot-illustrations/auth.png')}}" alt="" />
+                        <img class="auth-title-box-img d-light-none"
+                            src="{{asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/spot-illustrations/auth-dark.png')}}" alt="" />
+                    </div>
                 </div>
                 <div class="col mx-auto">
                     <div class="auth-form-box">
-                        <div class="text-center"><a class="d-flex flex-center text-decoration-none mb-4"
-                                href="{{asset('theme/prium.github.io/phoenix/v1.22.0/index.html')}}">
+                        <div class="text-center">
+                            <a class="d-flex flex-center text-decoration-none mb-4" href="{{ route('home') }}">
                                 <div class="d-flex align-items-center fw-bolder fs-3 d-inline-block">
                                     <img src="{{asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/logo.png')}}" alt="phoenix"
-                                        width="58" /></div>
+                                        width="58" />
+                                </div>
                             </a>
                             <h4 class="text-body-highlight">Forgot your password?</h4>
-                            <p class="text-body-tertiary mb-5">Enter your email below and we will <br
-                                    class="d-md-none" />send you <br class="d-none d-xxl-block" />a
-                                reset link</p>
-                            <form class="d-flex align-items-center mb-5"><input
-                                    class="form-control flex-1" id="email" type="email"
-                                    placeholder="Email" /><button class="btn btn-primary ms-2">Send<span
-                                        class="fas fa-chevron-right ms-2"></span></button></form><a
-                                class="fs-9 fw-bold" href="#!">Still having problems?</a>
+                            <p class="text-body-tertiary mb-5">Enter your email below and we will send you a reset link</p>
+
+                            @if (session('status'))
+                                <div class="alert alert-success" role="alert">
+                                    {{ session('status') }}
+                                </div>
+                            @endif
+
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <form method="POST" action="{{ route('password.email') }}" class="d-flex align-items-center mb-5">
+                                @csrf
+                                <input class="form-control flex-1 @error('email') is-invalid @enderror" 
+                                       id="email" type="email" name="email" value="{{ old('email') }}" 
+                                       required autocomplete="email" autofocus placeholder="Email" />
+                                
+                                <button type="submit" class="btn btn-primary ms-2">
+                                    Send
+                                    <span class="fas fa-chevron-right ms-2"></span>
+                                </button>
+                            </form>
+
+                            <a class="fs-9 fw-bold" href="{{ route('login') }}">Back to login</a>
                         </div>
                     </div>
                 </div>
