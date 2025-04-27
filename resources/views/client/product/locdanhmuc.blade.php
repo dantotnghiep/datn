@@ -7,6 +7,16 @@
     @include('client.layouts.partials.search-top')
 
     <div class="row">
+        @if ($products->isEmpty())
+            {{-- <div class="col-12">
+                <div class="alert alert-warning text-center">
+                    Không có sản phẩm nào trong danh mục này.
+                </div>
+            </div> --}}
+            <div class="col-12 text-center py-5">
+                <h4 class="text-muted">Không có sản phẩm nào trong danh mục này.</h4>
+            </div>
+        @endif
         @foreach ($products as $product)
             @php
                 $image = $product->images->first();
@@ -76,7 +86,8 @@
         @endforeach
         <div class="col-lg-12 mt-50">
             <div class="custom-pagination d-flex justify-content-center">
-                {{ $products->withQueryString()->links() }}
+                {{-- Khi phân trang, vẫn giữ lại category_slug --}}
+                {{ $products->appends(['category_slug' => $slug])->links() }}
             </div>
         </div>
     </div>

@@ -14,10 +14,10 @@ class RedirectIfNotAdmin
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next)
+    public function handle($request, Closure $next, ...$roles)
     {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect('/login')->withErrors(['email' => 'Bạn không có quyền truy cập vào trang admin.']);
+        if (!auth()->check() || !in_array(auth()->user()->role, $roles)) {
+            abort(403, 'Bạn không có quyền truy cập.');
         }
 
         return $next($request);

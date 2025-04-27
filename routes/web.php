@@ -43,6 +43,27 @@ Route::get('/search-suggestions', [HomeController::class, 'searchSuggestions'])-
 Route::get('/contact', [HomeController::class, 'contact'])->name('home.contact');
 Route::get('/about', [HomeController::class, 'about'])->name('home.about');
 
+Route::match(['get', 'post'], '/tim-kiem', [HomeController::class, 'timKiem'])->name('timKiem');
+
+Route::match(['get', 'post'], '/loc', [HomeController::class, 'loc'])->name('loc');
+
+Route::post('/autocomplete-ajax', [HomeController::class, 'autocomplete'])->name('autocomplete');
+
+Route::match(['get', 'post'], '/locdanhmuc', [HomeController::class, 'locdanhmuc'])->name('locdanhmuc');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard')->middleware('role:admin');
+
+    Route::get('/staff/dashboard', function () {
+        return view('staff.dashboard');
+    })->name('staff.dashboard')->middleware('role:staff,admin');
+
+    // Route::get('/dashboard', function () {
+    //     return view('client.index');
+    // })->name('client.index');
+});
 // Route::get('/order', [CartController::class, 'order'])->name('cart.order');
 
 // Broadcast authentication cho Pusher
@@ -56,7 +77,7 @@ Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('c
 
 // Auth
 Route::get('/login', [App\Http\Controllers\Client\AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'loginUser'])->name('login.post');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/register', [App\Http\Controllers\Client\AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [App\Http\Controllers\Client\AuthController::class, 'register'])->name('register.post');
 Route::get('/forgot-password', [App\Http\Controllers\Client\AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
@@ -65,7 +86,7 @@ Route::get('/reset-password/{token}', [App\Http\Controllers\Client\AuthControlle
 Route::post('/reset-password', [App\Http\Controllers\Client\AuthController::class, 'resetPassword'])->name('reset-password.post');
 
 Route::middleware('auth')->group(function () {
-     Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [App\Http\Controllers\Client\AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -92,10 +113,10 @@ Route::middleware('auth')->group(function () {
 //ADMIN CODE BẮT ĐẦU TỪ ĐÂY NHÉ
 
 Route::prefix('admin')->group(function () {
-    
+
 
     //admin/Auth
-    Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
+    // Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
     // Admin Orders
@@ -105,12 +126,11 @@ Route::prefix('admin')->group(function () {
         Route::post('/{order}/update-status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.update_status');
     });
 
-    Route::middleware(['admin'])->group(function () {
-        Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
-        Route::post('/dashboard/data', [ProductController::class, 'dashboardData'])->name('admin.dashboard.data');
-    });
+    // Route::middleware(['admin'])->group(function () {});
+    // Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
+    Route::post('/dashboard/data', [ProductController::class, 'dashboardData'])->name('admin.dashboard.data');
 
-    Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
+    // Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
 
     //admin/Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
@@ -175,10 +195,10 @@ Route::middleware(['auth'])->group(function () {
     // Routes cho checkout và thanh toán
     Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
     Route::post('/cart/process-checkout', [OrderController::class, 'store'])->name('cart.process-checkout');
-     // Routes cho trang checkout và quản lý địa chỉ
-     Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
-     Route::post('/checkout/address', [OrderController::class, 'storeAddress'])->name('order.storeAddress');
- 
+    // Routes cho trang checkout và quản lý địa chỉ
+    Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('cart.checkout');
+    Route::post('/checkout/address', [OrderController::class, 'storeAddress'])->name('order.storeAddress');
+
     Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])
@@ -193,7 +213,10 @@ Route::middleware(['auth'])->prefix('admin/users')->group(function () {
     Route::get('/clients', [AdminCustomerController::class, 'index'])->name('admin.users.clients.index');
     Route::get('/clients/{id}/lock', [AdminCustomerController::class, 'lock'])->name('admin.users.clients.lock');
     Route::get('/clients/{id}/unlock', [AdminCustomerController::class, 'unlock'])->name('admin.users.clients.unlock');
-    Route::get('/unlock-users', function () {UnlockUserAfterThreeDays::dispatch(); return 'Job dispatched!';});
+    Route::get('/unlock-users', function () {
+        UnlockUserAfterThreeDays::dispatch();
+        return 'Job dispatched!';
+    });
     Route::get('/clients/{id}', [AdminCustomerController::class, 'show'])->name('admin.users.clients.detail');
     Route::post('/clients', [AdminCustomerController::class, 'store'])->name('admin.users.clients.store');
     Route::post('/clients/{id}/reset-password', [AdminCustomerController::class, 'resetPassword'])->name('admin.users.clients.reset-password');
@@ -209,7 +232,6 @@ Route::middleware(['auth'])->prefix('admin/users')->group(function () {
     Route::delete('/staffs/{id}', [AdminEmployeeController::class, 'destroy'])->name('admin.users.staffs.destroy');
     Route::post('/staffs/{id}/lock', [AdminEmployeeController::class, 'lock'])->name('admin.users.staffs.lock');
     Route::post('/staffs/{id}/unlock', [AdminEmployeeController::class, 'unlock'])->name('admin.users.staffs.unlock');
-
 });
 
 // Thêm route này cho client hủy đơn hàng
@@ -255,7 +277,7 @@ Route::resource('/admin/users', UserController::class);
 //     Route::resource('/admin/users', UserController::class);
 // });
 
-Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
+// Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
 
 // Product Variation Routes
 Route::post('/admin/variation/{productId}', [ProductController::class, 'storeVariation'])->name('admin.variation.store');

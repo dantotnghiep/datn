@@ -15,28 +15,41 @@
                                 <a href="#"><i class="flaticon-user"></i></a>
                                 <div class="submenu-right position-absolute" style="left: 70px;">
                                     @if (Auth::check())
-
+                                        @php
+                                            $user = Auth::user();
+                                        @endphp
+                                
                                         <div class="submenu-item-wrapper">
+                                            {{-- Link dashboard tùy theo role --}}
+                                            @if ($user->role === 'admin')
+                                                <a href="{{ route('admin.dashboard') }}" class="submenu-item">
+                                                    <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a>
+                                            @elseif ($user->role === 'staff')
+                                                <a href="{{ route('staff.dashboard') }}" class="submenu-item">
+                                                    <i class="bi bi-speedometer2 me-2"></i>Staff Dashboard</a>
+                                            @endif
+                                
+                                            {{-- Các link luôn hiện --}}
                                             <a href="{{ route('profile') }}" class="submenu-item">
-                                                <i class="bi bi-person me-2"></i>Hồ sơ</a>
+                                                <i class="bi bi-person me-2"></i>Profile</a>
+                                
                                             <a href="{{ route('orders.index') }}" class="submenu-item">
-                                                <i class="bi bi-bag me-2"></i>Đơn hàng</a>
+                                                <i class="bi bi-bag me-2"></i>Orders</a>
+                                
                                             <form action="{{ route('logout') }}" method="POST" class="d-inline">
                                                 @csrf
-                                                <button type="submit"
-                                                    class="submenu-item border-0 bg-transparent w-100 text-start">
-                                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                                <button type="submit" class="submenu-item border-0 bg-transparent w-100 text-start">
+                                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
                                                 </button>
                                             </form>
                                         </div>
                                     @else
                                         <div class="submenu-item-wrapper">
                                             <a href="{{ route('login') }}" class="submenu-item">
-                                                <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập</a>
+                                                <i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
                                             <a href="{{ route('register') }}" class="submenu-item">
-                                                <i class="bi bi-person-plus me-2"></i>Đăng ký</a>
+                                                <i class="bi bi-person-plus me-2"></i>Register</a>
                                         </div>
-
                                     @endif
                                 </div>
                             </li>

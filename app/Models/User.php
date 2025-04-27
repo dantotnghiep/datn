@@ -74,6 +74,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->role === 'staff';
     }
+    public function isUser()
+    {
+        return $this->role === 'user';
+    }
     public function isActive()
     {
         return $this->status === 'active';
