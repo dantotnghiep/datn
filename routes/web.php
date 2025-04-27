@@ -43,6 +43,19 @@ Route::get('/search-suggestions', [HomeController::class, 'searchSuggestions'])-
 Route::get('/contact', [HomeController::class, 'contact'])->name('home.contact');
 Route::get('/about', [HomeController::class, 'about'])->name('home.about');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard')->middleware('role:admin');
+
+    Route::get('/staff/dashboard', function () {
+        return view('staff.dashboard');
+    })->name('staff.dashboard')->middleware('role:staff,admin');
+
+    // Route::get('/dashboard', function () {
+    //     return view('client.index');
+    // })->name('client.index');
+});
 // Route::get('/order', [CartController::class, 'order'])->name('cart.order');
 
 // Broadcast authentication cho Pusher
@@ -56,7 +69,7 @@ Route::get('/product-details/{id}', [ProductController::class, 'show'])->name('c
 
 // Auth
 Route::get('/login', [App\Http\Controllers\Client\AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'loginUser'])->name('login.post');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/register', [App\Http\Controllers\Client\AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [App\Http\Controllers\Client\AuthController::class, 'register'])->name('register.post');
 Route::get('/forgot-password', [App\Http\Controllers\Client\AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
@@ -95,7 +108,7 @@ Route::prefix('admin')->group(function () {
 
 
     //admin/Auth
-    Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
+    // Route::get('/login', [AuthController::class, 'login'])->name('admin.auth.login');
     Route::get('/forgot-password', [AuthController::class, 'forgotpassword'])->name('admin.auth.forgot-password');
 
     // Admin Orders
@@ -106,10 +119,10 @@ Route::prefix('admin')->group(function () {
     });
 
     // Route::middleware(['admin'])->group(function () {});
-    Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
+    // Route::get('/dashboard', [ProductController::class, 'dashboard'])->name('admin.dashboard');
     Route::post('/dashboard/data', [ProductController::class, 'dashboardData'])->name('admin.dashboard.data');
 
-    Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
+    // Route::post('/admin/login', [LoginController::class, 'loginAdmin'])->name('vh.dz');
 
     //admin/Category
     Route::get('/category', [CategoryController::class, 'index'])->name('admin.category');
@@ -256,7 +269,7 @@ Route::resource('/admin/users', UserController::class);
 //     Route::resource('/admin/users', UserController::class);
 // });
 
-Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
+// Route::get('/staff/dashboard', [LoginController::class, 'sta'])->name('staff.dashboard');
 
 // Product Variation Routes
 Route::post('/admin/variation/{productId}', [ProductController::class, 'storeVariation'])->name('admin.variation.store');

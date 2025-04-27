@@ -147,83 +147,32 @@ class LoginController extends Controller
     //     return redirect()->back()->withErrors(['email' => 'Sai thông tin đăng nhập!']);
     // }
 
-    public function login(Request $request, $type)
+    public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:8'
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-        if ($user && $user->status === 'inactive') {
-            session()->flash('error', 'Tài khoản của bạn đã bị khóa.');
-            return redirect()->route('login');
-        }
-        
-
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
             $user = Auth::user();
+            $role = $user->role;
 
-            // Nếu đăng nhập admin nhưng tài khoản là user, phải logout hoàn toàn
-            if ($user->role === 'admin' && $type === 'user') {
-                // Auth::logout();
-                // $request->session()->invalidate();
-                // $request->session()->regenerateToken();
-                return redirect()->route('client.index')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
+            switch ($role) {
+                case 'admin':
+                    return redirect()->route('client.index');
+                case 'staff':
+                    return redirect()->route('client.index');
+                case 'user':
+                    return redirect()->route('client.index');
+                default:
+                    Auth::logout();
+                    return redirect('/login')->withErrors(['role' => 'Vai trò không hợp lệ.']);
             }
-
-            // if ($user->role === 'staff' && $type === 'user') {
-            //     Auth::logout();
-            //     $request->session()->invalidate();
-            //     $request->session()->regenerateToken();
-            //     return redirect()->route('admin.auth.login')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
-            // }
-
-            if ($user->role === 'staff' && $type === 'user') {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                return redirect()->route('client.index')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
-            }
-
-            // if ($user->role === 'admin' && $type === 'admin') {
-            //     Auth::logout();
-            //     $request->session()->invalidate();
-            //     $request->session()->regenerateToken();
-                
-            // }
-
-            if ($user->role === 'staff' && $type === 'admin') {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                return redirect()->route('staff.dashboard')->withErrors(['email' => 'Tài khoản admin phải đăng nhập tại trang admin.']);
-            }
-
-            // Nếu đăng nhập client nhưng tài khoản là admin, cũng phải logout
-            if ($user->role === 'user' && $type === 'admin') {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                return redirect()->route('login')->withErrors(['email' => 'Bạn không có quyền truy cập admin.']);
-            }
-
-            return ($user->role === 'admin') ? redirect()->route('admin.dashboard') : redirect()->route('client.index');
         }
 
-        return redirect()->back()->withErrors(['email' => 'Sai thông tin đăng nhập!']);
-    }
-
-    public function loginAdmin(Request $request)
-    {
-        return $this->login($request, 'admin');
-    }
-
-    public function loginUser(Request $request)
-    {
-        return $this->login($request, 'user');
+        return back()->withErrors([
+            'email' => 'Email hoặc mật khẩu không đúng.',
+        ])->withInput();
     }
 
     public function sta()
