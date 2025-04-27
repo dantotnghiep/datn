@@ -14,7 +14,6 @@ class Category extends BaseModel
     {
         return [
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:categories,slug,' . $id,
             'description' => 'nullable|string',
         ];
     }
@@ -24,12 +23,6 @@ class Category extends BaseModel
         return [
             'name' => [
                 'label' => 'Category Name',
-                'type' => 'text',
-                'searchable' => true,
-                'sortable' => true
-            ],
-            'slug' => [
-                'label' => 'Slug',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
