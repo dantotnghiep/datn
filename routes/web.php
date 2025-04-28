@@ -50,19 +50,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/thong-tin', function () {
         return view('client.auth.profile');
     })->name('profile');
+
     
-    // Wishlist routes
-    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
-    Route::delete('/wishlist/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
 });
 
 Route::get('/san-pham', [ProductController::class, 'index'])->name('product.index');
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
 
-Route::get('/gio-hang', function () {
-    return view('client.cart.cart');
-})->name('cart');
-Route::get('/checkout', function () {
-    return view('client.cart.checkout');
-})->name('checkout');
 Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist');
