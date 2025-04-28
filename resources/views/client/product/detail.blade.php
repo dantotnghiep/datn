@@ -1102,8 +1102,51 @@
                     const variationSize = parts[1].trim();
                     return variationColor === color && variationSize === size;
                 });
-                console.log('getVariation:', color, size, found);
                 return found;
+            }
+
+            // Hàm kiểm tra tồn tại variation với color/size và còn hàng
+            function hasStock(color, size) {
+                const v = getVariation(color, size);
+                return v && v.stock > 0;
+            }
+
+            // Hàm cập nhật trạng thái enable/disable cho size dựa vào màu
+            function updateSizeOptions(selectedColor) {
+                let foundEnabled = false;
+                sizeInputs.forEach(input => {
+                    const size = input.value;
+                    if (hasStock(selectedColor, size)) {
+                        input.disabled = false;
+                        if (!foundEnabled) foundEnabled = input;
+                    } else {
+                        input.disabled = true;
+                        input.checked = false;
+                    }
+                });
+                // Nếu không có size nào được chọn, chọn lại size đầu tiên còn hàng
+                if (!document.querySelector('.variation-size:checked') && foundEnabled) {
+                    foundEnabled.checked = true;
+                }
+            }
+
+            // Hàm cập nhật trạng thái enable/disable cho color dựa vào size
+            function updateColorOptions(selectedSize) {
+                let foundEnabled = false;
+                colorInputs.forEach(input => {
+                    const color = input.value;
+                    if (hasStock(color, selectedSize)) {
+                        input.disabled = false;
+                        if (!foundEnabled) foundEnabled = input;
+                    } else {
+                        input.disabled = true;
+                        input.checked = false;
+                    }
+                });
+                // Nếu không có màu nào được chọn, chọn lại màu đầu tiên còn hàng
+                if (!document.querySelector('.variation-color:checked') && foundEnabled) {
+                    foundEnabled.checked = true;
+                }
             }
 
             // Hàm format số
@@ -1162,34 +1205,36 @@
             }
 
             // Hàm cập nhật khi thay đổi variation
-            function updateVariationInfo() {
+            function updateVariationInfo(triggeredBy) {
                 const selectedColor = document.querySelector('.variation-color:checked')?.value;
                 const selectedSize = document.querySelector('.variation-size:checked')?.value;
 
-                console.log('Selected:', { color: selectedColor, size: selectedSize });
-
-                if (!selectedColor || !selectedSize) {
-                    console.log('Missing color or size selection');
-                    return;
+                // Chỉ cập nhật enable/disable cho size khi chọn màu
+                if (triggeredBy === 'color') {
+                    updateSizeOptions(selectedColor);
                 }
+                // Không disable màu nào cả
 
-                const variation = getVariation(selectedColor, selectedSize);
-                console.log('Found variation:', variation);
+                // Lấy lại lựa chọn sau khi cập nhật
+                const color = document.querySelector('.variation-color:checked')?.value;
+                const size = document.querySelector('.variation-size:checked')?.value;
 
-                if (variation) {
-                    updateUI(variation);
-                } else {
-                    console.log('No variation found for selected combination');
-                }
+                if (!color || !size) return;
+                const variation = getVariation(color, size);
+                updateUI(variation);
             }
 
             // Event Listeners
             colorInputs.forEach(input => {
-                input.addEventListener('change', updateVariationInfo);
+                input.addEventListener('change', function() {
+                    updateVariationInfo('color');
+                });
             });
 
             sizeInputs.forEach(input => {
-                input.addEventListener('change', updateVariationInfo);
+                input.addEventListener('change', function() {
+                    updateVariationInfo('size'); // chỉ update UI, không disable màu
+                });
             });
 
             // Xử lý số lượng
@@ -1234,7 +1279,6 @@
 
             // Khởi tạo ban đầu
             if (colorInputs.length && sizeInputs.length) {
-                console.log('Initializing default variation');
                 updateVariationInfo();
             }
         });
