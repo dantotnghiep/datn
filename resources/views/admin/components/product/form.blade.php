@@ -1,229 +1,5 @@
 @extends('admin.master')
 
-@section('styles')
-    <style>
-        .product-form-heading {
-            color: #344767;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            position: relative;
-            padding-left: 0.75rem;
-            border-left: 4px solid #5e72e4;
-        }
-
-        .description-container {
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .custom-editor {
-            border: none;
-            padding: 1rem;
-            min-height: 200px;
-        }
-
-        .tox-tinymce {
-            border-radius: 8px !important;
-            border: 1px solid #e9ecef !important;
-        }
-
-        .select-category {
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            padding: 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .select-category:focus {
-            border-color: #5e72e4;
-            box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
-        }
-
-        /* Better styling for the placeholder */
-        .form-control::placeholder {
-            color: #adb5bd;
-            opacity: 0.7;
-        }
-
-        /* Attribute value buttons styling */
-        .attribute-value-btn {
-            display: block;
-            width: 100%;
-            padding: 0.75rem 0.5rem;
-            text-align: center;
-            margin-bottom: 0.5rem !important;
-            margin-right: 0 !important;
-            transition: all 0.2s;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            color: #5e72e4;
-            background-color: #f8f9fa;
-            border: 1px solid #edf2f9;
-        }
-
-        .attribute-value-btn.active {
-            background-color: #5e72e4;
-            color: white;
-            border-color: #5e72e4;
-        }
-
-        #values-display-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-        }
-
-        /* Size chips styling */
-        .size-chip {
-            background-color: #f8f9fa;
-            border-radius: 0.375rem;
-            transition: all 0.2s;
-            cursor: default;
-        }
-
-        .size-chip .btn-close {
-            opacity: 0.6;
-            cursor: pointer;
-        }
-
-        .size-chip .btn-close:hover {
-            opacity: 1;
-        }
-
-        @media (min-width: 576px) {
-            #values-display-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (min-width: 992px) {
-            #values-display-container {
-                grid-template-columns: repeat(1, 1fr);
-            }
-        }
-
-        .variant-values-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .variant-value-item {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .variant-value-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .variant-value-item.selected {
-            background-color: #4e73df;
-            color: white;
-        }
-
-        .variant-value-item:last-child {
-            border-bottom: none !important;
-        }
-
-        /* Selected values styling */
-        .selected-value-chip {
-            background-color: #fff;
-            border-radius: 16px;
-            padding: 2px 8px;
-            margin-right: 5px;
-            margin-bottom: 5px;
-            display: inline-flex;
-            align-items: center;
-            font-size: 0.75rem;
-            color: #333;
-        }
-
-        .variant-values-display .selected-value-chip {
-            background-color: #fff;
-            color: #333;
-        }
-
-        .selected-value-chip .btn-close {
-            width: 0.75em;
-            height: 0.75em;
-            opacity: 0.7;
-            margin-left: 5px;
-            font-size: 0.75rem;
-            padding: 0;
-        }
-
-        .selected-values-container {
-            background-color: #f5f7ff;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .variant-values-container {
-            overflow: hidden;
-        }
-
-        .variant-values-display {
-            background-color: #5e72e4;
-            color: white;
-            padding: 8px;
-            border-radius: 8px;
-        }
-
-        /* Dropzone styling */
-        .dropzone {
-            border: 2px dashed #5e72e4;
-            border-radius: 8px;
-            background: #f8f9fa;
-            min-height: 150px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .dropzone:hover {
-            background: #eef0fa;
-        }
-
-        .dz-preview {
-            position: relative;
-            display: inline-block;
-            margin: 0.5rem;
-            vertical-align: top;
-        }
-
-        .dz-image {
-            border-radius: 8px;
-            overflow: hidden;
-            width: 120px;
-            height: 120px;
-            position: relative;
-            display: block;
-            z-index: 10;
-        }
-
-        .dz-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .dz-remove {
-            font-size: 12px;
-            text-align: center;
-            display: block;
-            cursor: pointer;
-            color: #5e72e4;
-            margin-top: 5px;
-        }
-
-        .dz-message {
-            padding: 2rem 1rem;
-        }
-    </style>
-    <link rel="stylesheet" href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/choices/choices.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/dropzone/dropzone.min.css') }}">
-@endsection
 
 
 @section('content')
@@ -398,7 +174,7 @@
                     url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
                     paramName: "images",
                     acceptedFiles: "image/*",
-                    addRemoveLinks: true,
+                    addRemoveLinks: false,
                     autoProcessQueue: false,
                     uploadMultiple: true,
                     parallelUploads: 10,
@@ -406,12 +182,46 @@
                     maxFilesize: null,
                     previewsContainer: "#image-preview-container",
                     clickable: "#product-images-upload",
+                    createImageThumbnails: true,
+                    thumbnailWidth: 132,
+                    thumbnailHeight: 132,
+                    previewTemplate: `
+                        <div class="dz-preview dz-file-preview">
+                            <div style="margin:55px;" class="dz-image">
+                                <img style="border-radius: 4px;" data-dz-thumbnail />
+                                <a class="dz-remove" href="javascript:undefined;" data-dz-remove title="Xóa ảnh"></a>
+                            </div>
+                        </div>
+                    `,
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
                     init: function() {
                         let myDropzone = this;
                         let form = document.getElementById('product-form');
+
+                        // Add file input clear button
+                        const fileInput = document.querySelector('input[type="file"]');
+                        if (fileInput) {
+                            const clearButton = document.createElement('button');
+                            clearButton.type = 'button';
+                            clearButton.className = 'file-clear-btn';
+                            clearButton.innerHTML = '×';
+                            clearButton.onclick = function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                fileInput.value = '';
+                                // Also clear dropzone if needed
+                                myDropzone.removeAllFiles();
+                            };
+
+                            // Wrap file input in a relative positioned div
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'file-input-wrapper';
+                            fileInput.parentNode.insertBefore(wrapper, fileInput);
+                            wrapper.appendChild(fileInput);
+                            wrapper.appendChild(clearButton);
+                        }
 
                         form.addEventListener('submit', function(e) {
                             e.preventDefault();
@@ -464,6 +274,12 @@
                         // File added event
                         this.on("addedfile", function(file) {
                             console.log("File added:", file.name);
+                            // Ensure proper spacing and layout
+                            if (file.previewElement) {
+                                file.previewElement.style.margin = '0';
+                                let details = file.previewElement.querySelector('.dz-details');
+                                if (details) details.style.display = 'none';
+                            }
                         });
 
                         // File removed event
@@ -499,10 +315,15 @@
                                 myDropzone.emit("thumbnail", mockFile, "{{ Storage::url($image->image_path) }}");
                                 myDropzone.emit("complete", mockFile);
 
+                                // Hide file details for existing images
+                                if (mockFile.previewElement) {
+                                    let details = mockFile.previewElement.querySelector('.dz-details');
+                                    if (details) details.style.display = 'none';
+                                }
+
                                 if (mockFile.is_primary) {
                                     let primaryBadge = document.createElement('div');
-                                    primaryBadge.className = 'position-absolute top-0 start-0 bg-primary text-white px-2 py-1 small rounded-bottom';
-                                    primaryBadge.style.zIndex = '15';
+                                    primaryBadge.className = 'primary-badge';
                                     primaryBadge.textContent = 'Primary';
                                     mockFile.previewElement.appendChild(primaryBadge);
                                 }
@@ -877,3 +698,38 @@
         });
     </script>
 @endsection
+
+<style>
+    #image-preview-container .dz-image { position: relative !important; }
+    #image-preview-container .dz-remove {
+        position: absolute !important;
+        top: 6px !important;
+        right: 6px !important;
+        background: #ff4444 !important;
+        color: #fff !important;
+        border-radius: 50% !important;
+        width: 22px !important;
+        height: 22px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 18px !important;
+        z-index: 20 !important;
+        text-decoration: none !important;
+        border: none !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        font-weight: bold !important;
+    }
+    #image-preview-container .dz-remove:before {
+        content: "×";
+        font-size: 22px;
+        font-weight: bold;
+        line-height: 1;
+        color: #fff;
+        display: block;
+    }
+    #image-preview-container .dz-remove:hover {
+        background: #cc0000 !important;
+    }
+</style>
