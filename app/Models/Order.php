@@ -5,7 +5,9 @@ namespace App\Models;
 
 class Order extends BaseModel
 {
-
+    use SoftDeletes;
+    protected $hasSlug = false;
+    
     protected $fillable = [
         'order_number',
         'user_id',

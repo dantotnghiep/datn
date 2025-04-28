@@ -9,7 +9,7 @@ trait HasSlug
     protected static function bootHasSlug()
     {
         static::creating(function ($model) {
-            if (property_exists($model, 'hasSlug') && $model->hasSlug === false) {
+            if (!$model->shouldGenerateSlug()) {
                 return;
             }
             if (empty($model->slug)) {
@@ -18,13 +18,26 @@ trait HasSlug
         });
 
         static::updating(function ($model) {
-            if (property_exists($model, 'hasSlug') && $model->hasSlug === false) {
+            if (!$model->shouldGenerateSlug()) {
                 return;
             }
             if ($model->isDirty($model->getSlugSource())) {
                 $model->slug = $model->generateUniqueSlug($model->{$model->getSlugSource()});
             }
         });
+    }
+
+    protected function shouldGenerateSlug()
+    {
+        if (property_exists($this, 'hasSlug') && $this->hasSlug === false) {
+            return false;
+        }
+        
+        if (!isset($this->{$this->getSlugSource()})) {
+            return false;
+        }
+
+        return true;
     }
 
     protected function getSlugSource()
@@ -34,9 +47,10 @@ trait HasSlug
 
     protected function generateUniqueSlug($value)
     {
-        if (property_exists($this, 'hasSlug') && $this->hasSlug === false) {
+        if (!$this->shouldGenerateSlug()) {
             return null;
         }
+
         $slug = Str::slug($value);
         $originalSlug = $slug;
         $count = 1;
@@ -50,9 +64,10 @@ trait HasSlug
 
     protected function slugExists($slug)
     {
-        if (property_exists($this, 'hasSlug') && $this->hasSlug === false) {
+        if (!$this->shouldGenerateSlug()) {
             return false;
         }
+
         $query = static::where('slug', $slug);
 
         if ($this->exists) {
@@ -64,7 +79,7 @@ trait HasSlug
 
     public function getRouteKeyName()
     {
-        if (property_exists($this, 'hasSlug') && $this->hasSlug === false) {
+        if (!$this->shouldGenerateSlug()) {
             return $this->getKeyName();
         }
         return 'slug';
