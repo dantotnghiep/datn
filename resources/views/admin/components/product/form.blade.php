@@ -19,7 +19,7 @@
             <div class="row g-3 flex-between-end mb-5">
                 <div class="col-auto">
                     <h2 class="mb-2">{{ isset($item) ? 'Edit product' : 'Add a product' }}</h2>
-                    <h5 class="text-body-tertiary fw-semibold">Complete all required fields</h5>
+                    <h5 class="text-body-tertiary fw-semibold">Complete all fields</h5>
                 </div>
                 <div class="col-auto">
                     <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0" href="{{ route('admin.products.index') }}">Cancel</a>
@@ -32,8 +32,8 @@
 
                     <div class="row">
                       <div class="col-5">
-                        <h4 class="mb-3">Title</h4>
-                        <input class="form-control mb-5" type="text" name="name" placeholder="Write title here..." value="{{ $item->name ?? old('name') }}" required />
+                        <h4 class="mb-3">Product Name</h4>
+                        <input class="form-control mb-5" type="text" name="name" placeholder="Write name here..." value="{{ $item->name ?? old('name') }}" />
 
                       </div>
                        <div class="col-7">
@@ -98,7 +98,7 @@
                                                         class="fw-bold fs-9"
                                                         href="{{ route('admin.categories.create') }}">Add new category</a>
                                                 </div>
-                                                <select class="form-select mb-3" name="category_id" aria-label="category" required>
+                                                <select class="form-select mb-3" name="category_id" aria-label="category">
                                                     <option value="">Select Category</option>
                                                     @foreach (\App\Models\Category::all() as $category)
                                                         <option value="{{ $category->id }}" {{ (isset($item) && $item->category_id == $category->id) || old('category_id') == $category->id ? 'selected' : '' }}>
@@ -268,13 +268,9 @@
                             .then(data => {
                                 if (data.success) {
                                     window.location.href = data.redirect;
-                                } else {
-                                    alert(data.message || 'Error saving product');
                                 }
                             })
                             .catch(error => {
-                                console.error('Error:', error);
-                                alert('Error saving product. Please try again.');
                             });
                         });
 
@@ -390,7 +386,6 @@
             });
         });
     </script>
-    {{--  variants handling --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const variantsContainer = document.getElementById('variants-container');
