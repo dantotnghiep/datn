@@ -36,7 +36,7 @@ class CartController extends Controller
 
         $user = Auth::user();
         $variation = ProductVariation::find($request->variation_id);
-        
+
         if ($variation->stock < $request->quantity) {
             return back()->with('error', 'Số lượng sản phẩm không đủ');
         }
@@ -75,7 +75,7 @@ class CartController extends Controller
 
         $user = Auth::user();
         $variation = ProductVariation::find($request->variation_id);
-        
+
         if ($variation->stock < $request->quantity) {
             return response()->json([
                 'success' => false,
@@ -139,10 +139,38 @@ class CartController extends Controller
     {
         $user = Auth::user();
         Cart::where('user_id', $user->id)->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Đã xóa giỏ hàng'
         ]);
     }
-} 
+    public function saveSelectedItems(Request $request)
+    {
+        $selected = json_decode($request->input('selected_items'), true);
+        session(['selected_cart_items' => $selected]);
+        return redirect()->route('checkout');
+    }
+    public function checkout(Request $request)
+    {
+        $user = Auth::user();
+        $selectedVariationIds = session('selected_cart_items', []);
+        if (empty($selectedVariationIds)) {
+            return redirect()->route('cart')->with('error', 'Vui lòng chọn sản phẩm để thanh toán');
+        }
+    
+        $selectedItems = Cart::where('user_id', $user->id)
+            ->whereIn('product_variation_id', $selectedVariationIds)
+            ->with(['productVariation.product', 'productVariation.attributeValues.attribute'])
+            ->get();
+    
+        $subtotal = $selectedItems->sum('total');
+        $discount = 0;
+        $shippingFee = 0;
+        $total = $subtotal - $discount + $shippingFee;
+    
+        return view('client.cart.checkout', compact(
+            'selectedItems', 'subtotal', 'discount', 'shippingFee', 'total'
+        ));
+    }
+}
