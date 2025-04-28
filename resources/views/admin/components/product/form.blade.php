@@ -235,7 +235,7 @@
                 <li class="breadcrumb-item active">{{ isset($item) ? 'Edit' : 'Create' }}</li>
             </ol>
         </nav>
-        <form class="mb-9" method="POST" action="{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}" enctype="multipart/form-data">
+        <form class="mb-9" method="POST" action="{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}" enctype="multipart/form-data" id="product-form">
             @csrf
             @if(isset($item))
                 @method('PUT')
@@ -262,10 +262,6 @@
                             <textarea class="tinymce form-control custom-editor" name="description"
                                 data-tinymce='{"height":"15rem","placeholder":"Write a description here...","skin":"oxide","content_css":"default","menubar":false,"statusbar":false,"toolbar":"bold italic underline | bullist numlist | link image | formatselect","plugins":"link image lists"}'>{{ $item->description ?? old('description') }}</textarea>
                         </div>
-                    </div>
-                    <div class="mb-4">
-                        <h4 class="mb-3">SKU</h4>
-                        <input class="form-control mb-5" type="text" name="sku" placeholder="Enter product SKU" value="{{ $item->sku ?? old('sku') }}" required />
                     </div>
                     <h4 class="mb-3">Display images</h4>
                     <div class="mb-3">
@@ -398,85 +394,71 @@
             if (typeof Dropzone !== 'undefined') {
                 Dropzone.autoDiscover = false;
 
-                // Create a Dropzone instance with better handling for multiple uploads
                 let myDropzone = new Dropzone("#product-images-upload", {
                     url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
                     paramName: "images",
-                    maxFilesize: 10, // MB
                     acceptedFiles: "image/*",
                     addRemoveLinks: true,
-                    createImageThumbnails: true,
-                    dictRemoveFile: "Remove",
-                    dictCancelUpload: "Cancel",
-                    dictDefaultMessage: "Drag your photos here or click to browse",
-                    autoProcessQueue: false, // Do not automatically upload
-                    uploadMultiple: true, // Allow multiple file uploads
+                    autoProcessQueue: false,
+                    uploadMultiple: true,
                     parallelUploads: 10,
-                    maxFiles: 10, // Maximum number of files
+                    maxFiles: 10,
+                    maxFilesize: null,
                     previewsContainer: "#image-preview-container",
                     clickable: "#product-images-upload",
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
                     init: function() {
                         let myDropzone = this;
-                        let form = document.querySelector('form');
+                        let form = document.getElementById('product-form');
 
-                        // Form submission handler
                         form.addEventListener('submit', function(e) {
                             e.preventDefault();
                             e.stopPropagation();
 
-                            // Ensure variant data is collected before submission
+                            // Collect variant data
                             collectVariantData();
 
-                            // If no files to upload, submit form normally
-                            if (myDropzone.getQueuedFiles().length === 0) {
-                                form.submit();
-                                return;
-                            }
-
-                            // Process form with files
-                            console.log("Preparing to upload " + myDropzone.getQueuedFiles().length + " files");
-
-                            // Create FormData with all form fields
+                            // Create FormData
                             let formData = new FormData(form);
 
-                            // Add all files to FormData
-                            myDropzone.getQueuedFiles().forEach(function(file, index) {
+                            // Add queued files to FormData
+                            let queuedFiles = myDropzone.getQueuedFiles();
+                            queuedFiles.forEach(function(file) {
                                 formData.append('images[]', file);
-                                console.log("Added file to form: " + file.name);
                             });
 
-                            // Send the request with fetch API for better control
-                            fetch(form.action, {
-                                method: form.method,
+                            // Get the form method and URL
+                            let method = form.getAttribute('method').toUpperCase();
+                            let url = form.getAttribute('action');
+
+                            // If it's PUT request, we need to append _method field
+                            if (method === 'PUT') {
+                                formData.append('_method', 'PUT');
+                            }
+
+                            // Send AJAX request
+                            fetch(url, {
+                                method: 'POST',
                                 body: formData,
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                                     'X-Requested-With': 'XMLHttpRequest'
                                 }
                             })
-                            .then(response => {
-                                if (response.ok || response.redirected) {
-                                    return response.json().catch(() => {
-                                        // If not JSON, just return success object
-                                        return { success: true, redirect: response.url };
-                                    });
-                                }
-                                throw new Error('Network response was not ok.');
-                            })
+                            .then(response => response.json())
                             .then(data => {
-                                console.log("Form submitted successfully:", data);
-                                // Handle redirect
-                                if (data.redirect) {
+                                if (data.success) {
                                     window.location.href = data.redirect;
                                 } else {
-                                    window.location.href = "{{ route('admin.products.index') }}";
+                                    alert(data.message || 'Error saving product');
                                 }
                             })
                             .catch(error => {
-                                console.error('Error submitting form:', error);
-                                alert("Error saving product. Please try again.");
+                                console.error('Error:', error);
+                                alert('Error saving product. Please try again.');
                             });
-
                         });
 
                         // File added event
@@ -487,71 +469,47 @@
                         // File removed event
                         this.on("removedfile", function(file) {
                             console.log("File removed:", file.name);
-
-                            // If file was from existing images, add to removal list
-                            if (file.id) {
-                                const removalInput = document.createElement('input');
-                                removalInput.type = 'hidden';
-                                removalInput.name = 'remove_images[]';
-                                removalInput.value = file.id;
-                                form.appendChild(removalInput);
-                            }
                         });
 
                         // Error handling
                         this.on("error", function(file, errorMessage) {
                             console.error("Error with file:", file.name, errorMessage);
-
-                            // Display error on the file preview
                             if (file.previewElement) {
-                                file.previewElement.classList.add("dz-error");
-                                const errorDisplay = document.createElement('div');
-                                errorDisplay.className = 'text-danger small mt-1';
-                                errorDisplay.textContent = typeof errorMessage === 'string' ? errorMessage : 'Upload failed';
-                                file.previewElement.appendChild(errorDisplay);
-                            }
-                        });
-
-                        // Add thumbnail method for better previews
-                        this.on("thumbnail", function(file, dataUrl) {
-                            if (file.previewElement) {
-                                file.previewElement.classList.add("dz-has-thumbnail");
-                                const images = file.previewElement.querySelectorAll("[data-dz-thumbnail]");
-                                for (let i = 0; i < images.length; i++) {
-                                    images[i].alt = file.name;
-                                    images[i].src = dataUrl;
+                                let errorDisplay = file.previewElement.querySelector('[data-dz-errormessage]');
+                                if (errorDisplay) {
+                                    errorDisplay.textContent = errorMessage;
                                 }
+                                file.previewElement.classList.add('dz-error');
                             }
                         });
+
+                        // Display existing images (for edit mode)
+                        @if(isset($item) && $item->images->count() > 0)
+                            @foreach($item->images as $image)
+                                let mockFile = {
+                                    name: "{{ basename($image->image_path) }}",
+                                    size: 12345,
+                                    accepted: true,
+                                    status: "success",
+                                    id: {{ $image->id }},
+                                    is_primary: {{ $image->is_primary ? 'true' : 'false' }}
+                                };
+
+                                myDropzone.emit("addedfile", mockFile);
+                                myDropzone.emit("thumbnail", mockFile, "{{ Storage::url($image->image_path) }}");
+                                myDropzone.emit("complete", mockFile);
+
+                                if (mockFile.is_primary) {
+                                    let primaryBadge = document.createElement('div');
+                                    primaryBadge.className = 'position-absolute top-0 start-0 bg-primary text-white px-2 py-1 small rounded-bottom';
+                                    primaryBadge.style.zIndex = '15';
+                                    primaryBadge.textContent = 'Primary';
+                                    mockFile.previewElement.appendChild(primaryBadge);
+                                }
+                            @endforeach
+                        @endif
                     }
                 });
-
-                // Display existing images (for edit mode)
-                @if(isset($item) && $item->images->count() > 0)
-                    @foreach($item->images as $image)
-                        let mockFile = {
-                            name: "{{ basename($image->image_path) }}",
-                            size: 12345,
-                            accepted: true,
-                            status: "success",
-                            id: {{ $image->id }},
-                            is_primary: {{ $image->is_primary ? 'true' : 'false' }}
-                        };
-
-                        myDropzone.emit("addedfile", mockFile);
-                        myDropzone.emit("thumbnail", mockFile, "{{ Storage::url($image->image_path) }}");
-                        myDropzone.emit("complete", mockFile);
-
-                        // Add primary indicator if needed
-                        if (mockFile.is_primary) {
-                            const primaryBadge = document.createElement('div');
-                            primaryBadge.className = 'position-absolute top-0 start-0 bg-primary text-white px-2 py-1 small rounded-bottom';
-                            primaryBadge.style.zIndex = '15';
-                            primaryBadge.textContent = 'Primary';
-                            mockFile.previewElement.appendChild(primaryBadge);
-                        }
-                    @endforeach
-                @endif
             }
 
             // Initialize flatpickr

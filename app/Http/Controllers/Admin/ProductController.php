@@ -52,23 +52,48 @@ class ProductController extends BaseController
         ]);
     }
 
+    protected function generateSKU($name)
+    {
+        // Remove special characters and convert to uppercase
+        $base = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $name));
+
+        // Take first 6 characters
+        $base = substr($base, 0, 6);
+
+        // Add random number
+        $random = mt_rand(1000, 9999);
+
+        $sku = $base . $random;
+
+        // Check if SKU exists
+        while (Product::where('sku', $sku)->exists()) {
+            $random = mt_rand(1000, 9999);
+            $sku = $base . $random;
+        }
+
+        return $sku;
+    }
+
     public function store(Request $request)
     {
         // Log request data for debugging
         Log::info('Product store request', [
             'has_variants' => $request->has('variants'),
-            'variants_data' => $request->variants
+            'variants_data' => $request->variants,
+            'has_files' => $request->hasFile('images'),
+            'files_count' => $request->hasFile('images') ? count($request->file('images')) : 0
         ]);
 
         $validated = $request->validate($this->model::rules());
+
+        // Generate SKU and slug
+        $validated['sku'] = $this->generateSKU($validated['name']);
+        $validated['slug'] = Str::slug($validated['name']);
 
         // Begin transaction
         DB::beginTransaction();
 
         try {
-            // Log for debugging
-            Log::info('Creating product data', ['has_files' => $request->hasFile('images')]);
-
             // Create the product
             $product = $this->model::create($validated);
 
@@ -77,59 +102,31 @@ class ProductController extends BaseController
                 $images = $request->file('images');
                 Log::info('Processing ' . count($images) . ' uploaded image files');
 
-                // Validate that all files are valid images
                 foreach ($images as $index => $image) {
-                    if (!$image->isValid() || !in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
-                        throw new \Exception('Invalid image file uploaded at index ' . $index . ': ' . $image->getClientOriginalName());
+                    // Validate image
+                    if (!$image->isValid()) {
+                        throw new \Exception('Invalid image file at index ' . $index);
                     }
-                }
 
-                foreach ($images as $index => $image) {
-                    // Store image directly without going through temporary storage
-                    $imagePath = $image->store('products', 'public');
-                    Log::info('Stored image directly at: ' . $imagePath);
+                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+                        throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
+                    }
 
-                    ProductImage::create([
-                        'product_id' => $product->id,
-                        'image_path' => $imagePath,
-                        'is_primary' => $index === 0, // First image is primary
-                        'order' => $index
-                    ]);
-                }
-            } elseif ($request->has('images')) {
-                // This block is for the previous approach, can be kept for backward compatibility
-                // Handle image paths from dropzone temp uploads
-                $imagePaths = $request->input('images');
-                Log::info('Alternative approach - Processing image paths', ['count' => is_array($imagePaths) ? count($imagePaths) : 0]);
+                    // Store image
+                    try {
+                        $imagePath = $image->store('products', 'public');
+                        Log::info('Stored image at: ' . $imagePath);
 
-                if (is_array($imagePaths) && !empty($imagePaths)) {
-                    foreach ($imagePaths as $index => $path) {
-                        // Check if the path exists
-                        if (!Storage::disk('public')->exists($path)) {
-                            Log::warning('Image path does not exist: ' . $path);
-                            continue; // Skip if file doesn't exist
-                        }
-
-                        // Move from temp folder to permanent location if it's in temp
-                        if (Str::startsWith($path, 'temp/')) {
-                            $newPath = str_replace('temp/', '', $path);
-                            try {
-                                Storage::disk('public')->move($path, $newPath);
-                                Log::info('Moved image from ' . $path . ' to ' . $newPath);
-                                $path = $newPath;
-                            } catch (\Exception $e) {
-                                Log::error('Failed to move image: ' . $e->getMessage());
-                                throw new \Exception('Failed to move image from temporary location: ' . $e->getMessage());
-                            }
-                        }
-
-                        $productImage = ProductImage::create([
+                        // Create product image record
+                        ProductImage::create([
                             'product_id' => $product->id,
-                            'image_path' => $path,
-                            'is_primary' => $index === 0, // First image is primary
+                            'image_path' => $imagePath,
+                            'is_primary' => $index === 0,
                             'order' => $index
                         ]);
-                        Log::info('Created product image record: ' . $productImage->id);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to store image: ' . $e->getMessage());
+                        throw new \Exception('Failed to store image: ' . $e->getMessage());
                     }
                 }
             }
@@ -138,25 +135,10 @@ class ProductController extends BaseController
             if ($request->has('variants') && !empty($request->variants)) {
                 $variantsData = json_decode($request->variants, true);
 
-                // Log the decoded data
-                Log::info('Decoded variants data', [
-                    'data' => $variantsData,
-                    'is_array' => is_array($variantsData),
-                    'is_null' => is_null($variantsData)
-                ]);
-
                 if (!empty($variantsData) && is_array($variantsData)) {
-                    // Generate all possible combinations of attribute values
                     $combinations = $this->generateVariantCombinations($variantsData);
 
-                    // Log combinations result
-                    Log::info('Generated combinations result', [
-                        'count' => count($combinations)
-                    ]);
-
-                    // Create a variation for each combination
                     foreach ($combinations as $index => $combination) {
-                        // Generate a name and SKU based on the combination
                         $variationName = $product->name;
                         $skuSuffix = '';
                         $attributeValueIds = [];
@@ -167,26 +149,23 @@ class ProductController extends BaseController
                             $attributeValueIds[] = $attrValue['id'];
                         }
 
-                        // Ensure SKU is unique
-                        $baseSku = $product->sku . $skuSuffix;
-                        $sku = $baseSku;
+                        // Generate variation SKU
+                        $variationSku = $product->sku . $skuSuffix;
                         $counter = 1;
-
-                        while (ProductVariation::where('sku', $sku)->exists()) {
-                            $sku = $baseSku . '-' . $counter;
+                        while (ProductVariation::where('sku', $variationSku)->exists()) {
+                            $variationSku = $product->sku . $skuSuffix . '-' . $counter;
                             $counter++;
                         }
 
-                        // Create the variation
+                        // Create variation
                         $newVariation = ProductVariation::create([
                             'product_id' => $product->id,
-                            'sku' => $sku,
+                            'sku' => $variationSku,
                             'name' => $variationName,
-                            'price' => 0, // Default price, will need to be updated later
-                            'stock' => 0   // Default stock, will need to be updated later
+                            'price' => 0,
+                            'stock' => 0
                         ]);
 
-                        // Attach attribute values to the variation
                         if (!empty($attributeValueIds)) {
                             $newVariation->attributeValues()->attach($attributeValueIds);
                         }
@@ -196,7 +175,6 @@ class ProductController extends BaseController
 
             DB::commit();
 
-            // Check if this is an AJAX request
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -211,9 +189,10 @@ class ProductController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error creating product: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Error creating product: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
-            // Check if this is an AJAX request
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -245,12 +224,6 @@ class ProductController extends BaseController
 
     public function update(Request $request, $id)
     {
-        // Log request data for debugging
-        Log::info('Product update request', [
-            'has_variants' => $request->has('variants'),
-            'variants_data' => $request->variants
-        ]);
-
         $item = $this->model::findOrFail($id);
         $validated = $request->validate($this->model::rules($id));
 
@@ -258,72 +231,39 @@ class ProductController extends BaseController
         DB::beginTransaction();
 
         try {
-            Log::info('Updating product ID: ' . $id, ['has_files' => $request->hasFile('images')]);
-
             // Update the product
             $item->update($validated);
 
             // Handle product images
             if ($request->hasFile('images')) {
                 $images = $request->file('images');
-                Log::info('Processing ' . count($images) . ' uploaded image files for update');
+                Log::info('Processing ' . count($images) . ' uploaded image files');
 
-                // Validate that all files are valid images
                 foreach ($images as $index => $image) {
-                    if (!$image->isValid() || !in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
-                        throw new \Exception('Invalid image file uploaded at index ' . $index . ': ' . $image->getClientOriginalName());
+                    // Validate image
+                    if (!$image->isValid()) {
+                        throw new \Exception('Invalid image file at index ' . $index);
                     }
-                }
 
-                $maxOrder = ProductImage::where('product_id', $id)->max('order') ?? 0;
+                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+                        throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
+                    }
 
-                foreach ($images as $index => $image) {
-                    // Store image directly
-                    $imagePath = $image->store('products', 'public');
-                    Log::info('Stored updated image at: ' . $imagePath);
+                    // Store image
+                    try {
+                        $imagePath = $image->store('products', 'public');
+                        Log::info('Stored image at: ' . $imagePath);
 
-                    ProductImage::create([
-                        'product_id' => $id,
-                        'image_path' => $imagePath,
-                        'is_primary' => false, // Never make new images primary when updating
-                        'order' => $maxOrder + $index + 1
-                    ]);
-                }
-            } elseif ($request->has('images')) {
-                // Legacy approach - handle image paths from dropzone temp uploads
-                $imagePaths = $request->input('images');
-                Log::info('Alternative update approach - Processing image paths', ['count' => is_array($imagePaths) ? count($imagePaths) : 0]);
-
-                if (is_array($imagePaths) && !empty($imagePaths)) {
-                    $maxOrder = ProductImage::where('product_id', $id)->max('order') ?? 0;
-
-                    foreach ($imagePaths as $index => $path) {
-                        // Check if the path exists
-                        if (!Storage::disk('public')->exists($path)) {
-                            Log::warning('Image path does not exist: ' . $path);
-                            continue; // Skip if file doesn't exist
-                        }
-
-                        // Move from temp folder to permanent location if it's in temp
-                        if (Str::startsWith($path, 'temp/')) {
-                            $newPath = str_replace('temp/', '', $path);
-                            try {
-                                Storage::disk('public')->move($path, $newPath);
-                                Log::info('Moved image from ' . $path . ' to ' . $newPath);
-                                $path = $newPath;
-                            } catch (\Exception $e) {
-                                Log::error('Failed to move image during update: ' . $e->getMessage());
-                                throw new \Exception('Failed to move image from temporary location: ' . $e->getMessage());
-                            }
-                        }
-
-                        $productImage = ProductImage::create([
+                        // Create product image record
+                        ProductImage::create([
                             'product_id' => $id,
-                            'image_path' => $path,
-                            'is_primary' => false, // Never make new images primary when updating
-                            'order' => $maxOrder + $index + 1
+                            'image_path' => $imagePath,
+                            'is_primary' => false,
+                            'order' => ProductImage::where('product_id', $id)->max('order') + 1
                         ]);
-                        Log::info('Created product image record during update: ' . $productImage->id);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to store image: ' . $e->getMessage());
+                        throw new \Exception('Failed to store image: ' . $e->getMessage());
                     }
                 }
             }
@@ -333,9 +273,7 @@ class ProductController extends BaseController
                 foreach ($request->existing_images as $imageId => $imageData) {
                     $productImage = ProductImage::findOrFail($imageId);
 
-                    // Update primary status
                     if (isset($imageData['is_primary']) && $imageData['is_primary']) {
-                        // Reset all other images to non-primary
                         ProductImage::where('product_id', $id)
                             ->where('id', '!=', $imageId)
                             ->update(['is_primary' => false]);
@@ -343,7 +281,6 @@ class ProductController extends BaseController
                         $productImage->is_primary = true;
                     }
 
-                    // Update order
                     if (isset($imageData['order'])) {
                         $productImage->order = $imageData['order'];
                     }
@@ -356,16 +293,13 @@ class ProductController extends BaseController
             if ($request->has('remove_images')) {
                 foreach ($request->remove_images as $imageId) {
                     $image = ProductImage::findOrFail($imageId);
-
-                    // Delete the file
                     if ($image->image_path) {
                         Storage::disk('public')->delete($image->image_path);
                     }
-
                     $image->delete();
                 }
 
-                // Make sure there's a primary image
+                // Ensure there's a primary image
                 $primaryExists = ProductImage::where('product_id', $id)
                     ->where('is_primary', true)
                     ->exists();
@@ -382,28 +316,14 @@ class ProductController extends BaseController
             if ($request->has('variants') && !empty($request->variants)) {
                 $variantsData = json_decode($request->variants, true);
 
-                // Log the decoded data
-                Log::info('Decoded variants data in update', [
-                    'data' => $variantsData,
-                    'is_array' => is_array($variantsData),
-                    'is_null' => is_null($variantsData)
-                ]);
-
                 if (!empty($variantsData) && is_array($variantsData)) {
                     // First, soft delete all existing variations
                     ProductVariation::where('product_id', $id)->delete();
 
-                    // Generate all possible combinations of attribute values
+                    // Generate all possible combinations
                     $combinations = $this->generateVariantCombinations($variantsData);
 
-                    // Log combinations result
-                    Log::info('Generated combinations result in update', [
-                        'count' => count($combinations)
-                    ]);
-
-                    // Create a variation for each combination
                     foreach ($combinations as $index => $combination) {
-                        // Generate a name and SKU based on the combination
                         $variationName = $item->name;
                         $skuSuffix = '';
                         $attributeValueIds = [];
@@ -414,26 +334,23 @@ class ProductController extends BaseController
                             $attributeValueIds[] = $attrValue['id'];
                         }
 
-                        // Ensure SKU is unique
-                        $baseSku = $item->sku . $skuSuffix;
-                        $sku = $baseSku;
+                        // Generate variation SKU
+                        $variationSku = $item->sku . $skuSuffix;
                         $counter = 1;
-
-                        while (ProductVariation::where('sku', $sku)->exists()) {
-                            $sku = $baseSku . '-' . $counter;
+                        while (ProductVariation::where('sku', $variationSku)->exists()) {
+                            $variationSku = $item->sku . $skuSuffix . '-' . $counter;
                             $counter++;
                         }
 
-                        // Create the variation
+                        // Create variation
                         $newVariation = ProductVariation::create([
                             'product_id' => $id,
-                            'sku' => $sku,
+                            'sku' => $variationSku,
                             'name' => $variationName,
-                            'price' => 0, // Default price, will need to be updated later
-                            'stock' => 0   // Default stock, will need to be updated later
+                            'price' => 0,
+                            'stock' => 0
                         ]);
 
-                        // Attach attribute values to the variation
                         if (!empty($attributeValueIds)) {
                             $newVariation->attributeValues()->attach($attributeValueIds);
                         }
@@ -443,7 +360,6 @@ class ProductController extends BaseController
 
             DB::commit();
 
-            // Check if this is an AJAX request
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -458,9 +374,10 @@ class ProductController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating product: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Error updating product: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
-            // Check if this is an AJAX request
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
