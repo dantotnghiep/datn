@@ -29,17 +29,25 @@
             </div>
             <div class="row g-5">
                 <div class="col-12 col-xl-8">
-                    <h4 class="mb-3">Product Title</h4>
-                    <input class="form-control mb-5" type="text" name="name" placeholder="Write title here..." value="{{ $item->name ?? old('name') }}" required />
 
-                    <div class="mb-6">
-                        <h4 class="mb-3 product-form-heading">Product Description</h4>
-                        <div class="description-container">
-                            <textarea class="tinymce form-control custom-editor" name="description"
-                                data-tinymce='{"height":"15rem","placeholder":"Write a description here...","skin":"oxide","content_css":"default","menubar":false,"statusbar":false,"toolbar":"bold italic underline | bullist numlist | link image | formatselect","plugins":"link image lists"}'>{{ $item->description ?? old('description') }}</textarea>
+                    <div class="row">
+                      <div class="col-5">
+                        <h4 class="mb-3">Title</h4>
+                        <input class="form-control mb-5" type="text" name="name" placeholder="Write title here..." value="{{ $item->name ?? old('name') }}" required />
+
+                      </div>
+                       <div class="col-7">
+                        <div class="mb-6">
+                            <h4 class="mb-3">Description</h4>
+                            <div class="description-container">
+                                <textarea class="tinymce form-control custom-editor" name="description"
+                                    data-tinymce='{"height":"30rem","placeholder":"Write a description here...","skin":"oxide","content_css":"default","menubar":false,"statusbar":false,"toolbar":"bold italic underline | bullist numlist | link image | formatselect","plugins":"link image lists"}'>{{ $item->description ?? old('description') }}</textarea>
+                            </div>
                         </div>
+                       </div>
                     </div>
-                    <h4 class="mb-3">Display images</h4>
+
+                    <h4 class="mb-3">Images</h4>
                     <div class="mb-3">
                         @if(isset($item) && $item->images->count() > 0)
                             <div class="row mb-3">
@@ -82,7 +90,6 @@
                         <div class="col-12 col-xl-12">
                             <div class="card mb-3">
                                 <div class="card-body">
-                                    <h4 class="card-title mb-4">Organize</h4>
                                     <div class="row gx-3">
                                         <div class="col-12 col-sm-6 col-xl-12">
                                             <div class="mb-4">
