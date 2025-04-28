@@ -18,19 +18,21 @@
                                     <div>
                                         <div
                                             class="border border-1 border-translucent rounded-3 position-relative mb-3">
+                                            @if($product->first_variation_id)
                                             <button
                                                 class="btn btn-wish btn-wish-primary z-2 d-toggle-container wishlist-btn"
                                                 data-bs-toggle="tooltip" data-bs-placement="top"
-                                                data-product-id="{{ $product->id }}"
-                                                data-variation-id="{{ $product->first_variation_id ?? 0 }}"
+                                                data-variation-id="{{ $product->first_variation_id }}"
                                                 title="{{ in_array($product->first_variation_id, $wishlistItems ?? []) ? 'Đã yêu thích' : 'Thêm vào yêu thích' }}">
                                                 @if(in_array($product->first_variation_id, $wishlistItems ?? []))
-                                                    <span class="fas fa-heart text-danger" data-fa-transform="down-1"></span>
+                                                    <span class="fas fa-heart text-danger"
+                                                        data-fa-transform="down-1"></span>
                                                 @else
-                                                    <span class="fas fa-heart d-block-hover" data-fa-transform="down-1"></span>
-                                                    <span class="far fa-heart d-none-hover" data-fa-transform="down-1"></span>
+                                                    <span class="far fa-heart d-none-hover"
+                                                        data-fa-transform="down-1"></span>
                                                 @endif
                                             </button>
+                                            @endif
                                             <img class="img-fluid"
                                                 src="{{ asset($product->image ? $product->image : 'theme/prium.github.io/phoenix/v1.22.0/assets/img/products/6.png') }}"
                                                 alt="{{ $product->name }}" />
@@ -91,11 +93,6 @@
             var btn = $(this);
             var variationId = btn.data('variation-id');
             
-            if (variationId <= 0) {
-                toastr.warning('Sản phẩm này không có biến thể');
-                return;
-            }
-            
             $.ajax({
                 url: '{{ route("wishlist.toggle") }}',
                 type: 'POST',
@@ -106,12 +103,12 @@
                 success: function(response) {
                     if (response.status === 'success') {
                         if (response.action === 'added') {
-                            btn.find('.far.fa-heart').hide();
-                            btn.find('.fas.fa-heart.d-block-hover').hide();
-                            btn.html('<span class="fas fa-heart text-danger" data-fa-transform="down-1"></span>');
+                            btn.find('span').removeClass('far fa-heart d-none-hover')
+                                .addClass('fas fa-heart text-danger');
                             btn.attr('title', 'Đã yêu thích');
                         } else {
-                            btn.html('<span class="fas fa-heart d-block-hover" data-fa-transform="down-1"></span><span class="far fa-heart d-none-hover" data-fa-transform="down-1"></span>');
+                            btn.find('span').removeClass('fas fa-heart text-danger')
+                                .addClass('far fa-heart d-none-hover');
                             btn.attr('title', 'Thêm vào yêu thích');
                         }
                         
@@ -123,10 +120,11 @@
                 },
                 error: function(xhr) {
                     if (xhr.status === 401) {
-                        // Chưa đăng nhập, chuyển đến trang đăng nhập
+                        // Chưa đăng nhập
                         window.location.href = '{{ route("login") }}';
                     } else {
-                        toastr.error('Đã xảy ra lỗi, vui lòng thử lại sau');
+                        // Lỗi khác
+                        toastr.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
                     }
                 }
             });

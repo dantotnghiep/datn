@@ -34,7 +34,7 @@ abstract class BaseController extends Controller
 
     public function index(Request $request)
     {
-        $query = $this->model::query();
+        $query = $this->model::query()->orderBy('id', 'desc');
 
         // Handle Search
         if ($request->has('search')) {

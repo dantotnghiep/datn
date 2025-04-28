@@ -7,7 +7,7 @@
             <nav class="mb-3" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">Trang chủ</a></li>
-                        <li class="breadcrumb-item"><a href="#">{{ $product->category->name }}</a></li>
+                        <li class="breadcrumb-item"><a href="#">{{ $product->category_id }}</a></li>
                         <li class="breadcrumb-item active" aria-current="page">{{ $product->name }}</li>
                 </ol>
             </nav>
@@ -33,7 +33,7 @@
                                         <div class="swiper-wrapper">
                                             @foreach ($product->images as $image)
                                                 <div class="swiper-slide">
-                                                    <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}" />
+9                                                    <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}" />
                                                 </div>
                                             @endforeach
                                         </div>

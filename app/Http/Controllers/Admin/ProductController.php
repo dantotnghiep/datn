@@ -22,7 +22,7 @@ class ProductController extends BaseController
     public function __construct()
     {
         $this->model = Product::class;
-        $this->viewPath = 'admin.components.product';
+        $this->viewPath = 'admin.components.crud';
         $this->route = 'admin.products';
         parent::__construct();
     }
@@ -44,7 +44,7 @@ class ProductController extends BaseController
             }
         }
 
-        return view($this->viewPath . '.form', [
+        return view('admin.components.product.form', [
             'fields' => $fields,
             'route' => $this->route,
             'attributes' => $attributes,
@@ -100,24 +100,15 @@ class ProductController extends BaseController
             // Handle product images
             if ($request->hasFile('images')) {
                 $images = $request->file('images');
-                Log::info('Processing ' . count($images) . ' uploaded image files');
-
                 foreach ($images as $index => $image) {
-                    // Validate image
                     if (!$image->isValid()) {
                         throw new \Exception('Invalid image file at index ' . $index);
                     }
-
                     if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
                         throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
                     }
-
-                    // Store image
                     try {
                         $imagePath = $image->store('products', 'public');
-                        Log::info('Stored image at: ' . $imagePath);
-
-                        // Create product image record
                         ProductImage::create([
                             'product_id' => $product->id,
                             'image_path' => $imagePath,
@@ -125,7 +116,6 @@ class ProductController extends BaseController
                             'order' => $index
                         ]);
                     } catch (\Exception $e) {
-                        Log::error('Failed to store image: ' . $e->getMessage());
                         throw new \Exception('Failed to store image: ' . $e->getMessage());
                     }
                 }
@@ -213,7 +203,7 @@ class ProductController extends BaseController
         $attributes = Attribute::with('values')->get();
         $attributeValues = AttributeValue::all();
 
-        return view($this->viewPath . '.form', [
+        return view('admin.components.product.form', [
             'item' => $item,
             'fields' => $fields,
             'route' => $this->route,

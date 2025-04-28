@@ -23,8 +23,7 @@
                 </div>
                 <div class="col-auto">
                     <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0" href="{{ route('admin.products.index') }}">Cancel</a>
-                    <button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="submit" name="action" value="draft">Save draft</button>
-                    <button class="btn btn-primary mb-2 mb-sm-0" type="submit" id="publish-btn" name="action" value="publish">Publish product</button>
+                    <button class="btn btn-primary mb-2 mb-sm-0" type="submit" id="publish-btn" name="action" value="publish">Create</button>
                 </div>
             </div>
             <div class="row g-5">

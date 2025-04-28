@@ -61,32 +61,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/{id}/restore', [ProductController::class, 'restore'])->name('restore');
     });
 
-    // CRUD routes for product images
-    Route::prefix('product-images')->name('product-images.')->group(function () {
-        // List
-        Route::get('/', [ProductImageController::class, 'index'])->name('index');
-
-        // Create form
-        Route::get('/create', [ProductImageController::class, 'create'])->name('create');
-
-        // Store
-        Route::post('/', [ProductImageController::class, 'store'])->name('store');
-
-        // Temporary image upload for Dropzone
-        Route::post('/upload-temp', [ProductImageController::class, 'uploadTemp'])->name('upload-temp');
-
-        // Edit form
-        Route::get('/{id}/edit', [ProductImageController::class, 'edit'])->name('edit');
-
-        // Update
-        Route::put('/{id}', [ProductImageController::class, 'update'])->name('update');
-
-        // Soft delete
-        Route::delete('/{id}', [ProductImageController::class, 'destroy'])->name('destroy');
-
-        // Restore from trash
-        Route::put('/{id}/restore', [ProductImageController::class, 'restore'])->name('restore');
-    });
 
     // CRUD routes for product variations
     Route::prefix('product-variations')->name('product-variations.')->group(function () {
