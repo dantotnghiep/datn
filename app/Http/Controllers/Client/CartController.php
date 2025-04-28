@@ -27,7 +27,6 @@ class CartController extends Controller
         $cartItems = Cart::where('user_id', $user->id)
             ->with(['productVariation.product', 'productVariation.attributeValues.attribute'])
             ->get();
-
         $total = 0;
         foreach ($cartItems as $item) {
             $total += $item->total;

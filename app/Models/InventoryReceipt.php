@@ -83,7 +83,14 @@ class InventoryReceipt extends BaseModel
                 'label' => 'Created At',
                 'type' => 'datetime',
                 'sortable' => true
+            ],
+            'status' => [
+                'label' => 'Status',
+                'type' => 'select',
+                'options' => ['pending' => 'Pending', 'completed' => 'Completed', 'cancelled' => 'Cancelled'],
+                'sortable' => true
             ]
+     
         ];
     }
 

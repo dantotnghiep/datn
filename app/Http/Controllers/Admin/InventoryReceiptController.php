@@ -13,7 +13,7 @@ class InventoryReceiptController extends BaseController
     public function __construct()
     {
         $this->model = InventoryReceipt::class;
-        $this->viewPath = 'admin.components.crud';
+        $this->viewPath = 'admin.components.inventory-receipts';
         $this->route = 'admin.inventory-receipts';
         parent::__construct();
     }
@@ -32,7 +32,7 @@ class InventoryReceiptController extends BaseController
                 ];
             });
             
-        return view('admin.inventory-receipts.form', [
+        return view($this->viewPath . '.form', [
             'fields' => $fields,
             'route' => $this->route,
             'productVariations' => $productVariations
@@ -117,7 +117,7 @@ class InventoryReceiptController extends BaseController
             ->with('productVariation.product')
             ->get();
             
-        return view('admin.inventory-receipts.form', [
+        return view($this->viewPath . '.form', [
             'item' => $item,
             'fields' => $fields,
             'route' => $this->route,
@@ -193,6 +193,61 @@ class InventoryReceiptController extends BaseController
             return redirect()->back()
                 ->with('error', 'Error updating inventory receipt: ' . $e->getMessage())
                 ->withInput();
+        }
+    }
+    
+    /**
+     * Update the status of an inventory receipt
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'status' => 'required|in:pending,completed,cancelled'
+            ]);
+            
+            $receipt = $this->model::findOrFail($id);
+            $oldStatus = $receipt->status;
+            $newStatus = $request->status;
+            
+            // Update the receipt status
+            $receipt->status = $newStatus;
+            $receipt->save();
+            
+            // If changing from pending to completed, and it wasn't already completed before
+            if ($newStatus === 'completed' && $oldStatus !== 'completed') {
+                // Add stock for all items in the receipt
+                $receiptItems = InventoryReceiptItem::where('inventory_receipt_id', $id)->get();
+                
+                foreach ($receiptItems as $item) {
+                    $variation = ProductVariation::find($item->product_variation_id);
+                    if ($variation) {
+                        $variation->stock += $item->quantity;
+                        $variation->save();
+                    }
+                }
+            }
+            
+            // If changing from completed to another status, and it was completed before
+            if ($oldStatus === 'completed' && $newStatus !== 'completed') {
+                // Subtract stock for all items in the receipt
+                $receiptItems = InventoryReceiptItem::where('inventory_receipt_id', $id)->get();
+                
+                foreach ($receiptItems as $item) {
+                    $variation = ProductVariation::find($item->product_variation_id);
+                    if ($variation) {
+                        $variation->stock -= $item->quantity;
+                        $variation->save();
+                    }
+                }
+            }
+            
+            return redirect()->route($this->route . '.index')
+                ->with('success', 'Inventory receipt status updated successfully!');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error updating inventory receipt status: ' . $e->getMessage());
         }
     }
 } 

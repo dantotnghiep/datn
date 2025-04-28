@@ -87,12 +87,6 @@ class ProductVariation extends BaseModel
         ];
     }
 
-    public function getProductIdAttribute($value)
-    {
-        $product = Product::find($value);
-        return $product ? $product->name : $value;
-    }
-
     public function product()
     {
         return $this->belongsTo(Product::class);

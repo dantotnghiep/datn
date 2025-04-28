@@ -168,6 +168,32 @@
             function updateCheckoutButton() {
                 const hasSelectedItems = Array.from(itemCheckboxes).some(checkbox => checkbox.checked);
                 checkoutBtn.disabled = !hasSelectedItems;
+                updateSelectedTotals();
+            }
+
+            // Hàm tính và cập nhật tổng tiền cho các sản phẩm được chọn
+            function updateSelectedTotals() {
+                let selectedTotal = 0;
+                itemCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const row = checkbox.closest('tr');
+                        const totalCell = row.querySelector('.total');
+                        const total = parseInt(totalCell.textContent.replace(/[^\d]/g, ''));
+                        selectedTotal += total;
+                    }
+                });
+
+                // Cập nhật hiển thị tổng tiền cho Items subtotal
+                const formattedTotal = new Intl.NumberFormat('vi-VN').format(selectedTotal) + 'đ';
+                
+                // Cập nhật Items subtotal
+                document.querySelector('.card-body .d-flex:first-child .text-body-emphasis.fw-semibold').textContent = formattedTotal;
+                
+                // Cập nhật Subtotal
+                document.querySelector('.card-body .d-flex:nth-child(2) .text-body-emphasis.fw-semibold').textContent = formattedTotal;
+                
+                // Cập nhật Total
+                document.querySelector('.d-flex.justify-content-between.border-y h4:last-child').textContent = formattedTotal;
             }
 
             // Thêm sự kiện cho các checkbox

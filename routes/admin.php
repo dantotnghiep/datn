@@ -161,6 +161,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Restore from trash
         Route::put('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
+        
+        // Update status
+        Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
     });
 
     // Inventory Receipts routes
@@ -185,5 +188,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Restore from trash
         Route::put('/{id}/restore', [InventoryReceiptController::class, 'restore'])->name('restore');
+        
+        // Update status
+        Route::put('/{id}/update-status', [InventoryReceiptController::class, 'updateStatus'])->name('update-status');
     });
 });
