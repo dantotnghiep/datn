@@ -8,6 +8,8 @@ use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\Cart;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Order;
+use App\Models\OrderItem;
 
 class CartController extends Controller
 {
@@ -172,5 +174,68 @@ class CartController extends Controller
         return view('client.cart.checkout', compact(
             'selectedItems', 'subtotal', 'discount', 'shippingFee', 'total'
         ));
+    }
+
+    public function store(Request $request)
+    {
+        $user = Auth::user();
+        $selectedVariationIds = session('selected_cart_items', []);
+        
+        if (empty($selectedVariationIds)) {
+            return redirect()->route('cart')->with('error', 'Vui lòng chọn sản phẩm để thanh toán');
+        }
+
+        $selectedItems = Cart::where('user_id', $user->id)
+            ->whereIn('product_variation_id', $selectedVariationIds)
+            ->with(['productVariation.product'])
+            ->get();
+
+        $subtotal = $selectedItems->sum('total');
+        $discount = 0;
+        $shippingFee = 0;
+        $total = $subtotal - $discount + $shippingFee;
+
+        // Tạo đơn hàng mới
+        $order = Order::create([
+            'order_number' => 'ORD-' . time(),
+            'user_id' => $user->id,
+            'status_id' => 1, // Trạng thái mới
+            'user_name' => $request->user_name,
+            'user_phone' => $request->user_phone,
+            'province' => $request->province,
+            'district' => $request->district,
+            'ward' => $request->ward,
+            'address' => $request->address,
+            'notes' => $request->notes,
+            'payment_method' => $request->payment_method,
+            'payment_status' => 'pending',
+            'discount' => $discount,
+            'total' => $subtotal,
+            'total_with_discount' => $total
+        ]);
+
+        // Tạo chi tiết đơn hàng
+        foreach ($selectedItems as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_variation_id' => $item->product_variation_id,
+                'quantity' => $item->quantity,
+                'price' => $item->price,
+                'total' => $item->total
+            ]);
+
+            // Cập nhật số lượng tồn kho
+            $variation = $item->productVariation;
+            $variation->stock -= $item->quantity;
+            $variation->save();
+
+            // Xóa item khỏi giỏ hàng
+            $item->delete();
+        }
+
+        // Xóa session selected items
+        session()->forget('selected_cart_items');
+
+        return redirect()->route('cart')->with('success', 'Đặt hàng thành công! Mã đơn hàng của bạn là ' . $order->order_number);
     }
 }

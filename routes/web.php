@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     // Checkout routes (Vietnamese)
     Route::post('/gio-hang/checkout-chon', [CartController::class, 'saveSelectedItems'])->name('cart.checkout.selected');
     Route::get('/thanh-toan', [CartController::class, 'checkout'])->name('checkout');
+    Route::post('/dat-hang', [CartController::class, 'store'])->name('orders.store');
 });
 
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');

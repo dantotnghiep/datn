@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Order extends BaseModel
 {
     use SoftDeletes;
+    protected $hasSlug = false;
     
     protected $fillable = [
         'order_number', 'user_id', 'status_id', 'user_name', 'user_phone',
