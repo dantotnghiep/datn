@@ -38,7 +38,14 @@ Route::middleware('guest')->group(function () {
     Route::post('/dat-lai-mat-khau', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
+// Cart view route (public)
+Route::get('/gio-hang', [CartController::class, 'index'])->name('cart');
+
+// Only logged-in users can add/update/remove cart
 Route::middleware('auth')->group(function () {
+    Route::post('/gio-hang/them', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/gio-hang/cap-nhat', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/gio-hang/xoa', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/dang-xuat', [AuthController::class, 'logout'])->name('logout');
     Route::get('/thong-tin', function () {
         return view('client.auth.profile');
@@ -51,19 +58,9 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
 
-
 Route::get('/san-pham', function () {
     return view('client.product.index');
 })->name('product');
-
-// Cart routes
-Route::prefix('gio-hang')->group(function () {
-    Route::get('/', [CartController::class, 'index'])->name('cart');
-    Route::post('/them', [CartController::class, 'add'])->name('cart.add');
-    Route::post('/cap-nhat', [CartController::class, 'update'])->name('cart.update');
-    Route::post('/xoa', [CartController::class, 'remove'])->name('cart.remove');
-    Route::post('/xoa-tat-ca', [CartController::class, 'clear'])->name('cart.clear');
-});
 
 Route::get('/checkout', function () {
     return view('client.cart.checkout');

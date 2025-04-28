@@ -15,7 +15,7 @@ class CartController extends Controller
     {
         $user = Auth::user();
         $cartItems = Cart::where('user_id', $user->id)
-            ->with(['productVariation.product'])
+            ->with(['productVariation.product', 'productVariation.attributeValues.attribute'])
             ->get();
 
         $total = 0;
@@ -30,33 +30,20 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'color' => 'required',
-            'size' => 'required',
+            'variation_id' => 'required|exists:product_variations,id',
             'quantity' => 'required|integer|min:1'
         ]);
 
         $user = Auth::user();
-        $product = Product::find($request->product_id);
-        $variations = ProductVariation::where('product_id', $request->product_id)->get();
-        $variation = $variations->first(function ($v) use ($request) {
-            $parts = explode(' / ', $v->name);
-            $colorPart = explode(' - ', $parts[0]);
-            $color = trim(end($colorPart));
-            $size = isset($parts[1]) ? trim($parts[1]) : null;
-            return $color === $request->color && $size === $request->size;
-        });
-
-        if (!$variation) {
-            return back()->with('error', 'Không tìm thấy biến thể sản phẩm');
-        }
-
+        $variation = ProductVariation::find($request->variation_id);
+        
         if ($variation->stock < $request->quantity) {
             return back()->with('error', 'Số lượng sản phẩm không đủ');
         }
 
         // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
         $existingCart = Cart::where('user_id', $user->id)
-            ->where('product_variation_id', $variation->id)
+            ->where('product_variation_id', $request->variation_id)
             ->first();
 
         if ($existingCart) {
@@ -68,7 +55,7 @@ class CartController extends Controller
             // Nếu chưa có thì tạo mới
             Cart::create([
                 'user_id' => $user->id,
-                'product_variation_id' => $variation->id,
+                'product_variation_id' => $request->variation_id,
                 'quantity' => $request->quantity,
                 'price' => $variation->sale_price ?: $variation->price,
                 'total' => $request->quantity * ($variation->sale_price ?: $variation->price)

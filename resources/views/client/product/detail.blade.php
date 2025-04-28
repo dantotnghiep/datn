@@ -1167,27 +1167,6 @@
                 updateVariationInfo();
             }
 
-            // Thêm form submit
-            const addToCartForm = document.createElement('form');
-            addToCartForm.method = 'POST';
-            addToCartForm.action = '{{ route("cart.add") }}';
-            addToCartForm.style.display = 'none';
-            document.body.appendChild(addToCartForm);
-
-            // Thêm CSRF token
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            addToCartForm.appendChild(csrfToken);
-
-            // Thêm product_id
-            const productIdInput = document.createElement('input');
-            productIdInput.type = 'hidden';
-            productIdInput.name = 'product_id';
-            productIdInput.value = '{{ $product->id }}';
-            addToCartForm.appendChild(productIdInput);
-
             // Thêm sự kiện cho nút Add to Cart
             const addToCartBtn = document.querySelector('.btn-warning');
             addToCartBtn.addEventListener('click', function() {
@@ -1200,23 +1179,50 @@
                     return;
                 }
 
-                // Thêm các input vào form
-                selectedAttributes.forEach((attrId, index) => {
-                    const attrInput = document.createElement('input');
-                    attrInput.type = 'hidden';
-                    attrInput.name = `attributes[${index}]`;
-                    attrInput.value = attrId;
-                    addToCartForm.appendChild(attrInput);
-                });
+                // Tìm variation tương ứng với các thuộc tính đã chọn
+                const variation = getVariation(selectedAttributes);
+                if (!variation) {
+                    alert('Không tìm thấy biến thể sản phẩm');
+                    return;
+                }
 
+                // Tạo form và submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route("cart.add") }}';
+                form.style.display = 'none';
+
+                // Thêm CSRF token
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                form.appendChild(csrfToken);
+
+                // Thêm product_id
+                const productIdInput = document.createElement('input');
+                productIdInput.type = 'hidden';
+                productIdInput.name = 'product_id';
+                productIdInput.value = '{{ $product->id }}';
+                form.appendChild(productIdInput);
+
+                // Thêm variation_id
+                const variationIdInput = document.createElement('input');
+                variationIdInput.type = 'hidden';
+                variationIdInput.name = 'variation_id';
+                variationIdInput.value = variation.id;
+                form.appendChild(variationIdInput);
+
+                // Thêm quantity
                 const quantityInput = document.createElement('input');
                 quantityInput.type = 'hidden';
                 quantityInput.name = 'quantity';
                 quantityInput.value = quantity;
-                addToCartForm.appendChild(quantityInput);
+                form.appendChild(quantityInput);
 
-                // Submit form
-                addToCartForm.submit();
+                // Thêm form vào body và submit
+                document.body.appendChild(form);
+                form.submit();
             });
         });
     </script>
