@@ -101,10 +101,10 @@
                             @endif
 
                             @if ($items->count() > 0 && method_exists($items->first(), 'trashed'))
-                            <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
-                                class="btn btn-phoenix-secondary me-1">
-                                {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
-                            </a>
+                                <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
+                                    class="btn btn-phoenix-secondary me-1">
+                                    {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
+                                </a>
                             @endif
 
                             <a href="{{ route($route . '.create') }}" class="btn btn-primary">
@@ -137,48 +137,44 @@
                                                         width="40" height="40" class="rounded object-fit-cover">
                                                 @elseif (isset($options['formatter']) && is_callable($options['formatter']))
                                                     {!! $options['formatter']($item->$field, $item) !!}
-                                                @elseif ($field == 'status_id')
-                                                    @php
-                                                        // Get raw status_id before any getter transforms it
-                                                        $statusId = $item->getRawOriginal('status_id') ?? $item->status_id;
-                                                    @endphp
-                                                    
-                                                    @if ($statusId == 1)
-                                                        <span class="badge bg-warning">Pending</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
+                                                @elseif ($field == 'status')
+                                                    @if ($item->status == 'pending')
+                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline">
                                                             @csrf
                                                             @method('PUT')
-                                                            <input type="hidden" name="status_id" value="2">
-                                                            <button type="submit" class="btn btn-sm btn-info" title="Mark as Shipping">
-                                                                <span class="fas fa-shipping-fast me-1"></span>Ship
-                                                            </button>
-                                                        </form>
-                                                    @elseif ($statusId == 2)
-                                                        <span class="badge bg-info">Shipping</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status_id" value="3">
-                                                            <button type="submit" class="btn btn-sm btn-success" title="Mark as Completed">
+                                                            <input type="hidden" name="status" value="completed">
+                                                            <button type="submit" class="btn btn-sm btn-success me-1" title="Mark as Completed">
                                                                 <span class="fas fa-check me-1"></span>Complete
                                                             </button>
                                                         </form>
-                                                    @elseif ($statusId == 3)
-                                                        <span class="badge bg-success">Completed</span>  
-                                                    @elseif ($statusId == 4)
-                                                        <span class="badge bg-primary">Processing</span>
+                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <input type="hidden" name="status" value="cancelled">
+                                                            <button type="submit" class="btn btn-sm btn-danger" title="Mark as Cancelled">
+                                                                <span class="fas fa-times me-1"></span>Cancel
+                                                            </button>
+                                                        </form>
+                                                    @elseif ($item->status == 'completed')
+                                                        <span class="badge bg-success">Completed</span>
                                                         <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
                                                             @csrf
                                                             @method('PUT')
-                                                            <input type="hidden" name="status_id" value="2">
-                                                            <button type="submit" class="btn btn-sm btn-info" title="Mark as Shipping">
-                                                                <span class="fas fa-shipping-fast me-1"></span>Ship
+                                                            <input type="hidden" name="status" value="pending">
+                                                            <button type="submit" class="btn btn-sm btn-warning" title="Revert to Pending">
+                                                                <span class="fas fa-undo me-1"></span>Revert
                                                             </button>
                                                         </form>
-                                                    @elseif ($statusId == 5)
-                                                        <span class="badge bg-danger">Refunded</span>
-                                                    @else
-                                                        <span class="badge bg-secondary">{{ $item->status_id }}</span>
+                                                    @elseif ($item->status == 'cancelled')
+                                                        <span class="badge bg-danger">Cancelled</span>
+                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <input type="hidden" name="status" value="pending">
+                                                            <button type="submit" class="btn btn-sm btn-warning" title="Revert to Pending">
+                                                                <span class="fas fa-undo me-1"></span>Revert
+                                                            </button>
+                                                        </form>
                                                     @endif
                                                 @else
                                                     {{ $item->$field }}
@@ -198,9 +194,19 @@
                                                 </form>
                                             @else
                                                 <a href="{{ route($route . '.edit', $item->id) }}"
-                                                    class="btn btn-sm p-0 text-primary" title="Edit">
+                                                    class="btn btn-sm p-0 text-primary me-2" title="Edit">
                                                     <span class="fas fa-edit"></span>
                                                 </a>
+                                                <form action="{{ route($route . '.destroy', $item->id) }}" method="POST"
+                                                    class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm p-0 text-danger"
+                                                        title="Move to Trash"
+                                                        onclick="return confirm('Are you sure you want to move this item to trash?')">
+                                                        <span class="fas fa-trash-alt"></span>
+                                                    </button>
+                                                </form>
                                             @endif
                                         </td>
                                     </tr>

@@ -14,43 +14,31 @@ class OrderStatusSeeder extends Seeder
     {
         $statuses = [
             [
-                'name' => 'Đang xử lý',
+                'name' => 'Pending',
                 'description' => 'Đơn hàng đang được xác nhận và xử lý',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Đã xác nhận',
+                'name' => 'Completed',
                 'description' => 'Đơn hàng đã được xác nhận',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Đang chuẩn bị hàng',
-                'description' => 'Đơn hàng đang được chuẩn bị để giao',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Đang giao hàng',
+                'name' => 'Shipping',
                 'description' => 'Đơn hàng đang được giao',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Đã giao hàng',
-                'description' => 'Đơn hàng đã được giao thành công',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Đã hủy',
+                'name' => 'Cancelled',
                 'description' => 'Đơn hàng đã bị hủy',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Hoàn trả',
+                'name' => 'Refunded',
                 'description' => 'Đơn hàng đang trong quá trình hoàn trả',
                 'created_at' => now(),
                 'updated_at' => now(),
