@@ -88,16 +88,16 @@
                                                id="password" type="password" name="password" 
                                                required autocomplete="current-password" placeholder="Password" />
                                         <span class="fas fa-key text-body fs-9 form-icon"></span>
-                                    </div>
+                            </div>
                                     @error('password')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
                                     @enderror
-                                </div>
+                            </div>
 
-                                <div class="row flex-between-center mb-7">
-                                    <div class="col-auto">
+                            <div class="row flex-between-center mb-7">
+                                <div class="col-auto">
                                         <div class="form-check mb-0">
                                             <input class="form-check-input" id="remember" name="remember" 
                                                    type="checkbox" {{ old('remember') ? 'checked' : '' }} />

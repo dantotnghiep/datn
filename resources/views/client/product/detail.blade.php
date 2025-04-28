@@ -1079,109 +1079,162 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Khởi tạo biến variations từ PHP
             const variations = @json($product->variations);
+            console.log('All variations:', variations);
             
+            // Các elements
+            const colorInputs = document.querySelectorAll('.variation-color');
+            const sizeInputs = document.querySelectorAll('.variation-size');
+            const quantityInput = document.getElementById('quantity');
+            const decreaseBtn = document.getElementById('decrease-quantity');
+            const increaseBtn = document.getElementById('increase-quantity');
+            const stockStatus = document.querySelector('.stock-status');
+            const priceDisplay = document.querySelector('.price-display');
+
             // Hàm lấy thông tin variation dựa trên màu và size
             function getVariation(color, size) {
-                return variations.find(v => {
+                const found = variations.find(v => {
                     const parts = v.name.split(' / ');
                     const colorPart = parts[0].split(' - ');
                     const variationColor = colorPart[colorPart.length - 1];
                     const variationSize = parts[1].trim();
                     return variationColor === color && variationSize === size;
                 });
+                console.log('getVariation:', color, size, found);
+                return found;
             }
 
-            // Hàm cập nhật thông tin giá và tồn kho
-            function updateVariationInfo() {
-                const selectedColor = $('input[name="color"]:checked').val();
-                const selectedSize = $('input[name="size"]:checked').val();
-                
-                if (!selectedColor || !selectedSize) return;
-                
-                const variation = getVariation(selectedColor, selectedSize);
-                
-                if (variation) {
-                    // Cập nhật giá
-                    if (variation.sale_price) {
-                        const discount = Math.round(((variation.price - variation.sale_price) / variation.price) * 100);
-                        $('.price-display').html(`
-                            <div class="d-flex align-items-center">
-                                <h3 class="me-3 mb-0">${numberFormat(variation.sale_price)}đ</h3>
-                                <p class="text-decoration-line-through text-muted mb-0 me-2">
-                                    ${numberFormat(variation.price)}đ
-                                </p>
-                                <span class="badge bg-danger">-${discount}%</span>
-                            </div>
-                        `);
-                    } else {
-                        $('.price-display').html(`
-                            <h3 class="mb-0">${numberFormat(variation.price)}đ</h3>
-                        `);
-                    }
-
-                    // Cập nhật thông tin tồn kho
-                    if (variation.stock > 0) {
-                        $('.stock-status').removeClass('text-danger').addClass('text-success')
-                            .text(`${variation.stock} sản phẩm`);
-                        $('#quantity').prop('disabled', false)
-                            .attr('max', variation.stock)
-                            .val(1); // Reset về 1 khi đổi variation
-                    } else {
-                        $('.stock-status').removeClass('text-success').addClass('text-danger')
-                            .text('Hết hàng');
-                        $('#quantity').prop('disabled', true)
-                            .val(0);
-                    }
-                }
-            }
-
-            // Xử lý khi chọn màu sắc
-            $(document).on('change', 'input[name="color"]', function() {
-                updateVariationInfo();
-            });
-
-            // Xử lý khi chọn kích thước 
-            $(document).on('change', 'input[name="size"]', function() {
-                updateVariationInfo();
-            });
-
-            // Xử lý tăng giảm số lượng
-            $('#decrease-quantity').click(function() {
-                let qty = parseInt($('#quantity').val());
-                if (qty > 1) {
-                    $('#quantity').val(qty - 1);
-                }
-            });
-
-            $('#increase-quantity').click(function() {
-                let qty = parseInt($('#quantity').val());
-                let max = parseInt($('#quantity').attr('max'));
-                if (qty < max) {
-                    $('#quantity').val(qty + 1);
-                }
-            });
-
-            // Xử lý khi nhập số lượng trực tiếp
-            $('#quantity').on('input', function() {
-                let qty = parseInt($(this).val());
-                let max = parseInt($(this).attr('max'));
-                
-                if (isNaN(qty) || qty < 1) {
-                    $(this).val(1);
-                } else if (qty > max) {
-                    $(this).val(max);
-                }
-            });
-
+            // Hàm format số
             function numberFormat(number) {
                 return new Intl.NumberFormat('vi-VN').format(number);
             }
 
-            // Khởi tạo giá trị mặc định khi trang load
-            if ($('input[name="color"]').length && $('input[name="size"]').length) {
+            // Hàm cập nhật UI dựa trên variation
+            function updateUI(variation) {
+                if (!variation) return;
+
+                // Cập nhật giá
+                if (variation.sale_price) {
+                    const discount = Math.round(((variation.price - variation.sale_price) / variation.price) * 100);
+                    priceDisplay.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <h3 class="me-3 mb-0">${numberFormat(variation.sale_price)}đ</h3>
+                            <p class="text-decoration-line-through text-muted mb-0 me-2">
+                                ${numberFormat(variation.price)}đ
+                            </p>
+                            <span class="badge bg-danger">-${discount}%</span>
+                        </div>
+                    `;
+                } else {
+                    priceDisplay.innerHTML = `<h3 class="mb-0">${numberFormat(variation.price)}đ</h3>`;
+                }
+
+                // Lấy lại element stock-status mỗi lần update
+                const stockStatus = document.querySelector('.stock-status');
+
+                // Cập nhật tồn kho và số lượng
+                if (variation.stock > 0) {
+                    stockStatus.textContent = `${variation.stock} sản phẩm`;
+                    stockStatus.classList.remove('text-danger');
+                    stockStatus.classList.add('text-success');
+
+                    const currentQty = parseInt(quantityInput.value) || 1;
+                    const newQty = Math.min(currentQty, variation.stock);
+
+                    quantityInput.disabled = false;
+                    quantityInput.max = variation.stock;
+                    quantityInput.value = newQty;
+
+                    increaseBtn.disabled = newQty >= variation.stock;
+                    decreaseBtn.disabled = newQty <= 1;
+                } else {
+                    stockStatus.textContent = 'Hết hàng';
+                    stockStatus.classList.remove('text-success');
+                    stockStatus.classList.add('text-danger');
+
+                    quantityInput.disabled = true;
+                    quantityInput.value = 0;
+                    increaseBtn.disabled = true;
+                    decreaseBtn.disabled = true;
+                }
+            }
+
+            // Hàm cập nhật khi thay đổi variation
+            function updateVariationInfo() {
+                const selectedColor = document.querySelector('.variation-color:checked')?.value;
+                const selectedSize = document.querySelector('.variation-size:checked')?.value;
+
+                console.log('Selected:', { color: selectedColor, size: selectedSize });
+
+                if (!selectedColor || !selectedSize) {
+                    console.log('Missing color or size selection');
+                    return;
+                }
+
+                const variation = getVariation(selectedColor, selectedSize);
+                console.log('Found variation:', variation);
+
+                if (variation) {
+                    updateUI(variation);
+                } else {
+                    console.log('No variation found for selected combination');
+                }
+            }
+
+            // Event Listeners
+            colorInputs.forEach(input => {
+                input.addEventListener('change', updateVariationInfo);
+            });
+
+            sizeInputs.forEach(input => {
+                input.addEventListener('change', updateVariationInfo);
+            });
+
+            // Xử lý số lượng
+            decreaseBtn.addEventListener('click', () => {
+                const currentValue = parseInt(quantityInput.value);
+                if (currentValue > 1) {
+                    quantityInput.value = currentValue - 1;
+                    updateQuantityButtons();
+                }
+            });
+
+            increaseBtn.addEventListener('click', () => {
+                const currentValue = parseInt(quantityInput.value);
+                const max = parseInt(quantityInput.max);
+                if (currentValue < max) {
+                    quantityInput.value = currentValue + 1;
+                    updateQuantityButtons();
+                }
+            });
+
+            quantityInput.addEventListener('input', () => {
+                let value = parseInt(quantityInput.value);
+                const max = parseInt(quantityInput.max);
+
+                if (isNaN(value) || value < 1) {
+                    value = 1;
+                } else if (value > max) {
+                    value = max;
+                }
+
+                quantityInput.value = value;
+                updateQuantityButtons();
+            });
+
+            function updateQuantityButtons() {
+                const value = parseInt(quantityInput.value);
+                const max = parseInt(quantityInput.max);
+
+                decreaseBtn.disabled = value <= 1;
+                increaseBtn.disabled = value >= max;
+            }
+
+            // Khởi tạo ban đầu
+            if (colorInputs.length && sizeInputs.length) {
+                console.log('Initializing default variation');
                 updateVariationInfo();
             }
         });
