@@ -13,6 +13,10 @@
             <div class="col-12 col-lg-8">
                 <div id="cartTable"
                     data-list='{"valueNames":["products","color","size","price","quantity","total"],"page":10}'>
+                    <div class="mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="select-all-btn">Chọn tất cả</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-all-btn">Bỏ chọn tất cả</button>
+                    </div>
                     <div class="table-responsive scrollbar mx-n1 px-1">
                         <table class="table fs-9 mb-0 border-top border-translucent">
                             <thead>
@@ -31,9 +35,12 @@
                                 @forelse($cartItems as $item)
                                     <tr class="cart-table-row btn-reveal-trigger" data-product-id="{{ $item->productVariation->product->id }}" data-variation-id="{{ $item->productVariation->id }}">
                                         <td class="align-middle white-space-nowrap py-0">
-                                            <a class="d-block border border-translucent rounded-2" href="{{ route('product.detail', $item->productVariation->product->slug) }}">
-                                                <img src="{{ asset(optional($item->productVariation->product->images->first())->image_path ?? 'assets/img/products/default.png') }}" alt="{{ $item->productVariation->product->name }}" width="53" />
-                                            </a>
+                                            <div class="d-flex align-items-center">
+                                                <input type="checkbox" class="form-check-input select-item me-2" data-product-id="{{ $item->productVariation->product->id }}" data-variation-id="{{ $item->productVariation->id }}">
+                                                <a class="d-block border border-translucent rounded-2" href="{{ route('product.detail', $item->productVariation->product->slug) }}">
+                                                    <img src="{{ asset(optional($item->productVariation->product->images->first())->image_path ?? 'assets/img/products/default.png') }}" alt="{{ $item->productVariation->product->name }}" width="53" />
+                                                </a>
+                                            </div>
                                         </td>
                                         <td class="products align-middle">
                                             <a class="fw-semibold mb-0 line-clamp-2" href="{{ route('product.detail', $item->productVariation->product->slug) }}">
@@ -262,6 +269,18 @@
                 // Cập nhật tổng tiền cuối cùng
                 document.querySelector('.total').textContent = totals.total;
             }
+
+            // Xử lý chọn tất cả và bỏ chọn tất cả
+            const selectAllBtn = document.getElementById('select-all-btn');
+            const deselectAllBtn = document.getElementById('deselect-all-btn');
+            const itemCheckboxes = document.querySelectorAll('.select-item');
+
+            selectAllBtn.addEventListener('click', function() {
+                itemCheckboxes.forEach(cb => cb.checked = true);
+            });
+            deselectAllBtn.addEventListener('click', function() {
+                itemCheckboxes.forEach(cb => cb.checked = false);
+            });
         });
     </script>
 @endpush
