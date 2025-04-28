@@ -28,8 +28,7 @@
                                         </button>
                                         @endif
                                         <img class="img-fluid"
-                                            src="{{ asset($product->image ? $product->image : 'theme/prium.github.io/phoenix/v1.22.0/assets/img/products/5.png') }}"
-                                            alt="{{ $product->name }}" />
+                                            src="{{ $product->first_image }}" alt="{{ $product->name }}" />
                                     </div>
                                     <a class="stretched-link" href="{{ route('product.detail', $product->slug) }}">
                                         <h6 class="mb-2 lh-sm line-clamp-3 product-name">

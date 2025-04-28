@@ -9,6 +9,22 @@ class InventoryReceipt extends BaseModel
     protected $casts = [
         'total_amount' => 'decimal:2'
     ];
+    
+    /**
+     * Override để vô hiệu hóa tính năng tạo slug
+     */
+    protected function slugExists($slug)
+    {
+        return false; // Bỏ qua việc kiểm tra slug vì model này không sử dụng slug
+    }
+
+    /**
+     * Override để vô hiệu hóa việc cập nhật slug
+     */
+    protected static function bootHasSlug()
+    {
+        // Không làm gì để vô hiệu hóa hành vi
+    }
 
     public static function rules($id = null)
     {
@@ -26,13 +42,13 @@ class InventoryReceipt extends BaseModel
     {
         return [
             'receipt_number' => [
-                'label' => 'Mã phiếu nhập',
+                'label' => 'Inventory Receipt Number',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'user_id' => [
-                'label' => 'Nhân viên tạo',
+                'label' => 'Staff',
                 'type' => 'select',
                 'options' => User::pluck('name', 'id')->toArray(),
                 'filterable' => true,
@@ -40,31 +56,31 @@ class InventoryReceipt extends BaseModel
                 'sortable' => true
             ],
             'supplier_name' => [
-                'label' => 'Tên nhà cung cấp',
+                'label' => 'Supplier Name',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'supplier_contact' => [
-                'label' => 'Liên hệ nhà cung cấp',
+                'label' => 'Supplier Contact',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'total_amount' => [
-                'label' => 'Tổng tiền',
+                'label' => 'Total Amount',
                 'type' => 'number',
                 'step' => '0.01',
                 'sortable' => true
             ],
             'notes' => [
-                'label' => 'Ghi chú',
+                'label' => 'Notes',
                 'type' => 'textarea',
                 'searchable' => true,
                 'sortable' => false
             ],
             'created_at' => [
-                'label' => 'Ngày tạo',
+                'label' => 'Created At',
                 'type' => 'datetime',
                 'sortable' => true
             ]

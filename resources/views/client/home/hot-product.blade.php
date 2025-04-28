@@ -34,8 +34,7 @@
                                             </button>
                                             @endif
                                             <img class="img-fluid"
-                                                src="{{ asset($product->image ? $product->image : 'theme/prium.github.io/phoenix/v1.22.0/assets/img/products/6.png') }}"
-                                                alt="{{ $product->name }}" />
+                                                src="{{ $product->first_image }}" alt="{{ $product->name }}" />
                                             <!-- Hiển thị badge HOT -->
                                             <span class="badge text-bg-danger fs-10 product-verified-badge">HOT<span class="fas fa-fire ms-1"></span></span>
                                         </div>

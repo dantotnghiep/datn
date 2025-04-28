@@ -35,14 +35,15 @@ class Product extends BaseModel
                 'label' => 'Category',
                 'type' => 'select',
                 'options' => Category::orderBy('name')->pluck('name', 'id')->toArray(),
-                'filterable' => true, 
+                'filterable' => true,
                 'filter_options' => Category::orderBy('name')->pluck('name', 'id')->toArray(),
                 'sortable' => true
             ],
             'image' => [
                 'label' => 'Image',
                 'type' => 'file',
-                'sortable' => false
+                'sortable' => false,
+                'searchable' => false
             ],
             'name' => [
                 'label' => 'Product Name',
@@ -60,9 +61,7 @@ class Product extends BaseModel
             'is_hot' => [
                 'label' => 'Featured Product',
                 'type' => 'select',
-                'options' => [0 => 'No', 1 => 'Yes'],
                 'filterable' => true,
-                'filter_options' => [0 => 'No', 1 => 'Yes'],
                 'sortable' => true
             ]
         ];
@@ -73,12 +72,6 @@ class Product extends BaseModel
         $category = Category::find($value);
         return $category ? $category->name : $value;
     }
-
-    public function getImageAttribute($value)
-    {
-        return $value ? asset($value) : asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/products/6.png');
-    }
-
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -87,6 +80,12 @@ class Product extends BaseModel
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function getFirstImageAttribute()
+    {
+        $firstImage = $this->images()->where('is_primary', 1)->first() ?? $this->images->first();
+        return $firstImage ? asset('storage/' . $firstImage->image_path) : asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/products/6.png');
     }
 
     public function variations()

@@ -18,7 +18,7 @@
                 </div>
             </div>
 
-            <div id="table-list" data-list='{"valueNames":["name"],"page":15,"pagination":true}'>
+            <div id="table-list" data-list='{"valueNames":["name"],"page":15,"pagination":false}'>
                 <div class="mb-4">
                     <div class="d-flex flex-wrap gap-3">
                         <div class="search-box">
@@ -100,10 +100,12 @@
                                 </a>
                             @endif
 
+                            @if ($items->count() > 0 && method_exists($items->first(), 'trashed'))
                             <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
                                 class="btn btn-phoenix-secondary me-1">
                                 {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
                             </a>
+                            @endif
 
                             <a href="{{ route($route . '.create') }}" class="btn btn-primary">
                                 <span class="fas fa-plus me-2"></span> Add New
@@ -130,15 +132,18 @@
                                     <tr>
                                         @foreach ($fields as $field => $options)
                                             <td class="align-middle name">
-                                                @if($field == 'image')
-                                                    <img src="{{ asset(path: $item->$field) }}" alt="{{ $item->name }}" width="50" height="50" class="rounded">
+                                                @if ($field == 'image')
+                                                    <img src="{{ $item->first_image }}" alt="{{ $item->name }}"
+                                                        width="40" height="40" class="rounded object-fit-cover">
+                                                @elseif (isset($options['formatter']) && is_callable($options['formatter']))
+                                                    {!! $options['formatter']($item->$field, $item) !!}
                                                 @else
                                                     {{ $item->$field }}
                                                 @endif
                                             </td>
                                         @endforeach
                                         <td class="align-middle text-center">
-                                            @if ($item->trashed())
+                                            @if (method_exists($item, 'trashed') && $item->trashed())
                                                 <form action="{{ route($route . '.restore', $item->id) }}" method="POST"
                                                     class="d-inline">
                                                     @csrf

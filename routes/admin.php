@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AttributeValueController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\InventoryReceiptController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
@@ -137,4 +139,51 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/{id}/restore', [AttributeValueController::class, 'restore'])->name('restore');
     });
 
+    // Orders routes
+    Route::prefix('orders')->name('orders.')->group(function () {
+        // List
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [OrderController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [OrderController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [OrderController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
+    });
+
+    // Inventory Receipts routes
+    Route::prefix('inventory-receipts')->name('inventory-receipts.')->group(function () {
+        // List
+        Route::get('/', [InventoryReceiptController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [InventoryReceiptController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [InventoryReceiptController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [InventoryReceiptController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [InventoryReceiptController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [InventoryReceiptController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [InventoryReceiptController::class, 'restore'])->name('restore');
+    });
 });

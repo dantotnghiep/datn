@@ -48,12 +48,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/wishlist/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
 });
 
+Route::get('/san-pham', [ProductController::class, 'index'])->name('product.index');
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
 
-
-Route::get('/san-pham', function () {
-    return view('client.product.index');
-})->name('product');
 Route::get('/gio-hang', function () {
     return view('client.cart.cart');
 })->name('cart');
