@@ -11,6 +11,22 @@ class InventoryReceiptItem extends BaseModel
         'subtotal' => 'decimal:2'
     ];
 
+    /**
+     * Override để vô hiệu hóa tính năng tạo slug
+     */
+    protected function slugExists($slug)
+    {
+        return false; // Bỏ qua việc kiểm tra slug vì model này không sử dụng slug
+    }
+
+    /**
+     * Override để vô hiệu hóa việc cập nhật slug
+     */
+    protected static function bootHasSlug()
+    {
+        // Không làm gì để vô hiệu hóa hành vi
+    }
+
     public static function rules($id = null)
     {
         return [

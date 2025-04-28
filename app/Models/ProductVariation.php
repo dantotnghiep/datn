@@ -46,10 +46,14 @@ class ProductVariation extends BaseModel
             'product_id' => [
                 'label' => 'Product',
                 'type' => 'select',
-                'options' => Product::pluck('name', 'id')->toArray(),
+                'options' => Product::orderBy('name')->pluck('name', 'id')->toArray(),
                 'filterable' => true,
-                'filter_options' => Product::pluck('name', 'id')->toArray(),
-                'sortable' => true
+                'filter_options' => Product::orderBy('name')->pluck('name', 'id')->toArray(),
+                'sortable' => true,
+                'formatter' => function($value, $item) {
+                    $product = Product::find($value);
+                    return $product ? $product->name : $value;
+                }
             ],
             'sku' => [
                 'label' => 'SKU',
@@ -81,6 +85,12 @@ class ProductVariation extends BaseModel
                 'sortable' => true
             ]
         ];
+    }
+
+    public function getProductIdAttribute($value)
+    {
+        $product = Product::find($value);
+        return $product ? $product->name : $value;
     }
 
     public function product()

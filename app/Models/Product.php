@@ -25,13 +25,25 @@ class Product extends BaseModel
     public static function getFields()
     {
         return [
+            'sku' => [
+                'label' => 'SKU',
+                'type' => 'text',
+                'searchable' => true,
+                'sortable' => true
+            ],
             'category_id' => [
                 'label' => 'Category',
                 'type' => 'select',
-                'options' => Category::pluck('name', 'id')->toArray(),
+                'options' => Category::orderBy('name')->pluck('name', 'id')->toArray(),
                 'filterable' => true,
-                'filter_options' => Category::pluck('name', 'id')->toArray(),
+                'filter_options' => Category::orderBy('name')->pluck('name', 'id')->toArray(),
                 'sortable' => true
+            ],
+            'image' => [
+                'label' => 'Image',
+                'type' => 'file',
+                'sortable' => false,
+                'searchable' => false
             ],
             'name' => [
                 'label' => 'Product Name',
@@ -39,34 +51,27 @@ class Product extends BaseModel
                 'searchable' => true,
                 'sortable' => true
             ],
-            'sku' => [
-                'label' => 'SKU',
-                'type' => 'text',
-                'searchable' => true,
-                'sortable' => true
-            ],
+
             'description' => [
                 'label' => 'Description',
                 'type' => 'textarea',
                 'searchable' => true,
                 'sortable' => false
             ],
-            'image' => [
-                'label' => 'Product Image',
-                'type' => 'file',
-                'sortable' => false
-            ],
             'is_hot' => [
                 'label' => 'Featured Product',
                 'type' => 'select',
-                'options' => [0 => 'No', 1 => 'Yes'],
                 'filterable' => true,
-                'filter_options' => [0 => 'No', 1 => 'Yes'],
                 'sortable' => true
             ]
         ];
     }
 
+    public function getCategoryIdAttribute($value)
+    {
+        $category = Category::find($value);
+        return $category ? $category->name : $value;
+    }
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -75,6 +80,12 @@ class Product extends BaseModel
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function getFirstImageAttribute()
+    {
+        $firstImage = $this->images()->where('is_primary', 1)->first() ?? $this->images->first();
+        return $firstImage ? asset('storage/' . $firstImage->image_path) : asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/products/6.png');
     }
 
     public function variations()

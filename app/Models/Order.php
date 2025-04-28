@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends BaseModel
 {
@@ -10,10 +9,22 @@ class Order extends BaseModel
     protected $hasSlug = false;
     
     protected $fillable = [
-        'order_number', 'user_id', 'status_id', 'user_name', 'user_phone',
-        'province', 'district', 'ward', 'address', 'discount',
-        'total', 'total_with_discount', 'notes', 'payment_method',
-        'payment_status', 'paid_at'
+        'order_number',
+        'user_id',
+        'status_id',
+        'user_name',
+        'user_phone',
+        'province',
+        'district',
+        'ward',
+        'address',
+        'discount',
+        'total',
+        'total_with_discount',
+        'notes',
+        'payment_method',
+        'payment_status',
+        'paid_at'
     ];
 
     protected $casts = [
@@ -49,105 +60,98 @@ class Order extends BaseModel
     {
         return [
             'order_number' => [
-                'label' => 'Mã đơn hàng',
+                'label' => 'Order Number',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
-            'user_id' => [
-                'label' => 'Khách hàng',
+
+            'user_name' => [
+                'label' => 'Customer Name',
+                'type' => 'text',
+                'searchable' => true,
+                'sortable' => true
+            ],
+            'user_phone' => [
+                'label' => 'Customer Phone',
+                'type' => 'text',
+                'searchable' => true,
+                'sortable' => true
+            ],
+            'address' => [
+                'label' => 'Address',
+                'type' => 'text',
+                'searchable' => true,
+                'sortable' => false
+            ],
+            'total' => [
+                'label' => 'Total Price',
+                'type' => 'number',
+                'step' => '0.01',
+                'sortable' => true
+            ],
+            'total_with_discount' => [
+                'label' => 'Total Price After Discount',
+                'type' => 'number',
+                'step' => '0.01',
+                'sortable' => true
+            ],
+            'payment_method' => [
+                'label' => 'Payment Method',
                 'type' => 'select',
-                'options' => User::pluck('name', 'id')->toArray(),
+                'options' => [
+                    'bank' => 'Bank Transfer',
+                    'cod' => 'Cash on Delivery'
+                ],
                 'filterable' => true,
-                'filter_options' => User::pluck('name', 'id')->toArray(),
+                'filter_options' => [
+                    'bank' => 'Bank Transfer',
+                    'cod' => 'Cash on Delivery'
+                ],
+                'sortable' => true
+            ],
+            'payment_status' => [
+                'label' => 'Payment Status',
+                'type' => 'select',
+                'options' => [
+                    'pending' => 'Pending',
+                    'completed' => 'Completed',
+                    'failed' => 'Failed'
+                ],
+                'filterable' => true,
+                'filter_options' => [
+                    'pending' => 'Pending',
+                    'completed' => 'Completed',
+                    'failed' => 'Failed'
+                ],
+                'sortable' => true
+            ],
+            'paid_at' => [
+                'label' => 'Payment Date',
+                'type' => 'datetime',
                 'sortable' => true
             ],
             'status_id' => [
-                'label' => 'Trạng thái đơn hàng',
+                'label' => 'Status',
                 'type' => 'select',
                 'options' => OrderStatus::pluck('name', 'id')->toArray(),
                 'filterable' => true,
                 'filter_options' => OrderStatus::pluck('name', 'id')->toArray(),
                 'sortable' => true
             ],
-            'user_name' => [
-                'label' => 'Tên người nhận',
-                'type' => 'text',
-                'searchable' => true,
-                'sortable' => true
-            ],
-            'user_phone' => [
-                'label' => 'Số điện thoại',
-                'type' => 'text',
-                'searchable' => true,
-                'sortable' => true
-            ],
-            'address' => [
-                'label' => 'Địa chỉ',
-                'type' => 'text',
-                'searchable' => true,
-                'sortable' => false
-            ],
-            'total' => [
-                'label' => 'Tổng tiền',
-                'type' => 'number',
-                'step' => '0.01',
-                'sortable' => true
-            ],
-            'discount' => [
-                'label' => 'Giảm giá',
-                'type' => 'number',
-                'step' => '0.01',
-                'sortable' => true
-            ],
-            'total_with_discount' => [
-                'label' => 'Tổng tiền sau giảm giá',
-                'type' => 'number',
-                'step' => '0.01',
-                'sortable' => true
-            ],
-            'payment_method' => [
-                'label' => 'Phương thức thanh toán',
-                'type' => 'select',
-                'options' => [
-                    'bank' => 'Chuyển khoản',
-                    'cod' => 'Thanh toán khi nhận hàng'
-                ],
-                'filterable' => true,
-                'filter_options' => [
-                    'bank' => 'Chuyển khoản',
-                    'cod' => 'Thanh toán khi nhận hàng'
-                ],
-                'sortable' => true
-            ],
-            'payment_status' => [
-                'label' => 'Trạng thái thanh toán',
-                'type' => 'select',
-                'options' => [
-                    'pending' => 'Chờ thanh toán',
-                    'completed' => 'Đã thanh toán',
-                    'failed' => 'Thanh toán thất bại'
-                ],
-                'filterable' => true,
-                'filter_options' => [
-                    'pending' => 'Chờ thanh toán',
-                    'completed' => 'Đã thanh toán',
-                    'failed' => 'Thanh toán thất bại'
-                ],
-                'sortable' => true
-            ],
-            'paid_at' => [
-                'label' => 'Ngày thanh toán',
-                'type' => 'datetime',
-                'sortable' => true
-            ],
-            'notes' => [
-                'label' => 'Ghi chú',
-                'type' => 'textarea',
-                'searchable' => true,
-                'sortable' => false
-            ]
         ];
+    }
+
+    public function getUserIdAttribute($value)
+    {
+        $user = User::find($value);
+        return $user ? $user->name : $value;
+    }
+
+    public function getStatusIdAttribute($value)
+    {
+        $status = OrderStatus::find($value);
+        return $status ? $status->name : $value;
     }
 
     public function user()
@@ -179,4 +183,4 @@ class Order extends BaseModel
     {
         return $this->hasMany(OrderRefund::class);
     }
-} 
+}

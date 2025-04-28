@@ -17,6 +17,7 @@ class HomeController extends Controller
     {
         // Lấy sản phẩm hot với giá cao nhất và thấp nhất từ variations
         $hotProducts = Product::where('is_hot', 1)
+            ->whereNull('deleted_at')
             ->with(['variations' => function($query) {
                 $query->select('product_id', 'price')
                     ->whereNotNull('price')
@@ -24,6 +25,7 @@ class HomeController extends Controller
             }])
             ->withCount('variations')
             ->take(6)
+            ->orderBy('created_at', 'desc')
             ->get();
             
         // Tính toán giá thấp nhất và cao nhất cho mỗi sản phẩm hot
@@ -39,6 +41,7 @@ class HomeController extends Controller
         
         // Lấy sản phẩm không hot với giá cao nhất và thấp nhất từ variations
         $normalProducts = Product::where('is_hot', 0)
+            ->whereNull('deleted_at')
             ->with(['variations' => function($query) {
                 $query->select('product_id', 'price')
                     ->whereNotNull('price')
@@ -46,6 +49,7 @@ class HomeController extends Controller
             }])
             ->withCount('variations')
             ->take(6)
+            ->orderBy('created_at', 'desc')
             ->get();
             
         // Tính toán giá thấp nhất và cao nhất cho mỗi sản phẩm thường

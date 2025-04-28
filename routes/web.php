@@ -54,21 +54,15 @@ Route::middleware('auth')->group(function () {
     // Wishlist routes
     Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::delete('/wishlist/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
-
-    // Checkout routes (Vietnamese)
-    Route::post('/gio-hang/checkout-chon', [CartController::class, 'saveSelectedItems'])->name('cart.checkout.selected');
-    Route::get('/thanh-toan', [CartController::class, 'checkout'])->name('checkout');
-    Route::post('/dat-hang', [CartController::class, 'store'])->name('orders.store');
-    
-    // VNPay return route - must be public
-    Route::get('/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
 });
 
-
+Route::get('/san-pham', [ProductController::class, 'index'])->name('product.index');
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
 
-Route::get('/san-pham', function () {
-    return view('client.product.index');
-})->name('product');
-
+Route::get('/gio-hang', function () {
+    return view('client.cart.cart');
+})->name('cart');
+Route::get('/checkout', function () {
+    return view('client.cart.checkout');
+})->name('checkout');
 Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist');
