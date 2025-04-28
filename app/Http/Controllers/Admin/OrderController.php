@@ -10,7 +10,7 @@ class OrderController extends BaseController
     public function __construct()
     {
         $this->model = Order::class;
-        $this->viewPath = 'admin.orders';
+        $this->viewPath = 'admin.components.crud';
         $this->route = 'admin.orders';
         parent::__construct();
     }

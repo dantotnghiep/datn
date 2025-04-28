@@ -7,7 +7,7 @@
             <nav class="mb-3" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">Trang chủ</a></li>
-                        <li class="breadcrumb-item"><a href="#">{{ $product->category->name }}</a></li>
+                        <li class="breadcrumb-item"><a href="#">{{ $product->category_id }}</a></li>
                         <li class="breadcrumb-item active" aria-current="page">{{ $product->name }}</li>
                 </ol>
             </nav>
@@ -33,7 +33,7 @@
                                         <div class="swiper-wrapper">
                                             @foreach ($product->images as $image)
                                                 <div class="swiper-slide">
-                                                    <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}" />
+9                                                    <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}" />
                                                 </div>
                                             @endforeach
                                         </div>
@@ -103,107 +103,27 @@
                         <div>
                             <div class="mb-3">
                                 @if($product->variations->count() > 0)
-                                    <!-- Phần màu sắc -->
-                                    <div class="variation-colors mb-4">
-                                        <p class="fw-semibold mb-2 text-body">Màu sắc:</p>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            @php
-                                                $colorMap = [
-                                                    'Red' => '#ff0000',
-                                                    'Blue' => '#0000ff',
-                                                    'Black' => '#000000',
-                                                    'White' => '#ffffff',
-                                                    'Green' => '#00ff00',
-                                                    'Yellow' => '#ffff00',
-                                                    'Purple' => '#800080',
-                                                    'Orange' => '#ffa500',
-                                                    'Pink' => '#ffc0cb',
-                                                    'Brown' => '#a52a2a',
-                                                    'Gray' => '#808080'
-                                                ];
-                                                
-                                                // Lấy danh sách màu và size từ variations
-                                                $variations = collect($product->variations);
-                                                $colors = $variations->map(function($variation) {
-                                                    $parts = explode(' / ', $variation->name);
-                                                    $colorPart = explode(' - ', $parts[0]);
-                                                    return end($colorPart);
-                                                })->unique();
-                                                
-                                                $sizes = $variations->map(function($variation) {
-                                                    $parts = explode(' / ', $variation->name);
-                                                    return trim($parts[1]);
-                                                })->unique();
-
-                                                // Debug
-                                                // dd($variations->first()->name, $colors, $sizes);
-                                            @endphp
-                                            
-                                            <style>
-                                                .color-radio {
-                                                    width: 24px;
-                                                    height: 24px;
-                                                    border-radius: 50%;
-                                                    margin-right: 8px;
-                                                    position: relative;
-                                                    cursor: pointer;
-                                                    border: 2px solid #ddd;
-                                                }
-                                                
-                                                .color-radio input {
-                                                    opacity: 0;
-                                                    width: 100%;
-                                                    height: 100%;
-                                                    position: absolute;
-                                                    cursor: pointer;
-                                                }
-                                                
-                                                .color-radio input:checked + .color-circle {
-                                                    transform: scale(1.2);
-                                                }
-                                                
-                                                .color-circle {
-                                                    width: 100%;
-                                                    height: 100%;
-                                                    border-radius: 50%;
-                                                    position: absolute;
-                                                    top: 0;
-                                                    left: 0;
-                                                    transition: transform 0.2s;
-                                                }
-                                            </style>
-
-                                            @foreach($colors as $color)
-                                                <div class="d-flex align-items-center me-3">
-                                                    <label class="color-radio">
-                                                        <input type="radio" class="variation-color" 
-                                                               name="color" value="{{ $color }}"
+                                    @foreach($attributes as $attribute)
+                                        <div class="variation-{{ $attribute['id'] }} mb-4">
+                                            <p class="fw-semibold mb-2 text-body">{{ $attribute['name'] }}:</p>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach($attribute['values'] as $value)
+                                                    <div class="form-check me-3">
+                                                        <input class="form-check-input variation-attribute" 
+                                                               type="radio" 
+                                                               name="attribute_{{ $attribute['id'] }}" 
+                                                               value="{{ $value['id'] }}"
+                                                               data-attribute-id="{{ $attribute['id'] }}"
+                                                               id="attr-{{ $attribute['id'] }}-{{ $value['id'] }}"
                                                                {{ $loop->first ? 'checked' : '' }}>
-                                                        <span class="color-circle" style="background-color: {{ $colorMap[$color] ?? '#000000' }}"></span>
-                                                    </label>
-                                                    <span class="ms-2">{{ $color }}</span>
-                                                </div>
-                                            @endforeach
+                                                        <label class="form-check-label" for="attr-{{ $attribute['id'] }}-{{ $value['id'] }}">
+                                                            {{ $value['value'] }}
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <!-- Phần kích thước -->
-                                    <div class="variation-sizes mb-4">
-                                        <p class="fw-semibold mb-2 text-body">Kích thước:</p>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            @foreach($sizes as $size)
-                                                <div class="form-check me-3">
-                                                    <input class="form-check-input variation-size" type="radio" 
-                                                           name="size" value="{{ $size }}" 
-                                                           id="size-{{ $loop->index }}"
-                                                           {{ $loop->first ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="size-{{ $loop->index }}">
-                                                        {{ $size }}
-                                                    </label>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
+                                    @endforeach
 
                                     <!-- Phần số lượng -->
                                     <div class="variation-quantity mb-4">
@@ -1079,111 +999,231 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Khởi tạo biến variations từ PHP
             const variations = @json($product->variations);
+            const attributes = @json($attributes);
             
-            // Hàm lấy thông tin variation dựa trên màu và size
-            function getVariation(color, size) {
-                return variations.find(v => {
-                    const parts = v.name.split(' / ');
-                    const colorPart = parts[0].split(' - ');
-                    const variationColor = colorPart[colorPart.length - 1];
-                    const variationSize = parts[1].trim();
-                    return variationColor === color && variationSize === size;
+            // Các elements
+            const attributeInputs = document.querySelectorAll('.variation-attribute');
+            const quantityInput = document.getElementById('quantity');
+            const decreaseBtn = document.getElementById('decrease-quantity');
+            const increaseBtn = document.getElementById('increase-quantity');
+            const stockStatus = document.querySelector('.stock-status');
+            const priceDisplay = document.querySelector('.price-display');
+
+            // Hàm lấy thông tin variation dựa trên các thuộc tính được chọn
+            function getVariation(selectedAttributes) {
+                return variations.find(variation => {
+                    const variationAttributeValues = variation.attribute_values.map(av => av.id);
+                    return selectedAttributes.every(attrId => variationAttributeValues.includes(attrId));
                 });
             }
 
-            // Hàm cập nhật thông tin giá và tồn kho
-            function updateVariationInfo() {
-                const selectedColor = $('input[name="color"]:checked').val();
-                const selectedSize = $('input[name="size"]:checked').val();
-                
-                if (!selectedColor || !selectedSize) return;
-                
-                const variation = getVariation(selectedColor, selectedSize);
-                
-                if (variation) {
-                    // Cập nhật giá
-                    if (variation.sale_price) {
-                        const discount = Math.round(((variation.price - variation.sale_price) / variation.price) * 100);
-                        $('.price-display').html(`
-                            <div class="d-flex align-items-center">
-                                <h3 class="me-3 mb-0">${numberFormat(variation.sale_price)}đ</h3>
-                                <p class="text-decoration-line-through text-muted mb-0 me-2">
-                                    ${numberFormat(variation.price)}đ
-                                </p>
-                                <span class="badge bg-danger">-${discount}%</span>
-                            </div>
-                        `);
-                    } else {
-                        $('.price-display').html(`
-                            <h3 class="mb-0">${numberFormat(variation.price)}đ</h3>
-                        `);
-                    }
-
-                    // Cập nhật thông tin tồn kho
-                    if (variation.stock > 0) {
-                        $('.stock-status').removeClass('text-danger').addClass('text-success')
-                            .text(`${variation.stock} sản phẩm`);
-                        $('#quantity').prop('disabled', false)
-                            .attr('max', variation.stock)
-                            .val(1); // Reset về 1 khi đổi variation
-                    } else {
-                        $('.stock-status').removeClass('text-success').addClass('text-danger')
-                            .text('Hết hàng');
-                        $('#quantity').prop('disabled', true)
-                            .val(0);
-                    }
-                }
+            // Hàm kiểm tra tồn tại variation với các thuộc tính và còn hàng
+            function hasStock(selectedAttributes) {
+                const v = getVariation(selectedAttributes);
+                return v && v.stock > 0;
             }
 
-            // Xử lý khi chọn màu sắc
-            $(document).on('change', 'input[name="color"]', function() {
-                updateVariationInfo();
-            });
+            // Hàm cập nhật trạng thái enable/disable cho các thuộc tính
+            function updateAttributeOptions() {
+                const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
+                    .map(input => parseInt(input.value));
 
-            // Xử lý khi chọn kích thước 
-            $(document).on('change', 'input[name="size"]', function() {
-                updateVariationInfo();
-            });
+                attributeInputs.forEach(input => {
+                    const attributeId = parseInt(input.dataset.attributeId);
+                    const valueId = parseInt(input.value);
+                    
+                    // Nếu input này đang được chọn, không disable
+                    if (input.checked) return;
 
-            // Xử lý tăng giảm số lượng
-            $('#decrease-quantity').click(function() {
-                let qty = parseInt($('#quantity').val());
-                if (qty > 1) {
-                    $('#quantity').val(qty - 1);
-                }
-            });
+                    // Kiểm tra xem có variation nào phù hợp không
+                    const testAttributes = [...selectedAttributes];
+                    const currentAttributeIndex = testAttributes.findIndex(id => 
+                        attributes.find(attr => attr.id === attributeId).values.some(v => v.id === id)
+                    );
+                    
+                    if (currentAttributeIndex !== -1) {
+                        testAttributes[currentAttributeIndex] = valueId;
+                    } else {
+                        testAttributes.push(valueId);
+                    }
 
-            $('#increase-quantity').click(function() {
-                let qty = parseInt($('#quantity').val());
-                let max = parseInt($('#quantity').attr('max'));
-                if (qty < max) {
-                    $('#quantity').val(qty + 1);
-                }
-            });
+                    input.disabled = !hasStock(testAttributes);
+                });
+            }
 
-            // Xử lý khi nhập số lượng trực tiếp
-            $('#quantity').on('input', function() {
-                let qty = parseInt($(this).val());
-                let max = parseInt($(this).attr('max'));
-                
-                if (isNaN(qty) || qty < 1) {
-                    $(this).val(1);
-                } else if (qty > max) {
-                    $(this).val(max);
-                }
-            });
-
+            // Hàm format số
             function numberFormat(number) {
                 return new Intl.NumberFormat('vi-VN').format(number);
             }
 
-            // Khởi tạo giá trị mặc định khi trang load
-            if ($('input[name="color"]').length && $('input[name="size"]').length) {
+            // Hàm cập nhật UI dựa trên variation
+            function updateUI(variation) {
+                if (!variation) return;
+
+                // Cập nhật giá
+                if (variation.sale_price) {
+                    const discount = Math.round(((variation.price - variation.sale_price) / variation.price) * 100);
+                    priceDisplay.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <h3 class="me-3 mb-0">${numberFormat(variation.sale_price)}đ</h3>
+                            <p class="text-decoration-line-through text-muted mb-0 me-2">
+                                ${numberFormat(variation.price)}đ
+                            </p>
+                            <span class="badge bg-danger">-${discount}%</span>
+                        </div>
+                    `;
+                } else {
+                    priceDisplay.innerHTML = `<h3 class="mb-0">${numberFormat(variation.price)}đ</h3>`;
+                }
+
+                // Cập nhật tồn kho và số lượng
+                if (variation.stock > 0) {
+                    stockStatus.textContent = `${variation.stock} sản phẩm`;
+                    stockStatus.classList.remove('text-danger');
+                    stockStatus.classList.add('text-success');
+
+                    const currentQty = parseInt(quantityInput.value) || 1;
+                    const newQty = Math.min(currentQty, variation.stock);
+
+                    quantityInput.disabled = false;
+                    quantityInput.max = variation.stock;
+                    quantityInput.value = newQty;
+
+                    increaseBtn.disabled = newQty >= variation.stock;
+                    decreaseBtn.disabled = newQty <= 1;
+                } else {
+                    stockStatus.textContent = 'Hết hàng';
+                    stockStatus.classList.remove('text-success');
+                    stockStatus.classList.add('text-danger');
+
+                    quantityInput.disabled = true;
+                    quantityInput.value = 0;
+                    increaseBtn.disabled = true;
+                    decreaseBtn.disabled = true;
+                }
+            }
+
+            // Hàm cập nhật khi thay đổi thuộc tính
+            function updateVariationInfo() {
+                const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
+                    .map(input => parseInt(input.value));
+
+                updateAttributeOptions();
+                
+                const variation = getVariation(selectedAttributes);
+                updateUI(variation);
+            }
+
+            // Event Listeners
+            attributeInputs.forEach(input => {
+                input.addEventListener('change', updateVariationInfo);
+            });
+
+            // Xử lý số lượng
+            decreaseBtn.addEventListener('click', () => {
+                const currentValue = parseInt(quantityInput.value);
+                if (currentValue > 1) {
+                    quantityInput.value = currentValue - 1;
+                    updateQuantityButtons();
+                }
+            });
+
+            increaseBtn.addEventListener('click', () => {
+                const currentValue = parseInt(quantityInput.value);
+                const max = parseInt(quantityInput.max);
+                if (currentValue < max) {
+                    quantityInput.value = currentValue + 1;
+                    updateQuantityButtons();
+                }
+            });
+
+            quantityInput.addEventListener('input', () => {
+                let value = parseInt(quantityInput.value);
+                const max = parseInt(quantityInput.max);
+
+                if (isNaN(value) || value < 1) {
+                    value = 1;
+                } else if (value > max) {
+                    value = max;
+                }
+
+                quantityInput.value = value;
+                updateQuantityButtons();
+            });
+
+            function updateQuantityButtons() {
+                const value = parseInt(quantityInput.value);
+                const max = parseInt(quantityInput.max);
+
+                decreaseBtn.disabled = value <= 1;
+                increaseBtn.disabled = value >= max;
+            }
+
+            // Khởi tạo ban đầu
+            if (attributeInputs.length) {
                 updateVariationInfo();
             }
+
+            // Thêm sự kiện cho nút Add to Cart
+            const addToCartBtn = document.querySelector('.btn-warning');
+            addToCartBtn.addEventListener('click', function() {
+                const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
+                    .map(input => parseInt(input.value));
+                const quantity = parseInt(document.getElementById('quantity').value);
+
+                if (selectedAttributes.length === 0) {
+                    alert('Vui lòng chọn đầy đủ các thuộc tính');
+                    return;
+                }
+
+                // Tìm variation tương ứng với các thuộc tính đã chọn
+                const variation = getVariation(selectedAttributes);
+                if (!variation) {
+                    alert('Không tìm thấy biến thể sản phẩm');
+                    return;
+                }
+
+                // Tạo form và submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route("cart.add") }}';
+                form.style.display = 'none';
+
+                // Thêm CSRF token
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                form.appendChild(csrfToken);
+
+                // Thêm product_id
+                const productIdInput = document.createElement('input');
+                productIdInput.type = 'hidden';
+                productIdInput.name = 'product_id';
+                productIdInput.value = '{{ $product->id }}';
+                form.appendChild(productIdInput);
+
+                // Thêm variation_id
+                const variationIdInput = document.createElement('input');
+                variationIdInput.type = 'hidden';
+                variationIdInput.name = 'variation_id';
+                variationIdInput.value = variation.id;
+                form.appendChild(variationIdInput);
+
+                // Thêm quantity
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'hidden';
+                quantityInput.name = 'quantity';
+                quantityInput.value = quantity;
+                form.appendChild(quantityInput);
+
+                // Thêm form vào body và submit
+                document.body.appendChild(form);
+                form.submit();
+            });
         });
     </script>
 @endpush

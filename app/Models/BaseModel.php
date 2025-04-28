@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 abstract class BaseModel extends Model
 {
-    use SoftDeletes, HasSlug;
+    use HasSlug;
 
     protected $guarded = ['id'];
 

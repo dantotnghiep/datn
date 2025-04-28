@@ -21,7 +21,7 @@
             <div class="row g-3 flex-between-end mb-5">
                 <div class="col-auto">
                     <h2 class="mb-2">{{ isset($item) ? 'Edit product' : 'Add a product' }}</h2>
-                    <h5 class="text-body-tertiary fw-semibold">Complete all required fields</h5>
+                    <h5 class="text-body-tertiary fw-semibold">Complete all fields</h5>
                 </div>
                 <div class="col-auto">
                     <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0"
@@ -405,7 +405,6 @@
             });
         });
     </script>
-    {{--  variants handling --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const variantsContainer = document.getElementById('variants-container');

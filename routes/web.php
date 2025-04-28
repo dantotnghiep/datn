@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\AuthController;
+use App\Http\Controllers\Client\WishlistController;
+use App\Http\Controllers\Client\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,26 +38,31 @@ Route::middleware('guest')->group(function () {
     Route::post('/dat-lai-mat-khau', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
+// Cart view route (public)
+Route::get('/gio-hang', [CartController::class, 'index'])->name('cart');
+
+// Only logged-in users can add/update/remove cart
 Route::middleware('auth')->group(function () {
+    Route::post('/gio-hang/them', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/gio-hang/cap-nhat', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/gio-hang/xoa', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/dang-xuat', [AuthController::class, 'logout'])->name('logout');
     Route::get('/thong-tin', function () {
         return view('client.auth.profile');
     })->name('profile');
+    
+    // Wishlist routes
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
 });
 
+Route::get('/san-pham', [ProductController::class, 'index'])->name('product.index');
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
 
-Route::get('/chi-tiet-san-pham', [HomeController::class, 'show'])->name('detail');
-
-Route::get('/san-pham', function () {
-    return view('client.product.index');
-})->name('product');
 Route::get('/gio-hang', function () {
     return view('client.cart.cart');
 })->name('cart');
 Route::get('/checkout', function () {
     return view('client.cart.checkout');
 })->name('checkout');
-Route::get('/yeu-thich', function () {
-    return view('client.wishlist.index');
-})->name('wishlist');
+Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist');

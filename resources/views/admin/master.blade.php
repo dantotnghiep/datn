@@ -137,6 +137,7 @@
 
     @include('admin.components.layouts.partials.script')
     @yield('scripts')
+    @stack('scripts')
 </body>
 
 </html>

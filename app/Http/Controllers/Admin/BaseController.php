@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 abstract class BaseController extends Controller
 {
@@ -34,8 +35,12 @@ abstract class BaseController extends Controller
 
     public function index(Request $request)
     {
+        // Clear any cache that might interfere with sorting
+        $this->clearCache();
+        
+        // Tạo query ban đầu mà không có order by mặc định
         $query = $this->model::query();
-
+        
         // Handle Search
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
@@ -58,19 +63,38 @@ abstract class BaseController extends Controller
             }
         }
 
+        // Flag to track if sort has been applied
+        $sortApplied = false;
+
         // Handle Sorting
         if ($request->has('sort')) {
             $sort = $request->get('sort');
+            
             if (preg_match('/^(.+)_(asc|desc)$/', $sort, $matches)) {
                 $field = $matches[1];
                 $direction = $matches[2];
-                $query->orderBy($field, $direction);
+                $table = (new $this->model)->getTable();
+                $query->orderBy($table . '.' . $field, $direction);
+                $sortApplied = true;
+                $query->distinct();
             }
+        }
+        
+        if (!$sortApplied) {
+            $query->orderBy('id', 'desc');
         }
 
         // Handle Trashed Items
         if ($request->get('trashed')) {
-            $query->onlyTrashed();
+            // Kiểm tra xem model có sử dụng SoftDeletes không
+            $uses_soft_deletes = in_array(
+                \Illuminate\Database\Eloquent\SoftDeletes::class, 
+                class_uses_recursive($this->model)
+            );
+            
+            if ($uses_soft_deletes) {
+                $query->onlyTrashed();
+            }
         }
 
         $items = $query->paginate($this->itemsPerPage)->withQueryString();
@@ -187,6 +211,17 @@ abstract class BaseController extends Controller
     {
         if ($item->{$this->imageField}) {
             Storage::disk('public')->delete($item->{$this->imageField});
+        }
+    }
+
+    /**
+     * Clear cache to ensure fresh results
+     */
+    protected function clearCache()
+    {
+        // Xóa cache Laravel
+        if (app()->bound('cache')) {
+            app('cache')->flush();
         }
     }
 }

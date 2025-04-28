@@ -99,24 +99,15 @@ class ProductController extends BaseController
             // Handle product images
             if ($request->hasFile('images')) {
                 $images = $request->file('images');
-                Log::info('Processing ' . count($images) . ' uploaded image files');
-
                 foreach ($images as $index => $image) {
-                    // Validate image
                     if (!$image->isValid()) {
                         throw new \Exception('Invalid image file at index ' . $index);
                     }
-
                     if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
                         throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
                     }
-
-                    // Store image
                     try {
                         $imagePath = $image->store('products', 'public');
-                        Log::info('Stored image at: ' . $imagePath);
-
-                        // Create product image record
                         ProductImage::create([
                             'product_id' => $product->id,
                             'image_path' => $imagePath,
@@ -124,7 +115,6 @@ class ProductController extends BaseController
                             'order' => $index
                         ]);
                     } catch (\Exception $e) {
-                        Log::error('Failed to store image: ' . $e->getMessage());
                         throw new \Exception('Failed to store image: ' . $e->getMessage());
                     }
                 }

@@ -101,7 +101,6 @@ class AuthController extends Controller
                 ? back()->with(['status' => 'We have emailed your password reset link!'])
                 : back()->withErrors(['email' => __($status)]);
         } catch (\Exception $e) {
-            \Log::error('Password Reset Error: ' . $e->getMessage());
             return back()->withErrors(['email' => 'Unable to send password reset link. Please try again later.']);
         }
     }
