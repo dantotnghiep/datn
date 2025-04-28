@@ -103,107 +103,27 @@
                         <div>
                             <div class="mb-3">
                                 @if($product->variations->count() > 0)
-                                    <!-- Phần màu sắc -->
-                                    <div class="variation-colors mb-4">
-                                        <p class="fw-semibold mb-2 text-body">Màu sắc:</p>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            @php
-                                                $colorMap = [
-                                                    'Red' => '#ff0000',
-                                                    'Blue' => '#0000ff',
-                                                    'Black' => '#000000',
-                                                    'White' => '#ffffff',
-                                                    'Green' => '#00ff00',
-                                                    'Yellow' => '#ffff00',
-                                                    'Purple' => '#800080',
-                                                    'Orange' => '#ffa500',
-                                                    'Pink' => '#ffc0cb',
-                                                    'Brown' => '#a52a2a',
-                                                    'Gray' => '#808080'
-                                                ];
-                                                
-                                                // Lấy danh sách màu và size từ variations
-                                                $variations = collect($product->variations);
-                                                $colors = $variations->map(function($variation) {
-                                                    $parts = explode(' / ', $variation->name);
-                                                    $colorPart = explode(' - ', $parts[0]);
-                                                    return end($colorPart);
-                                                })->unique();
-                                                
-                                                $sizes = $variations->map(function($variation) {
-                                                    $parts = explode(' / ', $variation->name);
-                                                    return trim($parts[1]);
-                                                })->unique();
-
-                                                // Debug
-                                                // dd($variations->first()->name, $colors, $sizes);
-                                            @endphp
-                                            
-                                            <style>
-                                                .color-radio {
-                                                    width: 24px;
-                                                    height: 24px;
-                                                    border-radius: 50%;
-                                                    margin-right: 8px;
-                                                    position: relative;
-                                                    cursor: pointer;
-                                                    border: 2px solid #ddd;
-                                                }
-                                                
-                                                .color-radio input {
-                                                    opacity: 0;
-                                                    width: 100%;
-                                                    height: 100%;
-                                                    position: absolute;
-                                                    cursor: pointer;
-                                                }
-                                                
-                                                .color-radio input:checked + .color-circle {
-                                                    transform: scale(1.2);
-                                                }
-                                                
-                                                .color-circle {
-                                                    width: 100%;
-                                                    height: 100%;
-                                                    border-radius: 50%;
-                                                    position: absolute;
-                                                    top: 0;
-                                                    left: 0;
-                                                    transition: transform 0.2s;
-                                                }
-                                            </style>
-
-                                            @foreach($colors as $color)
-                                                <div class="d-flex align-items-center me-3">
-                                                    <label class="color-radio">
-                                                        <input type="radio" class="variation-color" 
-                                                               name="color" value="{{ $color }}"
+                                    @foreach($attributes as $attribute)
+                                        <div class="variation-{{ $attribute['id'] }} mb-4">
+                                            <p class="fw-semibold mb-2 text-body">{{ $attribute['name'] }}:</p>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach($attribute['values'] as $value)
+                                                    <div class="form-check me-3">
+                                                        <input class="form-check-input variation-attribute" 
+                                                               type="radio" 
+                                                               name="attribute_{{ $attribute['id'] }}" 
+                                                               value="{{ $value['id'] }}"
+                                                               data-attribute-id="{{ $attribute['id'] }}"
+                                                               id="attr-{{ $attribute['id'] }}-{{ $value['id'] }}"
                                                                {{ $loop->first ? 'checked' : '' }}>
-                                                        <span class="color-circle" style="background-color: {{ $colorMap[$color] ?? '#000000' }}"></span>
-                                                    </label>
-                                                    <span class="ms-2">{{ $color }}</span>
-                                                </div>
-                                            @endforeach
+                                                        <label class="form-check-label" for="attr-{{ $attribute['id'] }}-{{ $value['id'] }}">
+                                                            {{ $value['value'] }}
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <!-- Phần kích thước -->
-                                    <div class="variation-sizes mb-4">
-                                        <p class="fw-semibold mb-2 text-body">Kích thước:</p>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            @foreach($sizes as $size)
-                                                <div class="form-check me-3">
-                                                    <input class="form-check-input variation-size" type="radio" 
-                                                           name="size" value="{{ $size }}" 
-                                                           id="size-{{ $loop->index }}"
-                                                           {{ $loop->first ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="size-{{ $loop->index }}">
-                                                        {{ $size }}
-                                                    </label>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
+                                    @endforeach
 
                                     <!-- Phần số lượng -->
                                     <div class="variation-quantity mb-4">
@@ -1082,71 +1002,56 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Khởi tạo biến variations từ PHP
             const variations = @json($product->variations);
-            console.log('All variations:', variations);
+            const attributes = @json($attributes);
             
             // Các elements
-            const colorInputs = document.querySelectorAll('.variation-color');
-            const sizeInputs = document.querySelectorAll('.variation-size');
+            const attributeInputs = document.querySelectorAll('.variation-attribute');
             const quantityInput = document.getElementById('quantity');
             const decreaseBtn = document.getElementById('decrease-quantity');
             const increaseBtn = document.getElementById('increase-quantity');
             const stockStatus = document.querySelector('.stock-status');
             const priceDisplay = document.querySelector('.price-display');
 
-            // Hàm lấy thông tin variation dựa trên màu và size
-            function getVariation(color, size) {
-                const found = variations.find(v => {
-                    const parts = v.name.split(' / ');
-                    const colorPart = parts[0].split(' - ');
-                    const variationColor = colorPart[colorPart.length - 1];
-                    const variationSize = parts[1].trim();
-                    return variationColor === color && variationSize === size;
+            // Hàm lấy thông tin variation dựa trên các thuộc tính được chọn
+            function getVariation(selectedAttributes) {
+                return variations.find(variation => {
+                    const variationAttributeValues = variation.attribute_values.map(av => av.id);
+                    return selectedAttributes.every(attrId => variationAttributeValues.includes(attrId));
                 });
-                return found;
             }
 
-            // Hàm kiểm tra tồn tại variation với color/size và còn hàng
-            function hasStock(color, size) {
-                const v = getVariation(color, size);
+            // Hàm kiểm tra tồn tại variation với các thuộc tính và còn hàng
+            function hasStock(selectedAttributes) {
+                const v = getVariation(selectedAttributes);
                 return v && v.stock > 0;
             }
 
-            // Hàm cập nhật trạng thái enable/disable cho size dựa vào màu
-            function updateSizeOptions(selectedColor) {
-                let foundEnabled = false;
-                sizeInputs.forEach(input => {
-                    const size = input.value;
-                    if (hasStock(selectedColor, size)) {
-                        input.disabled = false;
-                        if (!foundEnabled) foundEnabled = input;
-                    } else {
-                        input.disabled = true;
-                        input.checked = false;
-                    }
-                });
-                // Nếu không có size nào được chọn, chọn lại size đầu tiên còn hàng
-                if (!document.querySelector('.variation-size:checked') && foundEnabled) {
-                    foundEnabled.checked = true;
-                }
-            }
+            // Hàm cập nhật trạng thái enable/disable cho các thuộc tính
+            function updateAttributeOptions() {
+                const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
+                    .map(input => parseInt(input.value));
 
-            // Hàm cập nhật trạng thái enable/disable cho color dựa vào size
-            function updateColorOptions(selectedSize) {
-                let foundEnabled = false;
-                colorInputs.forEach(input => {
-                    const color = input.value;
-                    if (hasStock(color, selectedSize)) {
-                        input.disabled = false;
-                        if (!foundEnabled) foundEnabled = input;
+                attributeInputs.forEach(input => {
+                    const attributeId = parseInt(input.dataset.attributeId);
+                    const valueId = parseInt(input.value);
+                    
+                    // Nếu input này đang được chọn, không disable
+                    if (input.checked) return;
+
+                    // Kiểm tra xem có variation nào phù hợp không
+                    const testAttributes = [...selectedAttributes];
+                    const currentAttributeIndex = testAttributes.findIndex(id => 
+                        attributes.find(attr => attr.id === attributeId).values.some(v => v.id === id)
+                    );
+                    
+                    if (currentAttributeIndex !== -1) {
+                        testAttributes[currentAttributeIndex] = valueId;
                     } else {
-                        input.disabled = true;
-                        input.checked = false;
+                        testAttributes.push(valueId);
                     }
+
+                    input.disabled = !hasStock(testAttributes);
                 });
-                // Nếu không có màu nào được chọn, chọn lại màu đầu tiên còn hàng
-                if (!document.querySelector('.variation-color:checked') && foundEnabled) {
-                    foundEnabled.checked = true;
-                }
             }
 
             // Hàm format số
@@ -1173,9 +1078,6 @@
                 } else {
                     priceDisplay.innerHTML = `<h3 class="mb-0">${numberFormat(variation.price)}đ</h3>`;
                 }
-
-                // Lấy lại element stock-status mỗi lần update
-                const stockStatus = document.querySelector('.stock-status');
 
                 // Cập nhật tồn kho và số lượng
                 if (variation.stock > 0) {
@@ -1204,37 +1106,20 @@
                 }
             }
 
-            // Hàm cập nhật khi thay đổi variation
-            function updateVariationInfo(triggeredBy) {
-                const selectedColor = document.querySelector('.variation-color:checked')?.value;
-                const selectedSize = document.querySelector('.variation-size:checked')?.value;
+            // Hàm cập nhật khi thay đổi thuộc tính
+            function updateVariationInfo() {
+                const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
+                    .map(input => parseInt(input.value));
 
-                // Chỉ cập nhật enable/disable cho size khi chọn màu
-                if (triggeredBy === 'color') {
-                    updateSizeOptions(selectedColor);
-                }
-                // Không disable màu nào cả
-
-                // Lấy lại lựa chọn sau khi cập nhật
-                const color = document.querySelector('.variation-color:checked')?.value;
-                const size = document.querySelector('.variation-size:checked')?.value;
-
-                if (!color || !size) return;
-                const variation = getVariation(color, size);
+                updateAttributeOptions();
+                
+                const variation = getVariation(selectedAttributes);
                 updateUI(variation);
             }
 
             // Event Listeners
-            colorInputs.forEach(input => {
-                input.addEventListener('change', function() {
-                    updateVariationInfo('color');
-                });
-            });
-
-            sizeInputs.forEach(input => {
-                input.addEventListener('change', function() {
-                    updateVariationInfo('size'); // chỉ update UI, không disable màu
-                });
+            attributeInputs.forEach(input => {
+                input.addEventListener('change', updateVariationInfo);
             });
 
             // Xử lý số lượng
@@ -1269,14 +1154,6 @@
                 updateQuantityButtons();
             });
 
-            // Đảm bảo không cho nhập ngoài phạm vi bằng cách chặn phím
-            quantityInput.addEventListener('keydown', function(e) {
-                // Chỉ cho phép số, phím điều hướng, backspace, delete
-                if (!((e.key >= '0' && e.key <= '9') || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key))) {
-                    e.preventDefault();
-                }
-            });
-
             function updateQuantityButtons() {
                 const value = parseInt(quantityInput.value);
                 const max = parseInt(quantityInput.max);
@@ -1286,9 +1163,61 @@
             }
 
             // Khởi tạo ban đầu
-            if (colorInputs.length && sizeInputs.length) {
+            if (attributeInputs.length) {
                 updateVariationInfo();
             }
+
+            // Thêm form submit
+            const addToCartForm = document.createElement('form');
+            addToCartForm.method = 'POST';
+            addToCartForm.action = '{{ route("cart.add") }}';
+            addToCartForm.style.display = 'none';
+            document.body.appendChild(addToCartForm);
+
+            // Thêm CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            addToCartForm.appendChild(csrfToken);
+
+            // Thêm product_id
+            const productIdInput = document.createElement('input');
+            productIdInput.type = 'hidden';
+            productIdInput.name = 'product_id';
+            productIdInput.value = '{{ $product->id }}';
+            addToCartForm.appendChild(productIdInput);
+
+            // Thêm sự kiện cho nút Add to Cart
+            const addToCartBtn = document.querySelector('.btn-warning');
+            addToCartBtn.addEventListener('click', function() {
+                const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
+                    .map(input => parseInt(input.value));
+                const quantity = parseInt(document.getElementById('quantity').value);
+
+                if (selectedAttributes.length === 0) {
+                    alert('Vui lòng chọn đầy đủ các thuộc tính');
+                    return;
+                }
+
+                // Thêm các input vào form
+                selectedAttributes.forEach((attrId, index) => {
+                    const attrInput = document.createElement('input');
+                    attrInput.type = 'hidden';
+                    attrInput.name = `attributes[${index}]`;
+                    attrInput.value = attrId;
+                    addToCartForm.appendChild(attrInput);
+                });
+
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'hidden';
+                quantityInput.name = 'quantity';
+                quantityInput.value = quantity;
+                addToCartForm.appendChild(quantityInput);
+
+                // Submit form
+                addToCartForm.submit();
+            });
         });
     </script>
 @endpush

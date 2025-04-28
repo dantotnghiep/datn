@@ -5,6 +5,7 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\WishlistController;
+use App\Http\Controllers\Client\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,9 +55,16 @@ Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('produc
 Route::get('/san-pham', function () {
     return view('client.product.index');
 })->name('product');
-Route::get('/gio-hang', function () {
-    return view('client.cart.cart');
-})->name('cart');
+
+// Cart routes
+Route::prefix('gio-hang')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('cart');
+    Route::post('/them', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cap-nhat', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/xoa', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/xoa-tat-ca', [CartController::class, 'clear'])->name('cart.clear');
+});
+
 Route::get('/checkout', function () {
     return view('client.cart.checkout');
 })->name('checkout');

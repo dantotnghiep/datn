@@ -166,3 +166,136 @@
         </div>
     </div><!-- end of .container-->
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý thay đổi số lượng
+            const quantityInputs = document.querySelectorAll('[data-quantity] input');
+            quantityInputs.forEach(input => {
+                const row = input.closest('tr');
+                const productId = row.dataset.productId;
+                const variationId = row.dataset.variationId;
+
+                input.addEventListener('change', function() {
+                    const newQuantity = parseInt(this.value);
+                    if (newQuantity < 1) {
+                        this.value = 1;
+                        return;
+                    }
+
+                    updateCartItem(productId, variationId, newQuantity);
+                });
+            });
+
+            // Xử lý nút tăng/giảm số lượng
+            const quantityButtons = document.querySelectorAll('[data-quantity] button');
+            quantityButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    const currentValue = parseInt(input.value);
+                    const newValue = this.dataset.type === 'plus' ? currentValue + 1 : currentValue - 1;
+                    
+                    if (newValue < 1) return;
+                    
+                    input.value = newValue;
+                    const row = input.closest('tr');
+                    const productId = row.dataset.productId;
+                    const variationId = row.dataset.variationId;
+                    
+                    updateCartItem(productId, variationId, newValue);
+                });
+            });
+
+            // Xử lý xóa sản phẩm
+            const removeButtons = document.querySelectorAll('.btn-reveal-trigger button');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const productId = row.dataset.productId;
+                    const variationId = row.dataset.variationId;
+
+                    if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+                        removeCartItem(productId, variationId);
+                    }
+                });
+            });
+
+            // Hàm cập nhật số lượng sản phẩm
+            function updateCartItem(productId, variationId, quantity) {
+                fetch('{{ route("cart.update") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        variation_id: variationId,
+                        quantity: quantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Cập nhật tổng tiền
+                        updateCartTotals(data.totals);
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi cập nhật giỏ hàng');
+                });
+            }
+
+            // Hàm xóa sản phẩm
+            function removeCartItem(productId, variationId) {
+                fetch('{{ route("cart.remove") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        variation_id: variationId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Xóa hàng khỏi bảng
+                        const row = document.querySelector(`tr[data-product-id="${productId}"][data-variation-id="${variationId}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                        // Cập nhật tổng tiền
+                        updateCartTotals(data.totals);
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi xóa sản phẩm');
+                });
+            }
+
+            // Hàm cập nhật tổng tiền
+            function updateCartTotals(totals) {
+                // Cập nhật tổng tiền sản phẩm
+                document.querySelector('.items-subtotal').textContent = totals.subtotal;
+                // Cập nhật tổng tiền giảm giá
+                document.querySelector('.discount').textContent = totals.discount;
+                // Cập nhật thuế
+                document.querySelector('.tax').textContent = totals.tax;
+                // Cập nhật phí vận chuyển
+                document.querySelector('.shipping').textContent = totals.shipping;
+                // Cập nhật tổng tiền cuối cùng
+                document.querySelector('.total').textContent = totals.total;
+            }
+        });
+    </script>
+@endpush
