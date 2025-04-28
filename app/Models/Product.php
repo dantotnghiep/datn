@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasSlug;
 
 class Product extends BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, HasSlug;
 
     protected $fillable = ['category_id', 'name', 'slug', 'sku', 'description', 'image', 'is_hot'];
 

@@ -11,9 +11,11 @@
                 <li class="breadcrumb-item active">{{ isset($item) ? 'Edit' : 'Create' }}</li>
             </ol>
         </nav>
-        <form class="mb-9" method="POST" action="{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}" enctype="multipart/form-data" id="product-form">
+        <form class="mb-9" method="POST"
+            action="{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}"
+            enctype="multipart/form-data" id="product-form">
             @csrf
-            @if(isset($item))
+            @if (isset($item))
                 @method('PUT')
             @endif
             <div class="row g-3 flex-between-end mb-5">
@@ -22,67 +24,91 @@
                     <h5 class="text-body-tertiary fw-semibold">Complete all required fields</h5>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0" href="{{ route('admin.products.index') }}">Cancel</a>
-                    <button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="submit" name="action" value="draft">Save draft</button>
-                    <button class="btn btn-primary mb-2 mb-sm-0" type="submit" id="publish-btn" name="action" value="publish">Publish product</button>
+                    <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0"
+                        href="{{ route('admin.products.index') }}">Cancel</a>
+                    <button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="submit" name="action"
+                        value="draft">Save draft</button>
+                    <button class="btn btn-primary mb-2 mb-sm-0" type="submit" id="publish-btn" name="action"
+                        value="publish">Publish product</button>
                 </div>
             </div>
             <div class="row g-5">
                 <div class="col-12 col-xl-8">
 
                     <div class="row">
-                      <div class="col-5">
-                        <h4 class="mb-3">Title</h4>
-                        <input class="form-control mb-5" type="text" name="name" placeholder="Write title here..." value="{{ $item->name ?? old('name') }}" required />
+                        <div class="col-5">
+                            <h4 class="mb-3">Title</h4>
+                            <input class="form-control mb-5" type="text" name="name" placeholder="Write title here..."
+                                value="{{ $item->name ?? old('name') }}" required />
 
-                      </div>
-                       <div class="col-7">
-                        <div class="mb-6">
-                            <h4 class="mb-3">Description</h4>
-                            <div class="description-container">
-                                <textarea class="tinymce form-control custom-editor" name="description"
-                                    data-tinymce='{"height":"30rem","placeholder":"Write a description here...","skin":"oxide","content_css":"default","menubar":false,"statusbar":false,"toolbar":"bold italic underline | bullist numlist | link image | formatselect","plugins":"link image lists"}'>{{ $item->description ?? old('description') }}</textarea>
+                        </div>
+                        <div class="col-7">
+                            <div class="mb-6">
+                                <h4 class="mb-3">Description</h4>
+                                <div class="description-container">
+                                    <textarea class="tinymce form-control custom-editor" name="description"
+                                        data-tinymce='{"height":"30rem","placeholder":"Write a description here...","skin":"oxide","content_css":"default","menubar":false,"statusbar":false,"toolbar":"bold italic underline | bullist numlist | link image | formatselect","plugins":"link image lists"}'>{{ $item->description ?? old('description') }}</textarea>
+                                </div>
                             </div>
                         </div>
-                       </div>
                     </div>
 
-                    <h4 class="mb-3">Images</h4>
-                    <div class="mb-3">
-                        @if(isset($item) && $item->images->count() > 0)
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <h5>Current Images</h5>
-                                    <div class="d-flex flex-wrap">
-                                        @foreach($item->images as $image)
-                                            <div class="position-relative me-2 mb-2">
-                                                <img src="{{ Storage::url($image->image_path) }}" alt="{{ $item->name }}" class="img-thumbnail" style="height:100px; width:100px; object-fit:cover;">
-                                                <div class="position-absolute top-0 end-0">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="existing_images[{{ $image->id }}][is_primary]" value="1" {{ $image->is_primary ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-white">Primary</label>
-                                                    </div>
-                                                    <input type="hidden" name="existing_images[{{ $image->id }}][order]" value="{{ $image->order }}">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input delete-image" type="checkbox" name="remove_images[]" value="{{ $image->id }}">
-                                                        <label class="form-check-label text-white">Remove</label>
+                    <div class="mb-4">
+                        <h4 class="mb-3">Images</h4>
+                        <div class="row g-3" id="current-images-container">
+                            @if (isset($item) && $item->images->count() > 0)
+                                @foreach ($item->images as $image)
+                                    <div class="col-auto">
+                                        <div class="product-image-card">
+                                            <button type="button" class="btn-remove-image"
+                                                onclick="toggleImageRemoval(this, {{ $image->id }})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+
+                                            <img src="{{ Storage::url($image->image_path) }}"
+                                                alt="{{ $item->name }}" class="product-image">
+
+                                            <div class="image-actions">
+                                                <div class="action-overlay">
+                                                    <div class="d-flex flex-column gap-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="primary_image" value="{{ $image->id }}"
+                                                                {{ $image->is_primary ? 'checked' : '' }}>
+                                                            <label class="form-check-label">
+                                                                <i class="fas fa-star me-1"></i> Set as Primary
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        @endforeach
+
+                                            @if ($image->is_primary)
+                                                <div class="primary-badge">
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                            @endif
+
+                                            <input type="hidden" name="remove_images[]" value=""
+                                                class="remove-image-input">
+                                            <input type="hidden" name="image_orders[{{ $image->id }}]"
+                                                value="{{ $image->order }}">
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="dropzone dropzone-multiple p-0 mb-5" id="product-images-upload">
-                        <div class="fallback"><input name="images[]" type="file" multiple /></div>
-                        <div class="dz-message text-body-tertiary text-opacity-85" data-dz-message="data-dz-message">
-                            Drag your photos here<span class="text-body-secondary px-1">or</span>
-                            <button class="btn btn-link p-0" type="button">Browse from device</button><br />
-                            <img class="mt-3 me-2" src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/image-icon.png') }}" width="40" alt="" />
+                                @endforeach
+                            @endif
                         </div>
-                        <div class="dz-preview-container d-flex flex-wrap mt-3" id="image-preview-container"></div>
+
+                        <div class="dropzone dropzone-multiple p-0 mt-3" id="product-images-upload">
+                            <div class="fallback">
+                                <input name="images[]" type="file" multiple />
+                            </div>
+                            <div class="dz-message text-body-tertiary text-opacity-85" data-dz-message="data-dz-message">
+                                Drag your photos here<span class="text-body-secondary px-1">or</span>
+                                <button class="btn btn-link p-0" type="button">Browse from device</button><br />
+                                <img class="mt-3 me-2" src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/image-icon.png') }}" width="40" alt="" />
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-12 col-xl-4">
@@ -98,10 +124,12 @@
                                                         class="fw-bold fs-9"
                                                         href="{{ route('admin.categories.create') }}">Add new category</a>
                                                 </div>
-                                                <select class="form-select mb-3" name="category_id" aria-label="category" required>
+                                                <select class="form-select mb-3" name="category_id" aria-label="category"
+                                                    required>
                                                     <option value="">Select Category</option>
                                                     @foreach (\App\Models\Category::all() as $category)
-                                                        <option value="{{ $category->id }}" {{ (isset($item) && $item->category_id == $category->id) || old('category_id') == $category->id ? 'selected' : '' }}>
+                                                        <option value="{{ $category->id }}"
+                                                            {{ (isset($item) && $item->category_id == $category->id) || old('category_id') == $category->id ? 'selected' : '' }}>
                                                             {{ $category->name }}
                                                         </option>
                                                     @endforeach
@@ -112,8 +140,11 @@
                                             <div class="mb-4">
                                                 <h5 class="mb-0 text-body-highlight mb-2">Featured Product</h5>
                                                 <div class="form-check form-switch">
-                                                    <input class="form-check-input" id="is_hot" name="is_hot" type="checkbox" value="1" {{ (isset($item) && $item->is_hot) || old('is_hot') ? 'checked' : '' }} />
-                                                    <label class="form-check-label" for="is_hot">Mark as featured</label>
+                                                    <input class="form-check-input" id="is_hot" name="is_hot"
+                                                        type="checkbox" value="1"
+                                                        {{ (isset($item) && $item->is_hot) || old('is_hot') ? 'checked' : '' }} />
+                                                    <label class="form-check-label" for="is_hot">Mark as
+                                                        featured</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -127,16 +158,18 @@
                                     <h4 class="card-title mb-4">Variants</h4>
                                     <div class="row g-3">
                                         <div class="col-12 col-sm-6 col-xl-12" id="variants-container">
-                                            <div
-                                                class="border-bottom border-translucent border-dashed border-sm-0 border-bottom-xl pb-4 variant-option" data-option="1">
+                                            <div class="border-bottom border-translucent border-dashed border-sm-0 border-bottom-xl pb-4 variant-option"
+                                                data-option="1">
                                                 <div class="d-flex flex-wrap mb-2">
                                                     <h5 class="text-body-highlight me-2">Option 1</h5>
-                                                    <a class="fw-bold fs-9 remove-option" href="javascript:void(0)">Remove</a>
+                                                    <a class="fw-bold fs-9 remove-option"
+                                                        href="javascript:void(0)">Remove</a>
                                                 </div>
                                                 <select class="form-select mb-3 attribute-select">
                                                     <option value="">Select attribute</option>
                                                     @foreach ($attributes as $attribute)
-                                                        <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
+                                                        <option value="{{ $attribute->id }}">{{ $attribute->name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
 
@@ -148,13 +181,15 @@
                                                         <div class="variant-values-display p-2 mb-2">
                                                             <div class="d-flex flex-wrap gap-2 selected-values"></div>
                                                         </div>
-                                                        <div class="text-muted mt-2 no-values-text">No choices to choose from</div>
+                                                        <div class="text-muted mt-2 no-values-text">No choices to choose
+                                                            from</div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <button id="add-option-btn" class="btn btn-phoenix-primary w-100 mt-3" type="button">Add another option</button>
+                                    <button id="add-option-btn" class="btn btn-phoenix-primary w-100 mt-3"
+                                        type="button">Add another option</button>
                                 </div>
                             </div>
                         </div>
@@ -173,7 +208,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Dropzone
             if (typeof Dropzone !== 'undefined') {
                 Dropzone.autoDiscover = false;
 
@@ -187,75 +221,85 @@
                     parallelUploads: 10,
                     maxFiles: 10,
                     maxFilesize: null,
-                    previewsContainer: "#image-preview-container",
+                    previewsContainer: false,
                     clickable: "#product-images-upload",
-                    createImageThumbnails: true,
-                    thumbnailWidth: 132,
-                    thumbnailHeight: 132,
-                    previewTemplate: `
-                        <div class="dz-preview dz-file-preview">
-                            <div style="margin:55px;" class="dz-image">
-                                <img style="border-radius: 4px;" data-dz-thumbnail />
-                                <a class="dz-remove" href="javascript:undefined;" data-dz-remove title="Xóa ảnh"></a>
-                            </div>
-                        </div>
-                    `,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
                     init: function() {
                         let myDropzone = this;
                         let form = document.getElementById('product-form');
+                        const currentImagesContainer = document.getElementById('current-images-container');
 
-                        // Add file input clear button
-                        const fileInput = document.querySelector('input[type="file"]');
-                        if (fileInput) {
-                            const clearButton = document.createElement('button');
-                            clearButton.type = 'button';
-                            clearButton.className = 'file-clear-btn';
-                            clearButton.innerHTML = '×';
-                            clearButton.onclick = function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                fileInput.value = '';
-                                // Also clear dropzone if needed
-                                myDropzone.removeAllFiles();
+                        this.on("addedfile", function(file) {
+                            // Create preview element
+                            const col = document.createElement('div');
+                            col.className = 'col-auto';
+
+                            const card = document.createElement('div');
+                            card.className = 'product-image-card';
+
+                            // Create remove button
+                            const removeBtn = document.createElement('button');
+                            removeBtn.type = 'button';
+                            removeBtn.className = 'btn-remove-image';
+                            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            removeBtn.onclick = function() {
+                                myDropzone.removeFile(file);
+                                col.remove();
                             };
 
-                            // Wrap file input in a relative positioned div
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'file-input-wrapper';
-                            fileInput.parentNode.insertBefore(wrapper, fileInput);
-                            wrapper.appendChild(fileInput);
-                            wrapper.appendChild(clearButton);
-                        }
+                            // Create image element
+                            const img = document.createElement('img');
+                            img.className = 'product-image';
+
+                            // Create primary radio
+                            const imageActions = document.createElement('div');
+                            imageActions.className = 'image-actions';
+                            imageActions.innerHTML = `
+                                <div class="action-overlay">
+                                    <div class="d-flex flex-column gap-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="primary_image" value="new_${file.name}">
+                                            <label class="form-check-label">
+                                                <i class="fas fa-star me-1"></i> Set as Primary
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            // Read and set image preview
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                img.src = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+
+                            // Assemble the preview
+                            card.appendChild(removeBtn);
+                            card.appendChild(img);
+                            card.appendChild(imageActions);
+                            col.appendChild(card);
+
+                            // Add to current images container
+                            currentImagesContainer.appendChild(col);
+                        });
 
                         form.addEventListener('submit', function(e) {
                             e.preventDefault();
                             e.stopPropagation();
 
-                            // Collect variant data
-                            collectVariantData();
-
-                            // Create FormData
                             let formData = new FormData(form);
-
-                            // Add queued files to FormData
                             let queuedFiles = myDropzone.getQueuedFiles();
                             queuedFiles.forEach(function(file) {
                                 formData.append('images[]', file);
                             });
 
-                            // Get the form method and URL
                             let method = form.getAttribute('method').toUpperCase();
                             let url = form.getAttribute('action');
 
-                            // If it's PUT request, we need to append _method field
                             if (method === 'PUT') {
                                 formData.append('_method', 'PUT');
                             }
 
-                            // Send AJAX request
                             fetch(url, {
                                 method: 'POST',
                                 body: formData,
@@ -277,65 +321,6 @@
                                 alert('Error saving product. Please try again.');
                             });
                         });
-
-                        // File added event
-                        this.on("addedfile", function(file) {
-                            console.log("File added:", file.name);
-                            // Ensure proper spacing and layout
-                            if (file.previewElement) {
-                                file.previewElement.style.margin = '0';
-                                let details = file.previewElement.querySelector('.dz-details');
-                                if (details) details.style.display = 'none';
-                            }
-                        });
-
-                        // File removed event
-                        this.on("removedfile", function(file) {
-                            console.log("File removed:", file.name);
-                        });
-
-                        // Error handling
-                        this.on("error", function(file, errorMessage) {
-                            console.error("Error with file:", file.name, errorMessage);
-                            if (file.previewElement) {
-                                let errorDisplay = file.previewElement.querySelector('[data-dz-errormessage]');
-                                if (errorDisplay) {
-                                    errorDisplay.textContent = errorMessage;
-                                }
-                                file.previewElement.classList.add('dz-error');
-                            }
-                        });
-
-                        // Display existing images (for edit mode)
-                        @if(isset($item) && $item->images->count() > 0)
-                            @foreach($item->images as $image)
-                                let mockFile = {
-                                    name: "{{ basename($image->image_path) }}",
-                                    size: 12345,
-                                    accepted: true,
-                                    status: "success",
-                                    id: {{ $image->id }},
-                                    is_primary: {{ $image->is_primary ? 'true' : 'false' }}
-                                };
-
-                                myDropzone.emit("addedfile", mockFile);
-                                myDropzone.emit("thumbnail", mockFile, "{{ Storage::url($image->image_path) }}");
-                                myDropzone.emit("complete", mockFile);
-
-                                // Hide file details for existing images
-                                if (mockFile.previewElement) {
-                                    let details = mockFile.previewElement.querySelector('.dz-details');
-                                    if (details) details.style.display = 'none';
-                                }
-
-                                if (mockFile.is_primary) {
-                                    let primaryBadge = document.createElement('div');
-                                    primaryBadge.className = 'primary-badge';
-                                    primaryBadge.textContent = 'Primary';
-                                    mockFile.previewElement.appendChild(primaryBadge);
-                                }
-                            @endforeach
-                        @endif
                     }
                 });
             }
@@ -364,7 +349,7 @@
                     const selectedValues = [];
                     optionEl.querySelectorAll('.selected-value-chip').forEach(chip => {
                         selectedValues.push({
-                            id: chip.getAttribute('data-value-id'),
+                            id: parseInt(chip.getAttribute('data-value-id')),
                             value: chip.querySelector('span').innerText
                         });
                     });
@@ -372,8 +357,8 @@
                     if (selectedValues.length === 0) return;
 
                     variantOptions.push({
-                        option: optionNumber,
-                        attribute_id: attributeId,
+                        option: parseInt(optionNumber),
+                        attribute_id: parseInt(attributeId),
                         attribute_name: attributeName,
                         values: selectedValues
                     });
@@ -381,12 +366,29 @@
 
                 // Update the hidden input with variant data
                 document.getElementById('variants-data').value = JSON.stringify(variantOptions);
-                console.log("Variant data collected:", document.getElementById('variants-data').value);
+                console.log("Variant data collected:", variantOptions);
             }
 
             // Handle form submission - collect variant data
             document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault();
                 collectVariantData();
+
+                // Check if variants data is valid
+                const variantsData = document.getElementById('variants-data').value;
+                if (variantsData) {
+                    try {
+                        const parsedData = JSON.parse(variantsData);
+                        if (!Array.isArray(parsedData) || parsedData.length === 0) {
+                            console.warn('No variant data collected');
+                        }
+                    } catch (error) {
+                        console.error('Invalid variants data:', error);
+                    }
+                }
+
+                // Continue with form submission
+                this.submit();
             });
         });
     </script>
@@ -406,7 +408,8 @@
                     const attributeId = this.value;
                     const optionEl = this.closest('.variant-option');
                     const optionNumber = optionEl.getAttribute('data-option');
-                    const valuesContainer = document.getElementById(`variant-values-option-${optionNumber}`);
+                    const valuesContainer = document.getElementById(
+                    `variant-values-option-${optionNumber}`);
                     const selectedValuesContainer = optionEl.querySelector('.selected-values-container');
                     const selectedValues = optionEl.querySelector('.selected-values');
                     const noValuesText = optionEl.querySelector('.no-values-text');
@@ -471,10 +474,12 @@
                                 this.classList.remove('selected');
                                 this.style.backgroundColor = '';
                                 this.style.color = '';
-                                this.style.display = ''; // Show this value again in the blue container
+                                this.style.display =
+                                ''; // Show this value again in the blue container
 
                                 // Remove the chip
-                                const chip = optionEl.querySelector(`.selected-value-chip[data-value-id="${valueId}"]`);
+                                const chip = optionEl.querySelector(
+                                    `.selected-value-chip[data-value-id="${valueId}"]`);
                                 if (chip) chip.remove();
 
                                 // Check if there are any selected values left
@@ -488,11 +493,13 @@
                                 this.classList.add('selected');
                                 this.style.backgroundColor = '#4e73df';
                                 this.style.color = 'white';
-                                this.style.display = 'none'; // Hide this value from the blue container once selected
+                                this.style.display =
+                                'none'; // Hide this value from the blue container once selected
 
                                 // Create and append chip
                                 const chip = document.createElement('div');
-                                chip.classList.add('selected-value-chip', 'd-flex', 'align-items-center');
+                                chip.classList.add('selected-value-chip', 'd-flex',
+                                    'align-items-center');
                                 chip.setAttribute('data-value-id', valueId);
                                 chip.innerHTML = `
                                     <span>${valueText}</span>
@@ -507,7 +514,8 @@
                             }
 
                             // Check if ANY values are visible
-                            const visibleValues = Array.from(valuesContainer.querySelectorAll('.variant-value-item')).filter(item =>
+                            const visibleValues = Array.from(valuesContainer
+                                .querySelectorAll('.variant-value-item')).filter(item =>
                                 item.style.display !== 'none'
                             );
 
@@ -524,7 +532,8 @@
 
                     // If no values found
                     if (attributeValues.length === 0) {
-                        valuesContainer.innerHTML = '<div class="text-center p-2">No values available for this attribute</div>';
+                        valuesContainer.innerHTML =
+                            '<div class="text-center p-2">No values available for this attribute</div>';
                     }
                 });
             }
@@ -665,7 +674,8 @@
 
                 // Create new option element
                 const newOption = document.createElement('div');
-                newOption.classList.add('variant-option', 'border-bottom', 'border-translucent', 'border-dashed', 'border-sm-0', 'border-bottom-xl', 'pb-4', 'mt-4');
+                newOption.classList.add('variant-option', 'border-bottom', 'border-translucent',
+                    'border-dashed', 'border-sm-0', 'border-bottom-xl', 'pb-4', 'mt-4');
                 newOption.setAttribute('data-option', optionCount);
 
                 // Create option HTML
@@ -707,7 +717,10 @@
 @endsection
 
 <style>
-    #image-preview-container .dz-image { position: relative !important; }
+    #image-preview-container .dz-image {
+        position: relative !important;
+    }
+
     #image-preview-container .dz-remove {
         position: absolute !important;
         top: 6px !important;
@@ -728,6 +741,7 @@
         padding: 0 !important;
         font-weight: bold !important;
     }
+
     #image-preview-container .dz-remove:before {
         content: "×";
         font-size: 22px;
@@ -736,7 +750,154 @@
         color: #fff;
         display: block;
     }
+
     #image-preview-container .dz-remove:hover {
         background: #cc0000 !important;
     }
+
+    .product-image-card {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .product-image-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+
+    .product-image-card:hover .product-image {
+        transform: scale(1.1);
+    }
+
+    .image-actions {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0);
+        transition: all 0.3s ease;
+    }
+
+    .product-image-card:hover .image-actions {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    .action-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 15px;
+        transform: translateY(100%);
+        transition: all 0.3s ease;
+    }
+
+    .product-image-card:hover .action-overlay {
+        transform: translateY(0);
+    }
+
+    .form-check-label {
+        color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .form-check-input {
+        cursor: pointer;
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .primary-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #0d6efd;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+
+    .primary-badge i {
+        filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.3));
+    }
+
+    .btn-remove-image {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        color: #dc3545;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+        transition: all 0.2s ease;
+        padding: 0;
+        font-size: 14px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-remove-image:hover {
+        background: #dc3545;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .product-image-card.marked-for-removal {
+        opacity: 0.5;
+        filter: grayscale(100%);
+    }
+
+    .product-image-card.marked-for-removal .btn-remove-image {
+        background: #dc3545;
+        color: white;
+    }
 </style>
+
+<script>
+    function toggleImageRemoval(button, imageId) {
+        const card = button.closest('.product-image-card');
+        const removeInput = card.querySelector('.remove-image-input');
+
+        if (card.classList.contains('marked-for-removal')) {
+            // Unmark for removal
+            card.classList.remove('marked-for-removal');
+            removeInput.value = '';
+        } else {
+            // Mark for removal
+            card.classList.add('marked-for-removal');
+            removeInput.value = imageId.toString(); // Ensure imageId is converted to string
+        }
+    }
+</script>
