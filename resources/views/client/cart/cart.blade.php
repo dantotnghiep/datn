@@ -54,17 +54,17 @@
                                             {{ number_format($item->price) }}đ
                                         </td>
                                         <td class="quantity align-middle fs-8 ps-5">
-                                            <div class="input-group input-group-sm flex-nowrap" data-quantity="data-quantity">
-                                                <button class="btn btn-sm px-2" data-type="minus">-</button>
-                                                <input class="form-control text-center input-spin-none bg-transparent border-0 px-0" type="number" min="1" value="{{ $item->quantity }}" aria-label="Số lượng" />
-                                                <button class="btn btn-sm px-2" data-type="plus">+</button>
+                                            <div class="input-group input-group-sm flex-nowrap quantity-control">
+                                                <button class="btn btn-sm px-2 minus-btn" type="button">-</button>
+                                                <input class="form-control text-center input-spin-none bg-transparent border-0 px-0 quantity-input" type="number" min="1" value="{{ $item->quantity }}" aria-label="Số lượng" />
+                                                <button class="btn btn-sm px-2 plus-btn" type="button">+</button>
                                             </div>
                                         </td>
                                         <td class="total align-middle fw-bold text-body-highlight text-end">
                                             {{ number_format($item->total) }}đ
                                         </td>
                                         <td class="align-middle white-space-nowrap text-end pe-0 ps-3">
-                                            <button class="btn btn-sm text-body-tertiary text-opacity-85 text-body-tertiary-hover me-2"><span class="fas fa-trash"></span></button>
+                                            <button class="btn btn-sm text-body-tertiary text-opacity-85 text-body-tertiary-hover me-2 btn-remove-cart-item"><span class="fas fa-trash"></span></button>
                                         </td>
                                     </tr>
                                 @empty
@@ -139,54 +139,43 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Xử lý thay đổi số lượng
-            const quantityInputs = document.querySelectorAll('[data-quantity] input');
-            quantityInputs.forEach(input => {
-                const row = input.closest('tr');
+            // Xử lý tăng/giảm số lượng
+            const quantityControls = document.querySelectorAll('.quantity-control');
+            
+            quantityControls.forEach(control => {
+                const input = control.querySelector('.quantity-input');
+                const minusBtn = control.querySelector('.minus-btn');
+                const plusBtn = control.querySelector('.plus-btn');
+                const row = control.closest('tr');
                 const productId = row.dataset.productId;
                 const variationId = row.dataset.variationId;
 
+                // Xử lý nút giảm
+                minusBtn.addEventListener('click', function() {
+                    let value = parseInt(input.value);
+                    if (value > 1) {
+                        value--;
+                        input.value = value;
+                        updateCartItem(productId, variationId, value);
+                    }
+                });
+
+                // Xử lý nút tăng
+                plusBtn.addEventListener('click', function() {
+                    let value = parseInt(input.value);
+                    value++;
+                    input.value = value;
+                    updateCartItem(productId, variationId, value);
+                });
+
+                // Xử lý thay đổi từ input
                 input.addEventListener('change', function() {
-                    const newQuantity = parseInt(this.value);
-                    if (newQuantity < 1) {
+                    let value = parseInt(this.value);
+                    if (value < 1) {
+                        value = 1;
                         this.value = 1;
-                        return;
                     }
-
-                    updateCartItem(productId, variationId, newQuantity);
-                });
-            });
-
-            // Xử lý nút tăng/giảm số lượng
-            const quantityButtons = document.querySelectorAll('[data-quantity] button');
-            quantityButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const input = this.parentElement.querySelector('input');
-                    const currentValue = parseInt(input.value);
-                    const newValue = this.dataset.type === 'plus' ? currentValue + 1 : currentValue - 1;
-                    
-                    if (newValue < 1) return;
-                    
-                    input.value = newValue;
-                    const row = input.closest('tr');
-                    const productId = row.dataset.productId;
-                    const variationId = row.dataset.variationId;
-                    
-                    updateCartItem(productId, variationId, newValue);
-                });
-            });
-
-            // Xử lý xóa sản phẩm
-            const removeButtons = document.querySelectorAll('.btn-reveal-trigger button');
-            removeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const row = this.closest('tr');
-                    const productId = row.dataset.productId;
-                    const variationId = row.dataset.variationId;
-
-                    if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-                        removeCartItem(productId, variationId);
-                    }
+                    updateCartItem(productId, variationId, value);
                 });
             });
 
@@ -207,8 +196,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Cập nhật tổng tiền
-                        updateCartTotals(data.totals);
+                        window.location.reload();
                     } else {
                         alert(data.message || 'Có lỗi xảy ra');
                     }
@@ -218,6 +206,20 @@
                     alert('Có lỗi xảy ra khi cập nhật giỏ hàng');
                 });
             }
+
+            // Xử lý xóa sản phẩm
+            const removeButtons = document.querySelectorAll('.btn-remove-cart-item');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const productId = row.dataset.productId;
+                    const variationId = row.dataset.variationId;
+
+                    if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+                        removeCartItem(productId, variationId);
+                    }
+                });
+            });
 
             // Hàm xóa sản phẩm
             function removeCartItem(productId, variationId) {
@@ -235,13 +237,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Xóa hàng khỏi bảng
-                        const row = document.querySelector(`tr[data-product-id="${productId}"][data-variation-id="${variationId}"]`);
-                        if (row) {
-                            row.remove();
-                        }
-                        // Cập nhật tổng tiền
-                        updateCartTotals(data.totals);
+                        // Reload page to update cart UI
+                        window.location.reload();
                     } else {
                         alert(data.message || 'Có lỗi xảy ra');
                     }
