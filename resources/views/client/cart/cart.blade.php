@@ -13,6 +13,10 @@
             <div class="col-12 col-lg-8">
                 <div id="cartTable"
                     data-list='{"valueNames":["products","color","size","price","quantity","total"],"page":10}'>
+                    <div class="mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="select-all-btn">Chọn tất cả</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-all-btn">Bỏ chọn tất cả</button>
+                    </div>
                     <div class="table-responsive scrollbar mx-n1 px-1">
                         <table class="table fs-9 mb-0 border-top border-translucent">
                             <thead>
@@ -20,8 +24,7 @@
                                     <th class="sort white-space-nowrap align-middle fs-10" scope="col"></th>
                                     <th class="sort white-space-nowrap align-middle" scope="col"
                                         style="min-width:250px;">PRODUCTS</th>
-                                    <th class="sort align-middle" scope="col" style="width:80px;">COLOR</th>
-                                    <th class="sort align-middle" scope="col" style="width:150px;">SIZE</th>
+                                    <th class="sort align-middle" scope="col" style="width:180px;">BIẾN THỂ</th>
                                     <th class="sort align-middle text-end" scope="col" style="width:300px;">PRICE</th>
                                     <th class="sort align-middle ps-5" scope="col" style="width:200px;">QUANTITY</th>
                                     <th class="sort align-middle text-end" scope="col" style="width:250px;">TOTAL</th>
@@ -29,87 +32,60 @@
                                 </tr>
                             </thead>
                             <tbody class="list" id="cart-table-body">
+                                @forelse($cartItems as $item)
+                                    <tr class="cart-table-row btn-reveal-trigger" data-product-id="{{ $item->productVariation->product->id }}" data-variation-id="{{ $item->productVariation->id }}">
+                                        <td class="align-middle white-space-nowrap py-0">
+                                            <div class="d-flex align-items-center">
+                                                <input type="checkbox" class="form-check-input select-item me-2" data-product-id="{{ $item->productVariation->product->id }}" data-variation-id="{{ $item->productVariation->id }}">
+                                                <a class="d-block border border-translucent rounded-2" href="{{ route('product.detail', $item->productVariation->product->slug) }}">
+                                                    <img src="{{ asset(optional($item->productVariation->product->images->first())->image_path ?? 'assets/img/products/default.png') }}" alt="{{ $item->productVariation->product->name }}" width="53" />
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="products align-middle">
+                                            <a class="fw-semibold mb-0 line-clamp-2" href="{{ route('product.detail', $item->productVariation->product->slug) }}">
+                                                {{ $item->productVariation->product->name }}
+                                            </a>
+                                            <div class="text-muted small">{{ $item->productVariation->name }}</div>
+                                        </td>
+                                        <td class="align-middle white-space-nowrap fs-9 text-body">
+                                            @if($item->productVariation->attributeValues && count($item->productVariation->attributeValues))
+                                                {{ $item->productVariation->attributeValues->map(function($attrVal) {
+                                                    return ($attrVal->attribute ? $attrVal->attribute->name . ': ' : '') . $attrVal->value;
+                                                })->implode(' / ') }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td class="price align-middle text-body fs-9 fw-semibold text-end">
+                                            {{ number_format($item->price) }}đ
+                                        </td>
+                                        <td class="quantity align-middle fs-8 ps-5">
+                                            <div class="input-group input-group-sm flex-nowrap quantity-control">
+                                                <button class="btn btn-sm px-2 minus-btn" type="button">-</button>
+                                                <input class="form-control text-center input-spin-none bg-transparent border-0 px-0 quantity-input" type="number" min="1" value="{{ $item->quantity }}" aria-label="Số lượng" />
+                                                <button class="btn btn-sm px-2 plus-btn" type="button">+</button>
+                                            </div>
+                                        </td>
+                                        <td class="total align-middle fw-bold text-body-highlight text-end">
+                                            {{ number_format($item->total) }}đ
+                                        </td>
+                                        <td class="align-middle white-space-nowrap text-end pe-0 ps-3">
+                                            <button class="btn btn-sm text-body-tertiary text-opacity-85 text-body-tertiary-hover me-2 btn-remove-cart-item"><span class="fas fa-trash"></span></button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-muted">Giỏ hàng của bạn đang trống.</td>
+                                    </tr>
+                                @endforelse
+                                @if(count($cartItems) > 0)
                                 <tr class="cart-table-row btn-reveal-trigger">
-                                    <td class="align-middle white-space-nowrap py-0"><a
-                                            class="d-block border border-translucent rounded-2"
-                                            href="product-details.html"><img src="../../../assets/img/products/1.png"
-                                                alt="" width="53" /></a></td>
-                                    <td class="products align-middle"><a class="fw-semibold mb-0 line-clamp-2"
-                                            href="product-details.html">Fitbit Sense Advanced Smartwatch with Tools for
-                                            Heart Health, Stress Management &amp; Skin Temperature Trends, Carbon/Graphite,
-                                            One Size (S &amp; L Bands)</a></td>
-                                    <td class="color align-middle white-space-nowrap fs-9 text-body">Glossy black</td>
-                                    <td class="size align-middle white-space-nowrap text-body-tertiary fs-9 fw-semibold">XL
-                                    </td>
-                                    <td class="price align-middle text-body fs-9 fw-semibold text-end">$199</td>
-                                    <td class="quantity align-middle fs-8 ps-5">
-                                        <div class="input-group input-group-sm flex-nowrap" data-quantity="data-quantity">
-                                            <button class="btn btn-sm px-2" data-type="minus">-</button><input
-                                                class="form-control text-center input-spin-none bg-transparent border-0 px-0"
-                                                type="number" min="1" value="2"
-                                                aria-label="Amount (to the nearest dollar)" /><button
-                                                class="btn btn-sm px-2" data-type="plus">+</button></div>
-                                    </td>
-                                    <td class="total align-middle fw-bold text-body-highlight text-end">$398</td>
-                                    <td class="align-middle white-space-nowrap text-end pe-0 ps-3"><button
-                                            class="btn btn-sm text-body-tertiary text-opacity-85 text-body-tertiary-hover me-2"><span
-                                                class="fas fa-trash"></span></button></td>
-                                </tr>
-                                <tr class="cart-table-row btn-reveal-trigger">
-                                    <td class="align-middle white-space-nowrap py-0"><a
-                                            class="d-block border border-translucent rounded-2"
-                                            href="product-details.html"><img src="../../../assets/img/products/2.png"
-                                                alt="" width="53" /></a></td>
-                                    <td class="products align-middle"><a class="fw-semibold mb-0 line-clamp-2"
-                                            href="product-details.html">iPhone 13 pro max-Pacific Blue-128GB storage</a>
-                                    </td>
-                                    <td class="color align-middle white-space-nowrap fs-9 text-body">Glossy black</td>
-                                    <td class="size align-middle white-space-nowrap text-body-tertiary fs-9 fw-semibold">XL
-                                    </td>
-                                    <td class="price align-middle text-body fs-9 fw-semibold text-end">$150</td>
-                                    <td class="quantity align-middle fs-8 ps-5">
-                                        <div class="input-group input-group-sm flex-nowrap" data-quantity="data-quantity">
-                                            <button class="btn btn-sm px-2" data-type="minus">-</button><input
-                                                class="form-control text-center input-spin-none bg-transparent border-0 px-0"
-                                                type="number" min="1" value="2"
-                                                aria-label="Amount (to the nearest dollar)" /><button
-                                                class="btn btn-sm px-2" data-type="plus">+</button></div>
-                                    </td>
-                                    <td class="total align-middle fw-bold text-body-highlight text-end">$300</td>
-                                    <td class="align-middle white-space-nowrap text-end pe-0 ps-3"><button
-                                            class="btn btn-sm text-body-tertiary text-opacity-85 text-body-tertiary-hover me-2"><span
-                                                class="fas fa-trash"></span></button></td>
-                                </tr>
-                                <tr class="cart-table-row btn-reveal-trigger">
-                                    <td class="align-middle white-space-nowrap py-0"><a
-                                            class="d-block border border-translucent rounded-2"
-                                            href="product-details.html"><img src="../../../assets/img/products/3.png"
-                                                alt="" width="53" /></a></td>
-                                    <td class="products align-middle"><a class="fw-semibold mb-0 line-clamp-2"
-                                            href="product-details.html">Apple MacBook Pro 13 inch-M1-8/256GB-space</a></td>
-                                    <td class="color align-middle white-space-nowrap fs-9 text-body">Glossy Golden</td>
-                                    <td class="size align-middle white-space-nowrap text-body-tertiary fs-9 fw-semibold">
-                                        34mm</td>
-                                    <td class="price align-middle text-body fs-9 fw-semibold text-end">$65</td>
-                                    <td class="quantity align-middle fs-8 ps-5">
-                                        <div class="input-group input-group-sm flex-nowrap" data-quantity="data-quantity">
-                                            <button class="btn btn-sm px-2" data-type="minus">-</button><input
-                                                class="form-control text-center input-spin-none bg-transparent border-0 px-0"
-                                                type="number" min="1" value="2"
-                                                aria-label="Amount (to the nearest dollar)" /><button
-                                                class="btn btn-sm px-2" data-type="plus">+</button></div>
-                                    </td>
-                                    <td class="total align-middle fw-bold text-body-highlight text-end">$130</td>
-                                    <td class="align-middle white-space-nowrap text-end pe-0 ps-3"><button
-                                            class="btn btn-sm text-body-tertiary text-opacity-85 text-body-tertiary-hover me-2"><span
-                                                class="fas fa-trash"></span></button></td>
-                                </tr>
-                                <tr class="cart-table-row btn-reveal-trigger">
-                                    <td class="text-body-emphasis fw-semibold ps-0 fs-8" colspan="6">Items subtotal :
-                                    </td>
-                                    <td class="text-body-emphasis fw-bold text-end fs-8">$691</td>
+                                    <td class="text-body-emphasis fw-semibold ps-0 fs-8" colspan="5">Tổng tiền :</td>
+                                    <td class="text-body-emphasis fw-bold text-end fs-8">{{ number_format($total) }}đ</td>
                                     <td></td>
                                 </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -166,3 +142,145 @@
         </div>
     </div><!-- end of .container-->
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý tăng/giảm số lượng
+            const quantityControls = document.querySelectorAll('.quantity-control');
+            
+            quantityControls.forEach(control => {
+                const input = control.querySelector('.quantity-input');
+                const minusBtn = control.querySelector('.minus-btn');
+                const plusBtn = control.querySelector('.plus-btn');
+                const row = control.closest('tr');
+                const productId = row.dataset.productId;
+                const variationId = row.dataset.variationId;
+
+                // Xử lý nút giảm
+                minusBtn.addEventListener('click', function() {
+                    let value = parseInt(input.value);
+                    if (value > 1) {
+                        value--;
+                        input.value = value;
+                        updateCartItem(productId, variationId, value);
+                    }
+                });
+
+                // Xử lý nút tăng
+                plusBtn.addEventListener('click', function() {
+                    let value = parseInt(input.value);
+                    value++;
+                    input.value = value;
+                    updateCartItem(productId, variationId, value);
+                });
+
+                // Xử lý thay đổi từ input
+                input.addEventListener('change', function() {
+                    let value = parseInt(this.value);
+                    if (value < 1) {
+                        value = 1;
+                        this.value = 1;
+                    }
+                    updateCartItem(productId, variationId, value);
+                });
+            });
+
+            // Hàm cập nhật số lượng sản phẩm
+            function updateCartItem(productId, variationId, quantity) {
+                fetch('{{ route("cart.update") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        variation_id: variationId,
+                        quantity: quantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi cập nhật giỏ hàng');
+                });
+            }
+
+            // Xử lý xóa sản phẩm
+            const removeButtons = document.querySelectorAll('.btn-remove-cart-item');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const productId = row.dataset.productId;
+                    const variationId = row.dataset.variationId;
+
+                    if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+                        removeCartItem(productId, variationId);
+                    }
+                });
+            });
+
+            // Hàm xóa sản phẩm
+            function removeCartItem(productId, variationId) {
+                fetch('{{ route("cart.remove") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        variation_id: variationId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload page to update cart UI
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi xóa sản phẩm');
+                });
+            }
+
+            // Hàm cập nhật tổng tiền
+            function updateCartTotals(totals) {
+                // Cập nhật tổng tiền sản phẩm
+                document.querySelector('.items-subtotal').textContent = totals.subtotal;
+                // Cập nhật tổng tiền giảm giá
+                document.querySelector('.discount').textContent = totals.discount;
+                // Cập nhật thuế
+                document.querySelector('.tax').textContent = totals.tax;
+                // Cập nhật phí vận chuyển
+                document.querySelector('.shipping').textContent = totals.shipping;
+                // Cập nhật tổng tiền cuối cùng
+                document.querySelector('.total').textContent = totals.total;
+            }
+
+            // Xử lý chọn tất cả và bỏ chọn tất cả
+            const selectAllBtn = document.getElementById('select-all-btn');
+            const deselectAllBtn = document.getElementById('deselect-all-btn');
+            const itemCheckboxes = document.querySelectorAll('.select-item');
+
+            selectAllBtn.addEventListener('click', function() {
+                itemCheckboxes.forEach(cb => cb.checked = true);
+            });
+            deselectAllBtn.addEventListener('click', function() {
+                itemCheckboxes.forEach(cb => cb.checked = false);
+            });
+        });
+    </script>
+@endpush

@@ -5,6 +5,7 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\WishlistController;
+use App\Http\Controllers\Client\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +38,14 @@ Route::middleware('guest')->group(function () {
     Route::post('/dat-lai-mat-khau', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
+// Cart view route (public)
+Route::get('/gio-hang', [CartController::class, 'index'])->name('cart');
+
+// Only logged-in users can add/update/remove cart
 Route::middleware('auth')->group(function () {
+    Route::post('/gio-hang/them', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/gio-hang/cap-nhat', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/gio-hang/xoa', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/dang-xuat', [AuthController::class, 'logout'])->name('logout');
     Route::get('/thong-tin', function () {
         return view('client.auth.profile');

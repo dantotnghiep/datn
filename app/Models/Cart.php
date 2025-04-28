@@ -4,6 +4,7 @@ namespace App\Models;
 
 class Cart extends BaseModel
 {
+    protected $hasSlug = false;
     protected $fillable = ['user_id', 'product_variation_id', 'quantity', 'price', 'total'];
 
     protected $casts = [
