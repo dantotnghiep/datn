@@ -18,7 +18,7 @@
                                         <div class="ms-n2">
                                             @foreach ($category->products->take(4) as $product)
                                                 <a class="text-body-emphasis d-block mb-1 text-decoration-none bg-body-highlight-hover px-2 py-1 rounded-2"
-                                                    href="">{{ $product->name }}</a>
+                                                    href="{{ route('product.detail', $product->slug) }}">{{ $product->name }}</a>
                                             @endforeach
                                         </div>
                                     </div>

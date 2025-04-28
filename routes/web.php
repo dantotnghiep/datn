@@ -23,7 +23,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
 
-Route::get('/chi-tiet-san-pham', [HomeController::class, 'show'])->name('detail');
 
 Route::get('/san-pham', function () {
     return view('client.product.index');

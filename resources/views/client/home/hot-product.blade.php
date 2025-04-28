@@ -32,7 +32,7 @@
                                             <!-- Hiển thị badge HOT -->
                                             <span class="badge text-bg-danger fs-10 product-verified-badge">HOT<span class="fas fa-fire ms-1"></span></span>
                                         </div>
-                                        <a class="stretched-link" href="{{ route('detail') }}">
+                                        <a class="stretched-link" href="{{ route('product.detail', $product->slug) }}">
                                             <h6 class="mb-2 lh-sm line-clamp-3 product-name">
                                                 {{ $product->name }}
                                             </h6>
@@ -47,12 +47,15 @@
                                     </div>
                                     <div>
                                         <p class="fs-9 text-body-highlight fw-bold mb-2">{{ $product->category->name ?? 'Danh mục' }}</p>
-                                        <div class="d-flex align-items-center mb-1">
-                                            <p class="me-2 text-body text-decoration-line-through mb-0">
-                                                {{ number_format(($product->price * 1.2), 0, ',', '.') }} VNĐ
-                                            </p>
-                                            <h3 class="text-body-emphasis mb-0">{{ number_format($product->price, 0, ',', '.') }} VNĐ</h3>
-                                        </div>
+                                        @if($product->min_price == $product->max_price)
+                                            <h5 class="text-danger mb-0 fw-bold">{{ number_format($product->min_price, 0, ',', '.') }} VNĐ</h5>
+                                        @else
+                                            <h5 class="text-danger mb-0 fw-bold">{{ number_format($product->min_price, 0, ',', '.') }} - {{ number_format($product->max_price, 0, ',', '.') }} VNĐ</h5>
+                                        @endif
+                                        
+                                        @if($product->variations_count > 0)
+                                        <p class="text-body-tertiary fw-semibold fs-9 lh-1 mb-0">{{ $product->variations_count }} loại sản phẩm</p>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
