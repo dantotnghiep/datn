@@ -1269,6 +1269,14 @@
                 updateQuantityButtons();
             });
 
+            // Đảm bảo không cho nhập ngoài phạm vi bằng cách chặn phím
+            quantityInput.addEventListener('keydown', function(e) {
+                // Chỉ cho phép số, phím điều hướng, backspace, delete
+                if (!((e.key >= '0' && e.key <= '9') || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key))) {
+                    e.preventDefault();
+                }
+            });
+
             function updateQuantityButtons() {
                 const value = parseInt(quantityInput.value);
                 const max = parseInt(quantityInput.max);
