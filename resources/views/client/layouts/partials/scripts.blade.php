@@ -9,3 +9,4 @@
 <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/dayjs/dayjs.min.js') }}"></script>
 <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/js/phoenix.js') }}"></script>
 <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/swiper/swiper-bundle.min.js') }}"></script>
+@stack('scripts')
