@@ -59,7 +59,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/gio-hang/checkout-chon', [CartController::class, 'saveSelectedItems'])->name('cart.checkout.selected');
     Route::get('/thanh-toan', [CartController::class, 'checkout'])->name('checkout');
     Route::post('/dat-hang', [CartController::class, 'store'])->name('orders.store');
+    
+    // VNPay return route - must be public
+    Route::get('/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
 });
+
 
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
 
