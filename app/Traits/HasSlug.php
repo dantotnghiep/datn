@@ -33,7 +33,8 @@ trait HasSlug
         $count = 1;
 
         while ($this->slugExists($slug)) {
-            $slug = $originalSlug . '-' . $count++;
+            $slug = $originalSlug . '-' . $count;
+            $count++;
         }
 
         return $slug;

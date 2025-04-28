@@ -26,10 +26,10 @@
                 <div class="col-auto">
                     <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0"
                         href="{{ route('admin.products.index') }}">Cancel</a>
-                    <button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="submit" name="action"
-                        value="draft">Save draft</button>
-                    <button class="btn btn-primary mb-2 mb-sm-0" type="submit" id="publish-btn" name="action"
-                        value="publish">Publish product</button>
+                    <button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="button" name="action"
+                        value="draft" onclick="submitForm('draft')">Save draft</button>
+                    <button class="btn btn-primary mb-2 mb-sm-0" type="button" id="publish-btn" name="action"
+                        value="publish" onclick="submitForm('publish')">Publish product</button>
                 </div>
             </div>
             <div class="row g-5">
@@ -207,11 +207,64 @@
     <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/flatpickr/flatpickr.min.js') }}"></script>
 
     <script>
+        // Function to handle form submission
+        function submitForm(action) {
+            const form = document.getElementById('product-form');
+
+            // Prevent multiple submissions
+            if (form.hasAttribute('data-submitting')) {
+                return;
+            }
+            form.setAttribute('data-submitting', 'true');
+
+            // Add action to form data
+            const formData = new FormData(form);
+            formData.append('action', action);
+
+            // Add Dropzone files if any
+            if (window.productDropzone && window.productDropzone.getQueuedFiles) {
+                const queuedFiles = window.productDropzone.getQueuedFiles();
+                queuedFiles.forEach(function(file) {
+                    formData.append('images[]', file);
+                });
+            }
+
+            let method = form.getAttribute('method').toUpperCase();
+            let url = form.getAttribute('action');
+
+            if (method === 'PUT') {
+                formData.append('_method', 'PUT');
+            }
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.message || 'Error saving product');
+                    form.removeAttribute('data-submitting');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error saving product. Please try again.');
+                form.removeAttribute('data-submitting');
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof Dropzone !== 'undefined') {
                 Dropzone.autoDiscover = false;
 
-                let myDropzone = new Dropzone("#product-images-upload", {
+                window.productDropzone = new Dropzone("#product-images-upload", {
                     url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
                     paramName: "images",
                     acceptedFiles: "image/*",
@@ -225,7 +278,6 @@
                     clickable: "#product-images-upload",
                     init: function() {
                         let myDropzone = this;
-                        let form = document.getElementById('product-form');
                         const currentImagesContainer = document.getElementById('current-images-container');
 
                         this.on("addedfile", function(file) {
@@ -281,45 +333,6 @@
 
                             // Add to current images container
                             currentImagesContainer.appendChild(col);
-                        });
-
-                        form.addEventListener('submit', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            let formData = new FormData(form);
-                            let queuedFiles = myDropzone.getQueuedFiles();
-                            queuedFiles.forEach(function(file) {
-                                formData.append('images[]', file);
-                            });
-
-                            let method = form.getAttribute('method').toUpperCase();
-                            let url = form.getAttribute('action');
-
-                            if (method === 'PUT') {
-                                formData.append('_method', 'PUT');
-                            }
-
-                            fetch(url, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    window.location.href = data.redirect;
-                                } else {
-                                    alert(data.message || 'Error saving product');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                alert('Error saving product. Please try again.');
-                            });
                         });
                     }
                 });
