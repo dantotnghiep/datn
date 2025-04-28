@@ -5,6 +5,7 @@
     @include('admin.components.layouts.partials.head')
 </head>
 
+
 <body>
     <main class="main" id="top">
         @include('admin.components.layouts.partials.toast-notifications')
@@ -135,6 +136,7 @@
     </main>
 
     @include('admin.components.layouts.partials.script')
+    @yield('scripts')
 </body>
 
 </html>
