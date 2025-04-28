@@ -72,6 +72,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Store
         Route::post('/', [ProductImageController::class, 'store'])->name('store');
 
+        // Temporary image upload for Dropzone
+        Route::post('/upload-temp', [ProductImageController::class, 'uploadTemp'])->name('upload-temp');
+
         // Edit form
         Route::get('/{id}/edit', [ProductImageController::class, 'edit'])->name('edit');
 

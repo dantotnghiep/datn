@@ -43,8 +43,9 @@ class AttributeValue extends BaseModel
         return $this->belongsTo(Attribute::class);
     }
 
-    public function variations()
+    public function productVariations()
     {
-        return $this->belongsToMany(ProductVariation::class, 'attribute_value_variations');
+        return $this->belongsToMany(ProductVariation::class, 'attribute_value_variations')
+            ->using(AttributeValueVariation::class);
     }
-} 
+}

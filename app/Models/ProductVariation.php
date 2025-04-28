@@ -7,8 +7,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProductVariation extends BaseModel
 {
     use SoftDeletes;
-    
+
     protected $fillable = ['product_id', 'sku', 'name', 'price', 'sale_price', 'stock'];
+
+    /**
+     * Override to disable slug generation
+     *
+     * @return bool
+     */
+    protected function slugExists($slug)
+    {
+        return false; // Skip slug checking since we don't use slugs for variations
+    }
+
+    /**
+     * Override to disable slug updating
+     */
+    protected static function bootHasSlug()
+    {
+        // Do nothing to disable the behavior
+    }
 
     public static function rules($id = null)
     {
@@ -72,6 +90,7 @@ class ProductVariation extends BaseModel
 
     public function attributeValues()
     {
-        return $this->belongsToMany(AttributeValue::class, 'attribute_value_variations');
+        return $this->belongsToMany(AttributeValue::class, 'attribute_value_variations')
+            ->using(AttributeValueVariation::class);
     }
-} 
+}

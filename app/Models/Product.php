@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Product extends BaseModel
 {
     use SoftDeletes;
-    
+
     protected $fillable = ['category_id', 'name', 'slug', 'sku', 'description', 'image', 'is_hot'];
 
     public static function rules($id = null)
@@ -15,9 +15,9 @@ class Product extends BaseModel
         return [
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'sku' => 'required|string|max:255|unique:products,sku,' . $id,
             'description' => 'nullable|string',
-            'images.*' => $id ? 'nullable|image|max:2048' : 'nullable|image|max:2048',
+            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
             'is_hot' => 'boolean'
         ];
     }
@@ -76,7 +76,7 @@ class Product extends BaseModel
     {
         return $this->hasMany(ProductImage::class);
     }
-    
+
     public function variations()
     {
         return $this->hasMany(ProductVariation::class);
