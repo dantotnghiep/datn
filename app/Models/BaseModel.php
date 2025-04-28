@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 abstract class BaseModel extends Model
 {
-    use SoftDeletes, HasSlug;
+    use HasSlug;
 
     protected $guarded = ['id'];
 

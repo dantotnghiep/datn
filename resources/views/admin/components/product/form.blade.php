@@ -1,234 +1,95 @@
 @extends('admin.master')
 
-@section('styles')
-    <style>
-        .product-form-heading {
-            color: #344767;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            position: relative;
-            padding-left: 0.75rem;
-            border-left: 4px solid #5e72e4;
-        }
-
-        .description-container {
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .custom-editor {
-            border: none;
-            padding: 1rem;
-            min-height: 200px;
-        }
-
-        .tox-tinymce {
-            border-radius: 8px !important;
-            border: 1px solid #e9ecef !important;
-        }
-
-        .select-category {
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            padding: 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .select-category:focus {
-            border-color: #5e72e4;
-            box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
-        }
-
-        /* Better styling for the placeholder */
-        .form-control::placeholder {
-            color: #adb5bd;
-            opacity: 0.7;
-        }
-
-        /* Attribute value buttons styling */
-        .attribute-value-btn {
-            display: block;
-            width: 100%;
-            padding: 0.75rem 0.5rem;
-            text-align: center;
-            margin-bottom: 0.5rem !important;
-            margin-right: 0 !important;
-            transition: all 0.2s;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            color: #5e72e4;
-            background-color: #f8f9fa;
-            border: 1px solid #edf2f9;
-        }
-
-        .attribute-value-btn.active {
-            background-color: #5e72e4;
-            color: white;
-            border-color: #5e72e4;
-        }
-
-        #values-display-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-        }
-
-        /* Size chips styling */
-        .size-chip {
-            background-color: #f8f9fa;
-            border-radius: 0.375rem;
-            transition: all 0.2s;
-            cursor: default;
-        }
-
-        .size-chip .btn-close {
-            opacity: 0.6;
-            cursor: pointer;
-        }
-
-        .size-chip .btn-close:hover {
-            opacity: 1;
-        }
-
-        @media (min-width: 576px) {
-            #values-display-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (min-width: 992px) {
-            #values-display-container {
-                grid-template-columns: repeat(1, 1fr);
-            }
-        }
-
-        .variant-values-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .variant-value-item {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .variant-value-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .variant-value-item.selected {
-            background-color: #4e73df;
-            color: white;
-        }
-
-        .variant-value-item:last-child {
-            border-bottom: none !important;
-        }
-
-        /* Selected values styling */
-        .selected-value-chip {
-            background-color: #fff;
-            border-radius: 16px;
-            padding: 2px 8px;
-            margin-right: 5px;
-            margin-bottom: 5px;
-            display: inline-flex;
-            align-items: center;
-            font-size: 0.75rem;
-            color: #333;
-        }
-
-        .variant-values-display .selected-value-chip {
-            background-color: #fff;
-            color: #333;
-        }
-
-        .selected-value-chip .btn-close {
-            width: 0.75em;
-            height: 0.75em;
-            opacity: 0.7;
-            margin-left: 5px;
-            font-size: 0.75rem;
-            padding: 0;
-        }
-
-        .selected-values-container {
-            background-color: #f5f7ff;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .variant-values-container {
-            overflow: hidden;
-        }
-
-        .variant-values-display {
-            background-color: #5e72e4;
-            color: white;
-            padding: 8px;
-            border-radius: 8px;
-        }
-    </style>
-    <link rel="stylesheet" href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/choices/choices.min.css') }}">
-@endsection
 
 
 @section('content')
     <div class="content">
         <nav class="mb-3" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="#!">Page 1</a></li>
-                <li class="breadcrumb-item"><a href="#!">Page 2</a></li>
-                <li class="breadcrumb-item active">Default</li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.products.index') }}">Products</a></li>
+                <li class="breadcrumb-item active">{{ isset($item) ? 'Edit' : 'Create' }}</li>
             </ol>
         </nav>
-        <form class="mb-9">
+        <form class="mb-9" method="POST" action="{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}" enctype="multipart/form-data" id="product-form">
+            @csrf
+            @if(isset($item))
+                @method('PUT')
+            @endif
             <div class="row g-3 flex-between-end mb-5">
                 <div class="col-auto">
-                    <h2 class="mb-2">Add a product</h2>
-                    <h5 class="text-body-tertiary fw-semibold">Orders placed across your store</h5>
+                    <h2 class="mb-2">{{ isset($item) ? 'Edit product' : 'Add a product' }}</h2>
+                    <h5 class="text-body-tertiary fw-semibold">Complete all fields</h5>
                 </div>
-                <div class="col-auto"><button class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0"
-                        type="button">Discard</button><button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0"
-                        type="button">Save draft</button><button class="btn btn-primary mb-2 mb-sm-0"
-                        type="submit" id="publish-btn">Publish product</button></div>
+                <div class="col-auto">
+                    <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0" href="{{ route('admin.products.index') }}">Cancel</a>
+                    <button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="submit" name="action" value="draft">Save draft</button>
+                    <button class="btn btn-primary mb-2 mb-sm-0" type="submit" id="publish-btn" name="action" value="publish">Publish product</button>
+                </div>
             </div>
             <div class="row g-5">
                 <div class="col-12 col-xl-8">
-                    <h4 class="mb-3">Product Title</h4><input class="form-control mb-5" type="text"
-                        placeholder="Write title here..." />
-                    <div class="mb-6">
-                        <h4 class="mb-3 product-form-heading">Product Description</h4>
-                        <div class="description-container">
-                            <textarea class="tinymce form-control custom-editor" name="description"
-                                data-tinymce='{"height":"15rem","placeholder":"Write a description here...","skin":"oxide","content_css":"default","menubar":false,"statusbar":false,"toolbar":"bold italic underline | bullist numlist | link image | formatselect","plugins":"link image lists"}'></textarea>
+
+                    <div class="row">
+                      <div class="col-5">
+                        <h4 class="mb-3">Product Name</h4>
+                        <input class="form-control mb-5" type="text" name="name" placeholder="Write name here..." value="{{ $item->name ?? old('name') }}" />
+
+                      </div>
+                       <div class="col-7">
+                        <div class="mb-6">
+                            <h4 class="mb-3">Description</h4>
+                            <div class="description-container">
+                                <textarea class="tinymce form-control custom-editor" name="description"
+                                    data-tinymce='{"height":"30rem","placeholder":"Write a description here...","skin":"oxide","content_css":"default","menubar":false,"statusbar":false,"toolbar":"bold italic underline | bullist numlist | link image | formatselect","plugins":"link image lists"}'>{{ $item->description ?? old('description') }}</textarea>
+                            </div>
                         </div>
-                    </div>
-                    <h4 class="mb-3">Display images</h4>
-                    <div class="dropzone dropzone-multiple p-0 mb-5" id="my-awesome-dropzone" data-dropzone="data-dropzone">
-                        <div class="fallback"><input name="file" type="file" multiple="multiple" /></div>
-                        <div class="dz-preview d-flex flex-wrap">
-                            <div class="border border-translucent bg-body-emphasis rounded-3 d-flex flex-center position-relative me-2 mb-2"
-                                style="height:80px;width:80px;"><img class="dz-image"
-                                    src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/products/23.png') }}"
-                                    alt="..." data-dz-thumbnail="data-dz-thumbnail" /><a
-                                    class="dz-remove text-body-quaternary" href="#!"
-                                    data-dz-remove="data-dz-remove"><span data-feather="x"></span></a></div>
-                        </div>
-                        <div class="dz-message text-body-tertiary text-opacity-85" data-dz-message="data-dz-message">Drag
-                            your photo here<span class="text-body-secondary px-1">or</span><button class="btn btn-link p-0"
-                                type="button">Browse from device</button><br /><img class="mt-3 me-2"
-                                src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/image-icon.png') }}"
-                                width="40" alt="" /></div>
+                       </div>
                     </div>
 
+                    <h4 class="mb-3">Images</h4>
+                    <div class="mb-3">
+                        @if(isset($item) && $item->images->count() > 0)
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <h5>Current Images</h5>
+                                    <div class="d-flex flex-wrap">
+                                        @foreach($item->images as $image)
+                                            <div class="position-relative me-2 mb-2">
+                                                <img src="{{ Storage::url($image->image_path) }}" alt="{{ $item->name }}" class="img-thumbnail" style="height:100px; width:100px; object-fit:cover;">
+                                                <div class="position-absolute top-0 end-0">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="existing_images[{{ $image->id }}][is_primary]" value="1" {{ $image->is_primary ? 'checked' : '' }}>
+                                                        <label class="form-check-label text-white">Primary</label>
+                                                    </div>
+                                                    <input type="hidden" name="existing_images[{{ $image->id }}][order]" value="{{ $image->order }}">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input delete-image" type="checkbox" name="remove_images[]" value="{{ $image->id }}">
+                                                        <label class="form-check-label text-white">Remove</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="dropzone dropzone-multiple p-0 mb-5" id="product-images-upload">
+                        <div class="fallback"><input name="images[]" type="file" multiple /></div>
+                        <div class="dz-message text-body-tertiary text-opacity-85" data-dz-message="data-dz-message">
+                            Drag your photos here<span class="text-body-secondary px-1">or</span>
+                            <button class="btn btn-link p-0" type="button">Browse from device</button><br />
+                            <img class="mt-3 me-2" src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/image-icon.png') }}" width="40" alt="" />
+                        </div>
+                        <div class="dz-preview-container d-flex flex-wrap mt-3" id="image-preview-container"></div>
+                    </div>
                 </div>
                 <div class="col-12 col-xl-4">
                     <div class="row g-2">
                         <div class="col-12 col-xl-12">
                             <div class="card mb-3">
                                 <div class="card-body">
-                                    <h4 class="card-title mb-4">Organize</h4>
                                     <div class="row gx-3">
                                         <div class="col-12 col-sm-6 col-xl-12">
                                             <div class="mb-4">
@@ -238,15 +99,24 @@
                                                         href="{{ route('admin.categories.create') }}">Add new category</a>
                                                 </div>
                                                 <select class="form-select mb-3" name="category_id" aria-label="category">
-                                                    <option value="">CHON DI CCHOCCHO</option>
+                                                    <option value="">Select Category</option>
                                                     @foreach (\App\Models\Category::all() as $category)
-                                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                        <option value="{{ $category->id }}" {{ (isset($item) && $item->category_id == $category->id) || old('category_id') == $category->id ? 'selected' : '' }}>
+                                                            {{ $category->name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                         </div>
-
-
+                                        <div class="col-12 col-sm-6 col-xl-12">
+                                            <div class="mb-4">
+                                                <h5 class="mb-0 text-body-highlight mb-2">Featured Product</h5>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" id="is_hot" name="is_hot" type="checkbox" value="1" {{ (isset($item) && $item->is_hot) || old('is_hot') ? 'checked' : '' }} />
+                                                    <label class="form-check-label" for="is_hot">Mark as featured</label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -283,16 +153,17 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div><button id="add-option-btn" class="btn btn-phoenix-primary w-100" type="button">Add another
-                                        option</button>
+                                    </div>
+                                    <button id="add-option-btn" class="btn btn-phoenix-primary w-100 mt-3" type="button">Add another option</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- Hidden input to store variants data -->
+            <input type="hidden" id="variants-data" name="variants" value="">
         </form>
-
     </div>
 @endsection
 
@@ -305,12 +176,163 @@
             // Initialize Dropzone
             if (typeof Dropzone !== 'undefined') {
                 Dropzone.autoDiscover = false;
-                new Dropzone("#my-awesome-dropzone", {
-                    url: "/file/upload", // Replace with your upload endpoint
-                    paramName: "file",
-                    maxFilesize: 10, // MB
-                    addRemoveLinks: true,
-                    dictDefaultMessage: "Drag your photo here or Browse from device"
+
+                let myDropzone = new Dropzone("#product-images-upload", {
+                    url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
+                    paramName: "images",
+                    acceptedFiles: "image/*",
+                    addRemoveLinks: false,
+                    autoProcessQueue: false,
+                    uploadMultiple: true,
+                    parallelUploads: 10,
+                    maxFiles: 10,
+                    maxFilesize: null,
+                    previewsContainer: "#image-preview-container",
+                    clickable: "#product-images-upload",
+                    createImageThumbnails: true,
+                    thumbnailWidth: 132,
+                    thumbnailHeight: 132,
+                    previewTemplate: `
+                        <div class="dz-preview dz-file-preview">
+                            <div style="margin:55px;" class="dz-image">
+                                <img style="border-radius: 4px;" data-dz-thumbnail />
+                                <a class="dz-remove" href="javascript:undefined;" data-dz-remove title="Xóa ảnh"></a>
+                            </div>
+                        </div>
+                    `,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    init: function() {
+                        let myDropzone = this;
+                        let form = document.getElementById('product-form');
+
+                        // Add file input clear button
+                        const fileInput = document.querySelector('input[type="file"]');
+                        if (fileInput) {
+                            const clearButton = document.createElement('button');
+                            clearButton.type = 'button';
+                            clearButton.className = 'file-clear-btn';
+                            clearButton.innerHTML = '×';
+                            clearButton.onclick = function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                fileInput.value = '';
+                                // Also clear dropzone if needed
+                                myDropzone.removeAllFiles();
+                            };
+
+                            // Wrap file input in a relative positioned div
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'file-input-wrapper';
+                            fileInput.parentNode.insertBefore(wrapper, fileInput);
+                            wrapper.appendChild(fileInput);
+                            wrapper.appendChild(clearButton);
+                        }
+
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            // Collect variant data
+                            collectVariantData();
+
+                            // Create FormData
+                            let formData = new FormData(form);
+
+                            // Add queued files to FormData
+                            let queuedFiles = myDropzone.getQueuedFiles();
+                            queuedFiles.forEach(function(file) {
+                                formData.append('images[]', file);
+                            });
+
+                            // Get the form method and URL
+                            let method = form.getAttribute('method').toUpperCase();
+                            let url = form.getAttribute('action');
+
+                            // If it's PUT request, we need to append _method field
+                            if (method === 'PUT') {
+                                formData.append('_method', 'PUT');
+                            }
+
+                            // Send AJAX request
+                            fetch(url, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    window.location.href = data.redirect;
+                                }
+                            })
+                            .catch(error => {
+                            });
+                        });
+
+                        // File added event
+                        this.on("addedfile", function(file) {
+                            console.log("File added:", file.name);
+                            // Ensure proper spacing and layout
+                            if (file.previewElement) {
+                                file.previewElement.style.margin = '0';
+                                let details = file.previewElement.querySelector('.dz-details');
+                                if (details) details.style.display = 'none';
+                            }
+                        });
+
+                        // File removed event
+                        this.on("removedfile", function(file) {
+                            console.log("File removed:", file.name);
+                        });
+
+                        // Error handling
+                        this.on("error", function(file, errorMessage) {
+                            console.error("Error with file:", file.name, errorMessage);
+                            if (file.previewElement) {
+                                let errorDisplay = file.previewElement.querySelector('[data-dz-errormessage]');
+                                if (errorDisplay) {
+                                    errorDisplay.textContent = errorMessage;
+                                }
+                                file.previewElement.classList.add('dz-error');
+                            }
+                        });
+
+                        // Display existing images (for edit mode)
+                        @if(isset($item) && $item->images->count() > 0)
+                            @foreach($item->images as $image)
+                                let mockFile = {
+                                    name: "{{ basename($image->image_path) }}",
+                                    size: 12345,
+                                    accepted: true,
+                                    status: "success",
+                                    id: {{ $image->id }},
+                                    is_primary: {{ $image->is_primary ? 'true' : 'false' }}
+                                };
+
+                                myDropzone.emit("addedfile", mockFile);
+                                myDropzone.emit("thumbnail", mockFile, "{{ Storage::url($image->image_path) }}");
+                                myDropzone.emit("complete", mockFile);
+
+                                // Hide file details for existing images
+                                if (mockFile.previewElement) {
+                                    let details = mockFile.previewElement.querySelector('.dz-details');
+                                    if (details) details.style.display = 'none';
+                                }
+
+                                if (mockFile.is_primary) {
+                                    let primaryBadge = document.createElement('div');
+                                    primaryBadge.className = 'primary-badge';
+                                    primaryBadge.textContent = 'Primary';
+                                    mockFile.previewElement.appendChild(primaryBadge);
+                                }
+                            @endforeach
+                        @endif
+                    }
                 });
             }
 
@@ -321,9 +343,49 @@
                     disableMobile: true
                 });
             }
+
+            // Function to collect variant data
+            function collectVariantData() {
+                // Collect all variant options data
+                const variantOptions = [];
+
+                document.querySelectorAll('.variant-option').forEach(optionEl => {
+                    const optionNumber = optionEl.getAttribute('data-option');
+                    const attributeSelect = optionEl.querySelector('.attribute-select');
+                    const attributeId = attributeSelect.value;
+                    const attributeName = attributeSelect.options[attributeSelect.selectedIndex]?.text || '';
+
+                    if (!attributeId) return;
+
+                    const selectedValues = [];
+                    optionEl.querySelectorAll('.selected-value-chip').forEach(chip => {
+                        selectedValues.push({
+                            id: chip.getAttribute('data-value-id'),
+                            value: chip.querySelector('span').innerText
+                        });
+                    });
+
+                    if (selectedValues.length === 0) return;
+
+                    variantOptions.push({
+                        option: optionNumber,
+                        attribute_id: attributeId,
+                        attribute_name: attributeName,
+                        values: selectedValues
+                    });
+                });
+
+                // Update the hidden input with variant data
+                document.getElementById('variants-data').value = JSON.stringify(variantOptions);
+                console.log("Variant data collected:", document.getElementById('variants-data').value);
+            }
+
+            // Handle form submission - collect variant data
+            document.querySelector('form').addEventListener('submit', function(e) {
+                collectVariantData();
+            });
         });
     </script>
-    {{--  fill --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const variantsContainer = document.getElementById('variants-container');
@@ -635,50 +697,41 @@
                 // Update attribute selects to reflect current selections
                 updateAttributeSelects();
             });
-
-            // Handle form submission
-            document.querySelector('form').addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                // Collect all variant options data
-                const variantOptions = [];
-
-                document.querySelectorAll('.variant-option').forEach(optionEl => {
-                    const optionNumber = optionEl.getAttribute('data-option');
-                    const attributeSelect = optionEl.querySelector('.attribute-select');
-                    const attributeId = attributeSelect.value;
-                    const attributeName = attributeSelect.options[attributeSelect.selectedIndex]?.text || '';
-
-                    if (!attributeId) return;
-
-                    const selectedValues = [];
-                    optionEl.querySelectorAll('.variant-value-item.selected').forEach(valueEl => {
-                        selectedValues.push({
-                            id: valueEl.getAttribute('data-value-id'),
-                            value: valueEl.innerText
-                        });
-                    });
-
-                    if (selectedValues.length === 0) return;
-
-                    variantOptions.push({
-                        option: optionNumber,
-                        attribute_id: attributeId,
-                        attribute_name: attributeName,
-                        values: selectedValues
-                    });
-                });
-
-                // Add hidden input for variant data
-                const variantInput = document.createElement('input');
-                variantInput.type = 'hidden';
-                variantInput.name = 'variants';
-                variantInput.value = JSON.stringify(variantOptions);
-                this.appendChild(variantInput);
-
-                // Continue with form submission
-                this.submit();
-            });
         });
     </script>
 @endsection
+
+<style>
+    #image-preview-container .dz-image { position: relative !important; }
+    #image-preview-container .dz-remove {
+        position: absolute !important;
+        top: 6px !important;
+        right: 6px !important;
+        background: #ff4444 !important;
+        color: #fff !important;
+        border-radius: 50% !important;
+        width: 22px !important;
+        height: 22px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 18px !important;
+        z-index: 20 !important;
+        text-decoration: none !important;
+        border: none !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        font-weight: bold !important;
+    }
+    #image-preview-container .dz-remove:before {
+        content: "×";
+        font-size: 22px;
+        font-weight: bold;
+        line-height: 1;
+        color: #fff;
+        display: block;
+    }
+    #image-preview-container .dz-remove:hover {
+        background: #cc0000 !important;
+    }
+</style>

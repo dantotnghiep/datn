@@ -1,0 +1,133 @@
+<div class="row g-4 mb-6">
+    <div class="col-12 col-lg-9 col-xxl-10">
+        <div class="d-flex flex-between-center mb-3">
+            <div class="d-flex">
+                <h3 class="mx-2">Sản phẩm thông thường</h3>
+            </div><a class="btn btn-link btn-lg p-0 d-none d-md-block" href="#!">Xem thêm
+                <span class="fas fa-chevron-right fs-9 ms-1"></span></a>
+        </div>
+        <div class="swiper-theme-container products-slider">
+            <div class="swiper swiper theme-slider"
+                data-swiper='{"slidesPerView":1,"spaceBetween":16,"breakpoints":{"450":{"slidesPerView":2,"spaceBetween":16},"768":{"slidesPerView":3,"spaceBetween":20},"1200":{"slidesPerView":4,"spaceBetween":16},"1540":{"slidesPerView":5,"spaceBetween":16}}}'>
+                <div class="swiper-wrapper">
+                    @foreach($normalProducts as $product)
+                    <div class="swiper-slide">
+                        <div class="position-relative text-decoration-none product-card h-100">
+                            <div class="d-flex flex-column justify-content-between h-100">
+                                <div>
+                                    <div
+                                        class="border border-1 border-translucent rounded-3 position-relative mb-3">
+                                        <button
+                                            class="btn btn-wish btn-wish-primary z-2 d-toggle-container wishlist-btn"
+                                            data-bs-toggle="tooltip" data-bs-placement="top"
+                                            data-product-id="{{ $product->id }}"
+                                            data-variation-id="{{ $product->first_variation_id ?? 0 }}"
+                                            title="{{ in_array($product->first_variation_id, $wishlistItems ?? []) ? 'Đã yêu thích' : 'Thêm vào yêu thích' }}">
+                                            @if(in_array($product->first_variation_id, $wishlistItems ?? []))
+                                                <span class="fas fa-heart text-danger" data-fa-transform="down-1"></span>
+                                            @else
+                                                <span class="fas fa-heart d-block-hover" data-fa-transform="down-1"></span>
+                                                <span class="far fa-heart d-none-hover" data-fa-transform="down-1"></span>
+                                            @endif
+                                        </button>
+                                        <img class="img-fluid"
+                                            src="{{ asset($product->image ? $product->image : 'theme/prium.github.io/phoenix/v1.22.0/assets/img/products/6.png') }}"
+                                            alt="{{ $product->name }}" />
+                                    </div>
+                                    <a class="stretched-link" href="{{ route('product.detail', $product->slug) }}">
+                                        <h6 class="mb-2 lh-sm line-clamp-3 product-name">
+                                            {{ $product->name }}
+                                        </h6>
+                                    </a>
+                                </div>
+                                <div>
+                                    @if($product->min_price == $product->max_price)
+                                        <h6 class="text-danger mb-0 fw-bold">{{ number_format($product->min_price, 0, ',', '.') }}</h6>
+                                    @else
+                                        <h6 class="text-danger mb-0 fw-bold">{{ number_format($product->min_price, 0, ',', '.') }} - {{ number_format($product->max_price, 0, ',', '.') }}</h6>
+                                    @endif
+                                    
+                                    @if($product->variations_count > 0)
+                                    <p class="text-body-tertiary fw-semibold fs-9 lh-1 mb-0">{{ $product->variations_count }} loại sản phẩm</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="swiper-nav swiper-product-nav">
+                <div class="swiper-button-next"><span
+                        class="fas fa-chevron-right nav-icon"></span></div>
+                <div class="swiper-button-prev"><span class="fas fa-chevron-left nav-icon"></span>
+                </div>
+            </div>
+        </div>
+        <a class="fw-bold d-md-none px-0" href="#!">Xem thêm<span
+                class="fas fa-chevron-right fs-9 ms-1"></span></a>
+    </div>
+    <div class="col-lg-3 d-none d-lg-block col-xxl-2">
+        <div class="h-100 position-relative rounded-3 overflow-hidden">
+            <div class="bg-holder"
+                style="background-image:url({{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/e-commerce/4.png') }});"></div>
+            <!--/.bg-holder-->
+        </div>
+    </div>
+    <div class="col-12 d-lg-none"><a href="#!"><img class="w-100 rounded-3"
+                src="../../../assets/img/e-commerce/6.png" alt="" /></a></div>
+</div>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('.wishlist-btn').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var btn = $(this);
+            var variationId = btn.data('variation-id');
+            
+            if (variationId <= 0) {
+                toastr.warning('Sản phẩm này không có biến thể');
+                return;
+            }
+            
+            $.ajax({
+                url: '{{ route("wishlist.toggle") }}',
+                type: 'POST',
+                data: {
+                    variation_id: variationId,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (response.action === 'added') {
+                            btn.find('.far.fa-heart').hide();
+                            btn.find('.fas.fa-heart.d-block-hover').hide();
+                            btn.html('<span class="fas fa-heart text-danger" data-fa-transform="down-1"></span>');
+                            btn.attr('title', 'Đã yêu thích');
+                        } else {
+                            btn.html('<span class="fas fa-heart d-block-hover" data-fa-transform="down-1"></span><span class="far fa-heart d-none-hover" data-fa-transform="down-1"></span>');
+                            btn.attr('title', 'Thêm vào yêu thích');
+                        }
+                        
+                        if (response.message) {
+                            // Hiển thị thông báo (nếu có)
+                            toastr.success(response.message);
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        // Chưa đăng nhập, chuyển đến trang đăng nhập
+                        window.location.href = '{{ route("login") }}';
+                    } else {
+                        toastr.error('Đã xảy ra lỗi, vui lòng thử lại sau');
+                    }
+                }
+            });
+        });
+    });
+</script>
+@endpush

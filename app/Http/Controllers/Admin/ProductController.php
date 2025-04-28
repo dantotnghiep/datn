@@ -11,6 +11,8 @@ use App\Models\AttributeValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Admin\Traits\HasUploadImage;
 
 class ProductController extends BaseController
@@ -50,12 +52,45 @@ class ProductController extends BaseController
         ]);
     }
 
+    protected function generateSKU($name)
+    {
+        // Remove special characters and convert to uppercase
+        $base = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $name));
+
+        // Take first 6 characters
+        $base = substr($base, 0, 6);
+
+        // Add random number
+        $random = mt_rand(1000, 9999);
+
+        $sku = $base . $random;
+
+        // Check if SKU exists
+        while (Product::where('sku', $sku)->exists()) {
+            $random = mt_rand(1000, 9999);
+            $sku = $base . $random;
+        }
+
+        return $sku;
+    }
+
     public function store(Request $request)
     {
-        // Validate basic product data
+        // Log request data for debugging
+        Log::info('Product store request', [
+            'has_variants' => $request->has('variants'),
+            'variants_data' => $request->variants,
+            'has_files' => $request->hasFile('images'),
+            'files_count' => $request->hasFile('images') ? count($request->file('images')) : 0
+        ]);
+
         $validated = $request->validate($this->model::rules());
 
-        // Begin transaction to ensure all related operations succeed or fail together
+        // Generate SKU and slug
+        $validated['sku'] = $this->generateSKU($validated['name']);
+        $validated['slug'] = Str::slug($validated['name']);
+
+        // Begin transaction
         DB::beginTransaction();
 
         try {
@@ -65,53 +100,105 @@ class ProductController extends BaseController
             // Handle product images
             if ($request->hasFile('images')) {
                 $images = $request->file('images');
-
-                // Validate that all files are valid images
-                foreach ($images as $image) {
-                    if (!$image->isValid() || !in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
-                        throw new \Exception('Invalid image file uploaded.');
-                    }
-                }
+                Log::info('Processing ' . count($images) . ' uploaded image files');
 
                 foreach ($images as $index => $image) {
-                    $imagePath = $image->store('products', 'public');
+                    // Validate image
+                    if (!$image->isValid()) {
+                        throw new \Exception('Invalid image file at index ' . $index);
+                    }
 
-                    ProductImage::create([
-                        'product_id' => $product->id,
-                        'image_path' => $imagePath,
-                        'is_primary' => $index === 0, // First image is primary
-                        'order' => $index
-                    ]);
+                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+                        throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
+                    }
+
+                    // Store image
+                    try {
+                        $imagePath = $image->store('products', 'public');
+                        Log::info('Stored image at: ' . $imagePath);
+
+                        // Create product image record
+                        ProductImage::create([
+                            'product_id' => $product->id,
+                            'image_path' => $imagePath,
+                            'is_primary' => $index === 0,
+                            'order' => $index
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to store image: ' . $e->getMessage());
+                        throw new \Exception('Failed to store image: ' . $e->getMessage());
+                    }
                 }
             }
 
             // Handle product variations
-            if ($request->has('variations')) {
-                foreach ($request->variations as $variation) {
-                    // Create the variation
-                    $newVariation = ProductVariation::create([
-                        'product_id' => $product->id,
-                        'sku' => $variation['sku'],
-                        'name' => $variation['name'],
-                        'price' => $variation['price'],
-                        'sale_price' => $variation['sale_price'] ?? null,
-                        'stock' => $variation['stock'] ?? 0
-                    ]);
+            if ($request->has('variants') && !empty($request->variants)) {
+                $variantsData = json_decode($request->variants, true);
 
-                    // Attach attribute values to the variation
-                    if (isset($variation['attribute_values']) && is_array($variation['attribute_values'])) {
-                        $newVariation->attributeValues()->attach($variation['attribute_values']);
+                if (!empty($variantsData) && is_array($variantsData)) {
+                    $combinations = $this->generateVariantCombinations($variantsData);
+
+                    foreach ($combinations as $index => $combination) {
+                        $variationName = $product->name;
+                        $skuSuffix = '';
+                        $attributeValueIds = [];
+
+                        foreach ($combination as $attrValue) {
+                            $variationName .= ' - ' . $attrValue['value'];
+                            $skuSuffix .= '-' . substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
+                            $attributeValueIds[] = $attrValue['id'];
+                        }
+
+                        // Generate variation SKU
+                        $variationSku = $product->sku . $skuSuffix;
+                        $counter = 1;
+                        while (ProductVariation::where('sku', $variationSku)->exists()) {
+                            $variationSku = $product->sku . $skuSuffix . '-' . $counter;
+                            $counter++;
+                        }
+
+                        // Create variation
+                        $newVariation = ProductVariation::create([
+                            'product_id' => $product->id,
+                            'sku' => $variationSku,
+                            'name' => $variationName,
+                            'price' => 0,
+                            'stock' => 0
+                        ]);
+
+                        if (!empty($attributeValueIds)) {
+                            $newVariation->attributeValues()->attach($attributeValueIds);
+                        }
                     }
                 }
             }
 
             DB::commit();
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Product created successfully',
+                    'redirect' => route('admin.products.index'),
+                    'product' => $product
+                ]);
+            }
+
             return redirect()->route($this->route . '.index')
                 ->with('success', 'Product created successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error creating product: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error creating product: ' . $e->getMessage()
+                ], 500);
+            }
 
             return redirect()->back()
                 ->with('error', 'Error creating product: ' . $e->getMessage())
@@ -124,12 +211,14 @@ class ProductController extends BaseController
         $item = $this->model::with(['images', 'variations.attributeValues'])->findOrFail($id);
         $fields = $this->model::getFields();
         $attributes = Attribute::with('values')->get();
+        $attributeValues = AttributeValue::all();
 
         return view($this->viewPath . '.form', [
             'item' => $item,
             'fields' => $fields,
             'route' => $this->route,
-            'attributes' => $attributes
+            'attributes' => $attributes,
+            'attributeValues' => $attributeValues
         ]);
     }
 
@@ -148,25 +237,34 @@ class ProductController extends BaseController
             // Handle product images
             if ($request->hasFile('images')) {
                 $images = $request->file('images');
-
-                // Validate that all files are valid images
-                foreach ($images as $image) {
-                    if (!$image->isValid() || !in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
-                        throw new \Exception('Invalid image file uploaded.');
-                    }
-                }
-
-                $maxOrder = ProductImage::where('product_id', $id)->max('order') ?? 0;
+                Log::info('Processing ' . count($images) . ' uploaded image files');
 
                 foreach ($images as $index => $image) {
-                    $imagePath = $image->store('products', 'public');
+                    // Validate image
+                    if (!$image->isValid()) {
+                        throw new \Exception('Invalid image file at index ' . $index);
+                    }
 
-                    ProductImage::create([
-                        'product_id' => $id,
-                        'image_path' => $imagePath,
-                        'is_primary' => false, // Never make new images primary when updating
-                        'order' => $maxOrder + $index + 1
-                    ]);
+                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+                        throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
+                    }
+
+                    // Store image
+                    try {
+                        $imagePath = $image->store('products', 'public');
+                        Log::info('Stored image at: ' . $imagePath);
+
+                        // Create product image record
+                        ProductImage::create([
+                            'product_id' => $id,
+                            'image_path' => $imagePath,
+                            'is_primary' => false,
+                            'order' => ProductImage::where('product_id', $id)->max('order') + 1
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to store image: ' . $e->getMessage());
+                        throw new \Exception('Failed to store image: ' . $e->getMessage());
+                    }
                 }
             }
 
@@ -175,9 +273,7 @@ class ProductController extends BaseController
                 foreach ($request->existing_images as $imageId => $imageData) {
                     $productImage = ProductImage::findOrFail($imageId);
 
-                    // Update primary status
                     if (isset($imageData['is_primary']) && $imageData['is_primary']) {
-                        // Reset all other images to non-primary
                         ProductImage::where('product_id', $id)
                             ->where('id', '!=', $imageId)
                             ->update(['is_primary' => false]);
@@ -185,7 +281,6 @@ class ProductController extends BaseController
                         $productImage->is_primary = true;
                     }
 
-                    // Update order
                     if (isset($imageData['order'])) {
                         $productImage->order = $imageData['order'];
                     }
@@ -198,16 +293,13 @@ class ProductController extends BaseController
             if ($request->has('remove_images')) {
                 foreach ($request->remove_images as $imageId) {
                     $image = ProductImage::findOrFail($imageId);
-
-                    // Delete the file
                     if ($image->image_path) {
                         Storage::disk('public')->delete($image->image_path);
                     }
-
                     $image->delete();
                 }
 
-                // Make sure there's a primary image
+                // Ensure there's a primary image
                 $primaryExists = ProductImage::where('product_id', $id)
                     ->where('is_primary', true)
                     ->exists();
@@ -220,57 +312,78 @@ class ProductController extends BaseController
                 }
             }
 
-            // Handle variations (update existing and create new)
-            if ($request->has('variations')) {
-                foreach ($request->variations as $variationData) {
-                    if (isset($variationData['id'])) {
-                        // Update existing variation
-                        $variation = ProductVariation::findOrFail($variationData['id']);
-                        $variation->update([
-                            'sku' => $variationData['sku'],
-                            'name' => $variationData['name'],
-                            'price' => $variationData['price'],
-                            'sale_price' => $variationData['sale_price'] ?? null,
-                            'stock' => $variationData['stock'] ?? 0
-                        ]);
+            // Handle product variations
+            if ($request->has('variants') && !empty($request->variants)) {
+                $variantsData = json_decode($request->variants, true);
 
-                        // Update attribute values
-                        if (isset($variationData['attribute_values']) && is_array($variationData['attribute_values'])) {
-                            $variation->attributeValues()->sync($variationData['attribute_values']);
+                if (!empty($variantsData) && is_array($variantsData)) {
+                    // First, soft delete all existing variations
+                    ProductVariation::where('product_id', $id)->delete();
+
+                    // Generate all possible combinations
+                    $combinations = $this->generateVariantCombinations($variantsData);
+
+                    foreach ($combinations as $index => $combination) {
+                        $variationName = $item->name;
+                        $skuSuffix = '';
+                        $attributeValueIds = [];
+
+                        foreach ($combination as $attrValue) {
+                            $variationName .= ' - ' . $attrValue['value'];
+                            $skuSuffix .= '-' . substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
+                            $attributeValueIds[] = $attrValue['id'];
                         }
-                    } else {
-                        // Create new variation
+
+                        // Generate variation SKU
+                        $variationSku = $item->sku . $skuSuffix;
+                        $counter = 1;
+                        while (ProductVariation::where('sku', $variationSku)->exists()) {
+                            $variationSku = $item->sku . $skuSuffix . '-' . $counter;
+                            $counter++;
+                        }
+
+                        // Create variation
                         $newVariation = ProductVariation::create([
                             'product_id' => $id,
-                            'sku' => $variationData['sku'],
-                            'name' => $variationData['name'],
-                            'price' => $variationData['price'],
-                            'sale_price' => $variationData['sale_price'] ?? null,
-                            'stock' => $variationData['stock'] ?? 0
+                            'sku' => $variationSku,
+                            'name' => $variationName,
+                            'price' => 0,
+                            'stock' => 0
                         ]);
 
-                        // Attach attribute values to the variation
-                        if (isset($variationData['attribute_values']) && is_array($variationData['attribute_values'])) {
-                            $newVariation->attributeValues()->attach($variationData['attribute_values']);
+                        if (!empty($attributeValueIds)) {
+                            $newVariation->attributeValues()->attach($attributeValueIds);
                         }
                     }
                 }
             }
 
-            // Handle removing variations
-            if ($request->has('remove_variations')) {
-                foreach ($request->remove_variations as $variationId) {
-                    ProductVariation::destroy($variationId);
-                }
-            }
-
             DB::commit();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Product updated successfully',
+                    'redirect' => route('admin.products.index'),
+                    'product' => $item->fresh()
+                ]);
+            }
 
             return redirect()->route($this->route . '.index')
                 ->with('success', 'Product updated successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error updating product: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error updating product: ' . $e->getMessage()
+                ], 500);
+            }
 
             return redirect()->back()
                 ->with('error', 'Error updating product: ' . $e->getMessage())
@@ -286,5 +399,60 @@ class ProductController extends BaseController
 
         return redirect()->route($this->route . '.index')
             ->with('success', 'Product moved to trash successfully!');
+    }
+
+    /**
+     * Generate all possible combinations of attribute values for product variations
+     *
+     * @param array $variantsData An array of variant options with their attribute values
+     * @return array All possible combinations of attribute values
+     */
+    protected function generateVariantCombinations(array $variantsData)
+    {
+        // Log input data for debugging
+        Log::info('Generating variant combinations', [
+            'input_data' => $variantsData
+        ]);
+
+        // Extract attribute values for each option
+        $attributeValueSets = [];
+
+        foreach ($variantsData as $option) {
+            if (isset($option['values']) && !empty($option['values'])) {
+                $attributeValueSets[] = $option['values'];
+                Log::debug('Added attribute values', [
+                    'option' => $option['option'],
+                    'attribute_id' => $option['attribute_id'],
+                    'values_count' => count($option['values'])
+                ]);
+            }
+        }
+
+        // If no attribute values, return empty array
+        if (empty($attributeValueSets)) {
+            Log::warning('No attribute value sets found');
+            return [];
+        }
+
+        // Helper function to generate Cartesian product (all combinations)
+        $combinations = [[]];
+
+        foreach ($attributeValueSets as $attributeValues) {
+            $result = [];
+
+            foreach ($combinations as $combination) {
+                foreach ($attributeValues as $attributeValue) {
+                    $result[] = array_merge($combination, [$attributeValue]);
+                }
+            }
+
+            $combinations = $result;
+        }
+
+        Log::info('Generated combinations', [
+            'combinations_count' => count($combinations)
+        ]);
+
+        return $combinations;
     }
 }

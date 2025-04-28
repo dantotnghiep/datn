@@ -6,6 +6,24 @@ class ProductImage extends BaseModel
 {
     protected $fillable = ['product_id', 'image_path', 'is_primary', 'order'];
 
+    /**
+     * Override to disable slug generation
+     *
+     * @return bool
+     */
+    protected function slugExists($slug)
+    {
+        return false; // Skip slug checking since we don't use slugs for images
+    }
+
+    /**
+     * Override to disable slug updating
+     */
+    protected static function bootHasSlug()
+    {
+        // Do nothing to disable the behavior
+    }
+
     public static function rules($id = null)
     {
         return [
@@ -52,4 +70,4 @@ class ProductImage extends BaseModel
     {
         return $this->belongsTo(Product::class);
     }
-} 
+}
