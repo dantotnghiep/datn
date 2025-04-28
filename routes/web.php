@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\AuthController;
+use App\Http\Controllers\Client\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/thong-tin', function () {
         return view('client.auth.profile');
     })->name('profile');
+    
+    // Wishlist routes
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
 });
 
 Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
@@ -55,6 +60,4 @@ Route::get('/gio-hang', function () {
 Route::get('/checkout', function () {
     return view('client.cart.checkout');
 })->name('checkout');
-Route::get('/yeu-thich', function () {
-    return view('client.wishlist.index');
-})->name('wishlist');
+Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist');
