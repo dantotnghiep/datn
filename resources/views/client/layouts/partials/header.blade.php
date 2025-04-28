@@ -16,8 +16,11 @@
                                     class="nav-link px-2 icon-indicator icon-indicator-primary"
                                     href="{{route('cart')}}" role="button"><span class="text-body-tertiary"
                                         data-feather="shopping-cart"
-                                        style="height:20px;width:20px;"></span><span
-                                        class="icon-indicator-number">3</span></a></li>
+                                        style="height:20px;width:20px;"></span>
+                                    @if($cartCount > 0)
+                                    <span class="icon-indicator-number">{{ $cartCount }}</span>
+                                    @endif
+                                </a></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link px-2" id="navbarDropdownUser"
                                     href="#" role="button" data-bs-toggle="dropdown"
