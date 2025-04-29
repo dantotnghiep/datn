@@ -5,13 +5,22 @@
         <div class="container-fluid">
             <div class="cr-page-title cr-page-title-2">
                 <div class="cr-breadcrumb">
-                    <h5>Add Product</h5>
+                    <h5>Thêm sản phẩm</h5>
                     <ul>
-                        <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li>Add Product</li>
+                        <li><a href="{{ route('admin.dashboard') }}">Bảng điều khiển</a></li>
+                        <li>Thêm sản phẩm</li>
                     </ul>
                 </div>
             </div>
+
+            @if($errors->any())
+                <div style="background-color: #000; color: #fff; padding: 15px; margin-bottom: 20px;">
+                    <p>Gỡ lỗi: Tìm thấy {{ count($errors->all()) }} lỗi</p>
+                    @foreach($errors->all() as $error)
+                        <p>- {{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
 
             @if ($errors->any())
                 <div id="error-container" class="alert alert-info">
@@ -41,53 +50,53 @@
                                 @csrf
                                 <div class="row g-3 mt-4">
                                     <div class="col-md-6">
-                                        <label for="name">Product Name</label>
+                                        <label for="name">Tên sản phẩm</label>
                                         <input type="text" name="name" class="form-control" id="slug"
                                             onkeyup="ChangeToSlug();"  value="{{ old('name') }}">
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="slug">Slug</label>
+                                        <label for="slug">Đường dẫn (Slug)</label>
                                         <input type="text" name="slug" class="form-control" id="convert_slug"
                                              value="{{ old('slug') }}">
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="category_id">Category</label>
-                                        <select name="category_id" id="category_id" class="form-control" >
-                                            <option value="">-- Select Category --</option>
+                                        <label for="category_id">Danh mục</label>
+                                        <select name="category_id" id="category_id" class="form-control" required>
+                                            <option value="">-- Chọn danh mục --</option>
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="status">Status</label>
-                                        <select name="status" id="status" class="form-control" >
-                                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                        <label for="status">Trạng thái</label>
+                                        <select name="status" id="status" class="form-control" required>
+                                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Kích hoạt</option>
+                                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Ẩn</option>
                                         </select>
                                     </div>
                                     <div class="col-md-12">
-                                        <label for="description">Description</label>
+                                        <label for="description">Mô tả</label>
                                         <textarea name="description" id="description" class="form-control" rows="3">{{ old('description') }}</textarea>
                                     </div>
 
                                     <hr class="my-4">
-                                    <h4>Images</h4>
+                                    <h4>Hình ảnh</h4>
 
                                     <div class="col-md-6">
-                                        <label for="main_image">Main Image</label>
+                                        <label for="main_image">Ảnh chính</label>
                                         <input type="file" name="main_image" class="form-control" accept="image/*">
+
                                         <div class="mt-2" id="main_image_preview"></div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="additional_images">Additional Images</label>
-                                        <input type="file" name="additional_images[]" class="form-control"
-                                            accept="image/*" multiple>
+                                        <label for="additional_images">Hình ảnh phụ</label>
+                                        <input type="file" name="additional_images[]" class="form-control" accept="image/*" multiple>
                                         <div class="mt-2" id="additional_images_preview"></div>
                                     </div>
 
                                     <hr class="my-4">
-                                    <h4>Attributes</h4>
+                                    <h4>Thuộc tính</h4>
 
                                     @foreach ($attributes as $attribute)
                                         <div class="col-md-6">
@@ -103,18 +112,17 @@
                                     @endforeach
 
                                     <hr class="my-4">
-                                    <h4>Variations</h4>
+                                    <h4>Biến thể</h4>
                                     <div class="col-12">
-                                        <button type="button" class="btn btn-secondary mb-3"
-                                            id="generate-variations">Generate Variations</button>
+                                        <button type="button" class="btn btn-secondary mb-3" id="generate-variations">Tạo biến thể</button>
                                         <div id="variations-container">
-                                            <!-- Variations will be dynamically added here -->
+                                            <!-- Các biến thể sẽ được thêm vào đây -->
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="col-md-12 mt-4">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" class="btn btn-primary">Lưu sản phẩm</button>
                                 </div>
                             </form>
                         </div>
@@ -135,7 +143,7 @@
             // Thêm xử lý slug tự động từ tên sản phẩm
             const nameInput = document.getElementById('slug');
             const slugInput = document.getElementById('convert_slug');
-            
+
             if (nameInput && slugInput) {
                 // Hàm chuyển đổi tên thành slug
                 function ChangeToSlug() {
@@ -145,10 +153,10 @@
                         .replace(/ +/g, '-');
                     slugInput.value = slug;
                 }
-                
+
                 // Gán hàm vào sự kiện input để cập nhật slug khi đang nhập tên
                 nameInput.addEventListener('input', ChangeToSlug);
-                
+
                 // Gán hàm vào window để sử dụng với onkeyup đã có trong HTML
                 window.ChangeToSlug = ChangeToSlug;
             }
@@ -311,7 +319,7 @@
                     window.scrollTo({top: y, behavior: 'smooth'});
                 }, 300);
             }
-            
+
             // Setup form submit to save scroll position
             const form = document.querySelector('form');
             if (form) {
@@ -319,7 +327,7 @@
                     sessionStorage.setItem('scrollPosition', window.pageYOffset);
                 });
             }
-            
+
             // Restore scroll position if there are errors
             if ({{ $errors->any() ? 'true' : 'false' }}) {
                 setTimeout(function() {
@@ -357,14 +365,14 @@
             border-radius: 4px;
             padding: 5px;
         }
-                
+
         .invalid-feedback {
             display: block;
             color: #dc3545;
             font-size: 14px;
             margin-top: 5px;
         }
-        
+
         .is-invalid {
             border-color: #dc3545 !important;
         }
@@ -378,7 +386,7 @@
             border: 1px solid #dee2e6;
             color: #333;
         }
-        
+
         #error-container div {
             margin-bottom: 5px;
         }

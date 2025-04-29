@@ -6,10 +6,10 @@
         <div class="container-fluid">
             <div class="cr-page-title cr-page-title-2">
                 <div class="cr-breadcrumb">
-                    <h5>Create user</h5>
+                    <h5>Thêm người dùng</h5>
                     <ul>
                         <li><a href="{{ route('admin.dashboard') }}">Carrot</a></li>
-                        <li>Create user</li>
+                        <li>Thêm người dùng</li>
                     </ul>
                 </div>
             </div>
@@ -40,18 +40,17 @@
                                 <div class="mb-3">
                                     <label class="form-label">Mật khẩu</label>
                                     <input type="password" name="password" class="form-control">
-                                    
+
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Trạng thái</label>
                                     <select name="status" class="form-control">
                                         <option value="active"
-                                            {{ old('status', $user->status ?? '') == 'active' ? 'selected' : '' }}>Active
+                                            {{ old('status', $user->status ?? '') == 'active' ? 'selected' : '' }}>Kích hoạt
                                         </option>
                                         <option value="inactive"
-                                            {{ old('status', $user->status ?? '') == 'inactive' ? 'selected' : '' }}>
-                                            Inactive</option>
+                                            {{ old('status', $user->status ?? '') == 'inactive' ? 'selected' : '' }}>Ẩn</option>
                                     </select>
                                 </div>
 
@@ -59,11 +58,11 @@
                                     <label class="form-label">Vai trò</label>
                                     <select name="role" class="form-control">
                                         <option value="user"
-                                            {{ old('role', $user->role ?? '') == 'user' ? 'selected' : '' }}>User</option>
+                                            {{ old('role', $user->role ?? '') == 'user' ? 'selected' : '' }}>Người dùng</option>
                                         <option value="admin"
-                                            {{ old('role', $user->role ?? '') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                            {{ old('role', $user->role ?? '') == 'admin' ? 'selected' : '' }}>Quản trị viên</option>
                                         <option value="staff"
-                                            {{ old('role', $user->role ?? '') == 'staff' ? 'selected' : '' }}>Staff</option>
+                                            {{ old('role', $user->role ?? '') == 'staff' ? 'selected' : '' }}>Nhân viên</option>
                                     </select>
                                 </div>
 

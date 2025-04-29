@@ -123,7 +123,7 @@
                 <li class="cr-sb-item">
                     <a href="apexchart.html" class="cr-page-link">
                         <i class="ri-bar-chart-grouped-line"></i><span class="condense"><span
-                                class="hover-title">Apexcharts</span></span></a>
+                                class="hover-title">Biểu đồ Apex</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="buttons.html" class="cr-page-link">
@@ -133,7 +133,7 @@
                 <li class="cr-sb-item">
                     <a href="accordions.html" class="cr-page-link">
                         <i class="ri-play-list-add-line"></i><span class="condense"><span
-                                class="hover-title">Accordion</span></span></a>
+                                class="hover-title">Đàn xếp</span></span></a>
                 </li>
                 <li class="cr-sb-item">
                     <a href="typography.html" class="cr-page-link">
