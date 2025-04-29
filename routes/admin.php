@@ -51,16 +51,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/', [ProductController::class, 'store'])->name('store');
 
         // Edit form
-        Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::get('/edit/{slug}', [ProductController::class, 'edit'])->name('edit');
 
         // Update
-        Route::put('/{id}', [ProductController::class, 'update'])->name('update');
+        Route::put('/update/{slug}', [ProductController::class, 'update'])->name('update');
 
         // Soft delete
-        Route::delete('/{id}', [ProductController::class, 'destroy'])->name('destroy');
+        Route::delete('/delete/{slug}', [ProductController::class, 'destroy'])->name('destroy');
 
         // Restore from trash
-        Route::put('/{id}/restore', [ProductController::class, 'restore'])->name('restore');
+        Route::put('/restore/{slug}', [ProductController::class, 'restore'])->name('restore');
     });
 
 

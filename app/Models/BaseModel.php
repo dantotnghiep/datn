@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 abstract class BaseModel extends Model
 {
@@ -106,5 +107,30 @@ abstract class BaseModel extends Model
     {
         $fields = static::getFields();
         return $fields[$field]['options'] ?? [];
+    }
+
+    protected function generateUniqueSlug($name)
+    {
+        $slug = Str::slug($name);
+        $originalSlug = $slug;
+        $count = 1;
+
+        while ($this->slugExists($slug)) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
+    }
+
+    protected function slugExists($slug)
+    {
+        $query = static::where('slug', $slug);
+
+        if ($this->exists) {
+            $query->where('id', '!=', $this->id);
+        }
+
+        return $query->exists();
     }
 }
