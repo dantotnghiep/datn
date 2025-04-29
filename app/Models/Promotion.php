@@ -103,18 +103,6 @@ class Promotion extends BaseModel
                 'type' => 'number',
                 'sortable' => true
             ],
-            'usage_count' => [
-                'label' => 'Đã sử dụng',
-                'type' => 'number',
-                'sortable' => true
-            ],
-            'is_active' => [
-                'label' => 'Kích hoạt',
-                'type' => 'boolean',
-                'filterable' => true,
-                'filter_options' => [0 => 'Không', 1 => 'Có'],
-                'sortable' => true
-            ],
             'starts_at' => [
                 'label' => 'Ngày bắt đầu',
                 'type' => 'datetime',
@@ -124,7 +112,15 @@ class Promotion extends BaseModel
                 'label' => 'Ngày kết thúc',
                 'type' => 'datetime',
                 'sortable' => true
-            ]
+            ],
+            'is_active' => [
+                'label' => 'Kích hoạt',
+                'type' => 'boolean',
+                'filterable' => true,
+                'filter_options' => [0 => 'Không', 1 => 'Có'],
+                'sortable' => true
+            ],
+
         ];
     }
 
