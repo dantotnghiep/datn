@@ -5,7 +5,8 @@ namespace App\Models;
 
 class Order extends BaseModel
 {
-
+    protected $hasSlug = false;
+    
     protected $fillable = [
         'order_number',
         'user_id',
@@ -82,14 +83,8 @@ class Order extends BaseModel
                 'searchable' => true,
                 'sortable' => false
             ],
-            'total' => [
-                'label' => 'Total Price',
-                'type' => 'number',
-                'step' => '0.01',
-                'sortable' => true
-            ],
             'total_with_discount' => [
-                'label' => 'Total Price After Discount',
+                'label' => 'Total Price',
                 'type' => 'number',
                 'step' => '0.01',
                 'sortable' => true

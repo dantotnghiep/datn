@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('supplier_name');
             $table->string('supplier_contact')->nullable();
             $table->decimal('total_amount', 12, 2);
+            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
             $table->text('notes')->nullable();
             $table->timestamps();
         });

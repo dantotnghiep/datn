@@ -62,6 +62,14 @@ class Product extends BaseModel
             'is_hot' => [
                 'label' => 'Featured Product',
                 'type' => 'select',
+                'options' => [
+                    0 => 'No',
+                    1 => 'Yes'
+                ],
+                'filter_options' => [
+                    0 => 'No',
+                    1 => 'Yes'
+                ],
                 'filterable' => true,
                 'sortable' => true
             ]

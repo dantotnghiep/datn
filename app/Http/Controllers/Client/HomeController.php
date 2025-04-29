@@ -27,7 +27,6 @@ class HomeController extends Controller
             ->take(6)
             ->orderBy('created_at', 'desc')
             ->get();
-            
         // Tính toán giá thấp nhất và cao nhất cho mỗi sản phẩm hot
         foreach ($hotProducts as $product) {
             if ($product->variations_count > 0) {
@@ -38,7 +37,6 @@ class HomeController extends Controller
                 $product->max_price = $product->price;
             }
         }
-        
         // Lấy sản phẩm không hot với giá cao nhất và thấp nhất từ variations
         $normalProducts = Product::where('is_hot', 0)
             ->whereNull('deleted_at')

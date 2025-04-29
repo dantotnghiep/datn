@@ -1,6 +1,18 @@
 @extends('client.master')
 @section('content')
     <div class="container-small cart">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <nav class="mb-3" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="#!">Page 1</a></li>
@@ -14,8 +26,10 @@
                 <div id="cartTable"
                     data-list='{"valueNames":["products","color","size","price","quantity","total"],"page":10}'>
                     <div class="mb-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="select-all-btn">Chọn tất cả</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-all-btn">Bỏ chọn tất cả</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="select-all-btn">Chọn tất
+                            cả</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-all-btn">Bỏ chọn tất
+                            cả</button>
                     </div>
                     <div class="table-responsive scrollbar mx-n1 px-1">
                         <table class="table fs-9 mb-0 border-top border-translucent">
@@ -33,26 +47,33 @@
                             </thead>
                             <tbody class="list" id="cart-table-body">
                                 @forelse($cartItems as $item)
-                                    <tr class="cart-table-row btn-reveal-trigger" data-product-id="{{ $item->productVariation->product->id }}" data-variation-id="{{ $item->productVariation->id }}">
+                                    <tr class="cart-table-row btn-reveal-trigger"
+                                        data-product-id="{{ $item->productVariation->product->id }}"
+                                        data-variation-id="{{ $item->productVariation->id }}">
                                         <td class="align-middle white-space-nowrap py-0">
                                             <div class="d-flex align-items-center">
-                                                <input type="checkbox" class="form-check-input select-item me-2" data-product-id="{{ $item->productVariation->product->id }}" data-variation-id="{{ $item->productVariation->id }}">
-                                                <a class="d-block border border-translucent rounded-2" href="{{ route('product.detail', $item->productVariation->product->slug) }}">
-                                                    <img src="{{ asset(optional($item->productVariation->product->images->first())->image_path ?? 'assets/img/products/default.png') }}" alt="{{ $item->productVariation->product->name }}" width="53" />
+                                                <input type="checkbox" class="form-check-input select-item me-2"
+                                                    data-product-id="{{ $item->productVariation->product->id }}"
+                                                    data-variation-id="{{ $item->productVariation->id }}">
+                                                <a class="d-block border border-translucent rounded-2"
+                                                    href="{{ route('product.detail', $item->productVariation->product->slug) }}">
+                                                    <img src="{{ asset(optional($item->productVariation->product->images->first())->image_path ?? 'assets/img/products/default.png') }}"
+                                                        alt="{{ $item->productVariation->product->name }}" width="53" />
                                                 </a>
                                             </div>
                                         </td>
                                         <td class="products align-middle">
-                                            <a class="fw-semibold mb-0 line-clamp-2" href="{{ route('product.detail', $item->productVariation->product->slug) }}">
+                                            <a class="fw-semibold mb-0 line-clamp-2"
+                                                href="{{ route('product.detail', $item->productVariation->product->slug) }}">
                                                 {{ $item->productVariation->product->name }}
                                             </a>
                                             <div class="text-muted small">{{ $item->productVariation->name }}</div>
                                         </td>
                                         <td class="align-middle white-space-nowrap fs-9 text-body">
-                                            @if($item->productVariation->attributeValues && count($item->productVariation->attributeValues))
-                                                {{ $item->productVariation->attributeValues->map(function($attrVal) {
-                                                    return ($attrVal->attribute ? $attrVal->attribute->name . ': ' : '') . $attrVal->value;
-                                                })->implode(' / ') }}
+                                            @if ($item->productVariation->attributeValues && count($item->productVariation->attributeValues))
+                                                {{ $item->productVariation->attributeValues->map(function ($attrVal) {
+                                                        return ($attrVal->attribute ? $attrVal->attribute->name . ': ' : '') . $attrVal->value;
+                                                    })->implode(' / ') }}
                                             @else
                                                 -
                                             @endif
@@ -63,7 +84,10 @@
                                         <td class="quantity align-middle fs-8 ps-5">
                                             <div class="input-group input-group-sm flex-nowrap quantity-control">
                                                 <button class="btn btn-sm px-2 minus-btn" type="button">-</button>
-                                                <input class="form-control text-center input-spin-none bg-transparent border-0 px-0 quantity-input" type="number" min="1" value="{{ $item->quantity }}" aria-label="Số lượng" />
+                                                <input
+                                                    class="form-control text-center input-spin-none bg-transparent border-0 px-0 quantity-input"
+                                                    type="number" min="1" value="{{ $item->quantity }}"
+                                                    aria-label="Số lượng" />
                                                 <button class="btn btn-sm px-2 plus-btn" type="button">+</button>
                                             </div>
                                         </td>
@@ -71,21 +95,17 @@
                                             {{ number_format($item->total) }}đ
                                         </td>
                                         <td class="align-middle white-space-nowrap text-end pe-0 ps-3">
-                                            <button class="btn btn-sm text-body-tertiary text-opacity-85 text-body-tertiary-hover me-2 btn-remove-cart-item"><span class="fas fa-trash"></span></button>
+                                            <button
+                                                class="btn btn-sm text-body-tertiary text-opacity-85 text-body-tertiary-hover me-2 btn-remove-cart-item"><span
+                                                    class="fas fa-trash"></span></button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-5 text-muted">Giỏ hàng của bạn đang trống.</td>
+                                        <td colspan="7" class="text-center py-5 text-muted">Giỏ hàng của bạn đang trống.
+                                        </td>
                                     </tr>
                                 @endforelse
-                                @if(count($cartItems) > 0)
-                                <tr class="cart-table-row btn-reveal-trigger">
-                                    <td class="text-body-emphasis fw-semibold ps-0 fs-8" colspan="5">Tổng tiền :</td>
-                                    <td class="text-body-emphasis fw-bold text-end fs-8">{{ number_format($total) }}đ</td>
-                                    <td></td>
-                                </tr>
-                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -95,46 +115,39 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex flex-between-center mb-3">
-                            <h3 class="card-title mb-0">Summary</h3><a class="btn btn-link p-0" href="#!">Edit cart
-                            </a>
-                        </div><select class="form-select mb-3" aria-label="delivery type">
-                            <option value="cod">Cash on Delivery</option>
-                            <option value="card">Card</option>
-                            <option value="paypal">Paypal</option>
-                        </select>
+                            <h3 class="card-title mb-0">Summary</h3>
+                        </div>
                         <div>
                             <div class="d-flex justify-content-between">
                                 <p class="text-body fw-semibold">Items subtotal :</p>
-                                <p class="text-body-emphasis fw-semibold">$691</p>
+                                <p class="text-body-emphasis fw-semibold">{{ number_format($total) }}đ</p>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <p class="text-body fw-semibold">Discount :</p>
-                                <p class="text-danger fw-semibold">-$59</p>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <p class="text-body fw-semibold">Tax :</p>
-                                <p class="text-body-emphasis fw-semibold">$126.20</p>
-                            </div>
+                            @if (isset($discount) && $discount > 0)
+                                <div class="d-flex justify-content-between">
+                                    <p class="text-body fw-semibold">Discount :</p>
+                                    <p class="text-danger fw-semibold">-{{ number_format($discount) }}đ</p>
+                                </div>
+                            @endif
                             <div class="d-flex justify-content-between">
                                 <p class="text-body fw-semibold">Subtotal :</p>
-                                <p class="text-body-emphasis fw-semibold">$665</p>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <p class="text-body fw-semibold">Shipping Cost :</p>
-                                <p class="text-body-emphasis fw-semibold">$30</p>
+                                <p class="text-body-emphasis fw-semibold">
+                                    {{ number_format(isset($subtotal) ? $subtotal : $total - ($discount ?? 0)) }}đ</p>
                             </div>
                         </div>
                         <div class="input-group mb-3"><input class="form-control" type="text"
                                 placeholder="Voucher" /><button class="btn btn-phoenix-primary px-5">Apply</button></div>
                         <div class="d-flex justify-content-between border-y border-dashed py-3 mb-4">
                             <h4 class="mb-0">Total :</h4>
-                            <h4 class="mb-">$695.20</h4>
+                            <h4 class="mb-">{{ number_format($total) }}đ</h4>
                         </div>
-                        <a href="{{route('checkout')}}">
-                            <button class="btn btn-primary w-100">Proceed to check out<span
-                                class="fas fa-chevron-right ms-1 fs-10"></span>
+                        <button class="btn btn-primary w-100" id="checkout-btn" disabled type="button">
+                            Proceed to check out<span class="fas fa-chevron-right ms-1 fs-10"></span>
                         </button>
-                        </a>
+                        <form id="checkout-form" action="{{ route('cart.checkout.selected') }}" method="POST"
+                            style="display:none;">
+                            @csrf
+                            <input type="hidden" name="selected_items" id="selected_items_input">
+                        </form>
 
                     </div>
                 </div>
@@ -148,7 +161,63 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Xử lý tăng/giảm số lượng
             const quantityControls = document.querySelectorAll('.quantity-control');
-            
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const itemCheckboxes = document.querySelectorAll('.select-item');
+
+            // Hàm kiểm tra và cập nhật trạng thái nút checkout
+            function updateCheckoutButton() {
+                const hasSelectedItems = Array.from(itemCheckboxes).some(checkbox => checkbox.checked);
+                checkoutBtn.disabled = !hasSelectedItems;
+                updateSelectedTotals();
+            }
+
+            // Hàm tính và cập nhật tổng tiền cho các sản phẩm được chọn
+            function updateSelectedTotals() {
+                let selectedTotal = 0;
+                itemCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const row = checkbox.closest('tr');
+                        const totalCell = row.querySelector('.total');
+                        const total = parseInt(totalCell.textContent.replace(/[^\d]/g, ''));
+                        selectedTotal += total;
+                    }
+                });
+
+                // Cập nhật hiển thị tổng tiền cho Items subtotal
+                const formattedTotal = new Intl.NumberFormat('vi-VN').format(selectedTotal) + 'đ';
+                
+                // Cập nhật Items subtotal
+                document.querySelector('.card-body .d-flex:first-child .text-body-emphasis.fw-semibold').textContent = formattedTotal;
+                
+                // Cập nhật Subtotal
+                document.querySelector('.card-body .d-flex:nth-child(2) .text-body-emphasis.fw-semibold').textContent = formattedTotal;
+                
+                // Cập nhật Total
+                document.querySelector('.d-flex.justify-content-between.border-y h4:last-child').textContent = formattedTotal;
+            }
+
+            // Thêm sự kiện cho các checkbox
+            itemCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateCheckoutButton);
+            });
+
+            // Xử lý chọn tất cả và bỏ chọn tất cả
+            const selectAllBtn = document.getElementById('select-all-btn');
+            const deselectAllBtn = document.getElementById('deselect-all-btn');
+
+            selectAllBtn.addEventListener('click', function() {
+                itemCheckboxes.forEach(cb => cb.checked = true);
+                updateCheckoutButton();
+            });
+
+            deselectAllBtn.addEventListener('click', function() {
+                itemCheckboxes.forEach(cb => cb.checked = false);
+                updateCheckoutButton();
+            });
+
+            // Kiểm tra ban đầu
+            updateCheckoutButton();
+
             quantityControls.forEach(control => {
                 const input = control.querySelector('.quantity-input');
                 const minusBtn = control.querySelector('.minus-btn');
@@ -188,30 +257,30 @@
 
             // Hàm cập nhật số lượng sản phẩm
             function updateCartItem(productId, variationId, quantity) {
-                fetch('{{ route("cart.update") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        variation_id: variationId,
-                        quantity: quantity
+                fetch('{{ route('cart.update') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            variation_id: variationId,
+                            quantity: quantity
+                        })
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        alert(data.message || 'Có lỗi xảy ra');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Có lỗi xảy ra khi cập nhật giỏ hàng');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Có lỗi xảy ra khi cập nhật giỏ hàng');
+                    });
             }
 
             // Xử lý xóa sản phẩm
@@ -230,30 +299,30 @@
 
             // Hàm xóa sản phẩm
             function removeCartItem(productId, variationId) {
-                fetch('{{ route("cart.remove") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        variation_id: variationId
+                fetch('{{ route('cart.remove') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            variation_id: variationId
+                        })
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Reload page to update cart UI
-                        window.location.reload();
-                    } else {
-                        alert(data.message || 'Có lỗi xảy ra');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Có lỗi xảy ra khi xóa sản phẩm');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Reload page to update cart UI
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Có lỗi xảy ra khi xóa sản phẩm');
+                    });
             }
 
             // Hàm cập nhật tổng tiền
@@ -269,18 +338,12 @@
                 // Cập nhật tổng tiền cuối cùng
                 document.querySelector('.total').textContent = totals.total;
             }
-
-            // Xử lý chọn tất cả và bỏ chọn tất cả
-            const selectAllBtn = document.getElementById('select-all-btn');
-            const deselectAllBtn = document.getElementById('deselect-all-btn');
-            const itemCheckboxes = document.querySelectorAll('.select-item');
-
-            selectAllBtn.addEventListener('click', function() {
-                itemCheckboxes.forEach(cb => cb.checked = true);
-            });
-            deselectAllBtn.addEventListener('click', function() {
-                itemCheckboxes.forEach(cb => cb.checked = false);
-            });
+        });
+        document.getElementById('checkout-btn').addEventListener('click', function() {
+            const selected = Array.from(document.querySelectorAll('.select-item:checked')).map(cb => cb.dataset
+                .variationId);
+            document.getElementById('selected_items_input').value = JSON.stringify(selected);
+            document.getElementById('checkout-form').submit();
         });
     </script>
 @endpush

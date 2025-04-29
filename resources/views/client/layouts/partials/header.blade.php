@@ -16,8 +16,11 @@
                                     class="nav-link px-2 icon-indicator icon-indicator-primary"
                                     href="{{route('cart')}}" role="button"><span class="text-body-tertiary"
                                         data-feather="shopping-cart"
-                                        style="height:20px;width:20px;"></span><span
-                                        class="icon-indicator-number">3</span></a></li>
+                                        style="height:20px;width:20px;"></span>
+                                    @if($cartCount > 0)
+                                    <span class="icon-indicator-number">{{ $cartCount }}</span>
+                                    @endif
+                                </a></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link px-2" id="navbarDropdownUser"
                                     href="#" role="button" data-bs-toggle="dropdown"
@@ -36,9 +39,6 @@
                                                 </div>
                                                 <h6 class="mt-2 text-body-emphasis">{{ Auth::user()->name }}</h6>
                                             </div>
-                                            <div class="mb-3 mx-3">
-                                                <input class="form-control form-control-sm" id="statusUpdateInput" type="text" placeholder="Update your status" />
-                                            </div>
                                         </div>
                                         <div class="overflow-auto scrollbar" style="height: 10rem;">
                                             <ul class="nav d-flex flex-column mb-2 pb-1">
@@ -49,15 +49,9 @@
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link px-3 d-block" href="#!">
-                                                        <span class="me-2 text-body align-bottom" data-feather="settings"></span>
-                                                        Settings &amp; Privacy
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link px-3 d-block" href="#!">
-                                                        <span class="me-2 text-body align-bottom" data-feather="help-circle"></span>
-                                                        Help Center
+                                                    <a class="nav-link px-3 d-block" href="{{route('client.order.list')}}">
+                                                        <span class="me-2 text-body align-bottom" data-feather="shopping-bag"></span>
+                                                        <span>Order</span>
                                                     </a>
                                                 </li>
                                             </ul>
@@ -70,13 +64,6 @@
                                                         <span class="me-2" data-feather="log-out"></span>Sign out
                                                     </button>
                                                 </form>
-                                            </div>
-                                            <div class="my-2 text-center fw-bold fs-10 text-body-quaternary">
-                                                <a class="text-body-quaternary me-1" href="#!">Privacy policy</a>
-                                                &bull;
-                                                <a class="text-body-quaternary mx-1" href="#!">Terms</a>
-                                                &bull;
-                                                <a class="text-body-quaternary ms-1" href="#!">Cookies</a>
                                             </div>
                                         </div>
                                         @else
