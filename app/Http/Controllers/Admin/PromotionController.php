@@ -10,7 +10,7 @@ class PromotionController extends BaseController
     public function __construct()
     {
         $this->model = Promotion::class;
-        $this->viewPath = 'admin.promotions';
+        $this->viewPath = 'admin.components.promotions';
         $this->route = 'admin.promotions';
         parent::__construct();
     }

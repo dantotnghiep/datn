@@ -8,6 +8,7 @@ class Attribute extends BaseModel
 {
     use SoftDeletes;
 
+    protected $hasSlug = false;
     protected $fillable = ['name'];
 
     public static function rules($id = null)
