@@ -46,14 +46,21 @@ class CartController extends Controller
         $user = Auth::user();
         $variation = ProductVariation::find($request->variation_id);
 
-        if ($variation->stock < $request->quantity) {
-            return back()->with('error', 'Số lượng sản phẩm không đủ');
-        }
-
         // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
         $existingCart = Cart::where('user_id', $user->id)
             ->where('product_variation_id', $request->variation_id)
             ->first();
+
+        // Tính tổng số lượng sẽ có trong giỏ hàng sau khi thêm
+        $totalQuantity = $request->quantity;
+        if ($existingCart) {
+            $totalQuantity += $existingCart->quantity;
+        }
+
+        // Kiểm tra tổng số lượng không vượt quá số lượng tồn kho
+        if ($totalQuantity > $variation->stock) {
+            return back()->with('error', 'Số lượng sản phẩm trong giỏ hàng vượt quá số lượng tồn kho. Số lượng tối đa có thể thêm là: ' . ($variation->stock - ($existingCart ? $existingCart->quantity : 0)));
+        }
 
         if ($existingCart) {
             // Nếu đã có thì cập nhật số lượng
