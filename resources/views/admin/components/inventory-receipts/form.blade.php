@@ -28,6 +28,7 @@
                 <div class="row g-3">
                     <!-- Main receipt information -->
                     @foreach($fields as $field => $options)
+                        @if(!in_array($field, ['total_amount', 'created_at', 'status']))
                         <div class="col-12 col-md-6 mb-3">
                             <label class="form-label fw-bold" for="{{ $field }}">
                                 {{ $options['label'] ?? ucfirst($field) }}
@@ -84,6 +85,7 @@
                                 </div>
                             @enderror
                         </div>
+                        @endif
                     @endforeach
                 </div>
                 
@@ -171,13 +173,8 @@
                                         </button>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end fw-bold">Total Amount:</td>
-                                    <td>
-                                        <input type="number" class="form-control" id="totalAmount" name="total_amount" value="{{ isset($item) ? $item->total_amount : '0.00' }}" readonly>
-                                    </td>
-                                    <td></td>
-                                </tr>
+                                <!-- Hidden total amount field -->
+                                <input type="hidden" id="totalAmount" name="total_amount" value="{{ isset($item) ? $item->total_amount : '0.00' }}">
                             </tfoot>
                         </table>
                     </div>

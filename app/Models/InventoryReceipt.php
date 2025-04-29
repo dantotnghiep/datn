@@ -4,7 +4,7 @@ namespace App\Models;
 
 class InventoryReceipt extends BaseModel
 {
-    protected $fillable = ['receipt_number', 'user_id', 'supplier_name', 'supplier_contact', 'total_amount', 'notes'];
+    protected $fillable = ['receipt_number', 'user_id', 'supplier_name', 'supplier_contact', 'total_amount', 'notes', 'status'];
 
     protected $casts = [
         'total_amount' => 'decimal:2'
@@ -94,6 +94,11 @@ class InventoryReceipt extends BaseModel
         ];
     }
 
+    public function getUserIdAttribute($value)
+    {
+        $user = User::find($value);
+        return $user ? $user->name : $value;
+    }
     public function user()
     {
         return $this->belongsTo(User::class);

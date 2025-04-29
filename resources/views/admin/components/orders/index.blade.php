@@ -106,10 +106,6 @@
                                 {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
                             </a>
                             @endif
-
-                            <a href="{{ route($route . '.create') }}" class="btn btn-primary">
-                                <span class="fas fa-plus me-2"></span> Add New
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -124,7 +120,6 @@
                                             {{ $options['label'] ?? ucfirst($field) }}
                                         </th>
                                     @endforeach
-                                    <th class="sort align-middle text-center" scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -153,56 +148,34 @@
                                                                 <span class="fas fa-shipping-fast me-1"></span>Ship
                                                             </button>
                                                         </form>
-                                                    @elseif ($statusId == 2)
+                                                    @elseif ($statusId == 3)
                                                         <span class="badge bg-info">Shipping</span>
                                                         <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
                                                             @csrf
                                                             @method('PUT')
-                                                            <input type="hidden" name="status_id" value="3">
+                                                            <input type="hidden" name="status_id" value="2">
                                                             <button type="submit" class="btn btn-sm btn-success" title="Mark as Completed">
                                                                 <span class="fas fa-check me-1"></span>Complete
                                                             </button>
                                                         </form>
-                                                    @elseif ($statusId == 3)
+                                                    @elseif ($statusId == 2)
                                                         <span class="badge bg-success">Completed</span>  
                                                     @elseif ($statusId == 4)
-                                                        <span class="badge bg-primary">Processing</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status_id" value="2">
-                                                            <button type="submit" class="btn btn-sm btn-info" title="Mark as Shipping">
-                                                                <span class="fas fa-shipping-fast me-1"></span>Ship
-                                                            </button>
-                                                        </form>
+                                                        <span class="badge bg-danger">Cancle</span>
                                                     @elseif ($statusId == 5)
                                                         <span class="badge bg-danger">Refunded</span>
                                                     @else
                                                         <span class="badge bg-secondary">{{ $item->status_id }}</span>
                                                     @endif
+                                                @elseif ($field == 'order_number')
+                                                    <a href="{{ route($route . '.details', $item->id) }}" class="fw-semibold text-body">
+                                                        {{ $item->$field }}
+                                                    </a>
                                                 @else
                                                     {{ $item->$field }}
                                                 @endif
                                             </td>
                                         @endforeach
-                                        <td class="align-middle text-center">
-                                            @if (method_exists($item, 'trashed') && $item->trashed())
-                                                <form action="{{ route($route . '.restore', $item->id) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <button type="submit" class="btn btn-sm p-0 text-success me-2"
-                                                        title="Restore">
-                                                        <span class="fas fa-trash-restore"></span>
-                                                    </button>
-                                                </form>
-                                            @else
-                                                <a href="{{ route($route . '.edit', $item->id) }}"
-                                                    class="btn btn-sm p-0 text-primary" title="Edit">
-                                                    <span class="fas fa-edit"></span>
-                                                </a>
-                                            @endif
-                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

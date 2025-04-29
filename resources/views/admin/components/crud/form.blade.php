@@ -27,6 +27,7 @@
 
                 <div class="row g-3">
                     @foreach($fields as $field => $options)
+                        @if(in_array($field, ['price', 'sale_price']))
                         <div class="col-12 col-md-6 mb-3">
                             <label class="form-label fw-bold" for="{{ $field }}">
                                 {{ $options['label'] ?? ucfirst($field) }}
@@ -77,6 +78,7 @@
                                         id="{{ $field }}"
                                         name="{{ $field }}"
                                         value="{{ old($field, isset($item) ? $item->$field : '') }}"
+                                        @if(isset($options['step'])) step="{{ $options['step'] }}" @endif
                                     >
                             @endswitch
 
@@ -86,6 +88,13 @@
                                 </div>
                             @enderror
                         </div>
+                        @endif
+                    @endforeach
+                    
+                    @foreach($fields as $field => $options)
+                        @if(!in_array($field, ['price', 'sale_price']))
+                            <input type="hidden" name="{{ $field }}" value="{{ old($field, isset($item) ? $item->$field : '') }}">
+                        @endif
                     @endforeach
                 </div>
 

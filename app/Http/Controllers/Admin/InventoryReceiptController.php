@@ -52,7 +52,8 @@ class InventoryReceiptController extends BaseController
             if (!isset($validated['user_id'])) {
                 $validated['user_id'] = auth()->id();
             }
-            
+            // Set default status to pending
+            $validated['status'] = 'pending';
             // Create receipt
             $receipt = $this->model::create($validated);
             
@@ -74,13 +75,6 @@ class InventoryReceiptController extends BaseController
                         'unit_cost' => $item['unit_cost'],
                         'subtotal' => $subtotal
                     ]);
-                    
-                    // Update product variation stock
-                    $variation = ProductVariation::find($item['product_variation_id']);
-                    if ($variation) {
-                        $variation->stock += $item['quantity'];
-                        $variation->save();
-                    }
                 }
             }
             
@@ -135,8 +129,17 @@ class InventoryReceiptController extends BaseController
             $item = $this->model::findOrFail($id);
             $validated = $request->validate($this->model::rules($id));
             
+            // Preserve the status and created_at values
+            $oldStatus = $item->status;
+            $oldCreatedAt = $item->created_at;
+            
             // Update receipt
             $item->update($validated);
+            
+            // Restore status and created_at
+            $item->status = $oldStatus;
+            $item->created_at = $oldCreatedAt;
+            $item->save();
             
             // Get existing items to calculate stock adjustments
             $existingItems = InventoryReceiptItem::where('inventory_receipt_id', $id)->get()
