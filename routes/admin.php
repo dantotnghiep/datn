@@ -111,8 +111,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Restore from trash
         Route::put('/{id}/restore', [AttributeController::class, 'restore'])->name('restore');
 
-        // Get values for a specific attribute
-        Route::get('/{id}/values', [AttributeController::class, 'getValues'])->name('values');
+        // Store attribute value
+        Route::post('/values', [AttributeController::class, 'storeValue'])->name('values.store');
     });
 
     // Attribute Value routes
@@ -161,7 +161,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Restore from trash
         Route::put('/{id}/restore', [OrderController::class, 'restore'])->name('restore');
-        
+
         // Update status
         Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
     });
@@ -188,7 +188,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Restore from trash
         Route::put('/{id}/restore', [InventoryReceiptController::class, 'restore'])->name('restore');
-        
+
         // Update status
         Route::put('/{id}/update-status', [InventoryReceiptController::class, 'updateStatus'])->name('update-status');
     });

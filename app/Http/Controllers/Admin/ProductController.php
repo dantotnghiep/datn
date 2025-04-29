@@ -160,17 +160,94 @@ class ProductController extends BaseController
 
     public function edit($id)
     {
-        $item = $this->model::with(['images', 'variations.attributeValues'])->findOrFail($id);
+        $item = $this->model::with(['images', 'variations.attributeValues.attribute'])->findOrFail($id);
         $fields = $this->model::getFields();
         $attributes = Attribute::with('values')->get();
         $attributeValues = AttributeValue::all();
+
+        // Debug log for variations
+        $debug_variations = [];
+        foreach ($item->variations as $variation) {
+            $debug_attributes = [];
+            foreach ($variation->attributeValues as $attributeValue) {
+                $debug_attributes[] = [
+                    'id' => $attributeValue->id,
+                    'value' => $attributeValue->value,
+                    'attribute_id' => $attributeValue->attribute_id,
+                    'attribute_name' => $attributeValue->attribute ? $attributeValue->attribute->name : 'null'
+                ];
+            }
+            $debug_variations[] = [
+                'id' => $variation->id,
+                'name' => $variation->name,
+                'attribute_values' => $debug_attributes
+            ];
+        }
+        Log::info('Variation data debug:', ['variations' => $debug_variations]);
+
+        // Prepare existing variants data for the UI
+        $existingVariantsData = [];
+
+        // Group variations by attribute
+        $attributeValuesMap = [];
+
+        foreach ($item->variations as $variation) {
+            foreach ($variation->attributeValues as $attributeValue) {
+                $attributeId = $attributeValue->attribute_id;
+
+                // Check if attribute relation is loaded
+                if (!$attributeValue->attribute) {
+                    Log::warning('Attribute relation not loaded for attribute value', [
+                        'attribute_value_id' => $attributeValue->id,
+                        'attribute_id' => $attributeId
+                    ]);
+
+                    // Get attribute name directly
+                    $attribute = Attribute::find($attributeId);
+                    $attributeName = $attribute ? $attribute->name : 'Unknown';
+                } else {
+                    $attributeName = $attributeValue->attribute->name;
+                }
+
+                if (!isset($attributeValuesMap[$attributeId])) {
+                    $attributeValuesMap[$attributeId] = [
+                        'attribute_id' => $attributeId,
+                        'attribute_name' => $attributeName,
+                        'values' => []
+                    ];
+                }
+
+                // Check if this value is already added
+                $valueExists = false;
+                foreach ($attributeValuesMap[$attributeId]['values'] as $value) {
+                    if ($value['id'] == $attributeValue->id) {
+                        $valueExists = true;
+                        break;
+                    }
+                }
+
+                if (!$valueExists) {
+                    $attributeValuesMap[$attributeId]['values'][] = [
+                        'id' => $attributeValue->id,
+                        'value' => $attributeValue->value
+                    ];
+                }
+            }
+        }
+
+        // Convert to array
+        $existingVariantsData = array_values($attributeValuesMap);
+
+        // Debug log
+        Log::info('Existing variants data:', ['data' => $existingVariantsData]);
 
         return view('admin.components.product.form', [
             'item' => $item,
             'fields' => $fields,
             'route' => $this->route,
             'attributes' => $attributes,
-            'attributeValues' => $attributeValues
+            'attributeValues' => $attributeValues,
+            'existingVariantsData' => $existingVariantsData
         ]);
     }
 
