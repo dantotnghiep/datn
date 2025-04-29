@@ -115,7 +115,31 @@ class ProductController extends Controller
                 }
             }
         }
+
+        // Lấy sản phẩm cùng danh mục (trừ sản phẩm hiện tại)
+        $relatedProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->whereNull('deleted_at')
+            ->with(['images', 'variations' => function($query) {
+                $query->select('id', 'product_id', 'price', 'sale_price', 'stock')
+                    ->whereNotNull('price')
+                    ->where('price', '>', 0);
+            }])
+            ->withCount('variations')
+            ->take(6)
+            ->get();
+
+        // Tính toán giá thấp nhất và cao nhất cho mỗi sản phẩm liên quan
+        foreach ($relatedProducts as $relatedProduct) {
+            if ($relatedProduct->variations_count > 0) {
+                $relatedProduct->min_price = $relatedProduct->variations->min('price');
+                $relatedProduct->max_price = $relatedProduct->variations->max('price');
+            } else {
+                $relatedProduct->min_price = $relatedProduct->price ?? 0;
+                $relatedProduct->max_price = $relatedProduct->price ?? 0;
+            }
+        }
             
-        return view('client.product.detail', compact('product', 'attributes'));
+        return view('client.product.detail', compact('product', 'attributes', 'relatedProducts'));
     }
 }

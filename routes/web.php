@@ -73,8 +73,6 @@
  
  Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
  
- Route::get('/san-pham', function () {
-     return view('client.product.index');
- })->name('product');
+ Route::get('/san-pham', [ProductController::class, 'index'])->name('product.index');
  
  Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist');
