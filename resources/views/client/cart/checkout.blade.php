@@ -133,11 +133,14 @@
                 <h5 class="text-body fw-semibold">Giảm giá: </h5>
                 <h5 class="text-danger fw-semibold">-{{ number_format($discount) }}đ</h5>
               </div>
-              @endif
+              @if(session('applied_voucher'))
               <div class="d-flex justify-content-between mb-2">
-                <h5 class="text-body fw-semibold">Phí vận chuyển: </h5>
-                <h5 class="text-body fw-semibold">{{ number_format($shippingFee) }}đ</h5>
+                <h5 class="text-body">
+                  <small>Discount: <span class="fw-semibold">{{ session('applied_voucher') }}</span></small>
+                </h5>
               </div>
+              @endif
+              @endif
             </div>
             <div class="d-flex justify-content-between border-dashed-y pt-3">
               <h4 class="mb-0">Tổng cộng:</h4>
