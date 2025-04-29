@@ -26,10 +26,8 @@
                 <div class="col-auto">
                     <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0"
                         href="{{ route('admin.products.index') }}">Cancel</a>
-                    <button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="button" name="action" value="draft"
-                        onclick="submitForm('draft')">Save draft</button>
                     <button class="btn btn-primary mb-2 mb-sm-0" type="button" id="publish-btn" name="action"
-                        value="publish" onclick="submitForm('publish')">Publish product</button>
+                        value="publish" onclick="submitForm('publish')">Create new</button>
                 </div>
             </div>
             <div class="row g-5">
@@ -38,9 +36,14 @@
                     <div class="row">
                         <div class="col-5">
                             <h4 class="mb-3">Title</h4>
-                            <input class="form-control mb-5" type="text" name="name" placeholder="Write title here..."
-                                value="{{ $item->name ?? old('name') }}" required />
-
+                            <input class="form-control mb-5 @error('name') is-invalid @enderror" type="text"
+                                name="name" placeholder="Write title here..." value="{{ $item->name ?? old('name') }}"
+                                required />
+                            @error('name')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
                         <div class="col-7">
                             <div class="mb-6">
@@ -112,6 +115,29 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Generated Variations - Now in left column -->
+                    <div class="mt-5 pt-3 border-top">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">Generated Variations</h4>
+                            <button type="button" class="btn btn-primary" id="generate-variations-btn">
+                                Generate Variations
+                            </button>
+                        </div>
+                        <div id="generated-variations" class="mt-3">
+                            <div class="alert alert-info mb-4">
+                                Select attribute options above and click "Generate Variations" to create all possible
+                                combinations
+                            </div>
+
+                            <!-- Generated variations list will be inserted here -->
+                            <div id="variations-table-container" style="display: none;">
+                                <ul class="list-group" id="variations-list">
+                                    <!-- Variations will be added here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-12 col-xl-4">
                     <div class="row g-2">
@@ -128,7 +154,6 @@
                                                 </div>
                                                 <select class="form-select mb-3" name="category_id" aria-label="category"
                                                     required>
-                                                    <option value="">Select Category</option>
                                                     @foreach (\App\Models\Category::all() as $category)
                                                         <option value="{{ $category->id }}"
                                                             {{ (isset($item) && $item->category_id == $category->id) || old('category_id') == $category->id ? 'selected' : '' }}>
@@ -158,32 +183,41 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h4 class="card-title mb-4">Variants</h4>
-                                    <div id="attributes-container">
-                                        <div class="mb-4">
-                                            <div class="d-flex flex-wrap gap-2 mb-3">
-                                                @foreach ($attributes as $attribute)
-                                                    <button type="button"
-                                                        class="btn attribute-btn {{ isset($selected_attribute) && $selected_attribute == $attribute->id ? 'btn-primary' : 'btn-outline-primary' }}"
-                                                        data-attribute-id="{{ $attribute->id }}"
-                                                        data-attribute-name="{{ $attribute->name }}">
-                                                        {{ $attribute->name }}
-                                                    </button>
-                                                @endforeach
+                                    <div id="variants-container">
+                                        <div class="variant-option mb-4" data-option="1">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0">Option 1</h6>
+                                                <a href="#" class="text-primary remove-option">Remove</a>
                                             </div>
-                                        </div>
-
-                                        <div class="variant-values-panel p-3 border rounded mb-4">
-                                            <h6 class="mb-3">Select Values</h6>
-                                            <div id="attribute-values-container" class="d-flex flex-wrap gap-2">
+                                            <div class="mb-3">
+                                                <select class="form-select variant-attribute-select">
+                                                    <option value="">Size</option>
+                                                </select>
+                                            </div>
+                                            <div class="variant-values-container p-3 border rounded mb-3">
                                                 <!-- Values will be loaded here -->
                                             </div>
                                         </div>
 
-                                        <div id="selected-variants-container" class="mb-4">
-                                            <h6 class="mb-3">Selected Variants</h6>
-                                            <div class="selected-variants-list">
-                                                <!-- Selected variants will appear here -->
+                                        <div class="variant-option mb-4" data-option="2">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0">Option 2</h6>
+                                                <a href="#" class="text-primary remove-option">Remove</a>
                                             </div>
+                                            <div class="mb-3">
+                                                <select class="form-select variant-attribute-select">
+                                                    <option value="">Size</option>
+                                                </select>
+                                            </div>
+                                            <div class="variant-values-container p-3 border rounded mb-3">
+                                                <!-- Values will be loaded here -->
+                                            </div>
+                                        </div>
+
+                                        <div class="text-center">
+                                            <button type="button" class="btn btn-outline-primary" id="add-option-btn">
+                                                Add another option
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -193,10 +227,15 @@
                 </div>
             </div>
             <!-- Hidden input to store variants data -->
-            <input type="hidden" id="variants-data" name="variants" value="{{ isset($existingVariantsData) && !empty($existingVariantsData) ? json_encode($existingVariantsData) : '' }}">
+            <input type="hidden" id="variants-data" name="variants"
+                value="{{ isset($existingVariantsData) && !empty($existingVariantsData) ? json_encode($existingVariantsData) : '' }}">
+
+            <!-- Hidden input to store generated variations data -->
+            <input type="hidden" id="generated-variations-data" name="generated_variations"
+                value="{{ isset($existingGeneratedVariations) && !empty($existingGeneratedVariations) ? json_encode($existingGeneratedVariations) : '[]' }}">
 
             <!-- Debug info -->
-            @if(isset($existingVariantsData) && count($existingVariantsData) > 0)
+            @if (isset($existingVariantsData) && count($existingVariantsData) > 0)
                 <script>
                     console.log('Existing variants data from PHP:', @json($existingVariantsData));
                 </script>
@@ -207,17 +246,789 @@
             @endif
 
             <!-- Debug Helper -->
-            <div id="debug-panel" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; z-index: 9999; display: none;">
+            <div id="debug-panel"
+                style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; z-index: 9999; display: none;">
                 <button onclick="reloadPage()" class="btn btn-sm btn-danger">Reload Page</button>
                 <button onclick="clearLocalStorage()" class="btn btn-sm btn-warning mx-2">Clear Storage</button>
                 <button onclick="toggleDebug()" class="btn btn-sm btn-secondary">Close</button>
             </div>
 
             <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    console.log("DOM Content loaded");
+
+                    // Variants Management
+                    initVariantsSystem();
+
+                    // Handle form submission
+                    setupFormSubmission();
+
+                    // Initialize dropzone
+                    initDropzone();
+
+                    // Initialize variations generator
+                    initVariationsGenerator();
+
+                    // Initialize flatpickr if available
+                    if (typeof flatpickr !== 'undefined') {
+                        flatpickr(".datetimepicker", {
+                            dateFormat: "d/m/Y",
+                            disableMobile: true
+                        });
+                    }
+                });
+
+                // Initialize the variants system
+                function initVariantsSystem() {
+                    const variantsContainer = document.getElementById('variants-container');
+                    const addOptionBtn = document.getElementById('add-option-btn');
+                    const variantsDataInput = document.getElementById('variants-data');
+                    
+                    // Load attributes into selects
+                    loadAttributesIntoSelects();
+                    
+                    // Handle existing variants data
+                    loadExistingVariantsData();
+                    
+                    // Event listener for adding new option
+                    addOptionBtn.addEventListener('click', function() {
+                        addNewVariantOption();
+                    });
+                    
+                    // Event delegation for remove option links
+                    variantsContainer.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('remove-option')) {
+                            e.preventDefault();
+                            const variantOption = e.target.closest('.variant-option');
+                            if (variantOption) {
+                                variantOption.remove();
+                                updateVariantsData();
+                            }
+                        }
+                    });
+                    
+                    // Event delegation for attribute select changes
+                    variantsContainer.addEventListener('change', function(e) {
+                        if (e.target.classList.contains('variant-attribute-select')) {
+                            const select = e.target;
+                            const option = select.closest('.variant-option');
+                            const valuesContainer = option.querySelector('.variant-values-container');
+                            
+                            // Update all selects to respect the new selection
+                            loadAttributesIntoSelects();
+                            
+                            // Load values for the selected attribute
+                            const attributeId = select.value;
+                            if (attributeId) {
+                                loadAttributeValues(attributeId, valuesContainer);
+                            } else {
+                                valuesContainer.innerHTML = '';
+                            }
+                            
+                            updateVariantsData();
+                        }
+                    });
+                }
+                
+                // Load attribute values for a specific attribute
+                function loadAttributeValues(attributeId, container) {
+                    container.innerHTML = '';
+                    
+                    // Get values for the attribute
+                    const values = [
+                        @foreach ($attributeValues as $value)
+                            { 
+                                id: {{ $value->id }}, 
+                                attribute_id: {{ $value->attribute_id }}, 
+                                value: "{{ $value->value }}" 
+                            },
+                        @endforeach
+                    ].filter(v => v.attribute_id == attributeId);
+                    
+                    if (values.length === 0) {
+                        container.innerHTML = '<p class="text-muted mb-0">No values available for this attribute</p>';
+                        return;
+                    }
+                    
+                    // Create a well-formatted container for the buttons
+                    const buttonsContainer = document.createElement('div');
+                    buttonsContainer.className = 'd-flex flex-wrap';
+                    
+                    // Display values as selectable options with the design from the image
+                    values.forEach(val => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-primary m-1 value-option';
+                        btn.dataset.valueId = val.id;
+                        btn.textContent = val.value;
+                        
+                        // Add click event handler
+                        btn.addEventListener('click', function() {
+                            // Toggle selected class
+                            this.classList.toggle('selected');
+                            if (this.classList.contains('selected')) {
+                                this.classList.remove('btn-outline-primary');
+                                this.classList.add('btn-primary');
+                            } else {
+                                this.classList.remove('btn-primary');
+                                this.classList.add('btn-outline-primary');
+                            }
+                            updateVariantsData();
+                        });
+                        
+                        buttonsContainer.appendChild(btn);
+                    });
+                    
+                    container.appendChild(buttonsContainer);
+                }
+
+                // Add a new variant option
+                function addNewVariantOption() {
+                    const variantsContainer = document.getElementById('variants-container');
+                    const optionCount = variantsContainer.querySelectorAll('.variant-option').length + 1;
+
+                    const newOption = document.createElement('div');
+                    newOption.className = 'variant-option mb-4';
+                    newOption.dataset.option = optionCount;
+
+                    newOption.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Option ${optionCount}</h6>
+                            <a href="#" class="text-primary remove-option">Remove</a>
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select variant-attribute-select">
+                                <option value="">Select attribute</option>
+                            </select>
+                        </div>
+                        <div class="variant-values-container p-3 border rounded mb-3">
+                            <!-- Values will be loaded here -->
+                        </div>
+                    `;
+
+                    // Insert before the add button
+                    const addButton = document.getElementById('add-option-btn').parentNode;
+                    variantsContainer.insertBefore(newOption, addButton);
+
+                    // Load available attributes (those not already selected)
+                    loadAttributesIntoSelects();
+
+                    // Return the new option
+                    return newOption;
+                }
+
+                // Load existing variants data
+                function loadExistingVariantsData() {
+                    const variantsDataInput = document.getElementById('variants-data');
+                    const variantsData = variantsDataInput.value;
+
+                    if (variantsData && variantsData.trim() !== '') {
+                        try {
+                            const parsedData = JSON.parse(variantsData);
+
+                            if (Array.isArray(parsedData) && parsedData.length > 0) {
+                                // Remove default options
+                                const variantOptions = document.querySelectorAll('.variant-option');
+                                variantOptions.forEach(option => option.remove());
+
+                                // Add options from the data
+                                parsedData.forEach((variant, index) => {
+                                    // Create new option
+                                    const newOption = addNewVariantOption();
+
+                                    // Set the selected attribute in each select box
+                                    const select = newOption.querySelector('.variant-attribute-select');
+                                    select.value = variant.attribute_id;
+
+                                    // Load attribute values for selected attribute
+                                    const valuesContainer = newOption.querySelector('.variant-values-container');
+                                    loadAttributeValues(variant.attribute_id, valuesContainer);
+
+                                    // Mark selected values after a small delay to ensure DOM is updated
+                                    setTimeout(() => {
+                                        if (variant.values && variant.values.length > 0) {
+                                            const valueIds = variant.values.map(v => v.id);
+
+                                            const valueButtons = valuesContainer.querySelectorAll('.value-option');
+                                            valueButtons.forEach(btn => {
+                                                if (valueIds.includes(parseInt(btn.dataset.valueId))) {
+                                                    btn.classList.add('selected');
+                                                    if (!btn.classList.contains('btn-primary')) {
+                                                        btn.classList.remove('btn-outline-primary');
+                                                        btn.classList.add('btn-primary');
+                                                    }
+                                                }
+                                            });
+                                        }
+
+                                        // Call loadAttributesIntoSelects to update all selects
+                                        loadAttributesIntoSelects();
+                                    }, 100);
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error parsing existing variants data:', error);
+                        }
+                    }
+                }
+
+                // Update variants data based on UI
+                function updateVariantsData() {
+                    const variantsDataInput = document.getElementById('variants-data');
+                    const variantOptions = document.querySelectorAll('.variant-option');
+                    const variantsData = [];
+
+                    variantOptions.forEach((option, index) => {
+                        const select = option.querySelector('.variant-attribute-select');
+                        const attributeId = select.value;
+
+                        if (attributeId) {
+                            const attributeName = select.options[select.selectedIndex].text;
+                            const selectedValues = option.querySelectorAll('.value-option.selected');
+
+                            const values = [];
+                            selectedValues.forEach(val => {
+                                values.push({
+                                    id: parseInt(val.dataset.valueId),
+                                    value: val.textContent
+                                });
+                            });
+
+                            variantsData.push({
+                                attribute_id: attributeId,
+                                attribute_name: attributeName,
+                                values: values
+                            });
+                        }
+                    });
+
+                    variantsDataInput.value = JSON.stringify(variantsData);
+                }
+
+                // Setup form submission
+                function setupFormSubmission() {
+                    function submitForm(action) {
+                        const form = document.getElementById('product-form');
+                        
+                        // Prevent multiple submissions
+                        if (form.hasAttribute('data-submitting')) {
+                            return;
+                        }
+                        
+                        // Update variants data
+                        updateVariantsData();
+                        
+                        // Get current variations data
+                        const generatedVariationsData = document.getElementById('generated-variations-data');
+                        const variationsData = document.getElementById('variations-list').querySelectorAll('li');
+                        
+                        // Ensure the data is properly JSON formatted
+                        try {
+                            let isValid = true;
+                            if (generatedVariationsData.value) {
+                                // Parse and validate data
+                                const parsedData = JSON.parse(generatedVariationsData.value);
+                                
+                                // Make sure all required fields are there
+                                parsedData.forEach((variation, index) => {
+                                    if (!variation.id || !variation.combination) {
+                                        isValid = false;
+                                    }
+                                    
+                                    if (variation.combination) {
+                                        variation.combination.forEach((attr, attrIndex) => {
+                                            if (!attr.value_id) {
+                                                attr.value_id = attr.id; // Try to fix it
+                                                if (!attr.value_id) {
+                                                    isValid = false;
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                
+                                // Update the input with fixed data
+                                generatedVariationsData.value = JSON.stringify(parsedData);
+                                
+                                if (!isValid) {
+                                    const debugPanel = document.getElementById('debug-panel');
+                                    debugPanel.style.display = 'block';
+                                    showVariationsDebug();
+                                    validateVariationsData();
+                                    
+                                    if (!confirm('Some variations data may be invalid. Do you want to continue anyway?')) {
+                                        return;
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            alert('Error validating variations data: ' + e.message);
+                            return;
+                        }
+                        
+                        // Mark as submitting
+                        form.setAttribute('data-submitting', 'true');
+                        
+                        // Add hidden input for action
+                        let actionInput = form.querySelector('input[name="action"]');
+                        if (!actionInput) {
+                            actionInput = document.createElement('input');
+                            actionInput.type = 'hidden';
+                            actionInput.name = 'action';
+                            form.appendChild(actionInput);
+                        }
+                        actionInput.value = action;
+                        
+                        // Submit the form directly
+                        form.submit();
+                    }
+
+                    // Handle form submission
+                    document.querySelector('form').addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        updateVariantsData();
+                        this.submit();
+                    });
+
+                    // Expose submitForm to the global scope
+                    window.submitForm = submitForm;
+                }
+
+                // Initialize dropzone
+                function initDropzone() {
+                    if (typeof Dropzone !== 'undefined') {
+                        Dropzone.autoDiscover = false;
+
+                        window.productDropzone = new Dropzone("#product-images-upload", {
+                            url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
+                            paramName: "images",
+                            acceptedFiles: "image/*",
+                            addRemoveLinks: false,
+                            autoProcessQueue: false,
+                            uploadMultiple: true,
+                            parallelUploads: 10,
+                            maxFiles: 10,
+                            maxFilesize: null,
+                            previewsContainer: false,
+                            clickable: "#product-images-upload",
+                            init: function() {
+                                let myDropzone = this;
+                                const currentImagesContainer = document.getElementById('current-images-container');
+
+                                this.on("addedfile", function(file) {
+                                    // Create preview element
+                                    const col = document.createElement('div');
+                                    col.className = 'col-auto';
+
+                                    const card = document.createElement('div');
+                                    card.className = 'product-image-card';
+
+                                    // Create remove button
+                                    const removeBtn = document.createElement('button');
+                                    removeBtn.type = 'button';
+                                    removeBtn.className = 'btn-remove-image';
+                                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                                    removeBtn.onclick = function() {
+                                        myDropzone.removeFile(file);
+                                        col.remove();
+                                    };
+
+                                    // Create image element
+                                    const img = document.createElement('img');
+                                    img.className = 'product-image';
+
+                                    // Check if this is the first image and no primary image is selected yet
+                                    const noPrimarySelected = !document.querySelector(
+                                        'input[name="primary_image"]:checked');
+
+                                    // Create primary radio
+                                    const imageActions = document.createElement('div');
+                                    imageActions.className = 'image-actions';
+
+                                    // We'll set isPrimary based on whether this is the first image and no primary is selected yet
+                                    const isPrimary = noPrimarySelected && currentImagesContainer.children
+                                        .length === 0;
+
+                                    imageActions.innerHTML = `
+                                        <div class="action-overlay">
+                                            <div class="d-flex flex-column gap-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input primary-image-radio" type="radio" 
+                                                        name="primary_image" value="new_${file.name}" ${isPrimary ? 'checked' : ''}>
+                                                    <label class="form-check-label">
+                                                        <i class="fas fa-star me-1"></i> Set as Primary
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+
+                                    // Add primary badge if this is set as primary
+                                    if (isPrimary) {
+                                        const primaryBadge = document.createElement('div');
+                                        primaryBadge.className = 'primary-badge';
+                                        primaryBadge.innerHTML = '<i class="fas fa-star"></i>';
+                                        card.appendChild(primaryBadge);
+                                    }
+
+                                    // Read and set image preview
+                                    const reader = new FileReader();
+                                    reader.onload = function(e) {
+                                        img.src = e.target.result;
+                                    };
+                                    reader.readAsDataURL(file);
+
+                                    // Assemble the preview
+                                    card.appendChild(removeBtn);
+                                    card.appendChild(img);
+                                    card.appendChild(imageActions);
+                                    col.appendChild(card);
+
+                                    // Add to current images container
+                                    currentImagesContainer.appendChild(col);
+                                });
+                            }
+                        });
+                    }
+                }
+
+                function toggleImageRemoval(button, imageId) {
+                    const card = button.closest('.product-image-card');
+                    const removeInput = card.querySelector('.remove-image-input');
+
+                    if (card.classList.contains('marked-for-removal')) {
+                        // Unmark for removal
+                        card.classList.remove('marked-for-removal');
+                        removeInput.value = '';
+                    } else {
+                        // Mark for removal
+                        card.classList.add('marked-for-removal');
+                        removeInput.value = imageId.toString(); // Ensure imageId is converted to string
+                    }
+                }
+
+                // Initialize variations generator
+                function initVariationsGenerator() {
+                    const generateBtn = document.getElementById('generate-variations-btn');
+                    const generatedVariationsData = document.getElementById('generated-variations-data');
+
+                    // Load existing generated variations if any
+                    loadExistingGeneratedVariations();
+
+                    // Add event listener for the generate button
+                    generateBtn.addEventListener('click', function() {
+                        generateAllVariations();
+                    });
+
+                    // Event delegation for variation actions
+                    document.getElementById('variations-list').addEventListener('click', function(e) {
+                        if (e.target.classList.contains('btn-remove-variation') || e.target.closest(
+                            '.btn-remove-variation')) {
+                            const button = e.target.classList.contains('btn-remove-variation') ?
+                                e.target : e.target.closest('.btn-remove-variation');
+                            const row = button.closest('li');
+                            const variationId = row.dataset.variationId;
+
+                            console.log("Removing variation with ID:", variationId);
+                            removeVariation(variationId);
+                        }
+                    });
+                }
+
+                // Display generated variations in the list
+                function displayGeneratedVariations(combinations) {
+                    const list = document.getElementById('variations-list');
+                    const tableContainer = document.getElementById('variations-table-container');
+                    const alert = document.querySelector('#generated-variations .alert');
+                    
+                    // Show table, hide alert
+                    tableContainer.style.display = 'block';
+                    alert.style.display = 'none';
+                    
+                    // Get existing data from hidden input
+                    let existingData = [];
+                    try {
+                        const generatedVariationsData = document.getElementById('generated-variations-data');
+                        existingData = JSON.parse(generatedVariationsData.value || '[]');
+                    } catch (error) {
+                        existingData = [];
+                    }
+                    
+                    // Store all existing variation IDs in a Set for quick lookup
+                    const existingIds = new Set(existingData.map(item => item.id));
+                    
+                    // Only add new combinations that don't already exist
+                    const newCombinations = combinations.filter(combo => !existingIds.has(combo.id));
+                    
+                    // Create updated set of variations (maintain existing ones, add new ones)
+                    // Important: We're NOT replacing existing variations with ones from combinations
+                    // We're only adding new ones that don't exist yet
+                    const updatedVariations = [...existingData, ...newCombinations];
+                    
+                    // Clear the variations list in the UI
+                    list.innerHTML = '';
+                    
+                    // Sort variations by ID to ensure consistent display order
+                    updatedVariations.sort((a, b) => {
+                        // Simple string comparison of IDs
+                        return a.id.localeCompare(b.id);
+                    });
+                    
+                    // Rebuild the visual list with all variations
+                    updatedVariations.forEach((variation) => {
+                        const item = document.createElement('li');
+                        item.className = 'list-group-item';
+                        item.dataset.variationId = variation.id;
+                        
+                        // Format the variation name from the combination
+                        const attributes = {};
+                        variation.combination.forEach(attr => {
+                            attributes[attr.attribute_name] = attr.value;
+                        });
+                        
+                        let variationName = '';
+                        Object.keys(attributes).forEach(attrName => {
+                            if (variationName) variationName += ', ';
+                            variationName += `${attrName}: ${attributes[attrName]}`;
+                        });
+                        
+                        item.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <span>${variationName}</span>
+                                <button type="button" class="btn-remove-variation">
+                                    ×
+                                </button>
+                            </div>
+                        `;
+                        
+                        list.appendChild(item);
+                    });
+                    
+                    // Save updated variations data to hidden input
+                    saveGeneratedVariations(updatedVariations);
+                }
+                
+                // Load existing generated variations if any
+                function loadExistingGeneratedVariations() {
+                    const input = document.getElementById('generated-variations-data');
+                    
+                    if (input.value && input.value !== '[]') {
+                        try {
+                            const data = JSON.parse(input.value);
+                            if (data && data.length > 0) {
+                                displayGeneratedVariations(data);
+                            }
+                        } catch (error) {
+                            // Error handling
+                        }
+                    }
+                }
+
+                // Save generated variations to hidden input (always called before form submission)
+                function saveGeneratedVariations(variations) {
+                    const input = document.getElementById('generated-variations-data');
+                    
+                    // Ensure we're saving a clean array of variations
+                    const cleanVariations = variations.map(variation => {
+                        // Only keep essential properties to avoid circular references
+                        return {
+                            id: variation.id,
+                            combination: variation.combination.map(attr => ({
+                                attribute_id: attr.attribute_id,
+                                attribute_name: attr.attribute_name,
+                                value_id: attr.value_id || attr.id, // Ensure value_id is available
+                                value: attr.value
+                            }))
+                        };
+                    });
+                    
+                    // Format the JSON properly
+                    const jsonString = JSON.stringify(cleanVariations);
+                    input.value = jsonString;
+                    
+                    return jsonString;
+                }
+
+                // Remove a variation from the list
+                function removeVariation(variationId) {
+                    // Remove the variant from DOM
+                    const item = document.querySelector(`li[data-variation-id="${variationId}"]`);
+                    if (item) {
+                        item.remove();
+                    }
+                    
+                    // Get current data from hidden input
+                    const input = document.getElementById('generated-variations-data');
+                    let currentVariations = [];
+                    
+                    try {
+                        currentVariations = JSON.parse(input.value || '[]');
+                        // Remove the specified variation
+                        const updatedVariations = currentVariations.filter(variation => variation.id !== variationId);
+                        
+                        // Update the hidden input with the new array
+                        input.value = JSON.stringify(updatedVariations);
+                        
+                        // If no variations left, show the alert and hide the table
+                        if (updatedVariations.length === 0) {
+                            document.getElementById('variations-table-container').style.display = 'none';
+                            document.querySelector('#generated-variations .alert').style.display = 'block';
+                        }
+                    } catch (error) {
+                        // Error handling
+                    }
+                }
+
+                // Generate all variations
+                function generateAllVariations() {
+                    // Get all selected attribute options
+                    const variantOptions = document.querySelectorAll('.variant-option');
+                    const attributeSelections = [];
+                    
+                    variantOptions.forEach(option => {
+                        const select = option.querySelector('.variant-attribute-select');
+                        if (select.value) {
+                            const attributeId = select.value;
+                            const attributeName = select.options[select.selectedIndex].text;
+                            const selectedValues = option.querySelectorAll('.value-option.selected');
+                            
+                            if (selectedValues.length > 0) {
+                                const values = [];
+                                selectedValues.forEach(val => {
+                                    values.push({
+                                        id: parseInt(val.dataset.valueId),
+                                        value: val.textContent
+                                    });
+                                });
+                                
+                                attributeSelections.push({
+                                    attribute_id: attributeId,
+                                    attribute_name: attributeName,
+                                    values: values
+                                });
+                            }
+                        }
+                    });
+                    
+                    if (attributeSelections.length === 0) {
+                        alert('Please select at least one attribute and its values first');
+                        return;
+                    }
+                    
+                    // Generate combinations
+                    const combinations = generateCombinations(attributeSelections);
+                    
+                    // Display combinations in the list
+                    displayGeneratedVariations(combinations);
+                }
+
                 // Debug Helper Functions
                 function toggleDebug() {
                     const panel = document.getElementById('debug-panel');
                     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+                    
+                    // Add extra debug info for variations
+                    if (panel.style.display !== 'none') {
+                        showVariationsDebug();
+                    }
+                }
+
+                function showVariationsDebug() {
+                    const debugPanel = document.getElementById('debug-panel');
+                    
+                    // Check if debug info already exists
+                    if (debugPanel.querySelector('#variations-debug')) {
+                        return;
+                    }
+                    
+                    // Create debug info
+                    const variationsDebug = document.createElement('div');
+                    variationsDebug.id = 'variations-debug';
+                    variationsDebug.className = 'mt-3 p-2 bg-dark text-white';
+                    
+                    // Get variations data
+                    const generatedVariationsInput = document.getElementById('generated-variations-data');
+                    const variantsDataInput = document.getElementById('variants-data');
+                    
+                    // Create content
+                    let content = '<h6>Variations Debug</h6>';
+                    
+                    try {
+                        const generatedData = JSON.parse(generatedVariationsInput.value || '[]');
+                        content += `<p>Generated Variations Count: ${generatedData.length}</p>`;
+                        content += `<pre style="max-height: 200px; overflow: auto; font-size: 11px;">${JSON.stringify(generatedData, null, 2)}</pre>`;
+                    } catch (e) {
+                        content += `<p>Error parsing generated variations: ${e.message}</p>`;
+                    }
+                    
+                    try {
+                        const variantsData = JSON.parse(variantsDataInput.value || '[]');
+                        content += `<p>Variants Attributes Count: ${variantsData.length}</p>`;
+                        content += `<pre style="max-height: 200px; overflow: auto; font-size: 11px;">${JSON.stringify(variantsData, null, 2)}</pre>`;
+                    } catch (e) {
+                        content += `<p>Error parsing variants data: ${e.message}</p>`;
+                    }
+                    
+                    // Add button to validate data
+                    content += `<button onclick="validateVariationsData()" class="btn btn-sm btn-info mt-2">Validate Variations</button>`;
+                    
+                    variationsDebug.innerHTML = content;
+                    debugPanel.appendChild(variationsDebug);
+                }
+
+                function validateVariationsData() {
+                    try {
+                        const generatedVariationsInput = document.getElementById('generated-variations-data');
+                        const generatedData = JSON.parse(generatedVariationsInput.value || '[]');
+                        
+                        // Check for required fields
+                        let valid = true;
+                        const issues = [];
+                        
+                        generatedData.forEach((variation, index) => {
+                            if (!variation.id) {
+                                issues.push(`Variation ${index} missing ID`);
+                                valid = false;
+                            }
+                            
+                            if (!variation.combination || !Array.isArray(variation.combination)) {
+                                issues.push(`Variation ${index} missing combination array`);
+                                valid = false;
+                            } else {
+                                variation.combination.forEach((attr, attrIndex) => {
+                                    if (!attr.value_id && !attr.id) {
+                                        issues.push(`Variation ${index}, attribute ${attrIndex} missing value_id and id`);
+                                        valid = false;
+                                    }
+                                });
+                            }
+                        });
+                        
+                        // Update UI with results
+                        const variationsDebug = document.getElementById('variations-debug');
+                        if (variationsDebug) {
+                            const validationResult = document.createElement('div');
+                            validationResult.className = valid ? 'text-success' : 'text-danger';
+                            validationResult.innerHTML = `<p>Validation result: ${valid ? 'VALID' : 'INVALID'}</p>`;
+                            
+                            if (!valid) {
+                                validationResult.innerHTML += '<ul>' + issues.map(issue => `<li>${issue}</li>`).join('') + '</ul>';
+                            }
+                            
+                            const existing = variationsDebug.querySelector('.validation-result');
+                            if (existing) {
+                                existing.remove();
+                            }
+                            
+                            validationResult.className += ' validation-result mt-2';
+                            variationsDebug.appendChild(validationResult);
+                        }
+                        
+                        return valid;
+                    } catch (e) {
+                        console.error('Validation error:', e);
+                        return false;
+                    }
                 }
 
                 function reloadPage() {
@@ -237,6 +1048,134 @@
                         toggleDebug();
                     }
                 });
+
+                // Add event listener for primary image selection
+                document.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('primary-image-radio')) {
+                        // When a primary radio is clicked
+                        updatePrimaryImageBadges(e.target);
+                    }
+                });
+
+                // Update primary image badges
+                function updatePrimaryImageBadges(selectedRadio) {
+                    // Remove all existing primary badges
+                    document.querySelectorAll('.primary-badge').forEach(badge => {
+                        badge.remove();
+                    });
+
+                    // Add badge to the selected image card
+                    const card = selectedRadio.closest('.product-image-card');
+                    if (card) {
+                        const primaryBadge = document.createElement('div');
+                        primaryBadge.className = 'primary-badge';
+                        primaryBadge.innerHTML = '<i class="fas fa-star"></i>';
+                        card.appendChild(primaryBadge);
+                    }
+                }
+
+                // Generate all possible combinations from selected attributes
+                function generateCombinations(attributeSelections) {
+                    // Start with an empty array to hold the combinations
+                    let result = [[]];
+                    
+                    // For each attribute
+                    for (let i = 0; i < attributeSelections.length; i++) {
+                        const attribute = attributeSelections[i];
+                        const values = attribute.values;
+                        const tmpResult = [];
+                        
+                        // For each existing combination
+                        for (let j = 0; j < result.length; j++) {
+                            const combo = result[j];
+                            
+                            // For each value of this attribute
+                            for (let k = 0; k < values.length; k++) {
+                                const value = values[k];
+                                
+                                // Create a new combination with this value
+                                const newCombo = combo.slice();
+                                newCombo.push({
+                                    attribute_id: attribute.attribute_id,
+                                    attribute_name: attribute.attribute_name,
+                                    value_id: value.id,
+                                    value: value.value
+                                });
+                                
+                                // Add to temp results
+                                tmpResult.push(newCombo);
+                            }
+                        }
+                        
+                        // Replace result with the new combinations
+                        result = tmpResult;
+                    }
+                    
+                    // Now add unique IDs to each combination
+                    result = result.map((combination, index) => {
+                        const id = generateVariationId(combination);
+                        return {
+                            id: id,
+                            combination: combination
+                        };
+                    });
+                    
+                    return result;
+                }
+
+                // Generate a unique ID for a variation based on its combination
+                function generateVariationId(combination) {
+                    return combination.map(item => `${item.attribute_id}-${item.value_id}`).join('_');
+                }
+
+                // Load attributes into select elements
+                function loadAttributesIntoSelects() {
+                    const attributeSelects = document.querySelectorAll('.variant-attribute-select');
+                    
+                    const attributes = [
+                        @foreach ($attributes as $attribute)
+                            {
+                                id: {{ $attribute->id }},
+                                name: "{{ $attribute->name }}"
+                            },
+                        @endforeach
+                    ];
+                    
+                    // Get already selected attributes
+                    const selectedAttributes = new Set();
+                    attributeSelects.forEach(select => {
+                        if (select.value) {
+                            selectedAttributes.add(select.value);
+                        }
+                    });
+                    
+                    attributeSelects.forEach(select => {
+                        // Store current value if exists
+                        const currentValue = select.value;
+                        
+                        // Clear existing options
+                        select.innerHTML = '<option value="">Select attribute</option>';
+                        
+                        // Add attribute options
+                        attributes.forEach(attr => {
+                            // Skip if this attribute is already selected in another dropdown
+                            // except for the currently selected value in THIS dropdown
+                            if (selectedAttributes.has(attr.id.toString()) && attr.id.toString() !== currentValue) {
+                                return;
+                            }
+                            
+                            const option = document.createElement('option');
+                            option.value = attr.id;
+                            option.textContent = attr.name;
+                            select.appendChild(option);
+                        });
+                        
+                        // Restore selected value
+                        if (currentValue) {
+                            select.value = currentValue;
+                        }
+                    });
+                }
             </script>
         </form>
     </div>
@@ -245,693 +1184,185 @@
 @section('scripts')
     <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/dropzone/dropzone-min.js') }}"></script>
     <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/flatpickr/flatpickr.min.js') }}"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM Content loaded - initializing variants...");
-
-            // Simple Variant System - New Implementation
-            const attributesContainer = document.getElementById('attributes-container');
-            const attributeValuesContainer = document.getElementById('attribute-values-container');
-            const selectedVariantsContainer = document.getElementById('selected-variants-container');
-            const selectedVariantsList = document.querySelector('.selected-variants-list');
-            const variantsDataInput = document.getElementById('variants-data');
-
-            // Storage for selected variants data
-            const selectedVariants = {};
-
-            // Load existing variants if in edit mode
-            function loadExistingVariants() {
-                const variantsData = variantsDataInput.value;
-                console.log('Raw variants data:', variantsData);
-
-                if (variantsData && variantsData.trim() !== '') {
-                    try {
-                        const parsedData = JSON.parse(variantsData);
-                        console.log('Parsed variants data:', parsedData);
-
-                        if (Array.isArray(parsedData) && parsedData.length > 0) {
-                            parsedData.forEach(variant => {
-                                if (variant && variant.attribute_id && variant.values) {
-                                    // Add to selected variants object
-                                    selectedVariants[variant.attribute_id] = {
-                                        attribute_id: parseInt(variant.attribute_id),
-                                        attribute_name: variant.attribute_name,
-                                        values: variant.values || []
-                                    };
-
-                                    // Immediately highlight the attribute button
-                                    const attributeBtn = document.querySelector(`.attribute-btn[data-attribute-id="${variant.attribute_id}"]`);
-                                    if (attributeBtn) {
-                                        attributeBtn.classList.remove('btn-outline-primary');
-                                        attributeBtn.classList.add('btn-primary');
-                                    }
-                                }
-                            });
-
-                            // Update display after loading data
-                            updateSelectedVariantsDisplay();
-
-                            // Update attribute button status
-                            updateAttributeButtonsStatus();
-
-                            console.log('Selected variants after loading:', selectedVariants);
-
-                            // Auto-select the first attribute to display its values
-                            setTimeout(() => {
-                                // Show the selected variants in the selected-variants-list
-                                updateSelectedVariantsDisplay();
-
-                                // Click the first attribute to show its values
-                                const firstAttributeId = Object.keys(selectedVariants)[0];
-                                if (firstAttributeId) {
-                                    const attributeBtn = document.querySelector(`.attribute-btn[data-attribute-id="${firstAttributeId}"]`);
-                                    if (attributeBtn) {
-                                        attributeBtn.click();
-                                    }
-                                }
-                            }, 300);
-                        }
-                    } catch (error) {
-                        console.error('Error parsing existing variants data:', error);
-                    }
-                }
-            }
-
-            // Event listener for attribute buttons
-            attributesContainer.addEventListener('click', function(e) {
-                const attributeBtn = e.target.closest('.attribute-btn');
-                if (!attributeBtn) return;
-
-                const attributeId = attributeBtn.dataset.attributeId;
-                const attributeName = attributeBtn.dataset.attributeName;
-
-                // Only highlight this button as active (for visual feedback)
-                // without changing the highlighted status of other buttons
-                attributeBtn.classList.remove('btn-outline-primary');
-                attributeBtn.classList.add('btn-primary');
-
-                // Load attribute values for this attribute
-                loadAttributeValues(attributeId, attributeName);
-            });
-
-            // Load attribute values for a specific attribute
-            function loadAttributeValues(attributeId, attributeName) {
-                console.log(`Loading values for attribute ID ${attributeId} (${attributeName})`);
-
-                // Clear previous values
-                attributeValuesContainer.innerHTML = '';
-
-                // Keep track of values we add
-                const addedValues = new Set();
-
-                // Add attribute values as buttons
-                @foreach ($attributeValues as $value)
-                    if ({{ $value->attribute_id }} == attributeId) {
-                        const valueBtn = document.createElement('button');
-                        valueBtn.type = 'button';
-                        valueBtn.className = 'btn btn-outline-secondary rounded-pill value-btn';
-                        valueBtn.dataset.valueId = {{ $value->id }};
-                        valueBtn.dataset.value = "{{ $value->value }}";
-                        valueBtn.dataset.attributeId = attributeId;
-                        valueBtn.dataset.attributeName = attributeName;
-                        valueBtn.textContent = "{{ $value->value }}";
-
-                        // Keep track of which values we've added
-                        addedValues.add({{ $value->id }});
-
-                        // Check if this value is already selected
-                        if (selectedVariants[attributeId] &&
-                            selectedVariants[attributeId].values.some(v => v.id == {{ $value->id }})) {
-                            valueBtn.classList.remove('btn-outline-secondary');
-                            valueBtn.classList.add('btn-secondary');
-                        }
-
-                        attributeValuesContainer.appendChild(valueBtn);
-                    }
-                @endforeach
-
-                // Log what values were found and added
-                console.log(`Added ${addedValues.size} values for attribute ID ${attributeId}`);
-
-                // If no values, show message
-                if (attributeValuesContainer.children.length === 0) {
-                    attributeValuesContainer.innerHTML =
-                        '<p class="text-muted">No values available for this attribute</p>';
-                }
-            }
-
-            // Handle value selection
-            attributeValuesContainer.addEventListener('click', function(e) {
-                const valueBtn = e.target.closest('.value-btn');
-                if (!valueBtn) return;
-
-                const attributeId = valueBtn.dataset.attributeId;
-                const attributeName = valueBtn.dataset.attributeName;
-                const valueId = parseInt(valueBtn.dataset.valueId);
-                const value = valueBtn.dataset.value;
-
-                // Toggle selection
-                if (valueBtn.classList.contains('btn-secondary')) {
-                    // Deselect
-                    valueBtn.classList.remove('btn-secondary');
-                    valueBtn.classList.add('btn-outline-secondary');
-
-                    // Remove from selected variants
-                    if (selectedVariants[attributeId]) {
-                        selectedVariants[attributeId].values = selectedVariants[attributeId].values.filter(
-                            v => v.id !== valueId);
-
-                        // If no values left, remove the attribute
-                        if (selectedVariants[attributeId].values.length === 0) {
-                            delete selectedVariants[attributeId];
-                        }
-                    }
-                } else {
-                    // Select
-                    valueBtn.classList.remove('btn-outline-secondary');
-                    valueBtn.classList.add('btn-secondary');
-
-                    // Add to selected variants
-                    if (!selectedVariants[attributeId]) {
-                        selectedVariants[attributeId] = {
-                            attribute_id: parseInt(attributeId),
-                            attribute_name: attributeName,
-                            values: []
-                        };
-                    }
-
-                    selectedVariants[attributeId].values.push({
-                        id: valueId,
-                        value: value
-                    });
-                }
-
-                // Update display and hidden input
-                updateSelectedVariantsDisplay();
-            });
-
-            // Update the display of selected variants
-            function updateSelectedVariantsDisplay() {
-                selectedVariantsList.innerHTML = '';
-
-                // Convert the object to array for the backend
-                const variantsArray = Object.values(selectedVariants);
-
-                // Set the hidden input value
-                variantsDataInput.value = JSON.stringify(variantsArray);
-
-                // Show selected variants UI
-                if (variantsArray.length === 0) {
-                    selectedVariantsList.innerHTML = '<p class="text-muted">No variants selected</p>';
-                    return;
-                }
-
-                // Create a card for each attribute with its values
-                variantsArray.forEach(variant => {
-                    const variantCard = document.createElement('div');
-                    variantCard.className = 'card mb-3';
-
-                    const cardBody = document.createElement('div');
-                    cardBody.className = 'card-body';
-
-                    // Attribute name heading
-                    const heading = document.createElement('h6');
-                    heading.className = 'card-title';
-                    heading.textContent = variant.attribute_name;
-
-                    // Value chips
-                    const valuesContainer = document.createElement('div');
-                    valuesContainer.className = 'd-flex flex-wrap gap-2 mt-2';
-
-                    variant.values.forEach(val => {
-                        const chip = document.createElement('div');
-                        chip.className = 'badge bg-primary rounded-pill';
-                        chip.textContent = val.value;
-                        valuesContainer.appendChild(chip);
-                    });
-
-                    cardBody.appendChild(heading);
-                    cardBody.appendChild(valuesContainer);
-                    variantCard.appendChild(cardBody);
-                    selectedVariantsList.appendChild(variantCard);
-                });
-
-                // Update attribute buttons status
-                updateAttributeButtonsStatus();
-            }
-
-            // Update attribute buttons to show selection count
-            function updateAttributeButtonsStatus() {
-                // First, remove all existing selection indicators
-                document.querySelectorAll('.attr-selection-count').forEach(el => el.remove());
-
-                // Then add new indicators
-                Object.keys(selectedVariants).forEach(attributeId => {
-                    const values = selectedVariants[attributeId].values;
-                    if (values && values.length > 0) {
-                        const attributeBtn = document.querySelector(`.attribute-btn[data-attribute-id="${attributeId}"]`);
-                        if (attributeBtn) {
-                            // Ensure the button is marked as selected
-                            attributeBtn.classList.remove('btn-outline-primary');
-                            attributeBtn.classList.add('btn-primary');
-
-                            // Add count indicator if more than 0 values
-                            if (values.length > 0) {
-                                // Check if counter already exists
-                                if (!attributeBtn.querySelector('.attr-selection-count')) {
-                                    const counter = document.createElement('span');
-                                    counter.className = 'attr-selection-count';
-                                    counter.textContent = values.length;
-                                    attributeBtn.appendChild(counter);
-                                } else {
-                                    attributeBtn.querySelector('.attr-selection-count').textContent = values.length;
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Function to handle form submission
-            function submitForm(action) {
-                const form = document.getElementById('product-form');
-
-                // Prevent multiple submissions
-                if (form.hasAttribute('data-submitting')) {
-                    return;
-                }
-                form.setAttribute('data-submitting', 'true');
-
-                // Add action to form data
-                const formData = new FormData(form);
-                formData.append('action', action);
-
-                // Make sure variants data is up to date
-                const variantsArray = Object.values(selectedVariants);
-                variantsDataInput.value = JSON.stringify(variantsArray);
-
-                // Add Dropzone files if any
-                if (window.productDropzone && window.productDropzone.getQueuedFiles) {
-                    const queuedFiles = window.productDropzone.getQueuedFiles();
-                    queuedFiles.forEach(function(file) {
-                        formData.append('images[]', file);
-                    });
-                }
-
-                let method = form.getAttribute('method').toUpperCase();
-                let url = form.getAttribute('action');
-
-                if (method === 'PUT') {
-                    formData.append('_method', 'PUT');
-                }
-
-                fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = data.redirect;
-                    } else {
-                        alert(data.message || 'Error saving product');
-                        form.removeAttribute('data-submitting');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error saving product. Please try again.');
-                    form.removeAttribute('data-submitting');
-                });
-            }
-
-            // Handle form submission
-            document.querySelector('form').addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                // Make sure variants data is up to date
-                const variantsArray = Object.values(selectedVariants);
-                variantsDataInput.value = JSON.stringify(variantsArray);
-
-                this.submit();
-            });
-
-            // Expose submitForm to the global scope
-            window.submitForm = submitForm;
-
-            // Initialize with existing values if available
-            loadExistingVariants();
-
-            // Initialize dropzone
-            if (typeof Dropzone !== 'undefined') {
-                Dropzone.autoDiscover = false;
-
-                window.productDropzone = new Dropzone("#product-images-upload", {
-                    url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
-                    paramName: "images",
-                    acceptedFiles: "image/*",
-                    addRemoveLinks: false,
-                    autoProcessQueue: false,
-                    uploadMultiple: true,
-                    parallelUploads: 10,
-                    maxFiles: 10,
-                    maxFilesize: null,
-                    previewsContainer: false,
-                    clickable: "#product-images-upload",
-                    init: function() {
-                        let myDropzone = this;
-                        const currentImagesContainer = document.getElementById(
-                            'current-images-container');
-
-                        this.on("addedfile", function(file) {
-                            // Create preview element
-                            const col = document.createElement('div');
-                            col.className = 'col-auto';
-
-                            const card = document.createElement('div');
-                            card.className = 'product-image-card';
-
-                            // Create remove button
-                            const removeBtn = document.createElement('button');
-                            removeBtn.type = 'button';
-                            removeBtn.className = 'btn-remove-image';
-                            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                            removeBtn.onclick = function() {
-                                myDropzone.removeFile(file);
-                                col.remove();
-                            };
-
-                            // Create image element
-                            const img = document.createElement('img');
-                            img.className = 'product-image';
-
-                            // Create primary radio
-                            const imageActions = document.createElement('div');
-                            imageActions.className = 'image-actions';
-                            imageActions.innerHTML = `
-                                <div class="action-overlay">
-                                    <div class="d-flex flex-column gap-2">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="primary_image" value="new_${file.name}">
-                                            <label class="form-check-label">
-                                                <i class="fas fa-star me-1"></i> Set as Primary
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-
-                            // Read and set image preview
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                img.src = e.target.result;
-                            };
-                            reader.readAsDataURL(file);
-
-                            // Assemble the preview
-                            card.appendChild(removeBtn);
-                            card.appendChild(img);
-                            card.appendChild(imageActions);
-                            col.appendChild(card);
-
-                            // Add to current images container
-                            currentImagesContainer.appendChild(col);
-                        });
-                    }
-                });
-            }
-
-            // Initialize flatpickr
-            if (typeof flatpickr !== 'undefined') {
-                flatpickr(".datetimepicker", {
-                    dateFormat: "d/m/Y",
-                    disableMobile: true
-                });
-            }
-        });
-    </script>
-
     <style>
-        #image-preview-container .dz-image {
-            position: relative !important;
-        }
-
-        #image-preview-container .dz-remove {
-            position: absolute !important;
-            top: 6px !important;
-            right: 6px !important;
-            background: #ff4444 !important;
-            color: #fff !important;
-            border-radius: 50% !important;
-            width: 22px !important;
-            height: 22px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-size: 18px !important;
-            z-index: 20 !important;
-            text-decoration: none !important;
-            border: none !important;
-            cursor: pointer !important;
-            padding: 0 !important;
-            font-weight: bold !important;
-        }
-
-        #image-preview-container .dz-remove:before {
-            content: "×";
-            font-size: 22px;
-            font-weight: bold;
-            line-height: 1;
-            color: #fff;
-            display: block;
-        }
-
-        #image-preview-container .dz-remove:hover {
-            background: #cc0000 !important;
-        }
-
+        /* Product image styles */
         .product-image-card {
             position: relative;
             width: 150px;
             height: 150px;
-            border-radius: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
         }
 
-        .product-image-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .product-image {
+        .product-image-card img.product-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: all 0.3s ease;
+            transition: transform 0.3s;
         }
 
-        .product-image-card:hover .product-image {
-            transform: scale(1.1);
-        }
-
-        .image-actions {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0);
-            transition: all 0.3s ease;
-        }
-
-        .product-image-card:hover .image-actions {
-            background: rgba(0, 0, 0, 0.7);
-        }
-
-        .action-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 15px;
-            transform: translateY(100%);
-            transition: all 0.3s ease;
-        }
-
-        .product-image-card:hover .action-overlay {
-            transform: translateY(0);
-        }
-
-        .form-check-label {
-            color: white;
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-
-        .form-check-input {
-            cursor: pointer;
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .form-check-input:checked {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-
-        .primary-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #0d6efd;
-            color: white;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-        }
-
-        .primary-badge i {
-            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.3));
+        .product-image-card:hover img.product-image {
+            transform: scale(1.05);
         }
 
         .btn-remove-image {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
+            top: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            background-color: #ff0000;
             border: none;
-            color: #dc3545;
+            border-radius: 50%;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 2;
-            transition: all 0.2s ease;
-            padding: 0;
-            font-size: 14px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            font-size: 12px;
         }
 
         .btn-remove-image:hover {
-            background: #dc3545;
-            color: white;
-            transform: scale(1.1);
+            background-color: #cc0000;
         }
 
-        .product-image-card.marked-for-removal {
+        .image-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: none;
+        }
+
+        .action-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 8px;
+            color: white;
+        }
+
+        .product-image-card:hover .image-actions {
+            display: block;
+        }
+
+        .primary-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: #ffc107;
+            color: #000;
+            padding: 3px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .marked-for-removal {
             opacity: 0.5;
-            filter: grayscale(100%);
         }
 
-        .product-image-card.marked-for-removal .btn-remove-image {
-            background: #dc3545;
-            color: white;
+        .marked-for-removal:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.3);
+            z-index: 5;
         }
 
-        /* New styles for the variant selection */
-        .variant-values-panel {
+        /* Variations table styles */
+        #variations-table-container {
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #variations-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #variations-list li {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        #variations-list li:hover {
             background-color: #f8f9fa;
         }
 
-        .value-btn {
-            transition: all 0.2s ease;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .value-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .attribute-btn {
-            font-weight: 600;
-            min-width: 100px;
-            position: relative;
-        }
-
-        .attribute-btn.btn-primary {
-            position: relative;
-        }
-
-        .attribute-btn.btn-primary::after {
-            content: "";
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #198754;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-primary, .btn-secondary {
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .selected-variants-list .card {
-            transition: all 0.3s ease;
-            border-left: 4px solid #0d6efd;
-        }
-
-        .selected-variants-list .card:hover {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .badge.bg-primary {
-            font-size: 0.9rem;
-            padding: 6px 12px;
-        }
-
-        .attr-selection-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #198754;
-            color: white;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            font-size: 10px;
+        .btn-remove-variation {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            border: 1px solid white;
+            transition: all 0.2s;
+            padding: 0;
+            font-size: 20px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            line-height: 1;
+            font-weight: bold;
+        }
+
+        .btn-remove-variation:hover {
+            background-color: #cc0000;
+            transform: scale(1.05);
+        }
+
+        #generate-variations-btn {
+            min-width: 160px;
+        }
+
+        /* Variant styles */
+        .variant-option {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 1rem;
+        }
+
+        .variant-values-container {
+            min-height: 50px;
+            background-color: #f8f9fa;
+        }
+
+        .value-option {
+            transition: all 0.2s ease;
+            min-width: 40px !important;
+            min-height: 38px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 4px !important;
+            border-radius: 5px !important;
+            font-weight: 500 !important;
+            padding: 6px 12px !important;
+        }
+
+        .value-option.selected {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+
+        /* Custom dropdown styling */
+        .form-select {
+            appearance: auto;
         }
     </style>
-
-    <script>
-        function toggleImageRemoval(button, imageId) {
-            const card = button.closest('.product-image-card');
-            const removeInput = card.querySelector('.remove-image-input');
-
-            if (card.classList.contains('marked-for-removal')) {
-                // Unmark for removal
-                card.classList.remove('marked-for-removal');
-                removeInput.value = '';
-            } else {
-                // Mark for removal
-                card.classList.add('marked-for-removal');
-                removeInput.value = imageId.toString(); // Ensure imageId is converted to string
-            }
-        }
-    </script>
+@endsection

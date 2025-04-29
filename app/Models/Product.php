@@ -15,7 +15,8 @@ class Product extends BaseModel
     {
         return [
             'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:products,name,' . $id,
+            'sku' => 'sometimes|string|max:100|unique:products,sku,' . $id,
             'description' => 'nullable|string',
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
