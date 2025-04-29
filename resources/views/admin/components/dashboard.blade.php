@@ -298,6 +298,100 @@
             </div>
         </div>
     </div>
+
+    <!-- Sixth Row - Marketing Metrics and Additional Business Insights -->
+    <div class="row mb-5">
+        <!-- Khuyến mãi đang hoạt động -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom border-light">
+                    <h5 class="mb-0">Khuyến mãi đang hoạt động</h5>
+                </div>
+                <div class="card-body">
+                    @if(isset($activePromotionsList) && count($activePromotionsList) > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mã KM</th>
+                                        <th>Tên khuyến mãi</th>
+                                        <th class="text-center">Giảm giá</th>
+                                        <th class="text-center">Ngày kết thúc</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($activePromotionsList as $promotion)
+                                    <tr>
+                                        <td class="fw-bold">{{ $promotion->code }}</td>
+                                        <td>{{ $promotion->name }}</td>
+                                        <td class="text-center">{{ $promotion->discount_type == 'percentage' ? $promotion->discount_value . '%' : number_format($promotion->discount_value, 0, ',', '.') . 'đ' }}</td>
+                                        <td class="text-center">{{ date('d/m/Y', strtotime($promotion->expires_at)) }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-5">
+                            <div class="mb-3 fs-1 text-body-tertiary">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                            <h6 class="mb-0">Không có khuyến mãi đang hoạt động</h6>
+                            <p class="text-body-tertiary mt-2">Tạo khuyến mãi để thu hút khách hàng ngay bây giờ</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Sản phẩm sắp hết hàng -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom border-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Sản phẩm sắp hết hàng</h5>
+                    <span class="badge bg-danger rounded-pill">{{ $lowStockProducts }} sản phẩm</span>
+                </div>
+                <div class="card-body">
+                    @if(isset($lowStockProductsList) && count($lowStockProductsList) > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">Biến thể</th>
+                                        <th class="text-center">Tồn kho</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($lowStockProductsList as $product)
+                                    <tr>
+                                        <td class="fw-bold">{{ $product->product_name }}</td>
+                                        <td class="text-center">{{ $product->attributes }}</td>
+                                        <td class="text-center">
+                                            <span class="badge {{ $product->stock <= 5 ? 'bg-danger' : 'bg-warning' }}">{{ $product->stock }}</span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $lowStockProductsList->links('pagination::bootstrap-4') }}
+                        </div>
+                    @else
+                        <div class="text-center py-5">
+                            <div class="mb-3 fs-1 text-body-tertiary">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <h6 class="mb-0">Tất cả sản phẩm đều có đủ tồn kho</h6>
+                            <p class="text-body-tertiary mt-2">Bạn không có sản phẩm nào sắp hết hàng</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Charts JS -->

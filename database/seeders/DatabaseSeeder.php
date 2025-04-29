@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ProductVariationSeeder::class, // Tạo biến thể sản phẩm
             OrderStatusSeeder::class,   // Tạo trạng thái đơn hàng
             OrderSeeder::class,         // Tạo đơn hàng mẫu
+            PromotionSeeder::class,      // Tạo PromotionSeeder
         ]);
     }
 }
