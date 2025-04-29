@@ -36,7 +36,6 @@ class Promotion extends BaseModel
             'minimum_spend' => 'nullable|numeric|min:0',
             'maximum_discount' => 'nullable|numeric|min:0',
             'usage_limit' => 'nullable|integer|min:0',
-            'usage_count' => 'integer|min:0',
             'is_active' => 'boolean',
             'starts_at' => 'nullable|date',
             'expires_at' => 'nullable|date|after_or_equal:starts_at'
@@ -98,11 +97,6 @@ class Promotion extends BaseModel
             ],
             'usage_limit' => [
                 'label' => 'Giới hạn sử dụng',
-                'type' => 'number',
-                'sortable' => true
-            ],
-            'usage_count' => [
-                'label' => 'Đã sử dụng',
                 'type' => 'number',
                 'sortable' => true
             ],

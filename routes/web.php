@@ -7,6 +7,7 @@
  use App\Http\Controllers\Client\WishlistController;
  use App\Http\Controllers\Client\CartController;
  use App\Http\Controllers\Client\OrderController;
+ use App\Http\Controllers\Client\PromotionController;
  
  /*
  |--------------------------------------------------------------------------
@@ -68,6 +69,11 @@
      Route::get('/orders', [OrderController::class, 'index'])->name('client.order.list');
      Route::get('/orders/{order}', [OrderController::class, 'show'])->name('client.order.detail');
      Route::post('/orders/{order}/cancel-request', [OrderController::class, 'cancelRequest'])->name('client.order.cancel.request');
+ 
+     // Promotion routes
+     Route::get('/promotions/available', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
+     Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply-voucher');
+     Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.remove-voucher');
  });
  
  
