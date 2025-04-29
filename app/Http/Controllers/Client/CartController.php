@@ -12,6 +12,9 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\VNPayService;
 use Illuminate\Support\Facades\DB;
+use App\Models\Promotion;
+use App\Models\UsedPromotion;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -379,6 +382,142 @@ class CartController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->route('cart')->with('error', 'Có lỗi xảy ra trong quá trình xử lý thanh toán: ' . $e->getMessage());
+        }
+    }
+
+    public function applyVoucher(Request $request)
+    {
+        try {
+            Log::info('Starting voucher application', ['code' => $request->code]);
+            
+            $request->validate([
+                'code' => 'required|string',
+                'selected_items' => 'required|array|min:1'
+            ], [
+                'selected_items.required' => 'Vui lòng chọn ít nhất một sản phẩm để áp dụng mã giảm giá',
+                'selected_items.array' => 'Dữ liệu không hợp lệ',
+                'selected_items.min' => 'Vui lòng chọn ít nhất một sản phẩm để áp dụng mã giảm giá'
+            ]);
+
+            $user = Auth::user();
+            Log::info('Finding promotion with code: ' . $request->code);
+            
+            $promotion = Promotion::where('code', $request->code)
+                ->where('is_active', 1)
+                ->where(function($query) {
+                    $now = now();
+                    $query->whereNull('starts_at')
+                        ->orWhere('starts_at', '<=', $now);
+                })
+                ->where(function($query) {
+                    $now = now();
+                    $query->whereNull('expires_at')
+                        ->orWhere('expires_at', '>=', $now);
+                })
+                ->where(function($query) {
+                    $query->whereNull('usage_limit')
+                        ->orWhereRaw('COALESCE(usage_count, 0) < usage_limit');
+                })
+                ->first();
+
+            Log::info('Found promotion', ['promotion' => $promotion]);
+
+            if (!$promotion) {
+                Log::warning('Promotion not found or invalid');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mã giảm giá không tồn tại hoặc đã hết hạn'
+                ], 400);
+            }
+
+            // Kiểm tra xem người dùng đã sử dụng mã này chưa
+            $usedPromotion = UsedPromotion::where('user_id', $user->id)
+                ->where('promotion_id', $promotion->id)
+                ->first();
+
+            if ($usedPromotion) {
+                Log::warning('User already used this promotion', ['user_id' => $user->id, 'promotion_id' => $promotion->id]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn đã sử dụng mã giảm giá này'
+                ], 400);
+            }
+
+            // Lấy các sản phẩm được chọn
+            $selectedItems = Cart::where('user_id', $user->id)
+                ->whereIn('product_variation_id', $request->selected_items)
+                ->get();
+
+            if ($selectedItems->isEmpty()) {
+                Log::warning('No selected items found');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy sản phẩm được chọn'
+                ], 400);
+            }
+
+            $subtotal = $selectedItems->sum('total');
+            Log::info('Selected items total: ' . $subtotal);
+
+            // Kiểm tra điều kiện minimum_spend
+            if ($promotion->minimum_spend && $subtotal < $promotion->minimum_spend) {
+                Log::warning('Order total below minimum spend', [
+                    'total' => $subtotal,
+                    'minimum_spend' => $promotion->minimum_spend
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tổng giá trị đơn hàng chưa đạt điều kiện tối thiểu (' . number_format($promotion->minimum_spend) . 'đ)'
+                ], 400);
+            }
+
+            // Tính toán số tiền giảm giá
+            $discountAmount = 0;
+            if ($promotion->discount_type === 'percentage') {
+                $discountAmount = round($subtotal * ($promotion->discount_value / 100));
+                if ($promotion->maximum_discount && $discountAmount > $promotion->maximum_discount) {
+                    $discountAmount = $promotion->maximum_discount;
+                }
+            } else {
+                $discountAmount = min($promotion->discount_value, $subtotal);
+            }
+
+            // Tính tổng tiền sau khi giảm giá
+            $total = $subtotal - $discountAmount;
+
+            Log::info('Calculated totals', [
+                'subtotal' => $subtotal,
+                'discount' => number_format($discountAmount, 2),
+                'total' => $total
+            ]);
+
+            $response = [
+                'success' => true,
+                'totals' => [
+                    'subtotal' => $subtotal,
+                    'discount' => $discountAmount,
+                    'total' => $total
+                ]
+            ];
+
+            Log::info('Sending response', ['response' => $response]);
+            return response()->json($response);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error', ['errors' => $e->errors()]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->errors()['selected_items'][0] ?? 'Dữ liệu không hợp lệ'
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Voucher application error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi áp dụng mã giảm giá'
+            ], 500);
         }
     }
 }

@@ -122,20 +122,29 @@
                                 <p class="text-body fw-semibold">Items subtotal :</p>
                                 <p class="text-body-emphasis fw-semibold">{{ number_format($total) }}đ</p>
                             </div>
+                            @if (session('applied_voucher'))
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <p class="text-body mb-0">
+                                        <small>Applied voucher: <span class="fw-semibold">{{ session('applied_voucher') }}</span></small>
+                                    </p>
+                                </div>
+                            @endif
                             @if (isset($discount) && $discount > 0)
                                 <div class="d-flex justify-content-between">
                                     <p class="text-body fw-semibold">Discount :</p>
                                     <p class="text-danger fw-semibold">-{{ number_format($discount) }}đ</p>
                                 </div>
                             @endif
-                            <div class="d-flex justify-content-between">
-                                <p class="text-body fw-semibold">Subtotal :</p>
-                                <p class="text-body-emphasis fw-semibold">
-                                    {{ number_format(isset($subtotal) ? $subtotal : $total - ($discount ?? 0)) }}đ</p>
+                        </div>
+                        <div class="input-group mb-3">
+                            <input class="form-control" type="text" placeholder="Voucher" id="voucher-input" />
+                            <button class="btn btn-phoenix-primary px-5" id="apply-voucher-btn">Apply</button>
+                        </div>
+                        <div id="voucher-list" class="dropdown-menu w-100 position-static border-0 pt-0" style="display: none;">
+                            <div class="list-group list-group-flush rounded-3">
+                                <!-- Voucher items will be loaded here -->
                             </div>
                         </div>
-                        <div class="input-group mb-3"><input class="form-control" type="text"
-                                placeholder="Voucher" /><button class="btn btn-phoenix-primary px-5">Apply</button></div>
                         <div class="d-flex justify-content-between border-y border-dashed py-3 mb-4">
                             <h4 class="mb-0">Total :</h4>
                             <h4 class="mb-">{{ number_format($total) }}đ</h4>
@@ -188,9 +197,6 @@
                 
                 // Cập nhật Items subtotal
                 document.querySelector('.card-body .d-flex:first-child .text-body-emphasis.fw-semibold').textContent = formattedTotal;
-                
-                // Cập nhật Subtotal
-                document.querySelector('.card-body .d-flex:nth-child(2) .text-body-emphasis.fw-semibold').textContent = formattedTotal;
                 
                 // Cập nhật Total
                 document.querySelector('.d-flex.justify-content-between.border-y h4:last-child').textContent = formattedTotal;
@@ -338,6 +344,177 @@
                 // Cập nhật tổng tiền cuối cùng
                 document.querySelector('.total').textContent = totals.total;
             }
+
+            // Voucher handling
+            const voucherInput = document.getElementById('voucher-input');
+            const voucherList = document.getElementById('voucher-list');
+            const applyVoucherBtn = document.getElementById('apply-voucher-btn');
+
+            voucherInput.addEventListener('focus', function() {
+                // Load available promotions
+                fetch('{{ route('promotions.available') }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Promotion response:', data); // Debug log
+                        
+                        const voucherListGroup = voucherList.querySelector('.list-group');
+                        voucherListGroup.innerHTML = '';
+
+                        if (data.success && data.promotions && data.promotions.length > 0) {
+                            data.promotions.forEach(promotion => {
+                                const discountType = promotion.discount_type === 'percentage' ? '%' : 'đ';
+                                const discountValue = promotion.discount_type === 'percentage' 
+                                    ? `${promotion.discount_value}%` 
+                                    : `${new Intl.NumberFormat('vi-VN').format(promotion.discount_value)}đ`;
+
+                                const voucherItem = document.createElement('a');
+                                voucherItem.href = '#';
+                                voucherItem.className = 'list-group-item list-group-item-action';
+                                voucherItem.innerHTML = `
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">${promotion.code}</h6>
+                                            <small class="text-muted">${promotion.description || 'Không có mô tả'}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-danger">${discountValue}</span>
+                                            <small class="d-block text-muted">HSD: ${new Date(promotion.expires_at).toLocaleDateString()}</small>
+                                        </div>
+                                    </div>
+                                `;
+
+                                voucherItem.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    voucherInput.value = promotion.code;
+                                    voucherList.style.display = 'none';
+                                });
+
+                                voucherListGroup.appendChild(voucherItem);
+                            });
+                        } else {
+                            voucherListGroup.innerHTML = '<div class="list-group-item">Không có mã giảm giá nào khả dụng</div>';
+                        }
+                        
+                        // Show the voucher list
+                        voucherList.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error loading promotions:', error);
+                        const voucherListGroup = voucherList.querySelector('.list-group');
+                        voucherListGroup.innerHTML = '<div class="list-group-item text-danger">Có lỗi xảy ra khi tải mã giảm giá</div>';
+                        voucherList.style.display = 'block';
+                    });
+            });
+
+            // Hide voucher list when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!voucherInput.contains(e.target) && !voucherList.contains(e.target)) {
+                    voucherList.style.display = 'none';
+                }
+            });
+
+            // Apply voucher
+            applyVoucherBtn.addEventListener('click', function() {
+                const voucherCode = voucherInput.value.trim();
+                const selectedItems = Array.from(document.querySelectorAll('.select-item:checked')).map(cb => cb.dataset.variationId);
+                
+                if (!voucherCode) {
+                    alert('Vui lòng nhập mã giảm giá');
+                    return;
+                }
+
+                if (selectedItems.length === 0) {
+                    alert('Vui lòng chọn ít nhất một sản phẩm để áp dụng mã giảm giá');
+                    return;
+                }
+
+                fetch('{{ route('cart.apply-voucher') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        code: voucherCode,
+                        selected_items: selectedItems
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response from server:', data); // Debug log
+
+                    if (data.success) {
+                        // Format numbers for display
+                        const formatPrice = (price) => new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+                        
+                        // Cập nhật Items subtotal
+                        const subtotalElement = document.querySelector('.card-body .d-flex:first-child .text-body-emphasis.fw-semibold');
+                        if (subtotalElement) {
+                            subtotalElement.textContent = formatPrice(data.totals.subtotal);
+                        }
+
+                        // Thêm hoặc cập nhật phần hiển thị mã giảm giá đã áp dụng
+                        let voucherInfoHtml = '';
+                        if (data.applied_voucher) {
+                            voucherInfoHtml = `
+                                <div class="d-flex justify-content-between align-items-center mb-2 applied-voucher-info">
+                                    <p class="text-body mb-0">
+                                        <small>Applied voucher: <span class="fw-semibold">${data.applied_voucher}</span></small>
+                                    </p>
+                                </div>
+                            `;
+                        }
+
+                        // Thêm phần discount nếu có
+                        let discountHtml = '';
+                        if (data.totals.discount > 0) {
+                            discountHtml = `
+                                <div class="d-flex justify-content-between discount-row">
+                                    <p class="text-body fw-semibold">Discount :</p>
+                                    <p class="text-danger fw-semibold">-${formatPrice(data.totals.discount)}</p>
+                                </div>
+                            `;
+                        }
+
+                        // Xóa thông tin voucher và discount cũ nếu có
+                        const existingVoucherInfo = document.querySelector('.applied-voucher-info');
+                        if (existingVoucherInfo) {
+                            existingVoucherInfo.remove();
+                        }
+                        const existingDiscountRow = document.querySelector('.discount-row');
+                        if (existingDiscountRow) {
+                            existingDiscountRow.remove();
+                        }
+
+                        // Thêm thông tin mới
+                        const summaryDiv = document.querySelector('.card-body > div:nth-child(2)');
+                        const firstRow = summaryDiv.querySelector('.d-flex:first-child');
+                        if (voucherInfoHtml) {
+                            firstRow.insertAdjacentHTML('afterend', voucherInfoHtml);
+                        }
+                        if (discountHtml) {
+                            const voucherInfo = document.querySelector('.applied-voucher-info') || firstRow;
+                            voucherInfo.insertAdjacentHTML('afterend', discountHtml);
+                        }
+
+                        // Cập nhật Total
+                        const totalElement = document.querySelector('.d-flex.justify-content-between.border-y h4:last-child');
+                        if (totalElement) {
+                            totalElement.textContent = formatPrice(data.totals.total);
+                        }
+
+                        // Hiển thị thông báo thành công
+                        alert('Áp dụng mã giảm giá thành công!');
+                    } else {
+                        // Hiển thị thông báo lỗi
+                        alert(data.message || 'Mã giảm giá không hợp lệ');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi áp dụng mã giảm giá');
+                });
+            });
         });
         document.getElementById('checkout-btn').addEventListener('click', function() {
             const selected = Array.from(document.querySelectorAll('.select-item:checked')).map(cb => cb.dataset
