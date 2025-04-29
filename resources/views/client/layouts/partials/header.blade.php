@@ -48,6 +48,12 @@
                                                         <span>Profile</span>
                                                     </a>
                                                 </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link px-3 d-block" href="{{route('client.order.list')}}">
+                                                        <span class="me-2 text-body align-bottom" data-feather="shopping-bag"></span>
+                                                        <span>Order</span>
+                                                    </a>
+                                                </li>
                                             </ul>
                                         </div>
                                         <div class="card-footer p-0 border-top border-translucent">

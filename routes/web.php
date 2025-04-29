@@ -6,6 +6,7 @@
  use App\Http\Controllers\Client\AuthController;
  use App\Http\Controllers\Client\WishlistController;
  use App\Http\Controllers\Client\CartController;
+ use App\Http\Controllers\Client\OrderController;
  
  /*
  |--------------------------------------------------------------------------
@@ -62,6 +63,11 @@
      
      // VNPay return route - must be public
      Route::get('/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
+ 
+     // Order routes
+     Route::get('/orders', [OrderController::class, 'index'])->name('client.order.list');
+     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('client.order.detail');
+     Route::post('/orders/{order}/cancel-request', [OrderController::class, 'cancelRequest'])->name('client.order.cancel.request');
  });
  
  
