@@ -153,17 +153,17 @@
                                                                 <span class="fas fa-shipping-fast me-1"></span>Ship
                                                             </button>
                                                         </form>
-                                                    @elseif ($statusId == 2)
+                                                    @elseif ($statusId == 3)
                                                         <span class="badge bg-info">Shipping</span>
                                                         <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
                                                             @csrf
                                                             @method('PUT')
-                                                            <input type="hidden" name="status_id" value="3">
+                                                            <input type="hidden" name="status_id" value="2">
                                                             <button type="submit" class="btn btn-sm btn-success" title="Mark as Completed">
                                                                 <span class="fas fa-check me-1"></span>Complete
                                                             </button>
                                                         </form>
-                                                    @elseif ($statusId == 3)
+                                                    @elseif ($statusId == 2)
                                                         <span class="badge bg-success">Completed</span>  
                                                     @elseif ($statusId == 4)
                                                         <span class="badge bg-primary">Processing</span>
