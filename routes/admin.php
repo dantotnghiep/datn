@@ -1,14 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\ProductImageController;
-use App\Http\Controllers\Admin\ProductVariationController;
-use App\Http\Controllers\Admin\AttributeController;
-use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\PromotionController;
+use App\Http\Controllers\Admin\ProductImageController;
+use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\InventoryReceiptController;
+use App\Http\Controllers\Admin\ProductVariationController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
@@ -191,5 +192,29 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Update status
         Route::put('/{id}/update-status', [InventoryReceiptController::class, 'updateStatus'])->name('update-status');
+    });
+
+    // Promotions routes
+    Route::prefix('promotions')->name('promotions.')->group(function () {
+        // List
+        Route::get('/', [PromotionController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [PromotionController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [PromotionController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [PromotionController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [PromotionController::class, 'update'])->name('update');
+
+        // Delete
+        Route::delete('/{id}', [PromotionController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [PromotionController::class, 'restore'])->name('restore');
     });
 });

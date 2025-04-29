@@ -31,6 +31,11 @@
                                                 class="nav-link-text">Attributes</span></div>
                                     </a>
                                 </li>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.promotions.index') }}">
+                                        <div class="d-flex align-items-center"><span
+                                                class="nav-link-text">Promotions</span></div>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div><!-- parent pages-->
@@ -200,7 +205,7 @@
                                     class="nav-link-text-wrapper"><span class="nav-link-text">Categories</span></span>
                             </div>
                         </a></div><!-- parent pages-->
-                    
+
                     <!-- Orders menu -->
                     <div class="nav-item-wrapper"><a class="nav-link label-1" href="{{ route('admin.orders.index') }}"
                             role="button" data-bs-toggle="" aria-expanded="false">
@@ -209,7 +214,7 @@
                                     class="nav-link-text-wrapper"><span class="nav-link-text">Orders</span></span>
                             </div>
                         </a></div><!-- parent pages-->
-                    
+
                     <!-- Inventory Receipts menu -->
                     <div class="nav-item-wrapper"><a class="nav-link label-1" href="{{ route('admin.inventory-receipts.index') }}"
                             role="button" data-bs-toggle="" aria-expanded="false">

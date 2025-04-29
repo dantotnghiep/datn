@@ -2,8 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Promotion extends BaseModel
 {
+    use SoftDeletes;
+
+    protected $hasSlug = false;
+
     protected $fillable = [
         'code', 'name', 'description', 'discount_type', 'discount_value',
         'minimum_spend', 'maximum_discount', 'usage_limit', 'usage_count',
@@ -126,4 +132,4 @@ class Promotion extends BaseModel
     {
         return $this->hasMany(UsedPromotion::class);
     }
-} 
+}
