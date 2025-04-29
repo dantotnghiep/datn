@@ -101,15 +101,16 @@
                             @endif
 
                             @if ($items->count() > 0 && method_exists($items->first(), 'trashed'))
-                            <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
-                                class="btn btn-phoenix-secondary me-1">
-                                {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
-                            </a>
+                                <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
+                                    class="btn btn-phoenix-secondary me-1">
+                                    {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
+                                </a>
                             @endif
-
-                            <a href="{{ route($route . '.create') }}" class="btn btn-primary">
-                                <span class="fas fa-plus me-2"></span> Add New
-                            </a>
+                            @if ($route !== 'admin.product-variations' && route($route . '.create'))
+                                <a href="{{ route($route . '.create') }}" class="btn btn-primary">
+                                    <span class="fas fa-plus me-2"></span> Add New
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>

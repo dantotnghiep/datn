@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Promotion extends BaseModel
 {
-    use SoftDeletes;
-
     protected $hasSlug = false;
 
     protected $fillable = [

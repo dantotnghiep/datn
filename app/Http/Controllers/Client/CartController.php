@@ -224,9 +224,7 @@ class CartController extends Controller
                     }
                 }
 
-                // Nếu thanh toán qua VNPay
                 if ($request->payment_method === 'bank') {
-                    // Lưu thông tin đơn hàng vào session để dùng sau khi thanh toán
                     session([
                         'pending_order' => [
                             'user_id' => $user->id,
@@ -244,7 +242,6 @@ class CartController extends Controller
                         ]
                     ]);
 
-                    // Tạo URL thanh toán VNPay
                     $vnpayUrl = $this->vnpayService->createPaymentUrl([
                         'order_code' => 'TEMP_' . time() . '_' . $user->id,
                         'total_amount' => $total

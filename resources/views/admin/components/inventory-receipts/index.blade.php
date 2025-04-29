@@ -157,24 +157,10 @@
                                                         </form>
                                                     @elseif ($item->status == 'completed')
                                                         <span class="badge bg-success">Completed</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status" value="pending">
-                                                            <button type="submit" class="btn btn-sm btn-warning" title="Revert to Pending">
-                                                                <span class="fas fa-undo me-1"></span>Revert
-                                                            </button>
-                                                        </form>
+                                            
                                                     @elseif ($item->status == 'cancelled')
                                                         <span class="badge bg-danger">Cancelled</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status" value="pending">
-                                                            <button type="submit" class="btn btn-sm btn-warning" title="Revert to Pending">
-                                                                <span class="fas fa-undo me-1"></span>Revert
-                                                            </button>
-                                                        </form>
+                                                
                                                     @endif
                                                 @else
                                                     {{ $item->$field }}
