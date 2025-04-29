@@ -493,12 +493,17 @@ class CartController extends Controller
 
             $response = [
                 'success' => true,
+                'applied_voucher' => $request->code,
                 'totals' => [
                     'subtotal' => $subtotal,
                     'discount' => $discountAmount,
                     'total' => $total
                 ]
             ];
+
+            // Lưu mã giảm giá vào session
+            session(['applied_voucher' => $request->code]);
+            session(['discount' => $discountAmount]);
 
             Log::info('Sending response', ['response' => $response]);
             return response()->json($response);
@@ -519,5 +524,30 @@ class CartController extends Controller
                 'message' => 'Có lỗi xảy ra khi áp dụng mã giảm giá'
             ], 500);
         }
+    }
+
+    public function removeVoucher(Request $request)
+    {
+        $user = Auth::user();
+        $selectedItems = Cart::where('user_id', $user->id)
+            ->whereIn('product_variation_id', $request->selected_items)
+            ->with(['productVariation.product'])
+            ->get();
+
+        // Tính tổng tiền các sản phẩm được chọn
+        $total = $selectedItems->sum('total');
+
+        // Xóa mã giảm giá khỏi session
+        session()->forget('applied_voucher');
+        session()->forget('discount');
+
+        return response()->json([
+            'success' => true,
+            'totals' => [
+                'subtotal' => $total,
+                'discount' => 0,
+                'total' => $total
+            ]
+        ]);
     }
 }

@@ -73,6 +73,7 @@
      // Promotion routes
      Route::get('/promotions/available', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
      Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply-voucher');
+     Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.remove-voucher');
  });
  
  

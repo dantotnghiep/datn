@@ -122,13 +122,6 @@
                                 <p class="text-body fw-semibold">Items subtotal :</p>
                                 <p class="text-body-emphasis fw-semibold">{{ number_format($total) }}đ</p>
                             </div>
-                            @if (session('applied_voucher'))
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <p class="text-body mb-0">
-                                        <small>Applied voucher: <span class="fw-semibold">{{ session('applied_voucher') }}</span></small>
-                                    </p>
-                                </div>
-                            @endif
                             @if (isset($discount) && $discount > 0)
                                 <div class="d-flex justify-content-between">
                                     <p class="text-body fw-semibold">Discount :</p>
@@ -418,17 +411,15 @@
                 const voucherCode = voucherInput.value.trim();
                 const selectedItems = Array.from(document.querySelectorAll('.select-item:checked')).map(cb => cb.dataset.variationId);
                 
-                if (!voucherCode) {
-                    alert('Vui lòng nhập mã giảm giá');
-                    return;
-                }
-
                 if (selectedItems.length === 0) {
-                    alert('Vui lòng chọn ít nhất một sản phẩm để áp dụng mã giảm giá');
+                    alert('Vui lòng chọn ít nhất một sản phẩm');
                     return;
                 }
 
-                fetch('{{ route('cart.apply-voucher') }}', {
+                // Nếu input trống, gọi API xóa mã giảm giá
+                const endpoint = voucherCode ? '{{ route('cart.apply-voucher') }}' : '{{ route('cart.remove-voucher') }}';
+
+                fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -441,7 +432,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Response from server:', data); // Debug log
+                    console.log('Response from server:', data);
 
                     if (data.success) {
                         // Format numbers for display
@@ -451,29 +442,6 @@
                         const subtotalElement = document.querySelector('.card-body .d-flex:first-child .text-body-emphasis.fw-semibold');
                         if (subtotalElement) {
                             subtotalElement.textContent = formatPrice(data.totals.subtotal);
-                        }
-
-                        // Thêm hoặc cập nhật phần hiển thị mã giảm giá đã áp dụng
-                        let voucherInfoHtml = '';
-                        if (data.applied_voucher) {
-                            voucherInfoHtml = `
-                                <div class="d-flex justify-content-between align-items-center mb-2 applied-voucher-info">
-                                    <p class="text-body mb-0">
-                                        <small>Applied voucher: <span class="fw-semibold">${data.applied_voucher}</span></small>
-                                    </p>
-                                </div>
-                            `;
-                        }
-
-                        // Thêm phần discount nếu có
-                        let discountHtml = '';
-                        if (data.totals.discount > 0) {
-                            discountHtml = `
-                                <div class="d-flex justify-content-between discount-row">
-                                    <p class="text-body fw-semibold">Discount :</p>
-                                    <p class="text-danger fw-semibold">-${formatPrice(data.totals.discount)}</p>
-                                </div>
-                            `;
                         }
 
                         // Xóa thông tin voucher và discount cũ nếu có
@@ -486,15 +454,30 @@
                             existingDiscountRow.remove();
                         }
 
-                        // Thêm thông tin mới
-                        const summaryDiv = document.querySelector('.card-body > div:nth-child(2)');
-                        const firstRow = summaryDiv.querySelector('.d-flex:first-child');
-                        if (voucherInfoHtml) {
+                        // Thêm thông tin mới nếu có mã giảm giá
+                        if (data.applied_voucher) {
+                            // Thêm thông tin voucher
+                            const voucherInfoHtml = `
+                                <div class="d-flex justify-content-between align-items-center mb-2 applied-voucher-info">
+                                    <p class="text-body mb-0">
+                                        <small>Applied voucher: <span class="fw-semibold">${data.applied_voucher}</span></small>
+                                    </p>
+                                </div>
+                            `;
+
+                            // Thêm thông tin discount
+                            const discountHtml = `
+                                <div class="d-flex justify-content-between discount-row">
+                                    <p class="text-body fw-semibold">Discount :</p>
+                                    <p class="text-danger fw-semibold">-${formatPrice(data.totals.discount)}</p>
+                                </div>
+                            `;
+
+                            // Thêm vào DOM
+                            const summaryDiv = document.querySelector('.card-body > div:nth-child(2)');
+                            const firstRow = summaryDiv.querySelector('.d-flex:first-child');
                             firstRow.insertAdjacentHTML('afterend', voucherInfoHtml);
-                        }
-                        if (discountHtml) {
-                            const voucherInfo = document.querySelector('.applied-voucher-info') || firstRow;
-                            voucherInfo.insertAdjacentHTML('afterend', discountHtml);
+                            document.querySelector('.applied-voucher-info').insertAdjacentHTML('afterend', discountHtml);
                         }
 
                         // Cập nhật Total
@@ -503,16 +486,21 @@
                             totalElement.textContent = formatPrice(data.totals.total);
                         }
 
-                        // Hiển thị thông báo thành công
-                        alert('Áp dụng mã giảm giá thành công!');
+                        // Hiển thị thông báo
+                        alert(data.applied_voucher ? 'Áp dụng mã giảm giá thành công!' : 'Đã xóa mã giảm giá!');
+                        
+                        // Clear input nếu xóa mã giảm giá
+                        if (!data.applied_voucher) {
+                            voucherInput.value = '';
+                        }
                     } else {
                         // Hiển thị thông báo lỗi
-                        alert(data.message || 'Mã giảm giá không hợp lệ');
+                        alert(data.message || 'Có lỗi xảy ra');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Có lỗi xảy ra khi áp dụng mã giảm giá');
+                    alert('Có lỗi xảy ra khi xử lý mã giảm giá');
                 });
             });
         });
