@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\InventoryReceiptController;
+use App\Http\Controllers\Admin\OrderCancellationController;
 use App\Http\Controllers\Admin\ProductVariationController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -165,8 +166,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Update status
         Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
+        
+        // Order details
+        Route::get('/{id}/details', [OrderController::class, 'details'])->name('details');
+        
+        // Cancelled orders
+        Route::get('/cancelled', [OrderCancellationController::class, 'index'])->name('cancelled');
+        
+        // Approve cancellation request
+        Route::post('/cancellation/{id}/approve', [OrderCancellationController::class, 'approve'])->name('cancellation.approve');
+        
+        // Reject cancellation request
     });
-
     // Inventory Receipts routes
     Route::prefix('inventory-receipts')->name('inventory-receipts.')->group(function () {
         // List

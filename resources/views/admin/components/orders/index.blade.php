@@ -167,6 +167,10 @@
                                                     @else
                                                         <span class="badge bg-secondary">{{ $item->status_id }}</span>
                                                     @endif
+                                                @elseif ($field == 'order_number')
+                                                    <a href="{{ route($route . '.details', $item->id) }}" class="fw-semibold text-body">
+                                                        {{ $item->$field }}
+                                                    </a>
                                                 @else
                                                     {{ $item->$field }}
                                                 @endif

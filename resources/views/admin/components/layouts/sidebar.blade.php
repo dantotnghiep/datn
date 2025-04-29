@@ -58,14 +58,35 @@
                         </a></div><!-- parent pages-->
 
                     <!-- Orders menu -->
-                    <div class="nav-item-wrapper"><a class="nav-link label-1"
-                            href="{{ route('admin.orders.index') }}" role="button" data-bs-toggle=""
-                            aria-expanded="false">
-                            <div class="d-flex align-items-center"><span class="nav-link-icon"><span
-                                        data-feather="shopping-cart"></span></span><span
-                                    class="nav-link-text-wrapper"><span class="nav-link-text">Orders</span></span>
+                    <div class="nav-item-wrapper">
+                        <a class="nav-link dropdown-indicator label-1" href="#nv-orders" role="button"
+                            data-bs-toggle="collapse" aria-expanded="false" aria-controls="nv-orders">
+                            <div class="d-flex align-items-center">
+                                <div class="dropdown-indicator-icon-wrapper"><span
+                                        class="fas fa-caret-right dropdown-indicator-icon"></span></div><span
+                                    class="nav-link-icon"><span data-feather="shopping-cart"></span></span><span
+                                    class="nav-link-text">Orders</span>
                             </div>
-                        </a></div><!-- parent pages-->
+                        </a>
+                        <div class="parent-wrapper label-1">
+                            <ul class="nav collapse parent" data-bs-parent="#navbarVerticalCollapse" id="nv-orders">
+                                <li class="collapsed-nav-item-title d-none">Orders</li>
+                                <li class="nav-item"><a class="nav-link"
+                                        href="{{ route('admin.orders.index') }}">
+                                        <div class="d-flex align-items-center"><span
+                                                class="nav-link-text">All Orders</span></div>
+                                    </a>
+                                </li>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.orders.cancelled') }}">
+                                        <div class="d-flex align-items-center">
+                                            <span class="nav-link-text">Cancellation Requests</span>
+                                            <span class="badge bg-danger ms-2">New</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div><!-- parent pages-->
 
                     <!-- Inventory Receipts menu -->
                     <div class="nav-item-wrapper"><a class="nav-link label-1"
