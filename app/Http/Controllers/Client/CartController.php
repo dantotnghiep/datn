@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\VNPayService;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
@@ -210,84 +211,97 @@ class CartController extends Controller
             $shippingFee = 0;
             $total = $subtotal - $discount + $shippingFee;
 
-            // Validate stock before proceeding
-            foreach ($selectedItems as $item) {
-                if ($item->productVariation->stock < $item->quantity) {
-                    return back()->with('error', "Sản phẩm {$item->productVariation->product->name} không đủ số lượng trong kho.");
+            // Start database transaction
+            DB::beginTransaction();
+
+            try {
+                // Validate stock and lock rows for update
+                foreach ($selectedItems as $item) {
+                    $variation = ProductVariation::lockForUpdate()->find($item->product_variation_id);
+                    if (!$variation || $variation->stock < $item->quantity) {
+                        DB::rollBack();
+                        return back()->with('error', "Sản phẩm {$item->productVariation->product->name} không đủ số lượng trong kho.");
+                    }
                 }
-            }
 
-            // Nếu thanh toán qua VNPay
-            if ($request->payment_method === 'bank') {
-                // Lưu thông tin đơn hàng vào session để dùng sau khi thanh toán
-                session([
-                    'pending_order' => [
-                        'user_id' => $user->id,
-                        'user_name' => $request->user_name,
-                        'user_phone' => $request->user_phone,
-                        'province' => $request->province,
-                        'district' => $request->district,
-                        'ward' => $request->ward,
-                        'address' => $request->address,
-                        'notes' => $request->notes,
-                        'payment_method' => 'bank',
-                        'selected_items' => $selectedItems->toArray(),
-                        'total' => $total,
-                        'discount' => $discount
-                    ]
+                // Nếu thanh toán qua VNPay
+                if ($request->payment_method === 'bank') {
+                    // Lưu thông tin đơn hàng vào session để dùng sau khi thanh toán
+                    session([
+                        'pending_order' => [
+                            'user_id' => $user->id,
+                            'user_name' => $request->user_name,
+                            'user_phone' => $request->user_phone,
+                            'province' => $request->province,
+                            'district' => $request->district,
+                            'ward' => $request->ward,
+                            'address' => $request->address,
+                            'notes' => $request->notes,
+                            'payment_method' => 'bank',
+                            'selected_items' => $selectedItems->toArray(),
+                            'total' => $total,
+                            'discount' => $discount
+                        ]
+                    ]);
+
+                    // Tạo URL thanh toán VNPay
+                    $vnpayUrl = $this->vnpayService->createPaymentUrl([
+                        'order_code' => 'TEMP_' . time() . '_' . $user->id,
+                        'total_amount' => $total
+                    ]);
+
+                    DB::commit();
+                    return redirect($vnpayUrl);
+                }
+
+                // Xử lý đơn hàng COD
+                $order = Order::create([
+                    'order_number' => 'ORD-' . time(),
+                    'user_id' => $user->id,
+                    'status_id' => 1, // Trạng thái mới
+                    'user_name' => $request->user_name,
+                    'user_phone' => $request->user_phone,
+                    'province' => $request->province,
+                    'district' => $request->district,
+                    'ward' => $request->ward,
+                    'address' => $request->address,
+                    'notes' => $request->notes,
+                    'payment_method' => 'cod',
+                    'payment_status' => 'pending',
+                    'discount' => $discount,
+                    'total' => $subtotal,
+                    'total_with_discount' => $total
                 ]);
 
-                // Tạo URL thanh toán VNPay
-                $vnpayUrl = $this->vnpayService->createPaymentUrl([
-                    'order_code' => 'TEMP_' . time() . '_' . $user->id,
-                    'total_amount' => $total
-                ]);
+                // Tạo chi tiết đơn hàng và cập nhật tồn kho
+                foreach ($selectedItems as $item) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_variation_id' => $item->product_variation_id,
+                        'quantity' => $item->quantity,
+                        'price' => $item->price,
+                        'total' => $item->total
+                    ]);
 
-                return redirect($vnpayUrl);
+                    // Cập nhật số lượng tồn kho
+                    $variation = ProductVariation::lockForUpdate()->find($item->product_variation_id);
+                    $variation->stock -= $item->quantity;
+                    $variation->save();
+
+                    // Xóa item khỏi giỏ hàng
+                    $item->delete();
+                }
+
+                // Xóa session selected items
+                session()->forget('selected_cart_items');
+
+                DB::commit();
+                return redirect()->route('cart')->with('success', 'Đặt hàng thành công! Mã đơn hàng của bạn là ' . $order->order_number);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
             }
-
-            // Xử lý đơn hàng COD
-            $order = Order::create([
-                'order_number' => 'ORD-' . time(),
-                'user_id' => $user->id,
-                'status_id' => 1, // Trạng thái mới
-                'user_name' => $request->user_name,
-                'user_phone' => $request->user_phone,
-                'province' => $request->province,
-                'district' => $request->district,
-                'ward' => $request->ward,
-                'address' => $request->address,
-                'notes' => $request->notes,
-                'payment_method' => 'cod',
-                'payment_status' => 'pending',
-                'discount' => $discount,
-                'total' => $subtotal,
-                'total_with_discount' => $total
-            ]);
-
-            // Tạo chi tiết đơn hàng
-            foreach ($selectedItems as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_variation_id' => $item->product_variation_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
-                    'total' => $item->total
-                ]);
-
-                // Cập nhật số lượng tồn kho
-                $variation = $item->productVariation;
-                $variation->stock -= $item->quantity;
-                $variation->save();
-
-                // Xóa item khỏi giỏ hàng
-                $item->delete();
-            }
-
-            // Xóa session selected items
-            session()->forget('selected_cart_items');
-
-            return redirect()->route('cart')->with('success', 'Đặt hàng thành công! Mã đơn hàng của bạn là ' . $order->order_number);
 
         } catch (\Exception $e) {
             return back()->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage())->withInput();
