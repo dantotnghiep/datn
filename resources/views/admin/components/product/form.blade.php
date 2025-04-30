@@ -669,114 +669,143 @@
 
                 // Initialize dropzone
                 function initDropzone() {
-                    if (typeof Dropzone !== 'undefined') {
-                        Dropzone.autoDiscover = false;
+                    Dropzone.autoDiscover = false;
+                    
+                    let myDropzone = new Dropzone("#product-images-upload", {
+                        url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
+                        paramName: "images",
+                        autoProcessQueue: false,
+                        uploadMultiple: true,
+                        parallelUploads: 5,
+                        maxFiles: 10,
+                        maxFilesize: 5, // MB
+                        acceptedFiles: "image/*",
+                        addRemoveLinks: true,
+                        previewsContainer: "#current-images-container",
+                        clickable: "#product-images-upload",
+                        createImageThumbnails: true,
+                        thumbnailWidth: 150,
+                        thumbnailHeight: 150,
+                        init: function() {
+                            let submitButton = document.querySelector("#publish-btn");
+                            let myDropzone = this;
+                            let form = document.querySelector("#product-form");
 
-                        window.productDropzone = new Dropzone("#product-images-upload", {
-                            url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
-                            paramName: "images",
-                            acceptedFiles: "image/*",
-                            addRemoveLinks: false,
-                            autoProcessQueue: false,
-                            uploadMultiple: true,
-                            parallelUploads: 10,
-                            maxFiles: 10,
-                            maxFilesize: null,
-                            previewsContainer: false,
-                            clickable: "#product-images-upload",
-                            init: function() {
-                                let myDropzone = this;
-                                const currentImagesContainer = document.getElementById('current-images-container');
-
-                                this.on("addedfile", function(file) {
-                                    // Create preview element
-                                    const col = document.createElement('div');
-                                    col.className = 'col-auto';
-
-                                    const card = document.createElement('div');
-                                    card.className = 'product-image-card';
-
-                                    // Create remove button
-                                    const removeBtn = document.createElement('button');
-                                    removeBtn.type = 'button';
-                                    removeBtn.className = 'btn-remove-image';
-                                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                                    removeBtn.onclick = function() {
-                                        myDropzone.removeFile(file);
-                                        col.remove();
-                                    };
-
-                                    // Create image element
-                                    const img = document.createElement('img');
-                                    img.className = 'product-image';
-
-                                    // Check if this is the first image and no primary image is selected yet
-                                    const noPrimarySelected = !document.querySelector(
-                                        'input[name="primary_image"]:checked');
-
-                                    // Create primary radio
-                                    const imageActions = document.createElement('div');
-                                    imageActions.className = 'image-actions';
-
-                                    // We'll set isPrimary based on whether this is the first image and no primary is selected yet
-                                    const isPrimary = noPrimarySelected && currentImagesContainer.children
-                                        .length === 0;
-
-                                    imageActions.innerHTML = `
-                                        <div class="action-overlay">
-                                            <div class="d-flex flex-column gap-2">
-                                                <div class="form-check">
-                                                    <input class="form-check-input primary-image-radio" type="radio" 
-                                                        name="primary_image" value="new_${file.name}" ${isPrimary ? 'checked' : ''}>
-                                                    <label class="form-check-label">
-                                                        <i class="fas fa-star me-1"></i> Set as Primary
-                                                    </label>
-                                                </div>
+                            // When files are added
+                            this.on("addedfile", function(file) {
+                                // Create a new div for the image card
+                                let imageCard = document.createElement('div');
+                                imageCard.className = 'col-auto';
+                                
+                                let cardInner = document.createElement('div');
+                                cardInner.className = 'product-image-card';
+                                
+                                // Add remove button
+                                let removeBtn = document.createElement('button');
+                                removeBtn.type = 'button';
+                                removeBtn.className = 'btn-remove-image';
+                                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                                removeBtn.onclick = function() {
+                                    myDropzone.removeFile(file);
+                                };
+                                
+                                // Add primary image radio
+                                let actionDiv = document.createElement('div');
+                                actionDiv.className = 'image-actions';
+                                actionDiv.innerHTML = `
+                                    <div class="action-overlay">
+                                        <div class="d-flex flex-column gap-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="primary_image" value="new_${file.name}">
+                                                <label class="form-check-label">
+                                                    <i class="fas fa-star me-1"></i> Set as Primary
+                                                </label>
                                             </div>
                                         </div>
-                                    `;
+                                    </div>
+                                `;
+                                
+                                cardInner.appendChild(removeBtn);
+                                cardInner.appendChild(file.previewElement);
+                                cardInner.appendChild(actionDiv);
+                                imageCard.appendChild(cardInner);
+                                
+                                document.querySelector("#current-images-container").appendChild(imageCard);
+                            });
 
-                                    // Add primary badge if this is set as primary
-                                    if (isPrimary) {
-                                        const primaryBadge = document.createElement('div');
-                                        primaryBadge.className = 'primary-badge';
-                                        primaryBadge.innerHTML = '<i class="fas fa-star"></i>';
-                                        card.appendChild(primaryBadge);
+                            // When a file is removed
+                            this.on("removedfile", function(file) {
+                                let card = file.previewElement.closest('.col-auto');
+                                if (card) {
+                                    card.remove();
+                                }
+                            });
+
+                            // Handle form submission
+                            form.addEventListener("submit", function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
+                                // If there are files to upload
+                                if (myDropzone.getQueuedFiles().length > 0) {
+                                    myDropzone.processQueue();
+                                } else {
+                                    // If no new files, just submit the form
+                                    form.submit();
+                                }
+                            });
+
+                            // Handle the sending of the files
+                            this.on("sending", function(file, xhr, formData) {
+                                // Append all form data
+                                let formElements = form.elements;
+                                for (let i = 0; i < formElements.length; i++) {
+                                    let element = formElements[i];
+                                    if (element.type !== 'file') {
+                                        formData.append(element.name, element.value);
                                     }
+                                }
+                                
+                                // Add PUT method for update
+                                if ("{{ isset($item) }}") {
+                                    formData.append('_method', 'PUT');
+                                }
+                            });
 
-                                    // Read and set image preview
-                                    const reader = new FileReader();
-                                    reader.onload = function(e) {
-                                        img.src = e.target.result;
-                                    };
-                                    reader.readAsDataURL(file);
+                            // After all files are processed
+                            this.on("successmultiple", function(files, response) {
+                                // Redirect or show success message
+                                window.location.href = "{{ route('admin.products.index') }}";
+                            });
 
-                                    // Assemble the preview
-                                    card.appendChild(removeBtn);
-                                    card.appendChild(img);
-                                    card.appendChild(imageActions);
-                                    col.appendChild(card);
+                            // Handle errors
+                            this.on("error", function(file, errorMessage) {
+                                console.error('Upload error:', errorMessage);
+                                alert('Error uploading file: ' + errorMessage);
+                            });
 
-                                    // Add to current images container
-                                    currentImagesContainer.appendChild(col);
-                                });
-                            }
-                        });
-                    }
+                            // Handle the submit button click
+                            submitButton.addEventListener("click", function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                form.dispatchEvent(new Event('submit'));
+                            });
+                        }
+                    });
+
+                    return myDropzone;
                 }
 
                 function toggleImageRemoval(button, imageId) {
                     const card = button.closest('.product-image-card');
-                    const removeInput = card.querySelector('.remove-image-input');
-
+                    const input = card.querySelector('.remove-image-input');
+                    
                     if (card.classList.contains('marked-for-removal')) {
-                        // Unmark for removal
                         card.classList.remove('marked-for-removal');
-                        removeInput.value = '';
+                        input.value = '';
                     } else {
-                        // Mark for removal
                         card.classList.add('marked-for-removal');
-                        removeInput.value = imageId.toString(); // Ensure imageId is converted to string
+                        input.value = imageId;
                     }
                 }
 
@@ -1273,6 +1302,58 @@
 @section('scripts')
     <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/dropzone/dropzone-min.js') }}"></script>
     <script src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/flatpickr/flatpickr.min.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Dropzone
+            initDropzone();
+            
+            // Initialize variations display
+            const existingVariationsData = document.getElementById('generated-variations-data').value;
+            if (existingVariationsData && existingVariationsData !== '[]') {
+                try {
+                    const parsedData = JSON.parse(existingVariationsData);
+                    if (parsedData && parsedData.length > 0) {
+                        document.getElementById('variations-table-container').style.display = 'block';
+                        document.querySelector('#generated-variations .alert').style.display = 'none';
+                    }
+                } catch (e) {
+                    console.error('Error parsing variations data:', e);
+                }
+            }
+
+            // If in readonly mode, disable controls
+            const isReadOnly = {{ isset($isReadOnly) && $isReadOnly ? 'true' : 'false' }};
+            if (isReadOnly) {
+                // Disable attribute selects
+                document.querySelectorAll('.variant-attribute-select').forEach(select => {
+                    select.disabled = true;
+                });
+                
+                // Hide remove option buttons
+                document.querySelectorAll('.remove-option').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                
+                // Hide add option button
+                const addOptionBtn = document.getElementById('add-option-btn');
+                if (addOptionBtn) {
+                    addOptionBtn.style.display = 'none';
+                }
+                
+                // Show notice at top of page
+                const noticeDiv = document.createElement('div');
+                noticeDiv.className = 'alert alert-warning mb-4';
+                noticeDiv.innerHTML = '<strong>Attention!</strong> This product has variations that have been purchased. Some editing options are restricted.';
+                
+                const formStart = document.querySelector('form .row.g-3.flex-between-end');
+                if (formStart) {
+                    formStart.insertAdjacentElement('beforebegin', noticeDiv);
+                }
+            }
+        });
+    </script>
+
     <style>
         /* Product image styles */
         .product-image-card {
@@ -1460,52 +1541,4 @@
             border-left: 3px solid #0dcaf0 !important;
         }
     </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize variations display
-            const existingVariationsData = document.getElementById('generated-variations-data').value;
-            if (existingVariationsData && existingVariationsData !== '[]') {
-                try {
-                    const parsedData = JSON.parse(existingVariationsData);
-                    if (parsedData && parsedData.length > 0) {
-                        document.getElementById('variations-table-container').style.display = 'block';
-                        document.querySelector('#generated-variations .alert').style.display = 'none';
-                    }
-                } catch (e) {
-                    console.error('Error parsing variations data:', e);
-                }
-            }
-
-            // If in readonly mode, disable controls
-            const isReadOnly = {{ isset($isReadOnly) && $isReadOnly ? 'true' : 'false' }};
-            if (isReadOnly) {
-                // Disable attribute selects
-                document.querySelectorAll('.variant-attribute-select').forEach(select => {
-                    select.disabled = true;
-                });
-                
-                // Hide remove option buttons
-                document.querySelectorAll('.remove-option').forEach(btn => {
-                    btn.style.display = 'none';
-                });
-                
-                // Hide add option button
-                const addOptionBtn = document.getElementById('add-option-btn');
-                if (addOptionBtn) {
-                    addOptionBtn.style.display = 'none';
-                }
-                
-                // Show notice at top of page
-                const noticeDiv = document.createElement('div');
-                noticeDiv.className = 'alert alert-warning mb-4';
-                noticeDiv.innerHTML = '<strong>Attention!</strong> This product has variations that have been purchased. Some editing options are restricted.';
-                
-                const formStart = document.querySelector('form .row.g-3.flex-between-end');
-                if (formStart) {
-                    formStart.insertAdjacentElement('beforebegin', noticeDiv);
-                }
-            }
-        });
-    </script>
 @endsection
