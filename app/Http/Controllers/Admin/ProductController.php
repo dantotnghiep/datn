@@ -19,6 +19,9 @@ class ProductController extends BaseController
 {
     use HasUploadImage;
 
+    protected $maxFileSize = 5 * 1024 * 1024; // 5MB
+    protected $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
     public function __construct()
     {
         $this->model = Product::class;
@@ -353,6 +356,207 @@ class ProductController extends BaseController
         ]);
     }
 
+    /**
+     * Process image upload for a product
+     * @param \Illuminate\Http\UploadedFile $image
+     * @param int $productId
+     * @param int $order
+     * @throws \Exception
+     * @return string
+     */
+    protected function processProductImage($image, $productId, $order)
+    {
+        if (!$image->isValid()) {
+            throw new \Exception('Invalid image file');
+        }
+
+        if (!in_array($image->getMimeType(), $this->allowedMimes)) {
+            throw new \Exception('Invalid image type: ' . $image->getMimeType());
+        }
+
+        if ($image->getSize() > $this->maxFileSize) {
+            throw new \Exception('File size too large. Maximum size is 5MB');
+        }
+
+        // Store image with a unique name
+        $fileName = uniqid('product_') . '_' . time() . '.' . $image->getClientOriginalExtension();
+        $imagePath = $image->storeAs('products', $fileName, 'public');
+        
+        if (!$imagePath) {
+            throw new \Exception('Failed to store image');
+        }
+
+        Log::info('Stored image at: ' . $imagePath);
+
+        // Create product image record
+        ProductImage::create([
+            'product_id' => $productId,
+            'image_path' => $imagePath,
+            'is_primary' => false,
+            'order' => $order
+        ]);
+
+        return $imagePath;
+    }
+
+    /**
+     * Handle primary image selection
+     * @param int $productId
+     * @param string $primaryImageId
+     */
+    protected function handlePrimaryImageSelection($productId, $primaryImageId)
+    {
+        // First, set all images as non-primary
+        ProductImage::where('product_id', $productId)->update(['is_primary' => false]);
+        
+        // Then set the selected image as primary
+        if (strpos($primaryImageId, 'new_') === 0) {
+            // It's a newly uploaded image, get the latest
+            $latestImage = ProductImage::where('product_id', $productId)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            
+            if ($latestImage) {
+                $latestImage->update(['is_primary' => true]);
+            }
+        } else {
+            // Verify the image belongs to this product before updating
+            $image = ProductImage::where('id', $primaryImageId)
+                ->where('product_id', $productId)
+                ->first();
+                
+            if ($image) {
+                $image->update(['is_primary' => true]);
+            }
+        }
+    }
+
+    /**
+     * Handle image removal
+     * @param int $productId
+     * @param array $removeImages
+     */
+    protected function handleImageRemoval($productId, $removeImages)
+    {
+        foreach ($removeImages as $imageId) {
+            if (!empty($imageId)) {
+                // Verify the image belongs to this product before deleting
+                $image = ProductImage::where('id', $imageId)
+                    ->where('product_id', $productId)
+                    ->first();
+                    
+                if ($image) {
+                    if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
+                        Storage::disk('public')->delete($image->image_path);
+                    }
+                    $image->delete();
+                }
+            }
+        }
+
+        // Ensure there's a primary image
+        $primaryExists = ProductImage::where('product_id', $productId)
+            ->where('is_primary', true)
+            ->exists();
+
+        if (!$primaryExists) {
+            $firstImage = ProductImage::where('product_id', $productId)->first();
+            if ($firstImage) {
+                $firstImage->update(['is_primary' => true]);
+            }
+        }
+    }
+
+    protected function handleImageUpdate(Request $request, $item, array $validated)
+    {
+        if (!$item || !$item->id) {
+            throw new \Exception('Invalid item provided for image update');
+        }
+
+        $productId = $item->id;
+        Log::info('Starting image update for product ' . $productId);
+
+        try {
+            // Handle new image uploads
+            if ($request->hasFile('images')) {
+                $images = $request->file('images');
+                Log::info('Processing ' . count($images) . ' uploaded image files');
+
+                // Validate each image
+                foreach ($images as $index => $image) {
+                    if (!$image->isValid()) {
+                        throw new \Exception('Invalid image file at index ' . $index);
+                    }
+
+                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+                        throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
+                    }
+
+                    if ($image->getSize() > 5 * 1024 * 1024) { // 5MB
+                        throw new \Exception('Image file too large at index ' . $index . '. Maximum size is 5MB');
+                    }
+                }
+
+                // Process each image after validation
+                foreach ($images as $index => $image) {
+                    try {
+                        $order = ProductImage::where('product_id', $productId)->max('order');
+                        $order = $order ? $order + 1 : 0;
+                        
+                        // Store image with a unique name
+                        $fileName = uniqid('product_') . '_' . time() . '.' . $image->getClientOriginalExtension();
+                        $imagePath = $image->storeAs('products', $fileName, 'public');
+                        
+                        if (!$imagePath) {
+                            throw new \Exception('Failed to store image at index ' . $index);
+                        }
+
+                        Log::info('Stored image at: ' . $imagePath);
+
+                        // Create product image record
+                        $productImage = ProductImage::create([
+                            'product_id' => $productId,
+                            'image_path' => $imagePath,
+                            'is_primary' => false,
+                            'order' => $order
+                        ]);
+
+                        Log::info('Created product image record: ' . $productImage->id);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to process image at index ' . $index . ': ' . $e->getMessage());
+                        throw $e;
+                    }
+                }
+            } else {
+                Log::info('No new images to process');
+            }
+
+            // Handle primary image selection
+            if ($request->has('primary_image')) {
+                $primaryImageId = $request->input('primary_image');
+                Log::info('Setting primary image: ' . $primaryImageId);
+                $this->handlePrimaryImageSelection($productId, $primaryImageId);
+            }
+
+            // Handle removing images
+            if ($request->has('remove_images')) {
+                $removeImages = array_filter($request->remove_images); // Remove empty values
+                if (!empty($removeImages)) {
+                    Log::info('Removing images: ' . implode(', ', $removeImages));
+                    $this->handleImageRemoval($productId, $removeImages);
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error handling image update: ' . $e->getMessage(), [
+                'product_id' => $productId,
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
+
     public function update(Request $request, $id)
     {
         $item = $this->model::findOrFail($id);
@@ -365,89 +569,8 @@ class ProductController extends BaseController
             // Update the product
             $item->update($validated);
 
-            // Handle product images
-            if ($request->hasFile('images')) {
-                $images = $request->file('images');
-                Log::info('Processing ' . count($images) . ' uploaded image files');
-
-                foreach ($images as $index => $image) {
-                    // Validate image
-                    if (!$image->isValid()) {
-                        throw new \Exception('Invalid image file at index ' . $index);
-                    }
-
-                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
-                        throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
-                    }
-
-                    // Store image
-                    try {
-                        $imagePath = $image->store('products', 'public');
-                        Log::info('Stored image at: ' . $imagePath);
-
-                        // Create product image record
-                        ProductImage::create([
-                            'product_id' => $id,
-                            'image_path' => $imagePath,
-                            'is_primary' => false,
-                            'order' => ProductImage::where('product_id', $id)->max('order') + 1
-                        ]);
-                    } catch (\Exception $e) {
-                        Log::error('Failed to store image: ' . $e->getMessage());
-                        throw new \Exception('Failed to store image: ' . $e->getMessage());
-                    }
-                }
-            }
-
-            // Handle primary image selection
-            if ($request->has('primary_image')) {
-                $primaryImageId = $request->input('primary_image');
-                Log::info('Setting primary image: ' . $primaryImageId);
-                
-                // First, set all images as non-primary
-                ProductImage::where('product_id', $id)->update(['is_primary' => false]);
-                
-                // Then set the selected image as primary
-                if (strpos($primaryImageId, 'new_') === 0) {
-                    // It's a newly uploaded image, get the latest
-                    $latestImage = ProductImage::where('product_id', $id)
-                        ->orderBy('created_at', 'desc')
-                        ->first();
-                    
-                    if ($latestImage) {
-                        $latestImage->update(['is_primary' => true]);
-                    }
-                } else {
-                    // It's an existing image
-                    ProductImage::where('id', $primaryImageId)->update(['is_primary' => true]);
-                }
-            }
-
-            // Handle removing images
-            if ($request->has('remove_images')) {
-                $removeImages = array_filter($request->remove_images); // Remove empty values
-                foreach ($removeImages as $imageId) {
-                    if (!empty($imageId)) {
-                        $image = ProductImage::findOrFail($imageId);
-                        if ($image->image_path) {
-                            Storage::disk('public')->delete($image->image_path);
-                        }
-                        $image->delete();
-                    }
-                }
-
-                // Ensure there's a primary image
-                $primaryExists = ProductImage::where('product_id', $id)
-                    ->where('is_primary', true)
-                    ->exists();
-
-                if (!$primaryExists) {
-                    $firstImage = ProductImage::where('product_id', $id)->first();
-                    if ($firstImage) {
-                        $firstImage->update(['is_primary' => true]);
-                    }
-                }
-            }
+            // Handle all image operations
+            $this->handleImageUpdate($request, $item, $validated);
 
             // Handle product variations using handleProductVariants method
             if ($request->has('generated_variations') && !empty($request->generated_variations)) {
@@ -603,18 +726,6 @@ class ProductController extends BaseController
                     }
                     $image->delete();
                 }
-            }
-        }
-    }
-
-    protected function handlePrimaryImage($primaryImageId, $product)
-    {
-        $product->images()->update(['is_primary' => false]);
-
-        if ($primaryImageId) {
-            $image = ProductImage::find($primaryImageId);
-            if ($image && $image->product_id === $product->id) {
-                $image->update(['is_primary' => true]);
             }
         }
     }
