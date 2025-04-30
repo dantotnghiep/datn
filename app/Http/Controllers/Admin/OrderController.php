@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Order;
-use App\Models\OrderStatus;
 use Illuminate\Http\Request;
 
 class OrderController extends BaseController
