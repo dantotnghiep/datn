@@ -69,6 +69,7 @@
      Route::get('/orders', [OrderController::class, 'index'])->name('client.order.list');
      Route::get('/orders/{order}', [OrderController::class, 'show'])->name('client.order.detail');
      Route::post('/orders/{order}/cancel-request', [OrderController::class, 'cancelRequest'])->name('client.order.cancel.request');
+     Route::post('/client/orders/{id}/request-cancel', [OrderController::class, 'requestCancel'])->name('client.order.request-cancel');
  
      // Promotion routes
      Route::get('/promotions/available', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
@@ -82,3 +83,8 @@
  Route::get('/san-pham', [ProductController::class, 'index'])->name('product.index');
  
  Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist');
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::post('/orders/{id}/confirm-cancel', [OrderController::class, 'confirmCancel'])->name('admin.order.confirm-cancel');
+    Route::get('/orders/cancellation-requests', [OrderController::class, 'getCancellationRequests'])->name('admin.orders.cancellation-requests');
+});

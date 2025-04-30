@@ -122,9 +122,9 @@
                                     @endforeach
                                 </tr>
                             </thead>
-                            <tbody class="list">
+                            <tbody class="list" id="orders-table-body">
                                 @foreach ($items as $item)
-                                    <tr>
+                                    <tr id="order-row-{{ $item->id }}">
                                         @foreach ($fields as $field => $options)
                                             <td class="align-middle name">
                                                 @if ($field == 'image')
@@ -138,35 +138,37 @@
                                                         $statusId = $item->getRawOriginal('status_id') ?? $item->status_id;
                                                     @endphp
                                                     
-                                                    @if ($statusId == 1)
-                                                        <span class="badge bg-warning">Pending</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status_id" value="2">
-                                                            <button type="submit" class="btn btn-sm btn-info" title="Mark as Shipping">
-                                                                <span class="fas fa-shipping-fast me-1"></span>Ship
-                                                            </button>
-                                                        </form>
-                                                    @elseif ($statusId == 3)
-                                                        <span class="badge bg-info">Shipping</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status_id" value="2">
-                                                            <button type="submit" class="btn btn-sm btn-success" title="Mark as Completed">
-                                                                <span class="fas fa-check me-1"></span>Complete
-                                                            </button>
-                                                        </form>
-                                                    @elseif ($statusId == 2)
-                                                        <span class="badge bg-success">Completed</span>  
-                                                    @elseif ($statusId == 4)
-                                                        <span class="badge bg-danger">Cancle</span>
-                                                    @elseif ($statusId == 5)
-                                                        <span class="badge bg-danger">Refunded</span>
-                                                    @else
-                                                        <span class="badge bg-secondary">{{ $item->status_id }}</span>
-                                                    @endif
+                                                    <div class="order-status-actions-{{ $item->id }}">
+                                                        @if ($statusId == 1)
+                                                            <span class="badge bg-warning">Pending</span>
+                                                            <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <input type="hidden" name="status_id" value="3">
+                                                                <button type="submit" class="btn btn-sm btn-info" title="Mark as Shipping">
+                                                                    <span class="fas fa-shipping-fast me-1"></span>Ship
+                                                                </button>
+                                                            </form>
+                                                        @elseif ($statusId == 3)
+                                                            <span class="badge bg-info">Shipping</span>
+                                                            <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <input type="hidden" name="status_id" value="2">
+                                                                <button type="submit" class="btn btn-sm btn-success" title="Mark as Completed">
+                                                                    <span class="fas fa-check me-1"></span>Complete
+                                                                </button>
+                                                            </form>
+                                                        @elseif ($statusId == 2)
+                                                            <span class="badge bg-success">Completed</span>  
+                                                        @elseif ($statusId == 4)
+                                                            <span class="badge bg-danger">Cancle</span>
+                                                        @elseif ($statusId == 5)
+                                                            <span class="badge bg-danger">Refunded</span>
+                                                        @else
+                                                            <span class="badge bg-secondary">{{ $item->status_id }}</span>
+                                                        @endif
+                                                    </div>
                                                 @elseif ($field == 'order_number')
                                                     <a href="{{ route($route . '.details', $item->id) }}" class="fw-semibold text-body">
                                                         {{ $item->$field }}
@@ -271,3 +273,186 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tắt Pusher logging
+        Pusher.logToConsole = false;
+        console.log('Initializing Pusher connection for orders...');
+
+        // Get Pusher key and cluster from configuration
+        const pusherKey = '{{ config("broadcasting.connections.pusher.key") }}';
+        const pusherCluster = '{{ config("broadcasting.connections.pusher.options.cluster") }}';
+        
+        console.log('Pusher configuration:', { 
+            key: pusherKey || 'not set', 
+            cluster: pusherCluster || 'not set' 
+        });
+
+        // Make sure we have necessary configuration
+        if (!pusherKey) {
+            console.error('Pusher key not configured. Please check your .env file.');
+            if (typeof toast !== 'undefined') {
+                toast.error('Real-time updates not available: Configuration missing');
+            }
+            return;
+        }
+
+        // Initialize Pusher
+        try {
+            const pusher = new Pusher(pusherKey, {
+                cluster: pusherCluster || 'mt1',
+                forceTLS: true
+            });
+            
+            // Monitor connection state
+            pusher.connection.bind('connected', function() {
+                console.log('Successfully connected to Pusher!');
+            });
+            
+            pusher.connection.bind('error', function(err) {
+                console.error('Pusher connection error:', err);
+                if (typeof toast !== 'undefined') {
+                    toast.error('Real-time connection error: ' + (err.message || 'Unknown error'));
+                }
+            });
+
+            // Subscribe to orders channel
+            const channel = pusher.subscribe('my-channel');
+            
+            // Handle subscription errors
+            channel.bind('pusher:subscription_error', function(status) {
+                console.error('Pusher subscription error:', status);
+                if (typeof toast !== 'undefined') {
+                    toast.error('Error subscribing to updates: ' + status);
+                }
+            });
+            
+            // Bind to order status change event
+            channel.bind('my-event', function(data) {
+                console.log('Received order status update:', data);
+                
+                // Update the order status in real-time
+                const orderStatusElement = document.querySelector(`.order-status-actions-${data.id}`);
+                
+                if (orderStatusElement) {
+                    console.log('Found status element to update');
+                    
+                    // Create status HTML based on the new status
+                    let statusHtml = '';
+                    let statusName = data.status_name || 'Unknown';
+                    
+                    if (data.status_id == 1) {
+                        statusHtml = `
+                            <span class="badge bg-warning">Pending</span>
+                            <form action="{{ route($route . '.update-status', '') }}/${data.id}" method="POST" class="d-inline ms-1">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status_id" value="3">
+                                <button type="submit" class="btn btn-sm btn-info" title="Mark as Shipping">
+                                    <span class="fas fa-shipping-fast me-1"></span>Ship
+                                </button>
+                            </form>
+                        `;
+                    } else if (data.status_id == 3) {
+                        statusHtml = `
+                            <span class="badge bg-info">Shipping</span>
+                            <form action="{{ route($route . '.update-status', '') }}/${data.id}" method="POST" class="d-inline ms-1">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status_id" value="2">
+                                <button type="submit" class="btn btn-sm btn-success" title="Mark as Completed">
+                                    <span class="fas fa-check me-1"></span>Complete
+                                </button>
+                            </form>
+                        `;
+                    } else if (data.status_id == 2) {
+                        statusHtml = `<span class="badge bg-success">Completed</span>`;
+                    } else if (data.status_id == 4) {
+                        statusHtml = `<span class="badge bg-danger">Cancelled</span>`;
+                    } else if (data.status_id == 5) {
+                        statusHtml = `<span class="badge bg-danger">Refunded</span>`;
+                    } else {
+                        statusHtml = `<span class="badge bg-secondary">${data.status_id}</span>`;
+                    }
+                    
+                    // Update the status cell with new HTML
+                    orderStatusElement.innerHTML = statusHtml;
+                    console.log('Updated status HTML');
+                    
+                    // Highlight the row that was updated
+                    const orderRow = document.getElementById(`order-row-${data.id}`);
+                    if (orderRow) {
+                        orderRow.classList.add('bg-light-warning');
+                        setTimeout(() => {
+                            orderRow.classList.remove('bg-light-warning');
+                        }, 3000);
+                        console.log('Highlighted updated row');
+                    }
+                    
+                    // Show notification
+                    showNotification('Order Status Updated', `Order #${data.order_number} status changed to ${statusName}`);
+                } else {
+                    console.warn(`Could not find element with selector .order-status-actions-${data.id}`);
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error initializing Pusher:', error);
+            if (typeof toast !== 'undefined') {
+                toast.error('Failed to initialize real-time updates: ' + error.message);
+            }
+        }
+        
+        // Function to show notification
+        function showNotification(title, message) {
+            console.log('Showing notification:', title, message);
+            
+            // Display toast notification if available
+            if (typeof toast !== 'undefined') {
+                toast.success(message);
+                console.log('Displayed toast notification');
+            }
+            
+            // Check if the browser supports notifications
+            if (!("Notification" in window)) {
+                console.log("This browser does not support desktop notification");
+                return;
+            }
+            
+            // Check if permission is already granted
+            if (Notification.permission === "granted") {
+                createNotification(title, message);
+            }
+            // Otherwise, ask for permission
+            else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        createNotification(title, message);
+                    }
+                });
+            }
+        }
+        
+        function createNotification(title, message) {
+            const notification = new Notification(title, {
+                body: message,
+                icon: '/favicon.ico',
+            });
+            
+            notification.onclick = function() {
+                window.focus();
+                notification.close();
+            };
+            
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                notification.close();
+            }, 5000);
+            
+            console.log('Created browser notification');
+        }
+    });
+</script>
+@endpush

@@ -28,6 +28,9 @@
                         </div>
                     </a>
                 </div>
+                <div class="d-flex align-items-center">
+                    @include('admin.components.layouts.partials.notification')
+                </div>
             </div>
         </nav>
 

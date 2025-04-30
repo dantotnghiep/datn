@@ -1,5 +1,13 @@
 <?php
 
+// IMPORTANT: For real-time updates to work, please update your .env file with:
+// BROADCAST_DRIVER=pusher
+// PUSHER_APP_ID=your_app_id
+// PUSHER_APP_KEY=your_app_key
+// PUSHER_APP_SECRET=your_app_secret
+// PUSHER_APP_CLUSTER=your_cluster (e.g., ap1, us2, eu, etc.)
+// You can get these values by creating a free account at https://pusher.com
+
 return [
 
     /*
@@ -36,12 +44,12 @@ return [
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
                 'host' => env('PUSHER_HOST') ?: 'api-'.env('PUSHER_APP_CLUSTER', 'mt1').'.pusher.com',
                 'port' => env('PUSHER_PORT', 443),
                 'scheme' => env('PUSHER_SCHEME', 'https'),
                 'encrypted' => true,
-                'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
+                'cluster' => 'ap1',
+                'useTLS' => true
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html

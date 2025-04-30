@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\InventoryReceiptController;
 use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Controllers\Admin\OrderCancellationController;
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // CRUD routes cho danh mục (category)

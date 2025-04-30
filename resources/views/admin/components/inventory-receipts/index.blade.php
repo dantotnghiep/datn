@@ -127,9 +127,9 @@
                                     <th class="sort align-middle text-center" scope="col">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="list">
+                            <tbody class="list" id="inventory-receipts-table-body">
                                 @foreach ($items as $item)
-                                    <tr>
+                                    <tr id="receipt-row-{{ $item->id }}">
                                         @foreach ($fields as $field => $options)
                                             <td class="align-middle name">
                                                 @if ($field == 'image')
@@ -138,30 +138,32 @@
                                                 @elseif (isset($options['formatter']) && is_callable($options['formatter']))
                                                     {!! $options['formatter']($item->$field, $item) !!}
                                                 @elseif ($field == 'status')
-                                                    @if ($item->status == 'pending')
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status" value="completed">
-                                                            <button type="submit" class="btn btn-sm btn-success me-1" title="Mark as Completed">
-                                                                <span class="fas fa-check me-1"></span>Complete
-                                                            </button>
-                                                        </form>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status" value="cancelled">
-                                                            <button type="submit" class="btn btn-sm btn-danger" title="Mark as Cancelled">
-                                                                <span class="fas fa-times me-1"></span>Cancel
-                                                            </button>
-                                                        </form>
-                                                    @elseif ($item->status == 'completed')
-                                                        <span class="badge bg-success">Completed</span>
+                                                    <div class="receipt-status-actions-{{ $item->id }}">
+                                                        @if ($item->status == 'pending')
+                                                            <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <input type="hidden" name="status" value="completed">
+                                                                <button type="submit" class="btn btn-sm btn-success me-1" title="Mark as Completed">
+                                                                    <span class="fas fa-check me-1"></span>Complete
+                                                                </button>
+                                                            </form>
+                                                            <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <input type="hidden" name="status" value="cancelled">
+                                                                <button type="submit" class="btn btn-sm btn-danger" title="Mark as Cancelled">
+                                                                    <span class="fas fa-times me-1"></span>Cancel
+                                                                </button>
+                                                            </form>
+                                                        @elseif ($item->status == 'completed')
+                                                            <span class="badge bg-success">Completed</span>
                                             
-                                                    @elseif ($item->status == 'cancelled')
-                                                        <span class="badge bg-danger">Cancelled</span>
+                                                        @elseif ($item->status == 'cancelled')
+                                                            <span class="badge bg-danger">Cancelled</span>
                                                 
-                                                    @endif
+                                                        @endif
+                                                    </div>
                                                 @else
                                                     {{ $item->$field }}
                                                 @endif
@@ -290,3 +292,178 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tắt Pusher logging
+        Pusher.logToConsole = false;
+        console.log('Initializing Pusher connection for inventory receipts...');
+
+        // Get Pusher key and cluster from configuration
+        const pusherKey = '{{ config("broadcasting.connections.pusher.key") }}';
+        const pusherCluster = '{{ config("broadcasting.connections.pusher.options.cluster") }}';
+        
+        console.log('Pusher configuration:', { 
+            key: pusherKey || 'not set', 
+            cluster: pusherCluster || 'not set' 
+        });
+
+        // Make sure we have necessary configuration
+        if (!pusherKey) {
+            console.error('Pusher key not configured. Please check your .env file.');
+            if (typeof toast !== 'undefined') {
+                toast.error('Real-time updates not available: Configuration missing');
+            }
+            return;
+        }
+
+        // Initialize Pusher
+        try {
+            const pusher = new Pusher(pusherKey, {
+                cluster: pusherCluster || 'mt1',
+                forceTLS: true
+            });
+            
+            // Monitor connection state
+            pusher.connection.bind('connected', function() {
+                console.log('Successfully connected to Pusher!');
+            });
+            
+            pusher.connection.bind('error', function(err) {
+                console.error('Pusher connection error:', err);
+                if (typeof toast !== 'undefined') {
+                    toast.error('Real-time connection error: ' + (err.message || 'Unknown error'));
+                }
+            });
+
+            // Subscribe to inventory-receipts channel
+            const channel = pusher.subscribe('my-channel');
+            
+            // Handle subscription errors
+            channel.bind('pusher:subscription_error', function(status) {
+                console.error('Pusher subscription error:', status);
+                if (typeof toast !== 'undefined') {
+                    toast.error('Error subscribing to updates: ' + status);
+                }
+            });
+            
+            // Bind to receipt status change event
+            channel.bind('my-event', function(data) {
+                console.log('Received inventory receipt status update:', data);
+                
+                // Update the receipt status in real-time
+                const receiptStatusElement = document.querySelector(`.receipt-status-actions-${data.id}`);
+                
+                if (receiptStatusElement) {
+                    console.log('Found status element to update');
+                    
+                    // Create status HTML based on the new status
+                    let statusHtml = '';
+                    
+                    if (data.status === 'pending') {
+                        statusHtml = `
+                            <form action="{{ route($route . '.update-status', '') }}/${data.id}" method="POST" class="d-inline">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status" value="completed">
+                                <button type="submit" class="btn btn-sm btn-success me-1" title="Mark as Completed">
+                                    <span class="fas fa-check me-1"></span>Complete
+                                </button>
+                            </form>
+                            <form action="{{ route($route . '.update-status', '') }}/${data.id}" method="POST" class="d-inline">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status" value="cancelled">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Mark as Cancelled">
+                                    <span class="fas fa-times me-1"></span>Cancel
+                                </button>
+                            </form>
+                        `;
+                    } else if (data.status === 'completed') {
+                        statusHtml = `<span class="badge bg-success">Completed</span>`;
+                    } else if (data.status === 'cancelled') {
+                        statusHtml = `<span class="badge bg-danger">Cancelled</span>`;
+                    } else {
+                        statusHtml = `<span class="badge bg-secondary">${data.status}</span>`;
+                    }
+                    
+                    // Update the status cell with new HTML
+                    receiptStatusElement.innerHTML = statusHtml;
+                    console.log('Updated status HTML');
+                    
+                    // Highlight the row that was updated
+                    const receiptRow = document.getElementById(`receipt-row-${data.id}`);
+                    if (receiptRow) {
+                        receiptRow.classList.add('bg-light-warning');
+                        setTimeout(() => {
+                            receiptRow.classList.remove('bg-light-warning');
+                        }, 3000);
+                        console.log('Highlighted updated row');
+                    }
+                    
+                    // Show notification
+                    showNotification('Inventory Receipt Status Updated', `Receipt #${data.receipt_number || data.id} status changed to ${data.status}`);
+                } else {
+                    console.warn(`Could not find element with selector .receipt-status-actions-${data.id}`);
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error initializing Pusher:', error);
+            if (typeof toast !== 'undefined') {
+                toast.error('Failed to initialize real-time updates: ' + error.message);
+            }
+        }
+        
+        // Function to show notification
+        function showNotification(title, message) {
+            console.log('Showing notification:', title, message);
+            
+            // Display toast notification if available
+            if (typeof toast !== 'undefined') {
+                toast.success(message);
+                console.log('Displayed toast notification');
+            }
+            
+            // Check if the browser supports notifications
+            if (!("Notification" in window)) {
+                console.log("This browser does not support desktop notification");
+                return;
+            }
+            
+            // Check if permission is already granted
+            if (Notification.permission === "granted") {
+                createNotification(title, message);
+            }
+            // Otherwise, ask for permission
+            else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        createNotification(title, message);
+                    }
+                });
+            }
+        }
+        
+        function createNotification(title, message) {
+            const notification = new Notification(title, {
+                body: message,
+                icon: '/favicon.ico',
+            });
+            
+            notification.onclick = function() {
+                window.focus();
+                notification.close();
+            };
+            
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                notification.close();
+            }, 5000);
+            
+            console.log('Created browser notification');
+        }
+    });
+</script>
+@endpush

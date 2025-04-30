@@ -11,6 +11,9 @@ class UserSeeder extends Seeder
     /**
      * Run the database seeds.
      */
+
+
+     
     public function run(): void
     {
         // Create user roles first
@@ -31,14 +34,15 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ];
-        
+
+
         DB::table('user_roles')->insert($roles);
-        
+
         // Get role IDs
         $adminRoleId = DB::table('user_roles')->where('name', 'Admin')->first()->id;
         $customerRoleId = DB::table('user_roles')->where('name', 'Khách hàng')->first()->id;
         $staffRoleId = DB::table('user_roles')->where('name', 'Nhân viên')->first()->id;
-        
+
         // Create admin user
         DB::table('users')->insert([
             'name' => 'Admin',
@@ -49,7 +53,7 @@ class UserSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        
+
         // Create staff users
         DB::table('users')->insert([
             'name' => 'Nhân viên 1',
@@ -60,7 +64,7 @@ class UserSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        
+
         DB::table('users')->insert([
             'name' => 'Nhân viên 2',
             'email' => 'staff2@example.com',
@@ -70,7 +74,7 @@ class UserSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        
+
         // Create sample customers
         $customers = [
             [
@@ -137,7 +141,7 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ];
-        
+
         DB::table('users')->insert($customers);
     }
-} 
+}

@@ -97,4 +97,14 @@ class ProductVariation extends BaseModel
         return $this->belongsToMany(AttributeValue::class, 'attribute_value_variations')
             ->using(AttributeValueVariation::class);
     }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function isPurchased()
+    {
+        return $this->orderItems()->exists();
+    }
 }

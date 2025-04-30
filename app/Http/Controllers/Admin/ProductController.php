@@ -19,6 +19,9 @@ class ProductController extends BaseController
 {
     use HasUploadImage;
 
+    protected $maxFileSize = 5 * 1024 * 1024; // 5MB
+    protected $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
     public function __construct()
     {
         $this->model = Product::class;
@@ -170,16 +173,10 @@ class ProductController extends BaseController
                                 'sku' => $variationSku,
                                 'name' => $variationName,
                                 'price' => 0,
+                                'sale_price' => 0,
                                 'stock' => 0
                             ]);
                             $createdCount++;
-                            
-                            Log::info('Created variation:', [
-                                'id' => $newVariation->id,
-                                'sku' => $variationSku,
-                                'name' => $variationName,
-                                'attribute_values' => $attributeValueIds
-                            ]);
                             
                             // Attach attribute values
                             if (!empty($attributeValueIds)) {
@@ -239,10 +236,18 @@ class ProductController extends BaseController
 
     public function edit($id)
     {
-        $item = $this->model::with(['images', 'variations.attributeValues.attribute'])->findOrFail($id);
+        $item = $this->model::with(['images', 'variations.attributeValues.attribute', 'variations.orderItems'])->findOrFail($id);
         $fields = $this->model::getFields();
         $attributes = Attribute::with('values')->get();
         $attributeValues = AttributeValue::all();
+
+        // Lấy danh sách biến thể đã được mua
+        $purchasedVariationIds = [];
+        foreach ($item->variations as $variation) {
+            if ($variation->orderItems && $variation->orderItems->count() > 0) {
+                $purchasedVariationIds[] = $variation->id;
+            }
+        }
 
         // Debug log for variations
         $debug_variations = [];
@@ -259,7 +264,8 @@ class ProductController extends BaseController
             $debug_variations[] = [
                 'id' => $variation->id,
                 'name' => $variation->name,
-                'attribute_values' => $debug_attributes
+                'attribute_values' => $debug_attributes,
+                'is_purchased' => in_array($variation->id, $purchasedVariationIds)
             ];
         }
         Log::info('Variation data debug:', ['variations' => $debug_variations]);
@@ -305,6 +311,37 @@ class ProductController extends BaseController
 
         // Convert to array
         $existingVariantsData = array_values($attributeValuesMap);
+        
+        // Build the existingGeneratedVariations data structure expected by the JS
+        $existingGeneratedVariations = [];
+        
+        foreach ($item->variations as $variation) {
+            if ($variation->attributeValues->isEmpty()) {
+                continue; // Skip variations with no attribute values
+            }
+            
+            $combinationArray = [];
+            foreach ($variation->attributeValues as $attributeValue) {
+                $combinationArray[] = [
+                    'attribute_id' => $attributeValue->attribute_id,
+                    'attribute_name' => $attributeValue->attribute ? $attributeValue->attribute->name : 'Unknown',
+                    'value_id' => $attributeValue->id,
+                    'value' => $attributeValue->value
+                ];
+            }
+            
+            // Generate an ID for the variation similar to the JS generateVariationId function
+            $variationId = implode('_', array_map(function($attr) {
+                return $attr['attribute_id'] . '-' . $attr['value_id'];
+            }, $combinationArray));
+            
+            $existingGeneratedVariations[] = [
+                'id' => $variationId,
+                'combination' => $combinationArray,
+                'variation_id' => $variation->id,
+                'is_purchased' => in_array($variation->id, $purchasedVariationIds)
+            ];
+        }
 
         return view('admin.components.product.form', [
             'item' => $item,
@@ -312,8 +349,212 @@ class ProductController extends BaseController
             'route' => $this->route,
             'attributes' => $attributes,
             'attributeValues' => $attributeValues,
-            'existingVariantsData' => $existingVariantsData
+            'existingVariantsData' => $existingVariantsData,
+            'existingGeneratedVariations' => $existingGeneratedVariations,
+            'purchasedVariationIds' => $purchasedVariationIds,
+            'isReadOnly' => !empty($purchasedVariationIds) // If any variation was purchased, make it readonly
         ]);
+    }
+
+    /**
+     * Process image upload for a product
+     * @param \Illuminate\Http\UploadedFile $image
+     * @param int $productId
+     * @param int $order
+     * @throws \Exception
+     * @return string
+     */
+    protected function processProductImage($image, $productId, $order)
+    {
+        if (!$image->isValid()) {
+            throw new \Exception('Invalid image file');
+        }
+
+        if (!in_array($image->getMimeType(), $this->allowedMimes)) {
+            throw new \Exception('Invalid image type: ' . $image->getMimeType());
+        }
+
+        if ($image->getSize() > $this->maxFileSize) {
+            throw new \Exception('File size too large. Maximum size is 5MB');
+        }
+
+        // Store image with a unique name
+        $fileName = uniqid('product_') . '_' . time() . '.' . $image->getClientOriginalExtension();
+        $imagePath = $image->storeAs('products', $fileName, 'public');
+        
+        if (!$imagePath) {
+            throw new \Exception('Failed to store image');
+        }
+
+        Log::info('Stored image at: ' . $imagePath);
+
+        // Create product image record
+        ProductImage::create([
+            'product_id' => $productId,
+            'image_path' => $imagePath,
+            'is_primary' => false,
+            'order' => $order
+        ]);
+
+        return $imagePath;
+    }
+
+    /**
+     * Handle primary image selection
+     * @param int $productId
+     * @param string $primaryImageId
+     */
+    protected function handlePrimaryImageSelection($productId, $primaryImageId)
+    {
+        // First, set all images as non-primary
+        ProductImage::where('product_id', $productId)->update(['is_primary' => false]);
+        
+        // Then set the selected image as primary
+        if (strpos($primaryImageId, 'new_') === 0) {
+            // It's a newly uploaded image, get the latest
+            $latestImage = ProductImage::where('product_id', $productId)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            
+            if ($latestImage) {
+                $latestImage->update(['is_primary' => true]);
+            }
+        } else {
+            // Verify the image belongs to this product before updating
+            $image = ProductImage::where('id', $primaryImageId)
+                ->where('product_id', $productId)
+                ->first();
+                
+            if ($image) {
+                $image->update(['is_primary' => true]);
+            }
+        }
+    }
+
+    /**
+     * Handle image removal
+     * @param int $productId
+     * @param array $removeImages
+     */
+    protected function handleImageRemoval($productId, $removeImages)
+    {
+        foreach ($removeImages as $imageId) {
+            if (!empty($imageId)) {
+                // Verify the image belongs to this product before deleting
+                $image = ProductImage::where('id', $imageId)
+                    ->where('product_id', $productId)
+                    ->first();
+                    
+                if ($image) {
+                    if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
+                        Storage::disk('public')->delete($image->image_path);
+                    }
+                    $image->delete();
+                }
+            }
+        }
+
+        // Ensure there's a primary image
+        $primaryExists = ProductImage::where('product_id', $productId)
+            ->where('is_primary', true)
+            ->exists();
+
+        if (!$primaryExists) {
+            $firstImage = ProductImage::where('product_id', $productId)->first();
+            if ($firstImage) {
+                $firstImage->update(['is_primary' => true]);
+            }
+        }
+    }
+
+    protected function handleImageUpdate(Request $request, $item, array $validated)
+    {
+        if (!$item || !$item->id) {
+            throw new \Exception('Invalid item provided for image update');
+        }
+
+        $productId = $item->id;
+        Log::info('Starting image update for product ' . $productId);
+
+        try {
+            // Handle new image uploads
+            if ($request->hasFile('images')) {
+                $images = $request->file('images');
+                Log::info('Processing ' . count($images) . ' uploaded image files');
+
+                // Validate each image
+                foreach ($images as $index => $image) {
+                    if (!$image->isValid()) {
+                        throw new \Exception('Invalid image file at index ' . $index);
+                    }
+
+                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+                        throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
+                    }
+
+                    if ($image->getSize() > 5 * 1024 * 1024) { // 5MB
+                        throw new \Exception('Image file too large at index ' . $index . '. Maximum size is 5MB');
+                    }
+                }
+
+                // Process each image after validation
+                foreach ($images as $index => $image) {
+                    try {
+                        $order = ProductImage::where('product_id', $productId)->max('order');
+                        $order = $order ? $order + 1 : 0;
+                        
+                        // Store image with a unique name
+                        $fileName = uniqid('product_') . '_' . time() . '.' . $image->getClientOriginalExtension();
+                        $imagePath = $image->storeAs('products', $fileName, 'public');
+                        
+                        if (!$imagePath) {
+                            throw new \Exception('Failed to store image at index ' . $index);
+                        }
+
+                        Log::info('Stored image at: ' . $imagePath);
+
+                        // Create product image record
+                        $productImage = ProductImage::create([
+                            'product_id' => $productId,
+                            'image_path' => $imagePath,
+                            'is_primary' => false,
+                            'order' => $order
+                        ]);
+
+                        Log::info('Created product image record: ' . $productImage->id);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to process image at index ' . $index . ': ' . $e->getMessage());
+                        throw $e;
+                    }
+                }
+            } else {
+                Log::info('No new images to process');
+            }
+
+            // Handle primary image selection
+            if ($request->has('primary_image')) {
+                $primaryImageId = $request->input('primary_image');
+                Log::info('Setting primary image: ' . $primaryImageId);
+                $this->handlePrimaryImageSelection($productId, $primaryImageId);
+            }
+
+            // Handle removing images
+            if ($request->has('remove_images')) {
+                $removeImages = array_filter($request->remove_images); // Remove empty values
+                if (!empty($removeImages)) {
+                    Log::info('Removing images: ' . implode(', ', $removeImages));
+                    $this->handleImageRemoval($productId, $removeImages);
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error handling image update: ' . $e->getMessage(), [
+                'product_id' => $productId,
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
     }
 
     public function update(Request $request, $id)
@@ -328,119 +569,14 @@ class ProductController extends BaseController
             // Update the product
             $item->update($validated);
 
-            // Handle product images
-            if ($request->hasFile('images')) {
-                $images = $request->file('images');
-                Log::info('Processing ' . count($images) . ' uploaded image files');
+            // Handle all image operations
+            $this->handleImageUpdate($request, $item, $validated);
 
-                foreach ($images as $index => $image) {
-                    // Validate image
-                    if (!$image->isValid()) {
-                        throw new \Exception('Invalid image file at index ' . $index);
-                    }
-
-                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
-                        throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
-                    }
-
-                    // Store image
-                    try {
-                        $imagePath = $image->store('products', 'public');
-                        Log::info('Stored image at: ' . $imagePath);
-
-                        // Create product image record
-                        ProductImage::create([
-                            'product_id' => $id,
-                            'image_path' => $imagePath,
-                            'is_primary' => false,
-                            'order' => ProductImage::where('product_id', $id)->max('order') + 1
-                        ]);
-                    } catch (\Exception $e) {
-                        Log::error('Failed to store image: ' . $e->getMessage());
-                        throw new \Exception('Failed to store image: ' . $e->getMessage());
-                    }
-                }
-            }
-
-            // Handle primary image selection
-            if ($request->has('primary_image')) {
-                $primaryImageId = $request->input('primary_image');
-                // First, set all images as non-primary
-                ProductImage::where('product_id', $id)->update(['is_primary' => false]);
-                // Then set the selected image as primary
-                ProductImage::where('id', $primaryImageId)->update(['is_primary' => true]);
-            }
-
-            // Handle removing images
-            if ($request->has('remove_images')) {
-                $removeImages = array_filter($request->remove_images); // Remove empty values
-                foreach ($removeImages as $imageId) {
-                    if (!empty($imageId)) {
-                        $image = ProductImage::findOrFail($imageId);
-                        if ($image->image_path) {
-                            Storage::disk('public')->delete($image->image_path);
-                        }
-                        $image->delete();
-                    }
-                }
-
-                // Ensure there's a primary image
-                $primaryExists = ProductImage::where('product_id', $id)
-                    ->where('is_primary', true)
-                    ->exists();
-
-                if (!$primaryExists) {
-                    $firstImage = ProductImage::where('product_id', $id)->first();
-                    if ($firstImage) {
-                        $firstImage->update(['is_primary' => true]);
-                    }
-                }
-            }
-
-            // Handle product variations
-            if ($request->has('variants') && !empty($request->variants)) {
-                $variantsData = json_decode($request->variants, true);
-
-                if (!empty($variantsData) && is_array($variantsData)) {
-                    // First, soft delete all existing variations
-                    ProductVariation::where('product_id', $id)->delete();
-
-                    // Generate all possible combinations
-                    $combinations = $this->generateVariantCombinations($variantsData);
-
-                    foreach ($combinations as $index => $combination) {
-                        $variationName = $item->name;
-                        $skuSuffix = '';
-                        $attributeValueIds = [];
-
-                        foreach ($combination as $attrValue) {
-                            $variationName .= ' - ' . $attrValue['value'];
-                            $skuSuffix .= '-' . substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
-                            $attributeValueIds[] = $attrValue['id'];
-                        }
-
-                        // Generate variation SKU
-                        $variationSku = $item->sku . $skuSuffix;
-                        $counter = 1;
-                        while (ProductVariation::where('sku', $variationSku)->exists()) {
-                            $variationSku = $item->sku . $skuSuffix . '-' . $counter;
-                            $counter++;
-                        }
-
-                        // Create variation
-                        $newVariation = ProductVariation::create([
-                            'product_id' => $id,
-                            'sku' => $variationSku,
-                            'name' => $variationName,
-                            'price' => 0,
-                            'stock' => 0
-                        ]);
-
-                        if (!empty($attributeValueIds)) {
-                            $newVariation->attributeValues()->attach($attributeValueIds);
-                        }
-                    }
-                }
+            // Handle product variations using handleProductVariants method
+            if ($request->has('generated_variations') && !empty($request->generated_variations)) {
+                $this->handleProductVariants($request->variants, $item, $request->generated_variations);
+            } elseif ($request->has('variants') && !empty($request->variants)) {
+                $this->handleProductVariants($request->variants, $item);
             }
 
             DB::commit();
@@ -594,138 +730,94 @@ class ProductController extends BaseController
         }
     }
 
-    protected function handlePrimaryImage($primaryImageId, $product)
+    protected function handleProductVariants($variantsData, $product, $generatedVariationsJson = null)
     {
-        // First, set all images as non-primary
-        $product->images()->update(['is_primary' => false]);
-
-        // Then set the selected image as primary
-        if ($primaryImageId) {
-            $image = ProductImage::find($primaryImageId);
-            if ($image && $image->product_id === $product->id) {
-                $image->update(['is_primary' => true]);
-            }
-        }
-    }
-
-    protected function handleProductVariants($variantsData, $product)
-    {
-        if (empty($variantsData)) {
-            Log::warning('No variants data provided');
-            return;
-        }
-
-        // Decode variants data if it's a string
         $variantsArray = is_string($variantsData) ? json_decode($variantsData, true) : $variantsData;
-        Log::info('Processing variants data:', ['data' => $variantsArray]);
-
-        // Get generated variations data - this contains the final list of variations to create
-        $generatedVariationsJson = request()->input('generated_variations');
-        Log::info('Raw generated_variations from form:', [
-            'raw_data' => $generatedVariationsJson,
-            'is_string' => is_string($generatedVariationsJson),
-            'length' => is_string($generatedVariationsJson) ? strlen($generatedVariationsJson) : 0
-        ]);
-        
-        // Decode the JSON more carefully
+        $generatedVariationsJson = $generatedVariationsJson ?? request()->input('generated_variations');
         $generatedVariations = [];
         if (!empty($generatedVariationsJson)) {
             try {
                 $generatedVariations = json_decode($generatedVariationsJson, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    Log::error('JSON decode error:', ['error' => json_last_error_msg()]);
                 }
             } catch (\Exception $e) {
-                Log::error('Exception decoding variations JSON:', ['message' => $e->getMessage()]);
             }
         }
-        
-        Log::info('Generated variations after decode:', [
-            'count' => is_array($generatedVariations) ? count($generatedVariations) : 0,
-            'is_array' => is_array($generatedVariations),
-            'variations' => $generatedVariations
-        ]);
 
         if (!empty($generatedVariations) && is_array($generatedVariations)) {
             try {
                 DB::beginTransaction();
-
-                // Delete existing variations if any
-                $deletedCount = ProductVariation::where('product_id', $product->id)->delete();
-                Log::info("Deleted {$deletedCount} existing variations for product {$product->id}");
-
-                // Only create variations that exist in the generated_variations field
-                $createdCount = 0;
+                $existingVariations = ProductVariation::where('product_id', $product->id)
+                    ->with(['attributeValues', 'orderItems'])
+                    ->get();
+                $existingVariationMap = [];
+                foreach ($existingVariations as $variation) {
+                    $attributeValueIds = $variation->attributeValues->pluck('id')->sort()->implode('_');
+                    $existingVariationMap[$attributeValueIds] = $variation;
+                }
+                $purchasedVariations = [];
+                foreach ($existingVariations as $variation) {
+                    if ($variation->orderItems->count() > 0) {
+                        $purchasedVariations[$variation->id] = true;
+                    }
+                }
+                $variationsToKeep = [];
+                $timestamp = now()->format('His');
                 foreach ($generatedVariations as $variation) {
                     if (!isset($variation['id']) || !isset($variation['combination'])) {
-                        Log::warning('Skipping invalid variation data', ['variation' => $variation]);
                         continue;
                     }
 
-                    $variationName = $product->name;
-                    $skuSuffix = '';
+                    if (isset($variation['variation_id']) && isset($purchasedVariations[$variation['variation_id']])) {
+                        $variationsToKeep[] = $variation['variation_id'];
+                        continue;
+                    }
                     $attributeValueIds = [];
-
-                    // Process each attribute in the combination
+                    $variationName = $product->name;
+                    $skuParts = [];
                     foreach ($variation['combination'] as $attrValue) {
-                        if (!isset($attrValue['id']) || !isset($attrValue['value'])) {
-                            Log::warning('Invalid attribute value', ['value' => $attrValue]);
-                            continue;
-                        }
-
+                        $valueId = $attrValue['value_id'] ?? $attrValue['id'];
+                        $attributeValueIds[] = $valueId;
                         $variationName .= ' - ' . $attrValue['value'];
-                        $skuSuffix .= '-' . substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
-                        $attributeValueIds[] = $attrValue['id'];
+                        $skuParts[] = substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
                     }
-
-                    if (empty($attributeValueIds)) {
-                        Log::warning('No valid attribute values for variation', ['variation' => $variation]);
+                    sort($attributeValueIds);
+                    $combinationSignature = implode('_', $attributeValueIds);
+                    if (isset($existingVariationMap[$combinationSignature])) {
+                        $existingVariation = $existingVariationMap[$combinationSignature];
+                        $variationsToKeep[] = $existingVariation->id;
                         continue;
                     }
-
-                    // Generate variation SKU
-                    $variationSku = $product->sku . $skuSuffix;
+                    $skuBase = $product->sku . '-' . implode('-', $skuParts);
+                    $variationSku = $skuBase . '-' . $timestamp;
                     $counter = 1;
                     while (ProductVariation::where('sku', $variationSku)->exists()) {
-                        $variationSku = $product->sku . $skuSuffix . '-' . $counter;
+                        $variationSku = $skuBase . '-' . $timestamp . '-' . $counter;
                         $counter++;
                     }
-
-                    // Create variation
                     $newVariation = ProductVariation::create([
                         'product_id' => $product->id,
                         'sku' => $variationSku,
                         'name' => $variationName,
                         'price' => 0,
+                        'sale_price' => 0,
                         'stock' => 0
                     ]);
-                    $createdCount++;
-
-                    Log::info('Created variation:', [
-                        'id' => $newVariation->id,
-                        'sku' => $variationSku,
-                        'name' => $variationName,
-                        'attribute_values' => $attributeValueIds
-                    ]);
-
-                    // Attach attribute values
                     if (!empty($attributeValueIds)) {
                         $newVariation->attributeValues()->attach($attributeValueIds);
                     }
+                    $variationsToKeep[] = $newVariation->id;
                 }
-
-                Log::info("Created {$createdCount} variations for product {$product->id}");
+                $deletedCount = ProductVariation::where('product_id', $product->id)
+                    ->whereNotIn('id', $variationsToKeep)
+                    ->whereNotIn('id', array_keys($purchasedVariations))
+                    ->delete();
                 DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error('Error processing variants:', [
-                    'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
                 throw $e;
             }
         } else {
-            Log::info('No generated variations to process');
         }
     }
 }

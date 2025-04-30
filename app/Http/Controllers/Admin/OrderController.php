@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\OrderStatusChanged;
 use App\Models\Order;
-use App\Models\OrderStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends BaseController
 {
@@ -45,21 +46,40 @@ class OrderController extends BaseController
                 'status_id' => 'required|in:1,2,3,4,5'
             ]);
             
-            $order = $this->model::findOrFail($id);
+            $order = $this->model::with('status')->findOrFail($id);
             $oldStatusId = $order->getRawOriginal('status_id');
             $newStatusId = $request->status_id;
             $order->status_id = $newStatusId;
             $order->save();
-            // If new status is Completed (2), update payment status
+            $order = $this->model::with('status')->findOrFail($id);
             if ($newStatusId == 2) {
                 $order->payment_status = 'completed';
                 $order->paid_at = now();
                 $order->save();
             }
+       
+            try {
+                event(new OrderStatusChanged($order));
+            } catch (\Exception $eventError) {
+              
+            }
+            
+            // Check Pusher configuration
+            $pusherConfig = [
+                'app_id' => config('broadcasting.connections.pusher.app_id'),
+                'key' => config('broadcasting.connections.pusher.key'),
+                'secret' => config('broadcasting.connections.pusher.secret'),
+                'cluster' => config('broadcasting.connections.pusher.options.cluster'),
+                'broadcast_driver' => config('broadcasting.default')
+            ];
+            
+            
             return redirect()->route($this->route . '.index')
                 ->with('success', 'Order status updated successfully!');
                 
         } catch (\Exception $e) {
+       
+            
             return redirect()->back()
                 ->with('error', 'Error updating order status: ' . $e->getMessage());
         }

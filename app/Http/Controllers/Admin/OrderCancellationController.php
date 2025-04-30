@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\OrderCancellationProcessed;
+use App\Events\OrderStatusChanged;
 use App\Models\OrderCancellation;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class OrderCancellationController extends BaseController
 {
@@ -85,7 +88,7 @@ class OrderCancellationController extends BaseController
         ];
         
         // Query từ bảng OrderCancellation với order và thông tin liên quan
-        $query = $this->model::with(['order']);
+        $query = $this->model::with(['order.user']);
         
         // Xử lý tìm kiếm
         if ($request->has('search') && !empty($request->search)) {
@@ -119,68 +122,8 @@ class OrderCancellationController extends BaseController
         
         $items = $query->paginate(15);
         
-        // Tạo mảng mới để lưu các item đã được xử lý
-        $processedItems = [];
-        
-        foreach ($items as $index => $item) {
-            // Tạo một bản sao dữ liệu của item
-            $processedItem = clone $item;
-            
-            if ($processedItem->order) {
-                // Thiết lập thông tin khách hàng
-                $processedItem->customer_info = $processedItem->order->user_name . ' (' . $processedItem->order->user_phone . ')';
-                
-                // Thiết lập trạng thái đơn hàng
-                $statusId = $processedItem->order->getRawOriginal('status_id') ?? 0;
-                $statusName = '';
-                $statusClass = '';
-                
-                switch ($statusId) {
-                    case 1:
-                        $statusName = 'Pending';
-                        $statusClass = 'warning';
-                        break;
-                    case 2:
-                        $statusName = 'Completed';
-                        $statusClass = 'success';
-                        break;
-                    case 3:
-                        $statusName = 'Shipping';
-                        $statusClass = 'info';
-                        break;
-                    case 4:
-                        $statusName = 'Cancelled';
-                        $statusClass = 'danger';
-                        break;
-                    case 5:
-                        $statusName = 'Refunded';
-                        $statusClass = 'danger';
-                        break;
-                    default:
-                        $statusName = 'Unknown';
-                        $statusClass = 'secondary';
-                }
-                
-                $processedItem->order_status = '<span class="badge bg-' . $statusClass . '">' . $statusName . '</span>';
-            } else {
-                $processedItem->customer_info = '-';
-                $processedItem->order_status = '-';
-            }
-            
-            $processedItems[] = $processedItem;
-        }
-        
-        // Tạo collection từ mảng đã xử lý và duy trì thông tin phân trang
-        $processedCollection = new \Illuminate\Pagination\LengthAwarePaginator(
-            $processedItems,
-            $items->total(),
-            $items->perPage(),
-            $items->currentPage(),
-            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
-        );
-        
         return view($this->viewPath . '.index', [
-            'items' => $processedCollection,
+            'items' => $items,
             'fields' => $fields,
             'route' => $this->route,
             'title' => 'Cancellation Requests'
@@ -193,22 +136,69 @@ class OrderCancellationController extends BaseController
     public function approve($id)
     {
         try {
+            // Ghi log để theo dõi
+            Log::info('OrderCancellationController@approve - Start', [
+                'cancellation_id' => $id
+            ]);
+            
             $cancellation = $this->model::with('order')->findOrFail($id);
             $order = $cancellation->order;
             
             if (!$order) {
+                Log::warning('OrderCancellationController@approve - Order not found', [
+                    'cancellation_id' => $id
+                ]);
+                
                 return redirect()->route($this->route . '.cancelled')
                     ->with('error', 'Order not found!');
             }
+            
+            Log::info('OrderCancellationController@approve - Before status update', [
+                'cancellation_id' => $id,
+                'order_id' => $order->id,
+                'old_status' => $order->status_id
+            ]);
             
             // Cập nhật trạng thái đơn hàng thành "Cancelled"
             $order->status_id = 4; // ID của trạng thái "Cancelled"
             $order->save();
             
+            Log::info('OrderCancellationController@approve - After status update', [
+                'cancellation_id' => $id,
+                'order_id' => $order->id,
+                'new_status' => $order->status_id
+            ]);
+            
+            // Phát sóng sự kiện OrderStatusChanged để cập nhật trạng thái đơn hàng ở client
+            try {
+                event(new OrderStatusChanged($order));
+                Log::info('OrderCancellationController@approve - OrderStatusChanged event dispatched');
+            } catch (\Exception $eventError) {
+                Log::error('OrderCancellationController@approve - Error dispatching OrderStatusChanged event', [
+                    'error' => $eventError->getMessage()
+                ]);
+            }
+            
+            // Phát sóng sự kiện OrderCancellationProcessed để cập nhật danh sách yêu cầu hủy
+            try {
+                event(new OrderCancellationProcessed($cancellation, 'approved'));
+                Log::info('OrderCancellationController@approve - OrderCancellationProcessed event dispatched');
+            } catch (\Exception $eventError) {
+                Log::error('OrderCancellationController@approve - Error dispatching OrderCancellationProcessed event', [
+                    'error' => $eventError->getMessage()
+                ]);
+            }
+            
             return redirect()->route($this->route . '.cancelled')
                 ->with('success', 'Order cancellation approved successfully!');
                 
         } catch (\Exception $e) {
+            Log::error('OrderCancellationController@approve - Error', [
+                'cancellation_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return redirect()->back()
                 ->with('error', 'Error approving cancellation: ' . $e->getMessage());
         }
@@ -220,15 +210,40 @@ class OrderCancellationController extends BaseController
     public function reject($id)
     {
         try {
-            $cancellation = $this->model::findOrFail($id);
+            // Ghi log để theo dõi
+            Log::info('OrderCancellationController@reject - Start', [
+                'cancellation_id' => $id
+            ]);
+            
+            $cancellation = $this->model::with('order')->findOrFail($id);
+            
+            // Phát sóng sự kiện OrderCancellationProcessed để cập nhật danh sách yêu cầu hủy
+            try {
+                event(new OrderCancellationProcessed($cancellation, 'rejected'));
+                Log::info('OrderCancellationController@reject - OrderCancellationProcessed event dispatched');
+            } catch (\Exception $eventError) {
+                Log::error('OrderCancellationController@reject - Error dispatching OrderCancellationProcessed event', [
+                    'error' => $eventError->getMessage()
+                ]);
+            }
             
             // Xóa yêu cầu hủy
             $cancellation->delete();
+            
+            Log::info('OrderCancellationController@reject - Cancellation deleted', [
+                'cancellation_id' => $id
+            ]);
             
             return redirect()->route($this->route . '.cancelled')
                 ->with('success', 'Order cancellation request rejected!');
                 
         } catch (\Exception $e) {
+            Log::error('OrderCancellationController@reject - Error', [
+                'cancellation_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return redirect()->back()
                 ->with('error', 'Error rejecting cancellation: ' . $e->getMessage());
         }
