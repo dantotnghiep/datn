@@ -26,8 +26,12 @@
                 <div class="col-auto">
                     <a class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0"
                         href="{{ route('admin.products.index') }}">Cancel</a>
-                    <button class="btn btn-primary mb-2 mb-sm-0" type="button" id="publish-btn" name="action"
-                        value="publish" onclick="submitForm('publish')">Create new</button>
+                    @if (!isset($isReadOnly) || !$isReadOnly)
+                        <button class="btn btn-primary mb-2 mb-sm-0" type="button" id="publish-btn" name="action"
+                            value="publish" onclick="submitForm('publish')">{{ isset($item) ? 'Update' : 'Create new' }}</button>
+                    @else
+                        <button class="btn btn-primary mb-2 mb-sm-0" type="button" disabled title="This product has purchased variations and cannot be updated">Update</button>
+                    @endif
                 </div>
             </div>
             <div class="row g-5">
@@ -68,7 +72,7 @@
                                                 <i class="fas fa-times"></i>
                                             </button>
 
-                                            <img src="{{ Storage::url($image->image_path) }}" alt="{{ $item->name }}"
+                                            <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $item->name }}"
                                                 class="product-image">
 
                                             <div class="image-actions">
@@ -120,14 +124,22 @@
                     <div class="mt-5 pt-3 border-top">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h4 class="mb-0">Generated Variations</h4>
+                            @if (!isset($isReadOnly) || !$isReadOnly)
                             <button type="button" class="btn btn-primary" id="generate-variations-btn">
                                 Generate Variations
                             </button>
+                            @else
+                            <span class="badge bg-warning">Some variations have been purchased and can't be deleted</span>
+                            @endif
                         </div>
                         <div id="generated-variations" class="mt-3">
                             <div class="alert alert-info mb-4">
-                                Select attribute options above and click "Generate Variations" to create all possible
-                                combinations
+                                @if (!isset($isReadOnly) || !$isReadOnly)
+                                    Select attribute options above and click "Generate Variations" to create all possible
+                                    combinations
+                                @else
+                                    View only mode: Some variations have been purchased and are locked for editing
+                                @endif
                             </div>
 
                             <!-- Generated variations list will be inserted here -->
@@ -156,7 +168,7 @@
                                                     required>
                                                     @foreach (\App\Models\Category::all() as $category)
                                                         <option value="{{ $category->id }}"
-                                                            {{ (isset($item) && $item->category_id == $category->id) || old('category_id') == $category->id ? 'selected' : '' }}>
+                                                            {{ (isset($item) && $item->getRawOriginal('category_id') == $category->id) || old('category_id') == $category->id ? 'selected' : '' }}>
                                                             {{ $category->name }}
                                                         </option>
                                                     @endforeach
@@ -245,6 +257,16 @@
                 </script>
             @endif
 
+            @if (isset($existingGeneratedVariations) && count($existingGeneratedVariations) > 0)
+                <script>
+                    console.log('Existing generated variations from PHP:', @json($existingGeneratedVariations));
+                </script>
+            @else
+                <script>
+                    console.log('No existing generated variations found');
+                </script>
+            @endif
+
             <!-- Debug Helper -->
             <div id="debug-panel"
                 style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; z-index: 9999; display: none;">
@@ -275,6 +297,55 @@
                             dateFormat: "d/m/Y",
                             disableMobile: true
                         });
+                    }
+                    
+                    // Initialize primary image badges if editing a product
+                    document.querySelectorAll('.form-check-input[name="primary_image"]:checked').forEach(radio => {
+                        updatePrimaryImageBadges(radio);
+                    });
+                    
+                    // Show the variations container if we have existing variations
+                    const existingVariationsData = document.getElementById('generated-variations-data').value;
+                    if (existingVariationsData && existingVariationsData !== '[]') {
+                        try {
+                            const parsedData = JSON.parse(existingVariationsData);
+                            if (parsedData && parsedData.length > 0) {
+                                document.getElementById('variations-table-container').style.display = 'block';
+                                document.querySelector('#generated-variations .alert').style.display = 'none';
+                            }
+                        } catch (e) {
+                            console.error('Error parsing variations data:', e);
+                        }
+                    }
+
+                    // If in readonly mode, disable controls
+                    const isReadOnly = {{ isset($isReadOnly) && $isReadOnly ? 'true' : 'false' }};
+                    if (isReadOnly) {
+                        // Disable attribute selects
+                        document.querySelectorAll('.variant-attribute-select').forEach(select => {
+                            select.disabled = true;
+                        });
+                        
+                        // Hide remove option buttons
+                        document.querySelectorAll('.remove-option').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
+                        
+                        // Hide add option button
+                        const addOptionBtn = document.getElementById('add-option-btn');
+                        if (addOptionBtn) {
+                            addOptionBtn.style.display = 'none';
+                        }
+                        
+                        // Show notice at top of page
+                        const noticeDiv = document.createElement('div');
+                        noticeDiv.className = 'alert alert-warning mb-4';
+                        noticeDiv.innerHTML = '<strong>Attention!</strong> This product has variations that have been purchased. Some editing options are restricted.';
+                        
+                        const formStart = document.querySelector('form .row.g-3.flex-between-end');
+                        if (formStart) {
+                            formStart.insertAdjacentElement('beforebegin', noticeDiv);
+                        }
                     }
                 });
 
@@ -427,6 +498,8 @@
                             const parsedData = JSON.parse(variantsData);
 
                             if (Array.isArray(parsedData) && parsedData.length > 0) {
+                                console.log('Loading variant data:', parsedData);
+                                
                                 // Remove default options
                                 const variantOptions = document.querySelectorAll('.variant-option');
                                 variantOptions.forEach(option => option.remove());
@@ -792,14 +865,28 @@
                             variationName += `${attrName}: ${attributes[attrName]}`;
                         });
                         
-                        item.innerHTML = `
-                            <div class="d-flex justify-content-between align-items-center w-100">
-                                <span>${variationName}</span>
-                                <button type="button" class="btn-remove-variation">
-                                    ×
-                                </button>
-                            </div>
-                        `;
+                        // Check if this variation has been purchased
+                        const isPurchased = variation.is_purchased === true;
+                        
+                        // Generate a different HTML based on whether variation is purchased
+                        if (isPurchased) {
+                            item.classList.add('purchased-variation');
+                            item.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <span>${variationName}</span>
+                                    <span class="badge bg-info">Purchased</span>
+                                </div>
+                            `;
+                        } else {
+                            item.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <span>${variationName}</span>
+                                    <button type="button" class="btn-remove-variation">
+                                        ×
+                                    </button>
+                                </div>
+                            `;
+                        }
                         
                         list.appendChild(item);
                     });
@@ -838,7 +925,9 @@
                                 attribute_name: attr.attribute_name,
                                 value_id: attr.value_id || attr.id, // Ensure value_id is available
                                 value: attr.value
-                            }))
+                            })),
+                            variation_id: variation.variation_id, // Keep the actual variation ID if it exists
+                            is_purchased: variation.is_purchased // Keep purchased status
                         };
                     });
                     
@@ -1364,5 +1453,59 @@
         .form-select {
             appearance: auto;
         }
+
+        /* Purchased variation styles */
+        .purchased-variation {
+            background-color: #f8f9fa !important;
+            border-left: 3px solid #0dcaf0 !important;
+        }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize variations display
+            const existingVariationsData = document.getElementById('generated-variations-data').value;
+            if (existingVariationsData && existingVariationsData !== '[]') {
+                try {
+                    const parsedData = JSON.parse(existingVariationsData);
+                    if (parsedData && parsedData.length > 0) {
+                        document.getElementById('variations-table-container').style.display = 'block';
+                        document.querySelector('#generated-variations .alert').style.display = 'none';
+                    }
+                } catch (e) {
+                    console.error('Error parsing variations data:', e);
+                }
+            }
+
+            // If in readonly mode, disable controls
+            const isReadOnly = {{ isset($isReadOnly) && $isReadOnly ? 'true' : 'false' }};
+            if (isReadOnly) {
+                // Disable attribute selects
+                document.querySelectorAll('.variant-attribute-select').forEach(select => {
+                    select.disabled = true;
+                });
+                
+                // Hide remove option buttons
+                document.querySelectorAll('.remove-option').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                
+                // Hide add option button
+                const addOptionBtn = document.getElementById('add-option-btn');
+                if (addOptionBtn) {
+                    addOptionBtn.style.display = 'none';
+                }
+                
+                // Show notice at top of page
+                const noticeDiv = document.createElement('div');
+                noticeDiv.className = 'alert alert-warning mb-4';
+                noticeDiv.innerHTML = '<strong>Attention!</strong> This product has variations that have been purchased. Some editing options are restricted.';
+                
+                const formStart = document.querySelector('form .row.g-3.flex-between-end');
+                if (formStart) {
+                    formStart.insertAdjacentElement('beforebegin', noticeDiv);
+                }
+            }
+        });
+    </script>
 @endsection

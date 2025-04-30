@@ -64,4 +64,9 @@ class User extends Authenticatable
     public function usedpromotion(){
         return $this->hasMany(Promotion::class);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }
