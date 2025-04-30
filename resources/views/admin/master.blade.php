@@ -29,7 +29,50 @@
                     </a>
                 </div>
                 <div class="d-flex align-items-center">
-                    @include('admin.components.layouts.partials.notification')
+                    {{-- @include('admin.components.layouts.partials.notification') --}}
+                    
+                    <!-- User Account Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a class="nav-link px-2" id="navbarDropdownUser"
+                            href="#" role="button" data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside" aria-haspopup="true"
+                            aria-expanded="false">
+                            <span class="text-body-tertiary" data-feather="user" style="height:20px;width:20px;"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-profile shadow border mt-2"
+                            aria-labelledby="navbarDropdownUser">
+                            <div class="card position-relative border-0">
+                                <div class="card-body p-0">
+                                    <div class="text-center pt-4 pb-3">
+                                        <div class="avatar avatar-xl ">
+                                            <img class="rounded-circle" src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/team/72x72/57.webp') }}" alt="" />
+                                        </div>
+                                        <h6 class="mt-2 text-body-emphasis">{{ Auth::user()->name }}</h6>
+                                    </div>
+                                </div>
+                                <div class="overflow-auto scrollbar" style="height: 10rem;">
+                                    <ul class="nav d-flex flex-column mb-2 pb-1">
+                                        <li class="nav-item">
+                                            <a class="nav-link px-3 d-block" href="#">
+                                                <span class="me-2 text-body align-bottom" data-feather="user"></span>
+                                                <span>Admin Profile</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="card-footer p-0 border-top border-translucent">
+                                    <div class="px-3 py-3">
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit" class="btn btn-phoenix-secondary d-flex flex-center w-100">
+                                                <span class="me-2" data-feather="log-out"></span>Sign out
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>
