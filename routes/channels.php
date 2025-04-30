@@ -16,3 +16,12 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+// Public channels for admin real-time updates
+Broadcast::channel('orders', function () {
+    return true; // Public channel, no authentication required
+});
+
+Broadcast::channel('inventory-receipts', function () {
+    return true; // Public channel, no authentication required
+});

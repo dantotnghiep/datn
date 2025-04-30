@@ -23,14 +23,14 @@
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="orders-table-body">
                             @forelse($orders as $order)
-                                <tr>
+                                <tr id="order-row-{{ $order->id }}">
                                     <td>{{ $order->order_number }}</td>    
                                     <td>{{ $order->user_name }}</td>
                                     <td>{{ $order->user_phone }}</td>
                                     <td>{{ number_format($order->total_with_discount) }}đ</td>
-                                    <td>
+                                    <td id="order-status-{{ $order->id }}">
                                         <span class="badge bg-{{ $order->status->color ?? 'primary' }}">
                                             {{ $order->status->name ?? 'Đang xử lý' }}
                                         </span>
@@ -58,4 +58,92 @@
             </div>
         </div>
     </div>
-@endsection 
+@endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enable Pusher logging for debugging
+        Pusher.logToConsole = false;
+        console.log('Initializing Pusher connection for client orders...');
+
+        // Get Pusher key and cluster from configuration
+        const pusherKey = '{{ config("broadcasting.connections.pusher.key") }}';
+        const pusherCluster = '{{ config("broadcasting.connections.pusher.options.cluster") }}';
+        
+        // Make sure we have necessary configuration
+        if (!pusherKey) {
+            console.error('Pusher key not configured');
+            return;
+        }
+
+        try {
+            // Initialize Pusher
+            const pusher = new Pusher(pusherKey, {
+                cluster: pusherCluster || 'ap1',
+                forceTLS: true
+            });
+
+            // Connection monitoring
+            pusher.connection.bind('connected', function() {
+                console.log('Successfully connected to Pusher!');
+            });
+            
+            pusher.connection.bind('error', function(err) {
+                console.error('Pusher connection error:', err);
+            });
+
+            // Subscribe to the channel
+            const channel = pusher.subscribe('my-channel');
+            
+            // Listen for order status updates
+            channel.bind('my-event', function(data) {
+                console.log('Received order update:', data);
+                
+                // Check if this is an order update
+                if (data.order_number) {
+                    // Find the status cell for this order
+                    const statusCell = document.getElementById(`order-status-${data.id}`);
+                    
+                    if (statusCell) {
+                        console.log('Updating status for order:', data.order_number);
+                        
+                        // Get status display information
+                        let statusName = data.status_name || 'Unknown';
+                        let statusColor = 'primary';
+                        
+                        // Set color based on status
+                        if (data.status_id == 1) statusColor = 'warning'; // Pending
+                        else if (data.status_id == 2) statusColor = 'success'; // Completed
+                        else if (data.status_id == 3) statusColor = 'info'; // Shipping
+                        else if (data.status_id == 4) statusColor = 'danger'; // Cancelled
+                        else if (data.status_id == 5) statusColor = 'danger'; // Refunded
+                        
+                        // Update the status display
+                        statusCell.innerHTML = `
+                            <span class="badge bg-${statusColor}">
+                                ${statusName}
+                            </span>
+                        `;
+                        
+                        // Highlight the updated row
+                        const orderRow = document.getElementById(`order-row-${data.id}`);
+                        if (orderRow) {
+                            orderRow.classList.add('bg-light-warning');
+                            setTimeout(() => {
+                                orderRow.classList.remove('bg-light-warning');
+                            }, 3000);
+                        }
+                        
+                        // Show notification
+                        toast.info(`Đơn hàng #${data.order_number} đã được cập nhật thành: ${statusName}`);
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error initializing Pusher:', error);
+        }
+    });
+</script>
+@endpush 

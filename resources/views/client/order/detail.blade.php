@@ -84,7 +84,7 @@
 
                         <div class="mb-4">
                             <h5 class="mb-2">Trạng thái thanh toán</h5>
-                            <p class="mb-0">
+                            <p class="mb-0" id="payment-status">
                                 @switch($order->payment_status)
                                     @case('pending')
                                         <span class="badge bg-warning">Chờ thanh toán</span>
@@ -101,7 +101,7 @@
 
                         <div class="mb-4">
                             <h5 class="mb-2">Trạng thái đơn hàng</h5>
-                            <p class="mb-0">
+                            <p class="mb-0" id="order-status-{{ $order->id }}">
                                 <span class="badge bg-{{ $order->status->color ?? 'primary' }}">
                                     {{ $order->status->name ?? 'Đang xử lý' }}
                                 </span>
@@ -125,17 +125,114 @@
                             </div>
                         </div>
                         {{-- Nút yêu cầu hủy --}}
-                        @if (!in_array($order->status_id, [2, 4, 5]) && !$order->cancellation)
-                            <form action="{{ route('client.order.cancel.request', $order->id) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn gửi yêu cầu hủy đơn hàng này?');">
-                                @csrf
-                                <button type="submit" class="btn btn-danger w-100 mt-3">Yêu cầu hủy đơn hàng</button>
-                            </form>
-                        @elseif($order->cancellation)
-                            <div class="alert alert-warning mt-3">Bạn đã gửi yêu cầu hủy đơn hàng này.</div>
-                        @endif
+                        <div id="cancel-button-container">
+                            @if (!in_array($order->status_id, [2, 4, 5]) && !$order->cancellation)
+                                <form action="{{ route('client.order.cancel.request', $order->id) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn gửi yêu cầu hủy đơn hàng này?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-danger w-100 mt-3">Yêu cầu hủy đơn hàng</button>
+                                </form>
+                            @elseif($order->cancellation)
+                                <div class="alert alert-warning mt-3">Bạn đã gửi yêu cầu hủy đơn hàng này.</div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-@endsection 
+@endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enable Pusher logging for debugging
+        Pusher.logToConsole = false;
+        console.log('Initializing Pusher connection for order details...');
+
+        // Get current order data
+        const currentOrderId = {{ $order->id }};
+        const currentOrderNumber = '{{ $order->order_number }}';
+        
+        // Get Pusher key and cluster from configuration
+        const pusherKey = '{{ config("broadcasting.connections.pusher.key") }}';
+        const pusherCluster = '{{ config("broadcasting.connections.pusher.options.cluster") }}';
+        
+        // Make sure we have necessary configuration
+        if (!pusherKey) {
+            console.error('Pusher key not configured');
+            return;
+        }
+
+        try {
+            // Initialize Pusher
+            const pusher = new Pusher(pusherKey, {
+                cluster: pusherCluster || 'ap1',
+                forceTLS: true
+            });
+            
+            // Connection monitoring
+            pusher.connection.bind('connected', function() {
+                console.log('Successfully connected to Pusher!');
+            });
+
+            // Subscribe to the channel
+            const channel = pusher.subscribe('my-channel');
+            
+            // Listen for order status updates
+            channel.bind('my-event', function(data) {
+                console.log('Received order update:', data);
+                
+                // Check if this update is for the current order
+                if (data.order_number && data.id == currentOrderId) {
+                    console.log('Updating current order status');
+                    
+                    // Get status display information
+                    let statusName = data.status_name || 'Unknown';
+                    let statusColor = 'primary';
+                    
+                    // Set color based on status
+                    if (data.status_id == 1) statusColor = 'warning'; // Pending
+                    else if (data.status_id == 2) statusColor = 'success'; // Completed
+                    else if (data.status_id == 3) statusColor = 'info'; // Shipping
+                    else if (data.status_id == 4) statusColor = 'danger'; // Cancelled
+                    else if (data.status_id == 5) statusColor = 'danger'; // Refunded
+                    
+                    // Update the status display
+                    const statusElement = document.getElementById(`order-status-${data.id}`);
+                    if (statusElement) {
+                        statusElement.innerHTML = `
+                            <span class="badge bg-${statusColor}">
+                                ${statusName}
+                            </span>
+                        `;
+                    }
+                    
+                    // Update payment status if order is completed
+                    if (data.status_id == 2) {
+                        const paymentStatusElement = document.getElementById('payment-status');
+                        if (paymentStatusElement) {
+                            paymentStatusElement.innerHTML = `
+                                <span class="badge bg-success">Đã thanh toán</span>
+                            `;
+                        }
+                    }
+                    
+                    // Hide cancel button if order is completed, cancelled or refunded
+                    if (data.status_id == 2 || data.status_id == 4 || data.status_id == 5) {
+                        const cancelContainer = document.getElementById('cancel-button-container');
+                        if (cancelContainer) {
+                            cancelContainer.innerHTML = '';
+                        }
+                    }
+                    
+                    // Show notification
+                    toast.info(`Đơn hàng #${data.order_number} đã được cập nhật thành: ${statusName}`);
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error initializing Pusher:', error);
+        }
+    });
+</script>
+@endpush 

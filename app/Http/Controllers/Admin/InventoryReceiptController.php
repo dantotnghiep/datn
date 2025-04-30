@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\InventoryReceiptStatusChanged;
 use App\Models\InventoryReceipt;
 use App\Models\InventoryReceiptItem;
 use App\Models\ProductVariation;
@@ -244,6 +245,9 @@ class InventoryReceiptController extends BaseController
                     }
                 }
             }
+            
+            // Dispatch event for real-time updates
+            event(new InventoryReceiptStatusChanged($receipt));
             
             return redirect()->route($this->route . '.index')
                 ->with('success', 'Inventory receipt status updated successfully!');
