@@ -79,4 +79,23 @@ class WishlistController extends Controller
 
         return redirect()->back()->with('error', 'Không tìm thấy sản phẩm trong danh sách yêu thích');
     }
+
+    public function check(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'exists' => false
+            ]);
+        }
+        
+        $variationId = $request->query('variation_id');
+        
+        $exists = Wishlist::where('user_id', Auth::id())
+            ->where('product_variation_id', $variationId)
+            ->exists();
+            
+        return response()->json([
+            'exists' => $exists
+        ]);
+    }
 } 

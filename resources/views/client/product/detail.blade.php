@@ -44,7 +44,7 @@
                                         <div class="swiper-wrapper">
                                             @foreach ($product->images as $image)
                                                 <div class="swiper-slide">
-9                                                    <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}" />
+                                                    <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}" />
                                                 </div>
                                             @endforeach
                                         </div>
@@ -53,8 +53,8 @@
                         </div>
                     </div>
                     <div class="d-flex"><button
-                            class="btn btn-lg btn-outline-warning rounded-pill w-100 me-3 px-2 px-sm-4 fs-9 fs-sm-8"><span
-                                    class="me-2 far fa-heart"></span>Thêm vào yêu thích</button><button
+                            class="btn btn-lg btn-outline-warning rounded-pill w-100 me-3 px-2 px-sm-4 fs-9 fs-sm-8" id="add-to-wishlist"><span
+                                    class="me-2 far fa-heart" id="wishlist-icon"></span>Thêm vào yêu thích</button><button
                             class="btn btn-lg btn-warning rounded-pill w-100 fs-9 fs-sm-8"><span
                                     class="fas fa-shopping-cart me-2"></span>Thêm vào giỏ hàng</button></div>
                 </div>
@@ -89,7 +89,7 @@
                                                         {{ number_format($selectedVariation->price) }}đ
                                                     </p>
                                                     @php
-                                                        $discount = round((($selectedVariation->price - $selectedVariation->sale_price) / $selectedVariation->price) * 100);
+                                                        $discount = $selectedVariation->price > 0 ? round((($selectedVariation->price - $selectedVariation->sale_price) / $selectedVariation->price) * 100) : 0;
                                                     @endphp
                                                     <span class="badge bg-danger">-{{ $discount }}%</span>
                                                 </div>
@@ -217,8 +217,9 @@
                             <div class="d-flex flex-column justify-content-between h-100">
                                 <div>
                                     <div class="border border-1 border-translucent rounded-3 position-relative mb-3">
-                                        <button class="btn btn-wish btn-wish-primary z-2 d-toggle-container"
+                                        <button class="btn btn-wish btn-wish-primary z-2 d-toggle-container wishlist-btn"
                                             data-bs-toggle="tooltip" data-bs-placement="top"
+                                            data-product-variation-id="{{ $relatedProduct->variations->first()->id ?? 0 }}"
                                             title="Thêm vào yêu thích">
                                             <span class="fas fa-heart d-block-hover" data-fa-transform="down-1"></span>
                                             <span class="far fa-heart d-none-hover" data-fa-transform="down-1"></span>
@@ -412,7 +413,7 @@
 
                 // Cập nhật giá
                 if (variation.sale_price) {
-                    const discount = Math.round(((variation.price - variation.sale_price) / variation.price) * 100);
+                    const discount = variation.price > 0 ? Math.round(((variation.price - variation.sale_price) / variation.price) * 100) : 0;
                     priceDisplay.innerHTML = `
                         <div class="d-flex align-items-center">
                             <h3 class="me-3 mb-0">${numberFormat(variation.sale_price)}đ</h3>
@@ -570,6 +571,199 @@
                 // Thêm form vào body và submit
                 document.body.appendChild(form);
                 form.submit();
+            });
+
+            // Xử lý chức năng thêm vào yêu thích
+            const addToWishlistBtn = document.getElementById('add-to-wishlist');
+            const wishlistIcon = document.getElementById('wishlist-icon');
+            
+            addToWishlistBtn.addEventListener('click', function() {
+                const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
+                    .map(input => parseInt(input.value));
+                
+                // Kiểm tra đã đăng nhập chưa
+                @if(!Auth::check())
+                    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+                    window.location.href = '{{ route("login") }}';
+                    return;
+                @endif
+                
+                // Kiểm tra đã chọn biến thể chưa
+                if (selectedAttributes.length === 0 && variations.length > 0) {
+                    alert('Vui lòng chọn đầy đủ các thuộc tính');
+                    return;
+                }
+                
+                // Lấy variation ID
+                let variationId;
+                if (variations.length > 0) {
+                    const variation = getVariation(selectedAttributes);
+                    if (!variation) {
+                        alert('Không tìm thấy biến thể sản phẩm');
+                        return;
+                    }
+                    variationId = variation.id;
+                } else {
+                    // Nếu sản phẩm không có biến thể, lấy biến thể đầu tiên (mặc định)
+                    variationId = variations[0]?.id;
+                }
+                
+                // Gọi API để thêm/xóa sản phẩm khỏi wishlist
+                fetch('{{ route("wishlist.toggle") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        variation_id: variationId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Cập nhật trạng thái UI
+                        if (data.action === 'added') {
+                            wishlistIcon.classList.remove('far');
+                            wishlistIcon.classList.add('fas', 'text-warning');
+                            addToWishlistBtn.innerHTML = `<span class="me-2 fas fa-heart text-warning" id="wishlist-icon"></span>Đã thêm vào yêu thích`;
+                        } else {
+                            wishlistIcon.classList.remove('fas', 'text-warning');
+                            wishlistIcon.classList.add('far');
+                            addToWishlistBtn.innerHTML = `<span class="me-2 far fa-heart" id="wishlist-icon"></span>Thêm vào yêu thích`;
+                        }
+                        // Hiển thị thông báo
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Đã xảy ra lỗi khi thực hiện thao tác. Vui lòng thử lại sau.');
+                });
+            });
+            
+            // Kiểm tra sản phẩm đã được yêu thích chưa khi tải trang
+            @if(Auth::check())
+                // Khi trang được tải, kiểm tra xem sản phẩm đã có trong wishlist chưa
+                function checkWishlistStatus() {
+                    const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
+                        .map(input => parseInt(input.value));
+                    
+                    let variationId;
+                    if (variations.length > 0) {
+                        const variation = getVariation(selectedAttributes);
+                        if (!variation) return;
+                        variationId = variation.id;
+                    } else if (variations.length === 1) {
+                        variationId = variations[0].id;
+                    } else {
+                        return;
+                    }
+                    
+                    fetch(`/api/wishlist/check?variation_id=${variationId}`, {
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            wishlistIcon.classList.remove('far');
+                            wishlistIcon.classList.add('fas', 'text-warning');
+                            addToWishlistBtn.innerHTML = `<span class="me-2 fas fa-heart text-warning" id="wishlist-icon"></span>Đã thêm vào yêu thích`;
+                        } else {
+                            wishlistIcon.classList.remove('fas', 'text-warning');
+                            wishlistIcon.classList.add('far');
+                            addToWishlistBtn.innerHTML = `<span class="me-2 far fa-heart" id="wishlist-icon"></span>Thêm vào yêu thích`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
+                
+                // Gọi function khi trang tải và khi thay đổi biến thể
+                checkWishlistStatus();
+                attributeInputs.forEach(input => {
+                    input.addEventListener('change', checkWishlistStatus);
+                });
+            @endif
+            
+            // Xử lý nút yêu thích trong danh sách sản phẩm liên quan
+            const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+            wishlistButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Kiểm tra đã đăng nhập chưa
+                    @if(!Auth::check())
+                        // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+                        window.location.href = '{{ route("login") }}';
+                        return;
+                    @endif
+                    
+                    const variationId = this.getAttribute('data-product-variation-id');
+                    if (!variationId || variationId === '0') {
+                        alert('Không thể thêm sản phẩm này vào danh sách yêu thích');
+                        return;
+                    }
+                    
+                    // Gọi API để thêm/xóa sản phẩm khỏi wishlist
+                    fetch('{{ route("wishlist.toggle") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            variation_id: variationId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Cập nhật UI: Đổi màu nút yêu thích
+                            if (data.action === 'added') {
+                                // Đã thêm vào yêu thích
+                                this.classList.add('active');
+                                alert('Đã thêm sản phẩm vào danh sách yêu thích');
+                            } else {
+                                // Đã xóa khỏi yêu thích
+                                this.classList.remove('active');
+                                alert('Đã xóa sản phẩm khỏi danh sách yêu thích');
+                            }
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Đã xảy ra lỗi khi thực hiện thao tác. Vui lòng thử lại sau.');
+                    });
+                });
+                
+                // Kiểm tra trạng thái ban đầu
+                @if(Auth::check())
+                    const variationId = button.getAttribute('data-product-variation-id');
+                    if (variationId && variationId !== '0') {
+                        fetch(`/api/wishlist/check?variation_id=${variationId}`, {
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.exists) {
+                                button.classList.add('active');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    }
+                @endif
             });
         });
     </script>

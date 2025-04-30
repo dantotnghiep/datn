@@ -56,6 +56,7 @@
      // Wishlist routes
      Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
      Route::delete('/wishlist/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+     Route::get('/api/wishlist/check', [WishlistController::class, 'check'])->name('wishlist.check');
  
      // Checkout routes (Vietnamese)
      Route::post('/gio-hang/checkout-chon', [CartController::class, 'saveSelectedItems'])->name('cart.checkout.selected');
