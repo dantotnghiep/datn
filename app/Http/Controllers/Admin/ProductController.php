@@ -170,16 +170,10 @@ class ProductController extends BaseController
                                 'sku' => $variationSku,
                                 'name' => $variationName,
                                 'price' => 0,
+                                'sale_price' => 0,
                                 'stock' => 0
                             ]);
                             $createdCount++;
-                            
-                            Log::info('Created variation:', [
-                                'id' => $newVariation->id,
-                                'sku' => $variationSku,
-                                'name' => $variationName,
-                                'attribute_values' => $attributeValueIds
-                            ]);
                             
                             // Attach attribute values
                             if (!empty($attributeValueIds)) {
@@ -239,10 +233,18 @@ class ProductController extends BaseController
 
     public function edit($id)
     {
-        $item = $this->model::with(['images', 'variations.attributeValues.attribute'])->findOrFail($id);
+        $item = $this->model::with(['images', 'variations.attributeValues.attribute', 'variations.orderItems'])->findOrFail($id);
         $fields = $this->model::getFields();
         $attributes = Attribute::with('values')->get();
         $attributeValues = AttributeValue::all();
+
+        // Lấy danh sách biến thể đã được mua
+        $purchasedVariationIds = [];
+        foreach ($item->variations as $variation) {
+            if ($variation->orderItems && $variation->orderItems->count() > 0) {
+                $purchasedVariationIds[] = $variation->id;
+            }
+        }
 
         // Debug log for variations
         $debug_variations = [];
@@ -259,7 +261,8 @@ class ProductController extends BaseController
             $debug_variations[] = [
                 'id' => $variation->id,
                 'name' => $variation->name,
-                'attribute_values' => $debug_attributes
+                'attribute_values' => $debug_attributes,
+                'is_purchased' => in_array($variation->id, $purchasedVariationIds)
             ];
         }
         Log::info('Variation data debug:', ['variations' => $debug_variations]);
@@ -305,6 +308,37 @@ class ProductController extends BaseController
 
         // Convert to array
         $existingVariantsData = array_values($attributeValuesMap);
+        
+        // Build the existingGeneratedVariations data structure expected by the JS
+        $existingGeneratedVariations = [];
+        
+        foreach ($item->variations as $variation) {
+            if ($variation->attributeValues->isEmpty()) {
+                continue; // Skip variations with no attribute values
+            }
+            
+            $combinationArray = [];
+            foreach ($variation->attributeValues as $attributeValue) {
+                $combinationArray[] = [
+                    'attribute_id' => $attributeValue->attribute_id,
+                    'attribute_name' => $attributeValue->attribute ? $attributeValue->attribute->name : 'Unknown',
+                    'value_id' => $attributeValue->id,
+                    'value' => $attributeValue->value
+                ];
+            }
+            
+            // Generate an ID for the variation similar to the JS generateVariationId function
+            $variationId = implode('_', array_map(function($attr) {
+                return $attr['attribute_id'] . '-' . $attr['value_id'];
+            }, $combinationArray));
+            
+            $existingGeneratedVariations[] = [
+                'id' => $variationId,
+                'combination' => $combinationArray,
+                'variation_id' => $variation->id,
+                'is_purchased' => in_array($variation->id, $purchasedVariationIds)
+            ];
+        }
 
         return view('admin.components.product.form', [
             'item' => $item,
@@ -312,7 +346,10 @@ class ProductController extends BaseController
             'route' => $this->route,
             'attributes' => $attributes,
             'attributeValues' => $attributeValues,
-            'existingVariantsData' => $existingVariantsData
+            'existingVariantsData' => $existingVariantsData,
+            'existingGeneratedVariations' => $existingGeneratedVariations,
+            'purchasedVariationIds' => $purchasedVariationIds,
+            'isReadOnly' => !empty($purchasedVariationIds) // If any variation was purchased, make it readonly
         ]);
     }
 
@@ -365,10 +402,25 @@ class ProductController extends BaseController
             // Handle primary image selection
             if ($request->has('primary_image')) {
                 $primaryImageId = $request->input('primary_image');
+                Log::info('Setting primary image: ' . $primaryImageId);
+                
                 // First, set all images as non-primary
                 ProductImage::where('product_id', $id)->update(['is_primary' => false]);
+                
                 // Then set the selected image as primary
-                ProductImage::where('id', $primaryImageId)->update(['is_primary' => true]);
+                if (strpos($primaryImageId, 'new_') === 0) {
+                    // It's a newly uploaded image, get the latest
+                    $latestImage = ProductImage::where('product_id', $id)
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+                    
+                    if ($latestImage) {
+                        $latestImage->update(['is_primary' => true]);
+                    }
+                } else {
+                    // It's an existing image
+                    ProductImage::where('id', $primaryImageId)->update(['is_primary' => true]);
+                }
             }
 
             // Handle removing images
@@ -397,50 +449,11 @@ class ProductController extends BaseController
                 }
             }
 
-            // Handle product variations
-            if ($request->has('variants') && !empty($request->variants)) {
-                $variantsData = json_decode($request->variants, true);
-
-                if (!empty($variantsData) && is_array($variantsData)) {
-                    // First, soft delete all existing variations
-                    ProductVariation::where('product_id', $id)->delete();
-
-                    // Generate all possible combinations
-                    $combinations = $this->generateVariantCombinations($variantsData);
-
-                    foreach ($combinations as $index => $combination) {
-                        $variationName = $item->name;
-                        $skuSuffix = '';
-                        $attributeValueIds = [];
-
-                        foreach ($combination as $attrValue) {
-                            $variationName .= ' - ' . $attrValue['value'];
-                            $skuSuffix .= '-' . substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
-                            $attributeValueIds[] = $attrValue['id'];
-                        }
-
-                        // Generate variation SKU
-                        $variationSku = $item->sku . $skuSuffix;
-                        $counter = 1;
-                        while (ProductVariation::where('sku', $variationSku)->exists()) {
-                            $variationSku = $item->sku . $skuSuffix . '-' . $counter;
-                            $counter++;
-                        }
-
-                        // Create variation
-                        $newVariation = ProductVariation::create([
-                            'product_id' => $id,
-                            'sku' => $variationSku,
-                            'name' => $variationName,
-                            'price' => 0,
-                            'stock' => 0
-                        ]);
-
-                        if (!empty($attributeValueIds)) {
-                            $newVariation->attributeValues()->attach($attributeValueIds);
-                        }
-                    }
-                }
+            // Handle product variations using handleProductVariants method
+            if ($request->has('generated_variations') && !empty($request->generated_variations)) {
+                $this->handleProductVariants($request->variants, $item, $request->generated_variations);
+            } elseif ($request->has('variants') && !empty($request->variants)) {
+                $this->handleProductVariants($request->variants, $item);
             }
 
             DB::commit();
@@ -608,7 +621,7 @@ class ProductController extends BaseController
         }
     }
 
-    protected function handleProductVariants($variantsData, $product)
+    protected function handleProductVariants($variantsData, $product, $generatedVariationsJson = null)
     {
         if (empty($variantsData)) {
             Log::warning('No variants data provided');
@@ -620,7 +633,7 @@ class ProductController extends BaseController
         Log::info('Processing variants data:', ['data' => $variantsArray]);
 
         // Get generated variations data - this contains the final list of variations to create
-        $generatedVariationsJson = request()->input('generated_variations');
+        $generatedVariationsJson = $generatedVariationsJson ?? request()->input('generated_variations');
         Log::info('Raw generated_variations from form:', [
             'raw_data' => $generatedVariationsJson,
             'is_string' => is_string($generatedVariationsJson),
@@ -650,8 +663,36 @@ class ProductController extends BaseController
             try {
                 DB::beginTransaction();
 
-                // Delete existing variations if any
-                $deletedCount = ProductVariation::where('product_id', $product->id)->delete();
+                // Kiểm tra các biến thể đã được mua
+                $purchasedVariations = [];
+                if ($product->id) {
+                    $existingVariations = ProductVariation::where('product_id', $product->id)
+                        ->with('orderItems')
+                        ->get();
+                    
+                    foreach ($existingVariations as $variation) {
+                        if ($variation->orderItems->count() > 0) {
+                            $purchasedVariations[$variation->id] = true;
+                        }
+                    }
+                }
+
+                // Ghi log số lượng biến thể đã mua
+                Log::info("Found " . count($purchasedVariations) . " purchased variations that cannot be deleted");
+
+                // Nếu có biến thể đã được mua, chỉ xóa các biến thể chưa mua
+                if (!empty($purchasedVariations)) {
+                    $variationsToDelete = ProductVariation::where('product_id', $product->id)
+                        ->whereNotIn('id', array_keys($purchasedVariations))
+                        ->pluck('id')
+                        ->toArray();
+                    
+                    $deletedCount = ProductVariation::whereIn('id', $variationsToDelete)->delete();
+                } else {
+                    // Không có biến thể nào đã mua, xóa tất cả
+                    $deletedCount = ProductVariation::where('product_id', $product->id)->delete();
+                }
+                
                 Log::info("Deleted {$deletedCount} existing variations for product {$product->id}");
 
                 // Only create variations that exist in the generated_variations field
@@ -662,20 +703,27 @@ class ProductController extends BaseController
                         continue;
                     }
 
+                    // Kiểm tra nếu biến thể này có variation_id và đã được mua thì bỏ qua
+                    if (isset($variation['variation_id']) && isset($purchasedVariations[$variation['variation_id']])) {
+                        Log::info("Skipping purchased variation: " . $variation['variation_id']);
+                        continue;
+                    }
+
                     $variationName = $product->name;
                     $skuSuffix = '';
                     $attributeValueIds = [];
 
                     // Process each attribute in the combination
                     foreach ($variation['combination'] as $attrValue) {
-                        if (!isset($attrValue['id']) || !isset($attrValue['value'])) {
+                        if (!isset($attrValue['value_id']) && !isset($attrValue['id'])) {
                             Log::warning('Invalid attribute value', ['value' => $attrValue]);
                             continue;
                         }
 
+                        $valueId = $attrValue['value_id'] ?? $attrValue['id'];
                         $variationName .= ' - ' . $attrValue['value'];
                         $skuSuffix .= '-' . substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
-                        $attributeValueIds[] = $attrValue['id'];
+                        $attributeValueIds[] = $valueId;
                     }
 
                     if (empty($attributeValueIds)) {
@@ -697,6 +745,7 @@ class ProductController extends BaseController
                         'sku' => $variationSku,
                         'name' => $variationName,
                         'price' => 0,
+                        'sale_price' => 0,
                         'stock' => 0
                     ]);
                     $createdCount++;

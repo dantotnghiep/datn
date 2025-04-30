@@ -222,31 +222,41 @@
                 <div class="card-body">
                   <h3 class="card-title mb-4">Order Status</h3>
                   <h6 class="mb-2">Current Status</h6>
-                  <form action="{{ route($route . '.update-status', $order->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <select class="form-select mb-4" name="status_id" onchange="this.form.submit()">
-                      @php
-                        $currentStatus = $order->getRawOriginal('status_id');
-                      @endphp
-                      <option value="1" {{ $currentStatus == 1 ? 'selected' : '' }}>Pending</option>
-                      <option value="3" {{ $currentStatus == 3 ? 'selected' : '' }}>Shipping</option>
-                      <option value="2" {{ $currentStatus == 2 ? 'selected' : '' }}>Completed</option>
-                      <option value="4" {{ $currentStatus == 4 ? 'selected' : '' }}>Cancelled</option>
-                      <option value="5" {{ $currentStatus == 5 ? 'selected' : '' }}>Refunded</option>
-                    </select>
-                  </form>
+                  @php
+                    $currentStatus = $order->getRawOriginal('status_id');
+                    $statusText = '';
+                    $statusClass = '';
+                    switch($currentStatus) {
+                      case 1:
+                        $statusText = 'Pending';
+                        $statusClass = 'warning';
+                        break;
+                      case 2:
+                        $statusText = 'Completed';
+                        $statusClass = 'success';
+                        break;
+                      case 3:
+                        $statusText = 'Shipping';
+                        $statusClass = 'info';
+                        break;
+                      case 4:
+                        $statusText = 'Cancelled';
+                        $statusClass = 'danger';
+                        break;
+                      case 5:
+                        $statusText = 'Refunded';
+                        $statusClass = 'secondary';
+                        break;
+                    }
+                  @endphp
+                  <p class="mb-3"><span class="badge bg-{{ $statusClass }}">{{ $statusText }}</span></p>
                   
                   <h6 class="mb-2">Payment Status</h6>
-                  <form action="{{ route($route . '.update', $order->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <select class="form-select" name="payment_status" onchange="this.form.submit()">
-                      <option value="pending" {{ $order->payment_status == 'pending' ? 'selected' : '' }}>Pending</option>
-                      <option value="completed" {{ $order->payment_status == 'completed' ? 'selected' : '' }}>Completed</option>
-                      <option value="failed" {{ $order->payment_status == 'failed' ? 'selected' : '' }}>Failed</option>
-                    </select>
-                  </form>
+                  <p class="mb-0">
+                    <span class="badge bg-{{ $order->payment_status == 'completed' ? 'success' : ($order->payment_status == 'failed' ? 'danger' : 'warning') }}">
+                      {{ ucfirst($order->payment_status) }}
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
