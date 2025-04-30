@@ -62,10 +62,6 @@ class DashboardController extends Controller
         // Khuyến mãi đang hoạt động - đảm bảo chỉ lấy những khuyến mãi đang còn hoạt động
         $activePromotions = Promotion::where('expires_at', '>=', Carbon::now())
             ->where('starts_at', '<=', Carbon::now())
-            ->where(function($query) {
-                $query->whereNull('deleted_at')
-                    ->orWhere('deleted_at', '>', Carbon::now());
-            })
             ->count();
 
         // Lấy danh sách khuyến mãi đang hoạt động

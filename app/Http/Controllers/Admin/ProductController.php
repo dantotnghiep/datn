@@ -609,10 +609,8 @@ class ProductController extends BaseController
 
     protected function handlePrimaryImage($primaryImageId, $product)
     {
-        // First, set all images as non-primary
         $product->images()->update(['is_primary' => false]);
 
-        // Then set the selected image as primary
         if ($primaryImageId) {
             $image = ProductImage::find($primaryImageId);
             if ($image && $image->product_id === $product->id) {
@@ -623,123 +621,69 @@ class ProductController extends BaseController
 
     protected function handleProductVariants($variantsData, $product, $generatedVariationsJson = null)
     {
-        if (empty($variantsData)) {
-            Log::warning('No variants data provided');
-            return;
-        }
-
-        // Decode variants data if it's a string
         $variantsArray = is_string($variantsData) ? json_decode($variantsData, true) : $variantsData;
-        Log::info('Processing variants data:', ['data' => $variantsArray]);
-
-        // Get generated variations data - this contains the final list of variations to create
         $generatedVariationsJson = $generatedVariationsJson ?? request()->input('generated_variations');
-        Log::info('Raw generated_variations from form:', [
-            'raw_data' => $generatedVariationsJson,
-            'is_string' => is_string($generatedVariationsJson),
-            'length' => is_string($generatedVariationsJson) ? strlen($generatedVariationsJson) : 0
-        ]);
-        
-        // Decode the JSON more carefully
         $generatedVariations = [];
         if (!empty($generatedVariationsJson)) {
             try {
                 $generatedVariations = json_decode($generatedVariationsJson, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    Log::error('JSON decode error:', ['error' => json_last_error_msg()]);
                 }
             } catch (\Exception $e) {
-                Log::error('Exception decoding variations JSON:', ['message' => $e->getMessage()]);
             }
         }
-        
-        Log::info('Generated variations after decode:', [
-            'count' => is_array($generatedVariations) ? count($generatedVariations) : 0,
-            'is_array' => is_array($generatedVariations),
-            'variations' => $generatedVariations
-        ]);
 
         if (!empty($generatedVariations) && is_array($generatedVariations)) {
             try {
                 DB::beginTransaction();
-
-                // Kiểm tra các biến thể đã được mua
+                $existingVariations = ProductVariation::where('product_id', $product->id)
+                    ->with(['attributeValues', 'orderItems'])
+                    ->get();
+                $existingVariationMap = [];
+                foreach ($existingVariations as $variation) {
+                    $attributeValueIds = $variation->attributeValues->pluck('id')->sort()->implode('_');
+                    $existingVariationMap[$attributeValueIds] = $variation;
+                }
                 $purchasedVariations = [];
-                if ($product->id) {
-                    $existingVariations = ProductVariation::where('product_id', $product->id)
-                        ->with('orderItems')
-                        ->get();
-                    
-                    foreach ($existingVariations as $variation) {
-                        if ($variation->orderItems->count() > 0) {
-                            $purchasedVariations[$variation->id] = true;
-                        }
+                foreach ($existingVariations as $variation) {
+                    if ($variation->orderItems->count() > 0) {
+                        $purchasedVariations[$variation->id] = true;
                     }
                 }
-
-                // Ghi log số lượng biến thể đã mua
-                Log::info("Found " . count($purchasedVariations) . " purchased variations that cannot be deleted");
-
-                // Nếu có biến thể đã được mua, chỉ xóa các biến thể chưa mua
-                if (!empty($purchasedVariations)) {
-                    $variationsToDelete = ProductVariation::where('product_id', $product->id)
-                        ->whereNotIn('id', array_keys($purchasedVariations))
-                        ->pluck('id')
-                        ->toArray();
-                    
-                    $deletedCount = ProductVariation::whereIn('id', $variationsToDelete)->delete();
-                } else {
-                    // Không có biến thể nào đã mua, xóa tất cả
-                    $deletedCount = ProductVariation::where('product_id', $product->id)->delete();
-                }
-                
-                Log::info("Deleted {$deletedCount} existing variations for product {$product->id}");
-
-                // Only create variations that exist in the generated_variations field
-                $createdCount = 0;
+                $variationsToKeep = [];
+                $timestamp = now()->format('His');
                 foreach ($generatedVariations as $variation) {
                     if (!isset($variation['id']) || !isset($variation['combination'])) {
-                        Log::warning('Skipping invalid variation data', ['variation' => $variation]);
                         continue;
                     }
 
-                    // Kiểm tra nếu biến thể này có variation_id và đã được mua thì bỏ qua
                     if (isset($variation['variation_id']) && isset($purchasedVariations[$variation['variation_id']])) {
-                        Log::info("Skipping purchased variation: " . $variation['variation_id']);
+                        $variationsToKeep[] = $variation['variation_id'];
                         continue;
                     }
-
-                    $variationName = $product->name;
-                    $skuSuffix = '';
                     $attributeValueIds = [];
-
-                    // Process each attribute in the combination
+                    $variationName = $product->name;
+                    $skuParts = [];
                     foreach ($variation['combination'] as $attrValue) {
-                        if (!isset($attrValue['value_id']) && !isset($attrValue['id'])) {
-                            Log::warning('Invalid attribute value', ['value' => $attrValue]);
-                            continue;
-                        }
-
                         $valueId = $attrValue['value_id'] ?? $attrValue['id'];
-                        $variationName .= ' - ' . $attrValue['value'];
-                        $skuSuffix .= '-' . substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
                         $attributeValueIds[] = $valueId;
+                        $variationName .= ' - ' . $attrValue['value'];
+                        $skuParts[] = substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $attrValue['value'])), 0, 3);
                     }
-
-                    if (empty($attributeValueIds)) {
-                        Log::warning('No valid attribute values for variation', ['variation' => $variation]);
+                    sort($attributeValueIds);
+                    $combinationSignature = implode('_', $attributeValueIds);
+                    if (isset($existingVariationMap[$combinationSignature])) {
+                        $existingVariation = $existingVariationMap[$combinationSignature];
+                        $variationsToKeep[] = $existingVariation->id;
                         continue;
                     }
-
-                    // Generate variation SKU
-                    $variationSku = $product->sku . $skuSuffix;
+                    $skuBase = $product->sku . '-' . implode('-', $skuParts);
+                    $variationSku = $skuBase . '-' . $timestamp;
                     $counter = 1;
                     while (ProductVariation::where('sku', $variationSku)->exists()) {
-                        $variationSku = $product->sku . $skuSuffix . '-' . $counter;
+                        $variationSku = $skuBase . '-' . $timestamp . '-' . $counter;
                         $counter++;
                     }
-
-                    // Create variation
                     $newVariation = ProductVariation::create([
                         'product_id' => $product->id,
                         'sku' => $variationSku,
@@ -748,33 +692,21 @@ class ProductController extends BaseController
                         'sale_price' => 0,
                         'stock' => 0
                     ]);
-                    $createdCount++;
-
-                    Log::info('Created variation:', [
-                        'id' => $newVariation->id,
-                        'sku' => $variationSku,
-                        'name' => $variationName,
-                        'attribute_values' => $attributeValueIds
-                    ]);
-
-                    // Attach attribute values
                     if (!empty($attributeValueIds)) {
                         $newVariation->attributeValues()->attach($attributeValueIds);
                     }
+                    $variationsToKeep[] = $newVariation->id;
                 }
-
-                Log::info("Created {$createdCount} variations for product {$product->id}");
+                $deletedCount = ProductVariation::where('product_id', $product->id)
+                    ->whereNotIn('id', $variationsToKeep)
+                    ->whereNotIn('id', array_keys($purchasedVariations))
+                    ->delete();
                 DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error('Error processing variants:', [
-                    'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
                 throw $e;
             }
         } else {
-            Log::info('No generated variations to process');
         }
     }
 }
