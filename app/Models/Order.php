@@ -6,7 +6,7 @@ namespace App\Models;
 class Order extends BaseModel
 {
     protected $hasSlug = false;
-    
+
     protected $fillable = [
         'order_number',
         'user_id',
@@ -139,12 +139,6 @@ class Order extends BaseModel
     {
         $user = User::find($value);
         return $user ? $user->name : $value;
-    }
-
-    public function getStatusIdAttribute($value)
-    {
-        $status = OrderStatus::find($value);
-        return $status ? $status->name : $value;
     }
 
     public function user()
