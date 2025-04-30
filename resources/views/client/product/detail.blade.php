@@ -25,38 +25,40 @@
             <div class="row g-5 mb-5 mb-lg-8" data-product-details="data-product-details">
                 <div class="col-12 col-lg-6">
                     <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-2 col-lg-12 col-xl-2">
-                            <div class="swiper-products-thumb swiper swiper theme-slider overflow-visible"
-                                    id="swiper-products-thumb">
-                                    <div class="swiper-wrapper">
-                                        @foreach ($product->images as $image)
-                                            <div class="swiper-slide">
-                                                <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}" />
-                                            </div>
-                                        @endforeach
+                        <!-- Ảnh sản phẩm phụ (thumbnails) ở bên trái -->
+                        <div class="col-2">
+                            <div class="product-thumbnails d-flex flex-column gap-2">
+                                @foreach ($product->images as $index => $image)
+                                    <div class="thumbnail-item mb-2">
+                                        <img src="{{ asset('storage/' . $image->image_path) }}" 
+                                             alt="{{ $product->name }}" 
+                                             class="img-thumbnail product-thumb-image @if($image->is_primary) active @endif"
+                                             data-index="{{ $index }}" />
                                     </div>
-                                </div>
+                                @endforeach
+                            </div>
                         </div>
-                        <div class="col-12 col-md-10 col-lg-12 col-xl-10">
-                            <div
-                                class="d-flex align-items-center border border-translucent rounded-3 text-center p-5 h-100">
-                                    <div class="swiper swiper theme-slider" data-thumb-target="swiper-products-thumb">
-                                        <div class="swiper-wrapper">
-                                            @foreach ($product->images as $image)
-                                                <div class="swiper-slide">
-                                                    <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}" />
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                </div>
+                        <!-- Ảnh sản phẩm chính ở bên phải -->
+                        <div class="col-10">
+                            <div class="main-product-image border border-translucent rounded-3 text-center p-3 h-100">
+                                @php
+                                    $primaryImage = $product->images->where('is_primary', 1)->first() ?? $product->images->first();
+                                @endphp
+                                <img id="mainProductImage" 
+                                     src="{{ asset('storage/' . $primaryImage->image_path) }}" 
+                                     alt="{{ $product->name }}" 
+                                     class="img-fluid" />
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex"><button
-                            class="btn btn-lg btn-outline-warning rounded-pill w-100 me-3 px-2 px-sm-4 fs-9 fs-sm-8" id="add-to-wishlist"><span
-                                    class="me-2 far fa-heart" id="wishlist-icon"></span>Thêm vào yêu thích</button><button
-                            class="btn btn-lg btn-warning rounded-pill w-100 fs-9 fs-sm-8"><span
-                                    class="fas fa-shopping-cart me-2"></span>Thêm vào giỏ hàng</button></div>
+                    <div class="d-flex">
+                        <button class="btn btn-lg btn-outline-warning rounded-pill w-100 me-3 px-2 px-sm-4 fs-9 fs-sm-8" id="add-to-wishlist">
+                            <span class="me-2 far fa-heart" id="wishlist-icon"></span>Thêm vào yêu thích
+                        </button>
+                        <button class="btn btn-lg btn-warning rounded-pill w-100 fs-9 fs-sm-8">
+                            <span class="fas fa-shopping-cart me-2"></span>Thêm vào giỏ hàng
+                        </button>
+                    </div>
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="d-flex flex-column justify-content-between h-100">
@@ -348,6 +350,22 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý chức năng hiển thị ảnh
+            const thumbnails = document.querySelectorAll('.product-thumb-image');
+            const mainImage = document.getElementById('mainProductImage');
+
+            // Thêm sự kiện click cho các ảnh thumbnail
+            thumbnails.forEach(thumbnail => {
+                thumbnail.addEventListener('click', function() {
+                    // Cập nhật ảnh chính
+                    mainImage.src = this.src;
+                    
+                    // Cập nhật trạng thái active cho thumbnail
+                    thumbnails.forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
             // Khởi tạo biến variations từ PHP
             const variations = @json($product->variations);
             const attributes = @json($attributes);
@@ -768,3 +786,39 @@
         });
     </script>
 @endpush
+
+<style>
+    .product-thumbnails {
+        max-height: 500px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+    
+    .product-thumb-image {
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+        width: 100%;
+        object-fit: cover;
+    }
+    
+    .product-thumb-image.active {
+        border-color: #ffc107;
+    }
+    
+    .product-thumb-image:hover {
+        opacity: 0.85;
+    }
+    
+    .main-product-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+    
+    #mainProductImage {
+        max-height: 500px;
+        object-fit: contain;
+    }
+</style>
