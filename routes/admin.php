@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -10,8 +11,8 @@ use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\InventoryReceiptController;
-use App\Http\Controllers\Admin\OrderCancellationController;
 use App\Http\Controllers\Admin\ProductVariationController;
+use App\Http\Controllers\Admin\OrderCancellationController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -165,16 +166,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Update status
         Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('update-status');
-        
+
         // Order details
         Route::get('/{id}/details', [OrderController::class, 'details'])->name('details');
-        
+
         // Cancelled orders
         Route::get('/cancelled', [OrderCancellationController::class, 'index'])->name('cancelled');
-        
+
         // Approve cancellation request
         Route::post('/cancellation/{id}/approve', [OrderCancellationController::class, 'approve'])->name('cancellation.approve');
-        
+
         // Reject cancellation request
     });
     // Inventory Receipts routes
@@ -227,4 +228,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Restore from trash
         Route::put('/{id}/restore', [PromotionController::class, 'restore'])->name('restore');
     });
+    Route::prefix('auth')->name('auth.')->group(function () {
+        // List
+        Route::get('/', [AuthController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [AuthController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [AuthController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [AuthController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [AuthController::class, 'update'])->name('update');
+
+        // Delete
+        Route::delete('/{id}', [AuthController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [AuthController::class, 'restore'])->name('restore');
+    });
+
+
 });
