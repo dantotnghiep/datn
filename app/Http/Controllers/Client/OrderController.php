@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Events\OrderCancellationRequestCreated;
+use App\Events\OrderStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderCancellation;
@@ -47,32 +47,28 @@ class OrderController extends Controller
                 abort(403);
             }
             
-            // Chỉ cho phép gửi yêu cầu khi chưa ở trạng thái 2, 4, 5 và chưa có yêu cầu hủy
-            if (in_array($order->status_id, [2, 4, 5]) || $order->cancellation) {
+            // Chỉ cho phép hủy khi chưa ở trạng thái 2, 4, 5
+            if (in_array($order->status_id, [2, 4, 5])) {
                 Log::warning('Client OrderController@cancelRequest - Cannot cancel order', [
                     'order_id' => $order->id,
-                    'status_id' => $order->status_id,
-                    'has_cancellation' => $order->cancellation ? 'yes' : 'no'
+                    'status_id' => $order->status_id
                 ]);
-                return back()->with('error', 'Không thể gửi yêu cầu hủy cho đơn hàng này.');
+                return back()->with('error', 'Không thể hủy đơn hàng này.');
             }
             
-            // Tạo yêu cầu hủy
-            $cancellation = $order->cancellation()->create([
-                'user_id' => auth()->id(),
-                'reason' => 'Khách hàng yêu cầu hủy',
-                'status' => 'pending'
-            ]);
+            // Cập nhật trạng thái đơn hàng thành "Đã hủy" (status_id = 4)
+            $order->status_id = 4;
+            $order->save();
             
-            Log::info('Client OrderController@cancelRequest - Cancellation created', [
+            Log::info('Client OrderController@cancelRequest - Order cancelled', [
                 'order_id' => $order->id,
-                'cancellation_id' => $cancellation->id
+                'new_status_id' => 4
             ]);
             
             // Kích hoạt sự kiện real-time
             try {
-                event(new OrderCancellationRequestCreated($cancellation));
-                Log::info('Client OrderController@cancelRequest - Event dispatched');
+                event(new OrderStatusChanged($order));
+                Log::info('Client OrderController@cancelRequest - Status change event dispatched');
             } catch (\Exception $eventError) {
                 Log::error('Client OrderController@cancelRequest - Error dispatching event', [
                     'error' => $eventError->getMessage(),
@@ -80,7 +76,7 @@ class OrderController extends Controller
                 ]);
             }
             
-            return back()->with('success', 'Đã gửi yêu cầu hủy đơn hàng. Vui lòng chờ xác nhận.');
+            return back()->with('success', 'Đơn hàng đã bị hủy thành công.');
             
         } catch (\Exception $e) {
             Log::error('Client OrderController@cancelRequest - Error', [
@@ -89,7 +85,7 @@ class OrderController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             
-            return back()->with('error', 'Đã xảy ra lỗi khi gửi yêu cầu hủy đơn hàng. Vui lòng thử lại sau.');
+            return back()->with('error', 'Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại sau.');
         }
     }
 } 

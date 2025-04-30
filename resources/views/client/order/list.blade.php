@@ -31,7 +31,17 @@
                                     <td>{{ $order->user_phone }}</td>
                                     <td>{{ number_format($order->total_with_discount) }}đ</td>
                                     <td id="order-status-{{ $order->id }}">
-                                        <span class="badge bg-{{ $order->status->color ?? 'primary' }}">
+                                        @php
+                                            $statusColors = [
+                                                1 => 'warning',    // Chờ xử lý - vàng
+                                                2 => 'success',    // Hoàn thành - xanh lá
+                                                3 => 'info',       // Đang vận chuyển - xanh dương 
+                                                4 => 'danger',     // Đã hủy - đỏ
+                                                5 => 'secondary'   // Đã hoàn tiền - xám
+                                            ];
+                                            $statusColor = isset($statusColors[$order->status_id]) ? $statusColors[$order->status_id] : 'primary';
+                                        @endphp
+                                        <span class="badge bg-{{ $statusColor }}">
                                             {{ $order->status->name ?? 'Đang xử lý' }}
                                         </span>
                                     </td>
@@ -110,14 +120,17 @@
                         
                         // Get status display information
                         let statusName = data.status_name || 'Unknown';
-                        let statusColor = 'primary';
                         
                         // Set color based on status
-                        if (data.status_id == 1) statusColor = 'warning'; // Pending
-                        else if (data.status_id == 2) statusColor = 'success'; // Completed
-                        else if (data.status_id == 3) statusColor = 'info'; // Shipping
-                        else if (data.status_id == 4) statusColor = 'danger'; // Cancelled
-                        else if (data.status_id == 5) statusColor = 'danger'; // Refunded
+                        const statusColors = {
+                            1: 'warning',    // Chờ xử lý - vàng
+                            2: 'success',    // Hoàn thành - xanh lá
+                            3: 'info',       // Đang vận chuyển - xanh dương 
+                            4: 'danger',     // Đã hủy - đỏ
+                            5: 'secondary'   // Đã hoàn tiền - xám
+                        };
+                        
+                        let statusColor = statusColors[data.status_id] || 'primary';
                         
                         // Update the status display
                         statusCell.innerHTML = `
