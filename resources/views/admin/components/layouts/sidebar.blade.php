@@ -48,12 +48,39 @@
                             </ul>
                         </div>
                     </div><!-- parent pages-->
+
+                    <div class="nav-item-wrapper"><a class="nav-link dropdown-indicator label-1"
+                            href="#nv-authentication" role="button" data-bs-toggle="collapse" aria-expanded="false"
+                            aria-controls="nv-authentication">
+                            <div class="d-flex align-items-center">
+                                <div class="dropdown-indicator-icon-wrapper"><span
+                                        class="fas fa-caret-right dropdown-indicator-icon"></span></div><span
+                                    class="nav-link-icon"><span data-feather="lock"></span></span><span
+                                    class="nav-link-text">Authentication</span>
+                            </div>
+                        </a>
+                        <div class="parent-wrapper label-1">
+                            <ul class="nav collapse parent" data-bs-parent="#navbarVerticalCollapse"
+                                id="nv-authentication">
+                                <li class="collapsed-nav-item-title d-none">Authentication</li>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.auth.index') }}">
+                                        <div class="d-flex align-items-center">
+                                            <span class="nav-link-text">Users</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+
                     <div class="nav-item-wrapper"><a class="nav-link label-1"
                             href="{{ route('admin.categories.index') }}" role="button" data-bs-toggle=""
                             aria-expanded="false">
                             <div class="d-flex align-items-center"><span class="nav-link-icon"><span
-                                        data-feather="calendar"></span></span><span
-                                    class="nav-link-text-wrapper"><span class="nav-link-text">Categories</span></span>
+                                        data-feather="calendar"></span></span><span class="nav-link-text-wrapper"><span
+                                        class="nav-link-text">Categories</span></span>
                             </div>
                         </a></div><!-- parent pages-->
 
@@ -71,13 +98,13 @@
                         <div class="parent-wrapper label-1">
                             <ul class="nav collapse parent" data-bs-parent="#navbarVerticalCollapse" id="nv-orders">
                                 <li class="collapsed-nav-item-title d-none">Orders</li>
-                                <li class="nav-item"><a class="nav-link"
-                                        href="{{ route('admin.orders.index') }}">
-                                        <div class="d-flex align-items-center"><span
-                                                class="nav-link-text">All Orders</span></div>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.orders.index') }}">
+                                        <div class="d-flex align-items-center"><span class="nav-link-text">All
+                                                Orders</span></div>
                                     </a>
                                 </li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.orders.cancelled') }}">
+                                <li class="nav-item"><a class="nav-link"
+                                        href="{{ route('admin.orders.cancelled') }}">
                                         <div class="d-flex align-items-center">
                                             <span class="nav-link-text">Cancellation Requests</span>
                                             <span class="badge bg-danger ms-2">New</span>

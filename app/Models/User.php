@@ -51,6 +51,92 @@ class User extends Authenticatable
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Get fields configuration for admin panel
+     *
+     * @return array
+     */
+    public static function getFields()
+    {
+        return [
+            'name' => [
+                'label' => 'Name',
+                'sortable' => true,
+            ],
+            'email' => [
+                'label' => 'Email',
+                'sortable' => true,
+            ],
+            'role_id' => [
+                'label' => 'Role',
+                'sortable' => true,
+                'filterable' => true,
+                'filter_options' => self::getRoleOptions(),
+                'formatter' => function($value, $user) {
+                    return $user->role ? $user->role->name : '-';
+                }
+            ],
+            'is_active' => [
+                'label' => 'Status',
+                'sortable' => true,
+                'filterable' => true,
+                'filter_options' => [
+                    '1' => 'Active',
+                    '0' => 'Inactive'
+                ],
+                'formatter' => function($value) {
+                    return $value ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>';
+                }
+            ],
+            'created_at' => [
+                'label' => 'Created At',
+                'sortable' => true,
+                'formatter' => function($value) {
+                    return $value ? $value->format('Y-m-d') : '-';
+                }
+            ],
+        ];
+    }
+
+    /**
+     * Get searchable fields
+     *
+     * @return array
+     */
+    public static function getSearchableFields()
+    {
+        return ['name', 'email', 'phone'];
+    }
+
+    /**
+     * Get validation rules
+     *
+     * @param int|null $id
+     * @return array
+     */
+    public static function rules($id = null)
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'phone' => 'nullable|string|max:20',
+            'password' => $id ? 'nullable|string|min:8|confirmed' : 'required|string|min:8|confirmed',
+            'role_id' => 'required|exists:user_roles,id',
+            'is_active' => 'boolean',
+        ];
+    }
+
+    /**
+     * Get role options for filter
+     *
+     * @return array
+     */
+    private static function getRoleOptions()
+    {
+        $roles = UserRole::pluck('name', 'id')->toArray();
+        return $roles;
+    }
+
     public function role()
     {
         return $this->belongsTo(UserRole::class);
