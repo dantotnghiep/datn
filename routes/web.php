@@ -44,6 +44,9 @@
  // Cart view route (public)
  Route::get('/gio-hang', [CartController::class, 'index'])->name('cart');
 
+ // Public promotion route
+ Route::get('/promotions/available', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
+
  // Only logged-in users can add/update/remove cart
  Route::middleware('auth')->group(function () {
      Route::post('/gio-hang/them', [CartController::class, 'add'])->name('cart.add');
@@ -75,8 +78,7 @@
      Route::post('/orders/{order}/cancel-request', [OrderController::class, 'cancelRequest'])->name('client.order.cancel.request');
      Route::post('/client/orders/{id}/request-cancel', [OrderController::class, 'requestCancel'])->name('client.order.request-cancel');
 
-     // Promotion routes
-     Route::get('/promotions/available', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
+     // Voucher application routes
      Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply-voucher');
      Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.remove-voucher');
  });
