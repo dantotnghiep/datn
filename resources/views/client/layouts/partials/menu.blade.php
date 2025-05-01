@@ -32,7 +32,7 @@
         <ul class="navbar-nav justify-content-end align-items-center">
             <li class="nav-item" data-nav-item="data-nav-item"><a class="nav-link ps-0 active"
                     href="{{ route('home') }}">Trang chủ</a></li>
-            <li class="nav-item" data-nav-item="data-nav-item"><a class="nav-link" href="">Sản
+            <li class="nav-item" data-nav-item="data-nav-item"><a class="nav-link" href="{{ route('product.index') }}">Sản
                     phẩm</a></li>
             <li class="nav-item" data-nav-item="data-nav-item"><a class="nav-link" href="{{ route('wishlist') }}">Yêu
                     thích</a></li>
