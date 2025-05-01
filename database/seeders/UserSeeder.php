@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
      */
 
 
-     
+
     public function run(): void
     {
         // Create user roles first
@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
         DB::table('users')->insert([
             'name' => 'Admin',
             'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('admin@example.com'),
             'phone' => '0901234567',
             'role_id' => $adminRoleId,
             'created_at' => now(),

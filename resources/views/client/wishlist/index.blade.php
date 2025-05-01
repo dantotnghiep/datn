@@ -10,7 +10,7 @@
         </ol>
       </nav>
       <h2 class="mb-5">Danh sách yêu thích <span class="text-body-tertiary fw-normal ms-2">({{ count($wishlists) }})</span></h2>
-      
+
       @if(count($wishlists) > 0)
       <div class="border-y border-translucent" id="productWishlistTable" data-list='{"valueNames":["products","color","size","price","quantity","total"],"page":10,"pagination":true}'>
         <div class="table-responsive scrollbar">
@@ -29,7 +29,8 @@
               <tr class="hover-actions-trigger btn-reveal-trigger position-static">
                 <td class="align-middle white-space-nowrap ps-0 py-0">
                   <a class="border border-translucent rounded-2 d-inline-block" href="{{ route('product.detail', $wishlist->productVariation->product->slug) }}">
-                    <img src="{{ asset($wishlist->productVariation->product->image ? $wishlist->productVariation->product->image : 'theme/prium.github.io/phoenix/v1.22.0/assets/img/products/1.png') }}" alt="{{ $wishlist->productVariation->product->name }}" width="53" />
+                    <img src="{{ $wishlist->productVariation->product->first_image }}"
+                    alt="{{ $wishlist->productVariation->product->name }}" width="53" />
                   </a>
                 </td>
                 <td class="products align-middle pe-11">
