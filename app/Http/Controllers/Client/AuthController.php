@@ -8,8 +8,10 @@ use App\Models\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Swift_TransportException;
 
 class AuthController extends Controller
 {
@@ -103,11 +105,17 @@ class AuthController extends Controller
                 $request->only('email')
             );
 
-            return $status === Password::RESET_LINK_SENT
-                ? back()->with(['status' => 'We have emailed your password reset link!'])
-                : back()->withErrors(['email' => __($status)]);
+            if ($status === Password::RESET_LINK_SENT) {
+                return back()->with(['status' => 'We have emailed your password reset link!']);
+            }
+            
+            // Log lỗi nếu không phải RESET_LINK_SENT
+            Log::error('Failed to send password reset link: ' . $status);
+            return back()->withErrors(['email' => __($status)]);
+            
         } catch (\Exception $e) {
-            return back()->withErrors(['email' => 'Unable to send password reset link. Please try again later.']);
+            Log::error('Exception when sending reset link: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Không thể gửi liên kết đặt lại mật khẩu. Vui lòng thử lại sau.']);
         }
     }
 

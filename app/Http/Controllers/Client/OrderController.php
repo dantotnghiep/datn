@@ -30,7 +30,7 @@ class OrderController extends Controller
         return view('client.order.detail', compact('order'));
     }
 
-    public function cancelRequest(Order $order)
+    public function cancelRequest(Order $order, Request $request)
     {
         try {
             // Ghi log để debug
@@ -55,6 +55,20 @@ class OrderController extends Controller
                 ]);
                 return back()->with('error', 'Không thể hủy đơn hàng này.');
             }
+
+            // Kiểm tra lý do hủy đơn hàng
+            $request->validate([
+                'reason' => 'required|string|max:255'
+            ], [
+                'reason.required' => 'Vui lòng nhập lý do hủy đơn hàng',
+                'reason.max' => 'Lý do hủy đơn hàng không được vượt quá 255 ký tự'
+            ]);
+            
+            // Lưu thông tin hủy đơn hàng
+            OrderCancellation::create([
+                'order_id' => $order->id,
+                'reason' => $request->reason
+            ]);
             
             // Cập nhật trạng thái đơn hàng thành "Đã hủy" (status_id = 4)
             $order->status_id = 4;
@@ -62,7 +76,8 @@ class OrderController extends Controller
             
             Log::info('Client OrderController@cancelRequest - Order cancelled', [
                 'order_id' => $order->id,
-                'new_status_id' => 4
+                'new_status_id' => 4,
+                'reason' => $request->reason
             ]);
             
             // Kích hoạt sự kiện real-time
@@ -76,6 +91,15 @@ class OrderController extends Controller
                 ]);
             }
             
+            // Nếu đơn hàng thanh toán bằng bank, chuyển hướng với session flag để hiển thị modal hoàn tiền
+            if ($order->payment_method == 'bank' && $order->payment_status == 'completed') {
+                return back()->with([
+                    'success' => 'Đơn hàng đã bị hủy thành công.',
+                    'show_refund_modal' => true,
+                    'order_id' => $order->id
+                ]);
+            }
+            
             return back()->with('success', 'Đơn hàng đã bị hủy thành công.');
             
         } catch (\Exception $e) {
@@ -86,6 +110,141 @@ class OrderController extends Controller
             ]);
             
             return back()->with('error', 'Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại sau.');
+        }
+    }
+
+    /**
+     * Hiển thị form hủy đơn hàng
+     */
+    public function showCancelForm(Order $order)
+    {
+        // Kiểm tra xem đơn hàng có thuộc về người dùng hiện tại không
+        if ($order->getRawOriginal('user_id') !== auth()->id()) {
+            abort(403);
+        }
+
+        // Kiểm tra xem đơn hàng có thể hủy không
+        if (in_array($order->status_id, [2, 4, 5])) {
+            return back()->with('error', 'Không thể hủy đơn hàng này.');
+        }
+
+        return view('client.order.cancel-form', compact('order'));
+    }
+
+    /**
+     * Xử lý yêu cầu hoàn tiền từ khách hàng
+     */
+    public function requestRefund(Order $order, Request $request)
+    {
+        try {
+            // Kiểm tra xem đơn hàng có thuộc về người dùng hiện tại không
+            if ($order->getRawOriginal('user_id') !== auth()->id()) {
+                return back()->with('error', 'Bạn không có quyền yêu cầu hoàn tiền cho đơn hàng này.');
+            }
+            
+            // Kiểm tra trạng thái đơn hàng (chỉ đơn hàng đã hủy mới được hoàn tiền)
+            if ($order->status_id != 4) {
+                return back()->with('error', 'Chỉ những đơn hàng đã hủy mới có thể yêu cầu hoàn tiền.');
+            }
+            
+            // Kiểm tra xem phương thức thanh toán có phải là bank không
+            if ($order->payment_method != 'bank') {
+                return back()->with('error', 'Chỉ đơn hàng thanh toán bằng chuyển khoản mới được yêu cầu hoàn tiền.');
+            }
+            
+            // Xác thực dữ liệu gửi lên
+            $request->validate([
+                'bank' => 'required|string|max:100',
+                'bank_number' => 'required|string|max:50',
+                'bank_name' => 'required|string|max:100',
+                'notes' => 'nullable|string',
+            ], [
+                'bank.required' => 'Vui lòng nhập tên ngân hàng',
+                'bank_number.required' => 'Vui lòng nhập số tài khoản',
+                'bank_name.required' => 'Vui lòng nhập tên chủ tài khoản',
+            ]);
+            
+            // Kiểm tra xem đã có yêu cầu hoàn tiền nào chưa
+            if ($order->refunds()->exists()) {
+                return back()->with('error', 'Đơn hàng này đã có yêu cầu hoàn tiền.');
+            }
+            
+            // Tạo yêu cầu hoàn tiền
+            $refund = $order->refunds()->create([
+                'user_id' => auth()->id(), // Người dùng yêu cầu hoàn tiền
+                'amount' => $order->total_with_discount, // Hoàn toàn bộ số tiền đã thanh toán
+                'refund_status' => 'pending',
+                'reason' => 'Hoàn tiền sau khi hủy đơn hàng',
+                'bank' => $request->bank,
+                'bank_number' => $request->bank_number,
+                'bank_name' => $request->bank_name,
+                'notes' => $request->notes,
+                'is_active' => true
+            ]);
+            
+            // Lưu log
+            Log::info('Client OrderController@requestRefund - Refund requested', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'refund_id' => $refund->id,
+                'amount' => $order->total_with_discount,
+                'user_id' => auth()->id()
+            ]);
+            
+            return back()->with('success', 'Yêu cầu hoàn tiền đã được gửi. Chúng tôi sẽ xử lý trong thời gian sớm nhất.');
+            
+        } catch (\Exception $e) {
+            Log::error('Client OrderController@requestRefund - Error', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->with('error', 'Đã xảy ra lỗi khi yêu cầu hoàn tiền. Vui lòng thử lại sau.');
+        }
+    }
+
+    /**
+     * Kiểm tra xem đơn hàng có thể yêu cầu hoàn tiền hay không
+     */
+    public function canRequestRefund(Order $order)
+    {
+        try {
+            // Kiểm tra xem đơn hàng có thuộc về người dùng hiện tại không
+            if ($order->getRawOriginal('user_id') !== auth()->id()) {
+                return response()->json(['can_request' => false, 'reason' => 'unauthorized']);
+            }
+            
+            // Kiểm tra trạng thái đơn hàng (chỉ đơn hàng đã hủy mới được hoàn tiền)
+            if ($order->status_id != 4) {
+                return response()->json(['can_request' => false, 'reason' => 'not_cancelled']);
+            }
+            
+            // Kiểm tra xem phương thức thanh toán có phải là bank không
+            if ($order->payment_method != 'bank') {
+                return response()->json(['can_request' => false, 'reason' => 'not_bank_payment']);
+            }
+            
+            // Kiểm tra xem đã thanh toán chưa
+            if ($order->payment_status != 'completed') {
+                return response()->json(['can_request' => false, 'reason' => 'payment_not_completed']);
+            }
+            
+            // Kiểm tra xem đã có yêu cầu hoàn tiền nào chưa
+            if ($order->refunds()->exists()) {
+                return response()->json(['can_request' => false, 'reason' => 'refund_exists']);
+            }
+            
+            return response()->json(['can_request' => true]);
+            
+        } catch (\Exception $e) {
+            Log::error('Client OrderController@canRequestRefund - Error', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['can_request' => false, 'reason' => 'error']);
         }
     }
 } 
