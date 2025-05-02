@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PromotionController;
+use App\Http\Controllers\Admin\StatisticsController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\InventoryReceiptController;
@@ -16,7 +17,8 @@ use App\Http\Controllers\Admin\OrderCancellationController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-
+    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
+    Route::get('/statistics/user-order-stats', [StatisticsController::class, 'userOrderStats'])->name('statistics.user-orders');
     // CRUD routes cho danh mục (category)
     Route::prefix('categories')->name('categories.')->group(function () {
         // Hiển thị danh sách

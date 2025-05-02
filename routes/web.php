@@ -100,4 +100,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Add routes for order refund status
     Route::get('/orders/{id}/check-refund', [App\Http\Controllers\Admin\OrderController::class, 'checkRefund'])->name('admin.orders.check-refund');
     Route::put('/order-refunds/{id}/update-status', [App\Http\Controllers\Admin\OrderRefundController::class, 'updateStatus'])->name('admin.order-refunds.update-status');
+
+    // Statistics Routes
+
 });
