@@ -45,14 +45,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
-        <nav class="mb-3" aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="#!">Page 1</a></li>
-                <li class="breadcrumb-item"><a href="#!">Page 2</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Default</li>
-            </ol>
-        </nav>
-        <h2 class="mb-6">Cart</h2>
+        <h2 class="mb-6">Giỏ hàng</h2>
         <div class="row g-5">
             <div class="col-12 col-lg-8">
                 <div id="cartTable"
@@ -69,11 +62,10 @@
                                 <tr>
                                     <th class="sort white-space-nowrap align-middle fs-10" scope="col"></th>
                                     <th class="sort white-space-nowrap align-middle" scope="col"
-                                        style="min-width:250px;">PRODUCTS</th>
-                                    <th class="sort align-middle" scope="col" style="width:180px;">BIẾN THỂ</th>
-                                    <th class="sort align-middle text-end" scope="col" style="width:300px;">PRICE</th>
-                                    <th class="sort align-middle ps-5" scope="col" style="width:200px;">QUANTITY</th>
-                                    <th class="sort align-middle text-end" scope="col" style="width:250px;">TOTAL</th>
+                                        style="min-width:250px;">SẢN PHẨM</th>
+                                    <th class="sort align-middle text-end" scope="col" style="width:300px;">GIÁ</th>
+                                    <th class="sort align-middle ps-5 " scope="col" style="width:300px;">SỐ LƯỢNG</th>
+                                    <th class="sort align-middle text-end" scope="col" style="width:250px;">TỔNG TIỀN</th>
                                     <th class="sort text-end align-middle pe-0" scope="col"></th>
                                 </tr>
                             </thead>
@@ -101,16 +93,7 @@
                                             </a>
                                             <div class="text-muted small">{{ $item->productVariation->name }}</div>
                                         </td>
-                                        <td class="align-middle white-space-nowrap fs-9 text-body">
-                                            @if ($item->productVariation->attributeValues && count($item->productVariation->attributeValues))
-                                                {{ $item->productVariation->attributeValues->map(function ($attrVal) {
-                                                        return ($attrVal->attribute ? $attrVal->attribute->name . ': ' : '') . $attrVal->value;
-                                                    })->implode(' / ') }}
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                        <td class="price align-middle text-body fs-9 fw-semibold text-end">
+                                            <td class="price align-middle text-body fs-9 fw-semibold text-end">
                                             {{ number_format($item->price) }}đ
                                         </td>
                                         <td class="quantity align-middle fs-8 ps-5">
@@ -147,16 +130,16 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex flex-between-center mb-3">
-                            <h3 class="card-title mb-0">Summary</h3>
+                            <h3 class="card-title mb-0">Tổng cộng</h3>
                         </div>
                         <div>
                             <div class="d-flex justify-content-between">
-                                <p class="text-body fw-semibold">Items subtotal :</p>
+                                <p class="text-body fw-semibold">Tổng tiền :</p>
                                 <p class="text-body-emphasis fw-semibold">{{ number_format($total) }}đ</p>
                             </div>
                             @if (isset($discount) && $discount > 0)
                                 <div class="d-flex justify-content-between">
-                                    <p class="text-body fw-semibold">Discount :</p>
+                                    <p class="text-body fw-semibold">Giảm giá :</p>
                                     <p class="text-danger fw-semibold">-{{ number_format($discount) }}đ</p>
                                 </div>
                             @endif
@@ -164,7 +147,7 @@
                         <div class="voucher-container mb-3">
                             <div class="input-group">
                                 <input class="form-control" type="text" placeholder="Nhập mã giảm giá hoặc click để chọn" id="voucher-input" />
-                                <button class="btn btn-phoenix-primary px-5" id="apply-voucher-btn">Apply</button>
+                                <button class="btn btn-phoenix-primary px-5" id="apply-voucher-btn">Áp dụng</button>
                             </div>
                             <div id="voucher-feedback" class="invalid-feedback" style="display: none;"></div>
                             <div id="voucher-list" class="dropdown-menu w-100 position-static border shadow rounded-3 pt-0" style="display: none; max-height: 300px; overflow-y: auto;">
@@ -174,11 +157,11 @@
                             </div>
                         </div>
                         <div class="d-flex justify-content-between border-y border-dashed py-3 mb-4">
-                            <h4 class="mb-0">Total :</h4>
+                            <h4 class="mb-0">Tổng cộng:</h4>
                             <h4 class="mb-">{{ number_format($total) }}đ</h4>
                         </div>
                         <button class="btn btn-primary w-100" id="checkout-btn" disabled type="button">
-                            Proceed to check out<span class="fas fa-chevron-right ms-1 fs-10"></span>
+                            Thanh toán<span class="fas fa-chevron-right ms-1 fs-10"></span>
                         </button>
                         <form id="checkout-form" action="{{ route('cart.checkout.selected') }}" method="POST"
                             style="display:none;">

@@ -151,6 +151,7 @@ class ProductController extends BaseController
                         throw new \Exception('Invalid image type at index ' . $index . ': ' . $image->getMimeType());
                     }
                     try {
+                        
                         $imagePath = $image->store('products', 'public');
                         ProductImage::create([
                             'product_id' => $product->id,

@@ -30,8 +30,8 @@
                             <div class="product-thumbnails d-flex flex-column gap-2">
                                 @foreach ($product->images as $index => $image)
                                     <div class="thumbnail-item mb-2">
-                                        <img src="{{ asset('storage/' . $image->image_path) }}" 
-                                             alt="{{ $product->name }}" 
+                                        <img src="{{ asset('storage/' . $image->image_path) }}"
+                                             alt="{{ $product->name }}"
                                              class="img-thumbnail product-thumb-image @if($image->is_primary) active @endif"
                                              data-index="{{ $index }}" />
                                     </div>
@@ -44,9 +44,9 @@
                                 @php
                                     $primaryImage = $product->images->where('is_primary', 1)->first() ?? $product->images->first();
                                 @endphp
-                                <img id="mainProductImage" 
-                                     src="{{ asset('storage/' . $primaryImage->image_path) }}" 
-                                     alt="{{ $product->name }}" 
+                                <img id="mainProductImage"
+                                     src="{{ asset('storage/' . $primaryImage->image_path) }}"
+                                     alt="{{ $product->name }}"
                                      class="img-fluid" />
                             </div>
                         </div>
@@ -63,19 +63,10 @@
                 <div class="col-12 col-lg-6">
                     <div class="d-flex flex-column justify-content-between h-100">
                         <div>
-                            <div class="d-flex flex-wrap">
-                                <div class="me-2"><span class="fa fa-star text-warning"></span><span
-                                        class="fa fa-star text-warning"></span><span
-                                        class="fa fa-star text-warning"></span><span
-                                        class="fa fa-star text-warning"></span><span
-                                        class="fa fa-star text-warning"></span></div>
-                                <p class="text-primary fw-semibold mb-2">6548 People rated and reviewed </p>
-                            </div>
                                 <h3 class="mb-3 lh-sm">{{ $product->name }}</h3>
                                 @if ($product->is_hot)
                                     <div class="d-flex flex-wrap align-items-start mb-3">
-                                        <span class="badge text-bg-success fs-9 rounded-pill me-2 fw-semibold">Sản phẩm nổi
-                                            bật</span>
+                                        <span class="badge text-bg-danger fs-10 product-verified-badge">HOT<span class="fas fa-fire ms-1"></span></span>
                                     </div>
                                 @endif
                             <div class="d-flex flex-wrap align-items-center">
@@ -122,9 +113,9 @@
                                             <div class="d-flex flex-wrap gap-2">
                                                 @foreach($attribute['values'] as $value)
                                                     <div class="form-check me-3">
-                                                        <input class="form-check-input variation-attribute" 
-                                                               type="radio" 
-                                                               name="attribute_{{ $attribute['id'] }}" 
+                                                        <input class="form-check-input variation-attribute"
+                                                               type="radio"
+                                                               name="attribute_{{ $attribute['id'] }}"
                                                                value="{{ $value['id'] }}"
                                                                data-attribute-id="{{ $attribute['id'] }}"
                                                                id="attr-{{ $attribute['id'] }}-{{ $value['id'] }}"
@@ -147,7 +138,7 @@
                                                     <button class="btn btn-outline-secondary btn-sm" id="decrease-quantity">
                                                         <i class="fas fa-minus"></i>
                                                     </button>
-                                                    <input type="number" class="form-control form-control-sm mx-2 text-center" 
+                                                    <input type="number" class="form-control form-control-sm mx-2 text-center"
                                                            id="quantity" value="1" min="1" style="width: 60px;">
                                                     <button class="btn btn-outline-secondary btn-sm" id="increase-quantity">
                                                         <i class="fas fa-plus"></i>
@@ -215,47 +206,48 @@
                 <div class="swiper-wrapper">
                     @foreach($relatedProducts as $relatedProduct)
                     <div class="swiper-slide">
-                        <div class="position-relative text-decoration-none product-card h-100">
-                            <div class="d-flex flex-column justify-content-between h-100">
+                        <div class="position-relative text-decoration-none product-card h-30">
+                            <div class="d-flex flex-column justify-content-between h-30">
                                 <div>
                                     <div class="border border-1 border-translucent rounded-3 position-relative mb-3">
-                                        <button class="btn btn-wish btn-wish-primary z-2 d-toggle-container wishlist-btn"
+                                        @if($relatedProduct->variations->first())
+                                        <button
+                                            class="btn btn-wish btn-wish-primary z-2 d-toggle-container wishlist-btn"
                                             data-bs-toggle="tooltip" data-bs-placement="top"
-                                            data-product-variation-id="{{ $relatedProduct->variations->first()->id ?? 0 }}"
-                                            title="Thêm vào yêu thích">
-                                            <span class="fas fa-heart d-block-hover" data-fa-transform="down-1"></span>
-                                            <span class="far fa-heart d-none-hover" data-fa-transform="down-1"></span>
+                                            data-variation-id="{{ $relatedProduct->variations->first()->id }}"
+                                            title="{{ in_array($relatedProduct->variations->first()->id, $wishlistItems ?? []) ? 'Đã yêu thích' : 'Thêm vào yêu thích' }}">
+                                            @if(in_array($relatedProduct->variations->first()->id, $wishlistItems ?? []))
+                                                <span class="fas fa-heart text-danger"
+                                                    data-fa-transform="down-1"></span>
+                                            @else
+                                                <span class="far fa-heart d-none-hover"
+                                                    data-fa-transform="down-1"></span>
+                                            @endif
                                         </button>
-                                        <a href="{{ route('product.show', $relatedProduct->slug) }}">
-                                            <img class="img-fluid" src="{{ $relatedProduct->first_image }}" alt="{{ $relatedProduct->name }}" />
+                                        @endif
+                                        <a href="{{ route('product.detail', $relatedProduct->slug) }}">
+                                            <img class="img-fluid"
+                                                src="{{ $relatedProduct->first_image }}" alt="{{ $relatedProduct->name }}" />
                                         </a>
+                                        @if($relatedProduct->is_hot)
+                                        <span class="badge text-bg-danger fs-10 product-verified-badge">HOT<span class="fas fa-fire ms-1"></span></span>
+                                        @endif
                                     </div>
-                                    <a class="stretched-link" href="{{ route('product.show', $relatedProduct->slug) }}">
-                                        <h6 class="mb-2 lh-sm line-clamp-3 product-name">{{ $relatedProduct->name }}</h6>
+                                    <a class="stretched-link" href="{{ route('product.detail', $relatedProduct->slug) }}">
+                                        <h6 class="mb-2 lh-sm line-clamp-3 product-name">
+                                            {{ $relatedProduct->name }}
+                                        </h6>
                                     </a>
-                                    <p class="fs-9">
-                                        <span class="fa fa-star text-warning"></span>
-                                        <span class="fa fa-star text-warning"></span>
-                                        <span class="fa fa-star text-warning"></span>
-                                        <span class="fa fa-star text-warning"></span>
-                                        <span class="fa fa-star text-warning"></span>
-                                    </p>
                                 </div>
                                 <div>
-                                    @if($relatedProduct->variations_count > 0)
-                                        @if($relatedProduct->variations->min('sale_price'))
-                                            <div class="d-flex align-items-center mb-1">
-                                                <p class="me-2 text-body text-decoration-line-through mb-0">{{ number_format($relatedProduct->variations->max('price')) }}đ</p>
-                                                <h3 class="text-body-emphasis mb-0">{{ number_format($relatedProduct->variations->min('sale_price')) }}đ</h3>
-                                            </div>
-                                        @else
-                                            <h3 class="text-body-emphasis mb-0">{{ number_format($relatedProduct->variations->min('price')) }}đ</h3>
-                                        @endif
+                                    @if($relatedProduct->min_price == $relatedProduct->max_price)
+                                        <h6 class="text-danger mb-0 fw-bold">{{ number_format($relatedProduct->min_price, 0, ',', '.') }}</h6>
                                     @else
-                                        <h3 class="text-body-emphasis mb-0">{{ number_format($relatedProduct->price) }}đ</h3>
+                                        <h6 class="text-danger mb-0 fw-bold">{{ number_format($relatedProduct->min_price, 0, ',', '.') }} - {{ number_format($relatedProduct->max_price, 0, ',', '.') }}</h6>
                                     @endif
+
                                     @if($relatedProduct->variations_count > 0)
-                                        <p class="text-body-tertiary fw-semibold fs-9 lh-1 mb-0">{{ $relatedProduct->variations_count }} biến thể</p>
+                                    <p class="text-body-tertiary fw-semibold fs-9 lh-1 mb-0">{{ $relatedProduct->variations_count }} loại sản phẩm</p>
                                     @endif
                                 </div>
                             </div>
@@ -359,7 +351,7 @@
                 thumbnail.addEventListener('click', function() {
                     // Cập nhật ảnh chính
                     mainImage.src = this.src;
-                    
+
                     // Cập nhật trạng thái active cho thumbnail
                     thumbnails.forEach(item => item.classList.remove('active'));
                     this.classList.add('active');
@@ -369,7 +361,7 @@
             // Khởi tạo biến variations từ PHP
             const variations = @json($product->variations);
             const attributes = @json($attributes);
-            
+
             // Các elements
             const attributeInputs = document.querySelectorAll('.variation-attribute');
             const quantityInput = document.getElementById('quantity');
@@ -400,16 +392,16 @@
                 attributeInputs.forEach(input => {
                     const attributeId = parseInt(input.dataset.attributeId);
                     const valueId = parseInt(input.value);
-                    
+
                     // Nếu input này đang được chọn, không disable
                     if (input.checked) return;
 
                     // Kiểm tra xem có variation nào phù hợp không
                     const testAttributes = [...selectedAttributes];
-                    const currentAttributeIndex = testAttributes.findIndex(id => 
+                    const currentAttributeIndex = testAttributes.findIndex(id =>
                         attributes.find(attr => attr.id === attributeId).values.some(v => v.id === id)
                     );
-                    
+
                     if (currentAttributeIndex !== -1) {
                         testAttributes[currentAttributeIndex] = valueId;
                     } else {
@@ -478,7 +470,7 @@
                     .map(input => parseInt(input.value));
 
                 updateAttributeOptions();
-                
+
                 const variation = getVariation(selectedAttributes);
                 updateUI(variation);
             }
@@ -594,24 +586,24 @@
             // Xử lý chức năng thêm vào yêu thích
             const addToWishlistBtn = document.getElementById('add-to-wishlist');
             const wishlistIcon = document.getElementById('wishlist-icon');
-            
+
             addToWishlistBtn.addEventListener('click', function() {
                 const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
                     .map(input => parseInt(input.value));
-                
+
                 // Kiểm tra đã đăng nhập chưa
                 @if(!Auth::check())
                     // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
                     window.location.href = '{{ route("login") }}';
                     return;
                 @endif
-                
+
                 // Kiểm tra đã chọn biến thể chưa
                 if (selectedAttributes.length === 0 && variations.length > 0) {
                     alert('Vui lòng chọn đầy đủ các thuộc tính');
                     return;
                 }
-                
+
                 // Lấy variation ID
                 let variationId;
                 if (variations.length > 0) {
@@ -625,7 +617,7 @@
                     // Nếu sản phẩm không có biến thể, lấy biến thể đầu tiên (mặc định)
                     variationId = variations[0]?.id;
                 }
-                
+
                 // Gọi API để thêm/xóa sản phẩm khỏi wishlist
                 fetch('{{ route("wishlist.toggle") }}', {
                     method: 'POST',
@@ -661,14 +653,14 @@
                     alert('Đã xảy ra lỗi khi thực hiện thao tác. Vui lòng thử lại sau.');
                 });
             });
-            
+
             // Kiểm tra sản phẩm đã được yêu thích chưa khi tải trang
             @if(Auth::check())
                 // Khi trang được tải, kiểm tra xem sản phẩm đã có trong wishlist chưa
                 function checkWishlistStatus() {
                     const selectedAttributes = Array.from(document.querySelectorAll('.variation-attribute:checked'))
                         .map(input => parseInt(input.value));
-                    
+
                     let variationId;
                     if (variations.length > 0) {
                         const variation = getVariation(selectedAttributes);
@@ -679,7 +671,7 @@
                     } else {
                         return;
                     }
-                    
+
                     fetch(`/api/wishlist/check?variation_id=${variationId}`, {
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -701,33 +693,33 @@
                         console.error('Error:', error);
                     });
                 }
-                
+
                 // Gọi function khi trang tải và khi thay đổi biến thể
                 checkWishlistStatus();
                 attributeInputs.forEach(input => {
                     input.addEventListener('change', checkWishlistStatus);
                 });
             @endif
-            
+
             // Xử lý nút yêu thích trong danh sách sản phẩm liên quan
             const wishlistButtons = document.querySelectorAll('.wishlist-btn');
             wishlistButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
+
                     // Kiểm tra đã đăng nhập chưa
                     @if(!Auth::check())
                         // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
                         window.location.href = '{{ route("login") }}';
                         return;
                     @endif
-                    
+
                     const variationId = this.getAttribute('data-product-variation-id');
                     if (!variationId || variationId === '0') {
                         alert('Không thể thêm sản phẩm này vào danh sách yêu thích');
                         return;
                     }
-                    
+
                     // Gọi API để thêm/xóa sản phẩm khỏi wishlist
                     fetch('{{ route("wishlist.toggle") }}', {
                         method: 'POST',
@@ -761,7 +753,7 @@
                         alert('Đã xảy ra lỗi khi thực hiện thao tác. Vui lòng thử lại sau.');
                     });
                 });
-                
+
                 // Kiểm tra trạng thái ban đầu
                 @if(Auth::check())
                     const variationId = button.getAttribute('data-product-variation-id');
@@ -793,7 +785,7 @@
         overflow-y: auto;
         scrollbar-width: thin;
     }
-    
+
     .product-thumb-image {
         cursor: pointer;
         border: 2px solid transparent;
@@ -801,22 +793,22 @@
         width: 100%;
         object-fit: cover;
     }
-    
+
     .product-thumb-image.active {
         border-color: #ffc107;
     }
-    
+
     .product-thumb-image:hover {
         opacity: 0.85;
     }
-    
+
     .main-product-image {
         display: flex;
         align-items: center;
         justify-content: center;
         height: 100%;
     }
-    
+
     #mainProductImage {
         max-height: 500px;
         object-fit: contain;

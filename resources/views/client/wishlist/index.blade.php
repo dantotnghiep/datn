@@ -52,9 +52,6 @@
                       <span class="fas fa-trash"></span>
                     </button>
                   </form>
-                  <a href="{{ route('product.detail', $wishlist->productVariation->product->slug) }}" class="btn btn-primary fs-10">
-                    <span class="fas fa-shopping-cart me-1 fs-10"></span>Thêm vào giỏ
-                  </a>
                 </td>
               </tr>
               @endforeach
@@ -81,7 +78,7 @@
         </div>
         <h4>Danh sách yêu thích của bạn đang trống</h4>
         <p class="text-body-tertiary">Hãy thêm sản phẩm yêu thích để xem ở đây</p>
-        <a href="{{ route('product') }}" class="btn btn-primary">Khám phá sản phẩm</a>
+        <a href="{{ route('product.index') }}" class="btn btn-primary">Khám phá sản phẩm</a>
       </div>
       @endif
     </div><!-- end of .container-->
