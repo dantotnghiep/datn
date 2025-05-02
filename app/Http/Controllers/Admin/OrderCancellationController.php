@@ -6,7 +6,9 @@ use App\Events\OrderCancellationProcessed;
 use App\Events\OrderStatusChanged;
 use App\Models\OrderCancellation;
 use App\Models\Order;
+use App\Models\ProductVariation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrderCancellationController extends BaseController
@@ -159,38 +161,75 @@ class OrderCancellationController extends BaseController
                 'old_status' => $order->status_id
             ]);
             
-            // Cập nhật trạng thái đơn hàng thành "Cancelled"
-            $order->status_id = 4; // ID của trạng thái "Cancelled"
-            $order->save();
+            // Bắt đầu transaction để đảm bảo tính nhất quán dữ liệu
+            DB::beginTransaction();
             
-            Log::info('OrderCancellationController@approve - After status update', [
-                'cancellation_id' => $id,
-                'order_id' => $order->id,
-                'new_status' => $order->status_id
-            ]);
-            
-            // Phát sóng sự kiện OrderStatusChanged để cập nhật trạng thái đơn hàng ở client
             try {
-                event(new OrderStatusChanged($order));
-                Log::info('OrderCancellationController@approve - OrderStatusChanged event dispatched');
-            } catch (\Exception $eventError) {
-                Log::error('OrderCancellationController@approve - Error dispatching OrderStatusChanged event', [
-                    'error' => $eventError->getMessage()
+                // Cập nhật trạng thái đơn hàng thành "Cancelled"
+                $order->status_id = 4; // ID của trạng thái "Cancelled"
+                $order->save();
+                
+                // Lấy đơn hàng với danh sách sản phẩm để cập nhật số lượng
+                $order->load('items.productVariation');
+                
+                // Cập nhật lại số lượng sản phẩm trong kho
+                foreach ($order->items as $item) {
+                    $variation = $item->productVariation;
+                    if ($variation) {
+                        $variation->stock += $item->quantity;
+                        $variation->save();
+                        
+                        Log::info('OrderCancellationController@approve - Updated product stock', [
+                            'order_id' => $order->id,
+                            'product_variation_id' => $variation->id,
+                            'old_stock' => $variation->stock - $item->quantity,
+                            'quantity_returned' => $item->quantity,
+                            'new_stock' => $variation->stock
+                        ]);
+                    } else {
+                        Log::warning('OrderCancellationController@approve - Product variation not found', [
+                            'order_id' => $order->id,
+                            'item_id' => $item->id,
+                            'product_variation_id' => $item->product_variation_id
+                        ]);
+                    }
+                }
+                
+                DB::commit();
+                
+                Log::info('OrderCancellationController@approve - After status update', [
+                    'cancellation_id' => $id,
+                    'order_id' => $order->id,
+                    'new_status' => $order->status_id
                 ]);
+                
+                // Phát sóng sự kiện OrderStatusChanged để cập nhật trạng thái đơn hàng ở client
+                try {
+                    event(new OrderStatusChanged($order));
+                    Log::info('OrderCancellationController@approve - OrderStatusChanged event dispatched');
+                } catch (\Exception $eventError) {
+                    Log::error('OrderCancellationController@approve - Error dispatching OrderStatusChanged event', [
+                        'error' => $eventError->getMessage()
+                    ]);
+                }
+                
+                // Phát sóng sự kiện OrderCancellationProcessed để cập nhật danh sách yêu cầu hủy
+                try {
+                    event(new OrderCancellationProcessed($cancellation, 'approved'));
+                    Log::info('OrderCancellationController@approve - OrderCancellationProcessed event dispatched');
+                } catch (\Exception $eventError) {
+                    Log::error('OrderCancellationController@approve - Error dispatching OrderCancellationProcessed event', [
+                        'error' => $eventError->getMessage()
+                    ]);
+                }
+                
+                return redirect()->route($this->route . '.cancelled')
+                    ->with('success', 'Order cancellation approved successfully!');
+                    
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
             }
-            
-            // Phát sóng sự kiện OrderCancellationProcessed để cập nhật danh sách yêu cầu hủy
-            try {
-                event(new OrderCancellationProcessed($cancellation, 'approved'));
-                Log::info('OrderCancellationController@approve - OrderCancellationProcessed event dispatched');
-            } catch (\Exception $eventError) {
-                Log::error('OrderCancellationController@approve - Error dispatching OrderCancellationProcessed event', [
-                    'error' => $eventError->getMessage()
-                ]);
-            }
-            
-            return redirect()->route($this->route . '.cancelled')
-                ->with('success', 'Order cancellation approved successfully!');
                 
         } catch (\Exception $e) {
             Log::error('OrderCancellationController@approve - Error', [

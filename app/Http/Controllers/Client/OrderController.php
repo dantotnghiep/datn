@@ -6,7 +6,9 @@ use App\Events\OrderStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderCancellation;
+use App\Models\ProductVariation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -64,43 +66,80 @@ class OrderController extends Controller
                 'reason.max' => 'Lý do hủy đơn hàng không được vượt quá 255 ký tự'
             ]);
             
-            // Lưu thông tin hủy đơn hàng
-            OrderCancellation::create([
-                'order_id' => $order->id,
-                'reason' => $request->reason
-            ]);
+            // Sử dụng transaction để đảm bảo tính nhất quán dữ liệu
+            DB::beginTransaction();
             
-            // Cập nhật trạng thái đơn hàng thành "Đã hủy" (status_id = 4)
-            $order->status_id = 4;
-            $order->save();
-            
-            Log::info('Client OrderController@cancelRequest - Order cancelled', [
-                'order_id' => $order->id,
-                'new_status_id' => 4,
-                'reason' => $request->reason
-            ]);
-            
-            // Kích hoạt sự kiện real-time
             try {
-                event(new OrderStatusChanged($order));
-                Log::info('Client OrderController@cancelRequest - Status change event dispatched');
-            } catch (\Exception $eventError) {
-                Log::error('Client OrderController@cancelRequest - Error dispatching event', [
-                    'error' => $eventError->getMessage(),
-                    'trace' => $eventError->getTraceAsString()
+                // Lưu thông tin hủy đơn hàng
+                OrderCancellation::create([
+                    'order_id' => $order->id,
+                    'reason' => $request->reason
                 ]);
-            }
-            
-            // Nếu đơn hàng thanh toán bằng bank, chuyển hướng với session flag để hiển thị modal hoàn tiền
-            if ($order->payment_method == 'bank' && $order->payment_status == 'completed') {
-                return back()->with([
-                    'success' => 'Đơn hàng đã bị hủy thành công.',
-                    'show_refund_modal' => true,
-                    'order_id' => $order->id
+                
+                // Cập nhật trạng thái đơn hàng thành "Đã hủy" (status_id = 4)
+                $order->status_id = 4;
+                $order->save();
+                
+                // Lấy đơn hàng với danh sách sản phẩm để cập nhật số lượng
+                $order->load('items.productVariation');
+                
+                // Cập nhật lại số lượng sản phẩm trong kho
+                foreach ($order->items as $item) {
+                    $variation = $item->productVariation;
+                    if ($variation) {
+                        $variation->stock += $item->quantity;
+                        $variation->save();
+                        
+                        Log::info('Client OrderController@cancelRequest - Updated product stock', [
+                            'order_id' => $order->id,
+                            'product_variation_id' => $variation->id,
+                            'old_stock' => $variation->stock - $item->quantity,
+                            'quantity_returned' => $item->quantity,
+                            'new_stock' => $variation->stock
+                        ]);
+                    } else {
+                        Log::warning('Client OrderController@cancelRequest - Product variation not found', [
+                            'order_id' => $order->id,
+                            'item_id' => $item->id,
+                            'product_variation_id' => $item->product_variation_id
+                        ]);
+                    }
+                }
+                
+                DB::commit();
+                
+                Log::info('Client OrderController@cancelRequest - Order cancelled', [
+                    'order_id' => $order->id,
+                    'new_status_id' => 4,
+                    'reason' => $request->reason
                 ]);
+                
+                // Kích hoạt sự kiện real-time
+                try {
+                    event(new OrderStatusChanged($order));
+                    Log::info('Client OrderController@cancelRequest - Status change event dispatched');
+                } catch (\Exception $eventError) {
+                    Log::error('Client OrderController@cancelRequest - Error dispatching event', [
+                        'error' => $eventError->getMessage(),
+                        'trace' => $eventError->getTraceAsString()
+                    ]);
+                }
+                
+                // Nếu đơn hàng thanh toán bằng bank, chuyển hướng với session flag để hiển thị modal hoàn tiền
+                if ($order->payment_method == 'bank' && $order->payment_status == 'completed') {
+                    return back()->with([
+                        'success' => 'Đơn hàng đã bị hủy thành công.',
+                        'show_refund_modal' => true,
+                        'order_id' => $order->id
+                    ]);
+                }
+                
+                return back()->with('success', 'Đơn hàng đã bị hủy thành công.');
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
             }
-            
-            return back()->with('success', 'Đơn hàng đã bị hủy thành công.');
             
         } catch (\Exception $e) {
             Log::error('Client OrderController@cancelRequest - Error', [
