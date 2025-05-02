@@ -16,134 +16,10 @@ use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Controllers\Admin\OrderCancellationController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+    // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
-    Route::get('/statistics/user-order-stats', [StatisticsController::class, 'userOrderStats'])->name('statistics.user-orders');
-    // CRUD routes cho danh mục (category)
-    Route::prefix('categories')->name('categories.')->group(function () {
-        // Hiển thị danh sách
-        Route::get('/', [CategoryController::class, 'index'])->name('index');
 
-        // Form tạo mớiimage.png
-        Route::get('/create', [CategoryController::class, 'create'])->name('create');
-
-        // Lưu dữ liệu mới
-        Route::post('/', [CategoryController::class, 'store'])->name('store');
-
-        // Form chỉnh sửa
-        Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
-
-        // Cập nhật dữ liệu
-        Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
-
-        // Xóa mềm
-        Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
-
-        // Khôi phục từ thùng rác
-        Route::put('/{id}/restore', [CategoryController::class, 'restore'])->name('restore');
-    });
-
-    // CRUD routes for products
-    Route::prefix('products')->name('products.')->group(function () {
-        // List
-        Route::get('/', [ProductController::class, 'index'])->name('index');
-
-        // Create form
-        Route::get('/create', [ProductController::class, 'create'])->name('create');
-
-        // Store
-        Route::post('/', [ProductController::class, 'store'])->name('store');
-
-        // Edit form
-        Route::get('/edit/{slug}', [ProductController::class, 'edit'])->name('edit');
-
-        // Update
-        Route::put('/update/{slug}', [ProductController::class, 'update'])->name('update');
-
-        // Soft delete
-        Route::delete('/delete/{slug}', [ProductController::class, 'destroy'])->name('destroy');
-
-        // Restore from trash
-        Route::put('/restore/{slug}', [ProductController::class, 'restore'])->name('restore');
-    });
-
-
-    // CRUD routes for product variations
-    Route::prefix('product-variations')->name('product-variations.')->group(function () {
-        // List
-        Route::get('/', [ProductVariationController::class, 'index'])->name('index');
-
-        // Create form
-        Route::get('/create', [ProductVariationController::class, 'create'])->name('create');
-
-        // Store
-        Route::post('/', [ProductVariationController::class, 'store'])->name('store');
-
-        // Edit form
-        Route::get('/{id}/edit', [ProductVariationController::class, 'edit'])->name('edit');
-
-        // Update
-        Route::put('/{id}', [ProductVariationController::class, 'update'])->name('update');
-
-        // Soft delete
-        Route::delete('/{id}', [ProductVariationController::class, 'destroy'])->name('destroy');
-
-        // Restore from trash
-        Route::put('/{id}/restore', [ProductVariationController::class, 'restore'])->name('restore');
-    });
-
-    // Attribute routes
-    Route::prefix('attributes')->name('attributes.')->group(function () {
-        // List
-        Route::get('/', [AttributeController::class, 'index'])->name('index');
-
-        // Create form
-        Route::get('/create', [AttributeController::class, 'create'])->name('create');
-
-        // Store
-        Route::post('/', [AttributeController::class, 'store'])->name('store');
-
-        // Edit form
-        Route::get('/{id}/edit', [AttributeController::class, 'edit'])->name('edit');
-
-        // Update
-        Route::put('/{id}', [AttributeController::class, 'update'])->name('update');
-
-        // Soft delete
-        Route::delete('/{id}', [AttributeController::class, 'destroy'])->name('destroy');
-
-        // Restore from trash
-        Route::put('/{id}/restore', [AttributeController::class, 'restore'])->name('restore');
-
-        // Store attribute value
-        Route::post('/values', [AttributeController::class, 'storeValue'])->name('values.store');
-    });
-
-    // Attribute Value routes
-    Route::prefix('attribute-values')->name('attribute-values.')->group(function () {
-        // List
-        Route::get('/', [AttributeValueController::class, 'index'])->name('index');
-
-        // Create form
-        Route::get('/create', [AttributeValueController::class, 'create'])->name('create');
-
-        // Store
-        Route::post('/', [AttributeValueController::class, 'store'])->name('store');
-
-        // Edit form
-        Route::get('/{id}/edit', [AttributeValueController::class, 'edit'])->name('edit');
-
-        // Update
-        Route::put('/{id}', [AttributeValueController::class, 'update'])->name('update');
-
-        // Soft delete
-        Route::delete('/{id}', [AttributeValueController::class, 'destroy'])->name('destroy');
-
-        // Restore from trash
-        Route::put('/{id}/restore', [AttributeValueController::class, 'restore'])->name('restore');
-    });
-
-    // Orders routes
+    // Orders routes - accessible by both admin and staff
     Route::prefix('orders')->name('orders.')->group(function () {
         // List
         Route::get('/', [OrderController::class, 'index'])->name('index');
@@ -180,7 +56,159 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
         // Reject cancellation request
     });
-    // Inventory Receipts routes
+
+    // Promotions routes - accessible by both admin and staff
+    Route::prefix('promotions')->name('promotions.')->group(function () {
+        // List
+        Route::get('/', [PromotionController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [PromotionController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [PromotionController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [PromotionController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [PromotionController::class, 'update'])->name('update');
+
+        // Delete
+        Route::delete('/{id}', [PromotionController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [PromotionController::class, 'restore'])->name('restore');
+    });
+
+    // Statistics routes
+    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
+    Route::get('/statistics/user-order-stats', [StatisticsController::class, 'userOrderStats'])->name('statistics.user-orders');
+
+    // Categories routes
+    Route::prefix('categories')->name('categories.')->group(function () {
+        // Hiển thị danh sách
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+
+        // Form tạo mớiimage.png
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+
+        // Lưu dữ liệu mới
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+
+        // Form chỉnh sửa
+        Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
+
+        // Cập nhật dữ liệu
+        Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
+
+        // Xóa mềm
+        Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
+
+        // Khôi phục từ thùng rác
+        Route::put('/{id}/restore', [CategoryController::class, 'restore'])->name('restore');
+    });
+
+    // Products routes
+    Route::prefix('products')->name('products.')->group(function () {
+        // List
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/edit/{slug}', [ProductController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/update/{slug}', [ProductController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/delete/{slug}', [ProductController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/restore/{slug}', [ProductController::class, 'restore'])->name('restore');
+    });
+
+    // Product variations routes
+    Route::prefix('product-variations')->name('product-variations.')->group(function () {
+        // List
+        Route::get('/', [ProductVariationController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [ProductVariationController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [ProductVariationController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [ProductVariationController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [ProductVariationController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [ProductVariationController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [ProductVariationController::class, 'restore'])->name('restore');
+    });
+
+    // Attributes routes
+    Route::prefix('attributes')->name('attributes.')->group(function () {
+        // List
+        Route::get('/', [AttributeController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [AttributeController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [AttributeController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [AttributeController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [AttributeController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [AttributeController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [AttributeController::class, 'restore'])->name('restore');
+
+        // Store attribute value
+        Route::post('/values', [AttributeController::class, 'storeValue'])->name('values.store');
+    });
+
+    // Attribute values routes
+    Route::prefix('attribute-values')->name('attribute-values.')->group(function () {
+        // List
+        Route::get('/', [AttributeValueController::class, 'index'])->name('index');
+
+        // Create form
+        Route::get('/create', [AttributeValueController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/', [AttributeValueController::class, 'store'])->name('store');
+
+        // Edit form
+        Route::get('/{id}/edit', [AttributeValueController::class, 'edit'])->name('edit');
+
+        // Update
+        Route::put('/{id}', [AttributeValueController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/{id}', [AttributeValueController::class, 'destroy'])->name('destroy');
+
+        // Restore from trash
+        Route::put('/{id}/restore', [AttributeValueController::class, 'restore'])->name('restore');
+    });
+
+    // Inventory receipts routes
     Route::prefix('inventory-receipts')->name('inventory-receipts.')->group(function () {
         // List
         Route::get('/', [InventoryReceiptController::class, 'index'])->name('index');
@@ -207,29 +235,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         Route::put('/{id}/update-status', [InventoryReceiptController::class, 'updateStatus'])->name('update-status');
     });
 
-    // Promotions routes
-    Route::prefix('promotions')->name('promotions.')->group(function () {
-        // List
-        Route::get('/', [PromotionController::class, 'index'])->name('index');
-
-        // Create form
-        Route::get('/create', [PromotionController::class, 'create'])->name('create');
-
-        // Store
-        Route::post('/', [PromotionController::class, 'store'])->name('store');
-
-        // Edit form
-        Route::get('/{id}/edit', [PromotionController::class, 'edit'])->name('edit');
-
-        // Update
-        Route::put('/{id}', [PromotionController::class, 'update'])->name('update');
-
-        // Delete
-        Route::delete('/{id}', [PromotionController::class, 'destroy'])->name('destroy');
-
-        // Restore from trash
-        Route::put('/{id}/restore', [PromotionController::class, 'restore'])->name('restore');
-    });
+    // Auth routes
     Route::prefix('auth')->name('auth.')->group(function () {
         // List
         Route::get('/', [AuthController::class, 'index'])->name('index');
@@ -252,6 +258,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         // Restore from trash
         Route::put('/{id}/restore', [AuthController::class, 'restore'])->name('restore');
     });
-
-
 });
