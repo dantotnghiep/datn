@@ -117,16 +117,18 @@ class ProductController extends Controller
         }
 
         // Lấy sản phẩm cùng danh mục (trừ sản phẩm hiện tại)
-        $relatedProducts = Product::where('category_id', $product->category_id)
+        $categoryId = Category::where('name', $product->category_id)->first()->id;
+        $relatedProducts = Product::where('category_id', $categoryId)
             ->where('id', '!=', $product->id)
             ->whereNull('deleted_at')
             ->with(['images', 'variations' => function($query) {
                 $query->select('id', 'product_id', 'price', 'sale_price', 'stock')
                     ->whereNotNull('price')
-                    ->where('price', '>', 0);
+                    ->where('price', '>', 0); 
             }])
             ->withCount('variations')
             ->take(6)
+            ->orderBy('created_at', 'desc')
             ->get();
 
         // Tính toán giá thấp nhất và cao nhất cho mỗi sản phẩm liên quan

@@ -63,19 +63,10 @@
                 <div class="col-12 col-lg-6">
                     <div class="d-flex flex-column justify-content-between h-100">
                         <div>
-                            <div class="d-flex flex-wrap">
-                                <div class="me-2"><span class="fa fa-star text-warning"></span><span
-                                        class="fa fa-star text-warning"></span><span
-                                        class="fa fa-star text-warning"></span><span
-                                        class="fa fa-star text-warning"></span><span
-                                        class="fa fa-star text-warning"></span></div>
-                                <p class="text-primary fw-semibold mb-2">6548 People rated and reviewed </p>
-                            </div>
                                 <h3 class="mb-3 lh-sm">{{ $product->name }}</h3>
                                 @if ($product->is_hot)
                                     <div class="d-flex flex-wrap align-items-start mb-3">
-                                        <span class="badge text-bg-success fs-9 rounded-pill me-2 fw-semibold">Sản phẩm nổi
-                                            bật</span>
+                                        <span class="badge text-bg-danger fs-10 product-verified-badge">HOT<span class="fas fa-fire ms-1"></span></span>
                                     </div>
                                 @endif
                             <div class="d-flex flex-wrap align-items-center">
@@ -219,43 +210,44 @@
                             <div class="d-flex flex-column justify-content-between h-100">
                                 <div>
                                     <div class="border border-1 border-translucent rounded-3 position-relative mb-3">
-                                        <button class="btn btn-wish btn-wish-primary z-2 d-toggle-container wishlist-btn"
+                                        @if($relatedProduct->variations->first())
+                                        <button
+                                            class="btn btn-wish btn-wish-primary z-2 d-toggle-container wishlist-btn"
                                             data-bs-toggle="tooltip" data-bs-placement="top"
-                                            data-product-variation-id="{{ $relatedProduct->variations->first()->id ?? 0 }}"
-                                            title="Thêm vào yêu thích">
-                                            <span class="fas fa-heart d-block-hover" data-fa-transform="down-1"></span>
-                                            <span class="far fa-heart d-none-hover" data-fa-transform="down-1"></span>
+                                            data-variation-id="{{ $relatedProduct->variations->first()->id }}"
+                                            title="{{ in_array($relatedProduct->variations->first()->id, $wishlistItems ?? []) ? 'Đã yêu thích' : 'Thêm vào yêu thích' }}">
+                                            @if(in_array($relatedProduct->variations->first()->id, $wishlistItems ?? []))
+                                                <span class="fas fa-heart text-danger"
+                                                    data-fa-transform="down-1"></span>
+                                            @else
+                                                <span class="far fa-heart d-none-hover"
+                                                    data-fa-transform="down-1"></span>
+                                            @endif
                                         </button>
-                                        <a href="{{ route('product.show', $relatedProduct->slug) }}">
-                                            <img class="img-fluid" src="{{ $relatedProduct->first_image }}" alt="{{ $relatedProduct->name }}" />
+                                        @endif
+                                        <a href="{{ route('product.detail', $relatedProduct->slug) }}">
+                                            <img class="img-fluid"
+                                                src="{{ $relatedProduct->first_image }}" alt="{{ $relatedProduct->name }}" />
                                         </a>
+                                        @if($relatedProduct->is_hot)
+                                        <span class="badge text-bg-danger fs-10 product-verified-badge">HOT<span class="fas fa-fire ms-1"></span></span>
+                                        @endif
                                     </div>
-                                    <a class="stretched-link" href="{{ route('product.show', $relatedProduct->slug) }}">
-                                        <h6 class="mb-2 lh-sm line-clamp-3 product-name">{{ $relatedProduct->name }}</h6>
+                                    <a class="stretched-link" href="{{ route('product.detail', $relatedProduct->slug) }}">
+                                        <h6 class="mb-2 lh-sm line-clamp-3 product-name">
+                                            {{ $relatedProduct->name }}
+                                        </h6>
                                     </a>
-                                    <p class="fs-9">
-                                        <span class="fa fa-star text-warning"></span>
-                                        <span class="fa fa-star text-warning"></span>
-                                        <span class="fa fa-star text-warning"></span>
-                                        <span class="fa fa-star text-warning"></span>
-                                        <span class="fa fa-star text-warning"></span>
-                                    </p>
                                 </div>
                                 <div>
-                                    @if($relatedProduct->variations_count > 0)
-                                        @if($relatedProduct->variations->min('sale_price'))
-                                            <div class="d-flex align-items-center mb-1">
-                                                <p class="me-2 text-body text-decoration-line-through mb-0">{{ number_format($relatedProduct->variations->max('price')) }}đ</p>
-                                                <h3 class="text-body-emphasis mb-0">{{ number_format($relatedProduct->variations->min('sale_price')) }}đ</h3>
-                                            </div>
-                                        @else
-                                            <h3 class="text-body-emphasis mb-0">{{ number_format($relatedProduct->variations->min('price')) }}đ</h3>
-                                        @endif
+                                    @if($relatedProduct->min_price == $relatedProduct->max_price)
+                                        <h6 class="text-danger mb-0 fw-bold">{{ number_format($relatedProduct->min_price, 0, ',', '.') }}</h6>
                                     @else
-                                        <h3 class="text-body-emphasis mb-0">{{ number_format($relatedProduct->price) }}đ</h3>
+                                        <h6 class="text-danger mb-0 fw-bold">{{ number_format($relatedProduct->min_price, 0, ',', '.') }} - {{ number_format($relatedProduct->max_price, 0, ',', '.') }}</h6>
                                     @endif
+                                    
                                     @if($relatedProduct->variations_count > 0)
-                                        <p class="text-body-tertiary fw-semibold fs-9 lh-1 mb-0">{{ $relatedProduct->variations_count }} biến thể</p>
+                                    <p class="text-body-tertiary fw-semibold fs-9 lh-1 mb-0">{{ $relatedProduct->variations_count }} loại sản phẩm</p>
                                     @endif
                                 </div>
                             </div>

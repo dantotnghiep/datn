@@ -23,11 +23,13 @@ class CartController extends Controller
     public function __construct(VNPayService $vnpayService)
     {
         $this->vnpayService = $vnpayService;
+        $this->middleware('auth');
     }
 
     public function index()
     {
         $user = Auth::user();
+
         $cartItems = Cart::where('user_id', $user->id)
             ->with(['productVariation.product', 'productVariation.attributeValues.attribute'])
             ->get();
@@ -165,12 +167,15 @@ class CartController extends Controller
             'message' => 'Đã xóa giỏ hàng'
         ]);
     }
+
     public function saveSelectedItems(Request $request)
     {
+        $user = Auth::user();
         $selected = json_decode($request->input('selected_items'), true);
         session(['selected_cart_items' => $selected]);
         return redirect()->route('checkout');
     }
+
     public function checkout(Request $request)
     {
         $user = Auth::user();
@@ -178,18 +183,18 @@ class CartController extends Controller
         if (empty($selectedVariationIds)) {
             return redirect()->route('cart')->with('error', 'Vui lòng chọn sản phẩm để thanh toán');
         }
-    
+
         $selectedItems = Cart::where('user_id', $user->id)
             ->whereIn('product_variation_id', $selectedVariationIds)
             ->with(['productVariation.product', 'productVariation.attributeValues.attribute'])
             ->get();
-    
+
         $subtotal = $selectedItems->sum('total');
         // Lấy giá trị discount từ session nếu có
         $discount = session('cart_discount', 0);
         $shippingFee = 0;
         $total = $subtotal - $discount + $shippingFee;
-    
+
         return view('client.cart.checkout', compact(
             'selectedItems', 'subtotal', 'discount', 'shippingFee', 'total'
         ));
@@ -200,7 +205,7 @@ class CartController extends Controller
         try {
             $user = Auth::user();
             $selectedVariationIds = session('selected_cart_items', []);
-            
+
             if (empty($selectedVariationIds)) {
                 return redirect()->route('cart')->with('error', 'Vui lòng chọn sản phẩm để thanh toán');
             }
@@ -317,6 +322,13 @@ class CartController extends Controller
                 return redirect()->route('cart')->with('error', 'Có lỗi xảy ra trong quá trình xác thực thanh toán.');
             }
 
+            // Kiểm tra trạng thái thanh toán từ VNPay
+            $vnpResponseCode = $request->vnp_ResponseCode;
+            if ($vnpResponseCode != '00') {
+                // Trạng thái không thành công (hủy, thất bại, lỗi...)
+                return redirect()->route('cart')->with('error', 'Bạn đã hủy thanh toán hoặc thanh toán không thành công.');
+            }
+
             // Lấy thông tin đơn hàng từ session
             $pendingOrder = session('pending_order');
             if (!$pendingOrder) {
@@ -385,9 +397,9 @@ class CartController extends Controller
 
     public function applyVoucher(Request $request)
     {
+        $user = Auth::user();
+
         try {
-            Log::info('Starting voucher application', ['code' => $request->code]);
-            
             $request->validate([
                 'code' => 'required|string',
                 'selected_items' => 'required|array|min:1'
@@ -397,35 +409,27 @@ class CartController extends Controller
                 'selected_items.min' => 'Vui lòng chọn ít nhất một sản phẩm để áp dụng mã giảm giá'
             ]);
 
-            $user = Auth::user();
-            Log::info('Finding promotion with code: ' . $request->code);
-            
+            // Log for debugging
+            Log::info('Applying voucher', [
+                'code' => $request->code,
+                'user_id' => $user->id,
+                'selected_items' => $request->selected_items
+            ]);
+
+            // Get voucher from database - simplified for now
             $promotion = Promotion::where('code', $request->code)
                 ->where('is_active', 1)
-                ->where(function($query) {
-                    $now = now();
-                    $query->whereNull('starts_at')
-                        ->orWhere('starts_at', '<=', $now);
-                })
-                ->where(function($query) {
-                    $now = now();
-                    $query->whereNull('expires_at')
-                        ->orWhere('expires_at', '>=', $now);
-                })
-                ->where(function($query) {
-                    $query->whereNull('usage_limit')
-                        ->orWhereRaw('COALESCE(usage_count, 0) < usage_limit');
-                })
                 ->first();
 
-            Log::info('Found promotion', ['promotion' => $promotion]);
-
             if (!$promotion) {
+                Log::info('Voucher not found or inactive');
                 return response()->json([
                     'success' => false,
-                    'message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn'
+                    'message' => 'Mã giảm giá không hợp lệ hoặc không tồn tại'
                 ]);
             }
+
+            Log::info('Promotion found', ['promotion' => $promotion->toArray()]);
 
             // Tính toán giảm giá
             $selectedItems = Cart::where('user_id', $user->id)
@@ -433,15 +437,38 @@ class CartController extends Controller
                 ->get();
 
             $subtotal = $selectedItems->sum('total');
-            $discount = $promotion->discount_type === 'percentage' 
-                ? ($subtotal * $promotion->discount_value / 100)
-                : $promotion->discount_value;
+
+            // Check minimum spend
+            if ($promotion->minimum_spend && $subtotal < $promotion->minimum_spend) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tổng giá trị đơn hàng phải ít nhất ' . number_format($promotion->minimum_spend) . 'đ để sử dụng mã giảm giá này'
+                ]);
+            }
+
+            // Calculate discount
+            $discount = 0;
+            if ($promotion->discount_type === 'percentage') {
+                $discount = ($subtotal * $promotion->discount_value / 100);
+                // Apply maximum discount if set
+                if ($promotion->maximum_discount && $discount > $promotion->maximum_discount) {
+                    $discount = $promotion->maximum_discount;
+                }
+            } else {
+                $discount = $promotion->discount_value;
+            }
 
             // Lưu thông tin giảm giá vào session
             session(['cart_discount' => $discount]);
             session(['applied_voucher' => $promotion->code]);
 
             $total = $subtotal - $discount;
+
+            Log::info('Voucher applied successfully', [
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'total' => $total
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -454,21 +481,22 @@ class CartController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error applying voucher: ' . $e->getMessage());
+            Log::error('Error applying voucher: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi áp dụng mã giảm giá'
+                'message' => 'Có lỗi xảy ra khi áp dụng mã giảm giá: ' . $e->getMessage()
             ]);
         }
     }
 
     public function removeVoucher(Request $request)
     {
+        $user = Auth::user();
+
         // Xóa thông tin giảm giá khỏi session
         session()->forget(['cart_discount', 'applied_voucher']);
 
         // Tính lại tổng tiền không có giảm giá
-        $user = Auth::user();
         $selectedItems = Cart::where('user_id', $user->id)
             ->whereIn('product_variation_id', $request->selected_items)
             ->get();

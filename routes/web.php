@@ -1,5 +1,5 @@
 <?php
- 
+
  use Illuminate\Support\Facades\Route;
  use App\Http\Controllers\Client\HomeController;
  use App\Http\Controllers\Client\ProductController;
@@ -8,7 +8,8 @@
  use App\Http\Controllers\Client\CartController;
  use App\Http\Controllers\Client\OrderController;
  use App\Http\Controllers\Client\PromotionController;
- 
+ use App\Http\Controllers\Client\ProfileController;
+
  /*
  |--------------------------------------------------------------------------
  | Web Routes
@@ -19,40 +20,45 @@
  | be assigned to the "web" middleware group. Make something great!
  |
  */
- 
+
  // Route::get('/', function () {
  //     return view('client.master');
  // });
- 
+
  Route::get('/', [HomeController::class, 'index'])->name('home');
- 
+
  // Authentication Routes
  Route::middleware('guest')->group(function () {
      Route::get('/dang-ky', [AuthController::class, 'showRegisterForm'])->name('register');
      Route::post('/dang-ky', [AuthController::class, 'register']);
- 
+
      Route::get('/dang-nhap', [AuthController::class, 'showLoginForm'])->name('login');
      Route::post('/dang-nhap', [AuthController::class, 'login']);
- 
+
      Route::get('/quen-mat-khau', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
      Route::post('/quen-mat-khau', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
      Route::get('/dat-lai-mat-khau/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
      Route::post('/dat-lai-mat-khau', [AuthController::class, 'resetPassword'])->name('password.update');
  });
- 
+
  // Cart view route (public)
  Route::get('/gio-hang', [CartController::class, 'index'])->name('cart');
- 
+
+ // Public promotion route
+ Route::get('/promotions/available', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
+
  // Only logged-in users can add/update/remove cart
  Route::middleware('auth')->group(function () {
      Route::post('/gio-hang/them', [CartController::class, 'add'])->name('cart.add');
      Route::post('/gio-hang/cap-nhat', [CartController::class, 'update'])->name('cart.update');
      Route::post('/gio-hang/xoa', [CartController::class, 'remove'])->name('cart.remove');
      Route::post('/dang-xuat', [AuthController::class, 'logout'])->name('logout');
-     Route::get('/thong-tin', function () {
-         return view('client.auth.profile');
-     })->name('profile');
- 
+
+     // Profile routes
+     Route::get('/thong-tin', [ProfileController::class, 'index'])->name('profile');
+     Route::post('/thong-tin/cap-nhat', [ProfileController::class, 'update'])->name('profile.update');
+     Route::post('/thong-tin/doi-mat-khau', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+
      // Wishlist routes
      Route::post('/yeu-thich/them', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
      Route::delete('/yeu-thich/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
@@ -62,10 +68,10 @@
      Route::post('/gio-hang/thanh-toan-chon', [CartController::class, 'saveSelectedItems'])->name('cart.checkout.selected');
      Route::get('/thanh-toan', [CartController::class, 'checkout'])->name('checkout');
      Route::post('/dat-hang', [CartController::class, 'store'])->name('orders.store');
-     
+
      // VNPay return route - must be public
      Route::get('/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
- 
+
      // Order routes
      Route::get('/don-hang', [OrderController::class, 'index'])->name('client.order.list');
      Route::get('/don-hang/{order}', [OrderController::class, 'show'])->name('client.order.detail');
@@ -80,9 +86,9 @@
 
  
  Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
- 
+
  Route::get('/san-pham', [ProductController::class, 'index'])->name('product.index');
- 
+
  Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {

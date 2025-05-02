@@ -1,7 +1,5 @@
 @extends('admin.master')
 
-
-
 @section('content')
     <div class="content">
         <nav class="mb-3" aria-label="breadcrumb">
@@ -11,6 +9,8 @@
                 <li class="breadcrumb-item active">{{ isset($item) ? 'Edit' : 'Create' }}</li>
             </ol>
         </nav>
+        <!-- Add CSRF meta tag for AJAX requests -->
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <form class="mb-9" method="POST"
             action="{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}"
             enctype="multipart/form-data" id="product-form">
@@ -298,12 +298,12 @@
                             disableMobile: true
                         });
                     }
-                    
+
                     // Initialize primary image badges if editing a product
                     document.querySelectorAll('.form-check-input[name="primary_image"]:checked').forEach(radio => {
                         updatePrimaryImageBadges(radio);
                     });
-                    
+
                     // Show the variations container if we have existing variations
                     const existingVariationsData = document.getElementById('generated-variations-data').value;
                     if (existingVariationsData && existingVariationsData !== '[]') {
@@ -325,23 +325,23 @@
                         document.querySelectorAll('.variant-attribute-select').forEach(select => {
                             select.disabled = true;
                         });
-                        
+
                         // Hide remove option buttons
                         document.querySelectorAll('.remove-option').forEach(btn => {
                             btn.style.display = 'none';
                         });
-                        
+
                         // Hide add option button
                         const addOptionBtn = document.getElementById('add-option-btn');
                         if (addOptionBtn) {
                             addOptionBtn.style.display = 'none';
                         }
-                        
+
                         // Show notice at top of page
                         const noticeDiv = document.createElement('div');
                         noticeDiv.className = 'alert alert-warning mb-4';
                         noticeDiv.innerHTML = '<strong>Attention!</strong> This product has variations that have been purchased. Some editing options are restricted.';
-                        
+
                         const formStart = document.querySelector('form .row.g-3.flex-between-end');
                         if (formStart) {
                             formStart.insertAdjacentElement('beforebegin', noticeDiv);
@@ -354,18 +354,18 @@
                     const variantsContainer = document.getElementById('variants-container');
                     const addOptionBtn = document.getElementById('add-option-btn');
                     const variantsDataInput = document.getElementById('variants-data');
-                    
+
                     // Load attributes into selects
                     loadAttributesIntoSelects();
-                    
+
                     // Handle existing variants data
                     loadExistingVariantsData();
-                    
+
                     // Event listener for adding new option
                     addOptionBtn.addEventListener('click', function() {
                         addNewVariantOption();
                     });
-                    
+
                     // Event delegation for remove option links
                     variantsContainer.addEventListener('click', function(e) {
                         if (e.target.classList.contains('remove-option')) {
@@ -377,17 +377,17 @@
                             }
                         }
                     });
-                    
+
                     // Event delegation for attribute select changes
                     variantsContainer.addEventListener('change', function(e) {
                         if (e.target.classList.contains('variant-attribute-select')) {
                             const select = e.target;
                             const option = select.closest('.variant-option');
                             const valuesContainer = option.querySelector('.variant-values-container');
-                            
+
                             // Update all selects to respect the new selection
                             loadAttributesIntoSelects();
-                            
+
                             // Load values for the selected attribute
                             const attributeId = select.value;
                             if (attributeId) {
@@ -395,36 +395,36 @@
                             } else {
                                 valuesContainer.innerHTML = '';
                             }
-                            
+
                             updateVariantsData();
                         }
                     });
                 }
-                
+
                 // Load attribute values for a specific attribute
                 function loadAttributeValues(attributeId, container) {
                     container.innerHTML = '';
-                    
+
                     // Get values for the attribute
                     const values = [
                         @foreach ($attributeValues as $value)
-                            { 
-                                id: {{ $value->id }}, 
-                                attribute_id: {{ $value->attribute_id }}, 
-                                value: "{{ $value->value }}" 
+                            {
+                                id: {{ $value->id }},
+                                attribute_id: {{ $value->attribute_id }},
+                                value: "{{ $value->value }}"
                             },
                         @endforeach
                     ].filter(v => v.attribute_id == attributeId);
-                    
+
                     if (values.length === 0) {
                         container.innerHTML = '<p class="text-muted mb-0">No values available for this attribute</p>';
                         return;
                     }
-                    
+
                     // Create a well-formatted container for the buttons
                     const buttonsContainer = document.createElement('div');
                     buttonsContainer.className = 'd-flex flex-wrap';
-                    
+
                     // Display values as selectable options with the design from the image
                     values.forEach(val => {
                         const btn = document.createElement('button');
@@ -432,7 +432,7 @@
                         btn.className = 'btn btn-outline-primary m-1 value-option';
                         btn.dataset.valueId = val.id;
                         btn.textContent = val.value;
-                        
+
                         // Add click event handler
                         btn.addEventListener('click', function() {
                             // Toggle selected class
@@ -446,10 +446,10 @@
                             }
                             updateVariantsData();
                         });
-                        
+
                         buttonsContainer.appendChild(btn);
                     });
-                    
+
                     container.appendChild(buttonsContainer);
                 }
 
@@ -499,7 +499,7 @@
 
                             if (Array.isArray(parsedData) && parsedData.length > 0) {
                                 console.log('Loading variant data:', parsedData);
-                                
+
                                 // Remove default options
                                 const variantOptions = document.querySelectorAll('.variant-option');
                                 variantOptions.forEach(option => option.remove());
@@ -582,66 +582,46 @@
                 function setupFormSubmission() {
                     function submitForm(action) {
                         const form = document.getElementById('product-form');
-                        
+
                         // Prevent multiple submissions
                         if (form.hasAttribute('data-submitting')) {
+                            console.log("Form already submitting, preventing duplicate submission");
                             return;
                         }
-                        
+
+                        // Mark as submitting immediately
+                        form.setAttribute('data-submitting', 'true');
+
                         // Update variants data
                         updateVariantsData();
-                        
-                        // Get current variations data
-                        const generatedVariationsData = document.getElementById('generated-variations-data');
-                        const variationsData = document.getElementById('variations-list').querySelectorAll('li');
-                        
-                        // Ensure the data is properly JSON formatted
-                        try {
-                            let isValid = true;
-                            if (generatedVariationsData.value) {
-                                // Parse and validate data
-                                const parsedData = JSON.parse(generatedVariationsData.value);
-                                
-                                // Make sure all required fields are there
-                                parsedData.forEach((variation, index) => {
-                                    if (!variation.id || !variation.combination) {
-                                        isValid = false;
-                                    }
-                                    
-                                    if (variation.combination) {
-                                        variation.combination.forEach((attr, attrIndex) => {
-                                            if (!attr.value_id) {
-                                                attr.value_id = attr.id; // Try to fix it
-                                                if (!attr.value_id) {
-                                                    isValid = false;
-                                                }
-                                            }
-                                        });
-                                    }
-                                });
-                                
-                                // Update the input with fixed data
-                                generatedVariationsData.value = JSON.stringify(parsedData);
-                                
-                                if (!isValid) {
-                                    const debugPanel = document.getElementById('debug-panel');
-                                    debugPanel.style.display = 'block';
-                                    showVariationsDebug();
-                                    validateVariationsData();
-                                    
-                                    if (!confirm('Some variations data may be invalid. Do you want to continue anyway?')) {
-                                        return;
-                                    }
+
+                        // Check if there are files queued in dropzone
+                        const dropzoneElement = document.getElementById('product-images-upload');
+                        if (dropzoneElement && Dropzone.instances.length > 0) {
+                            const myDropzone = Dropzone.instances.find(dz => dz.element === dropzoneElement);
+
+                            if (myDropzone && myDropzone.getQueuedFiles().length > 0) {
+                                console.log("Using Dropzone to process queued files");
+
+                                // Add hidden input for action
+                                let actionInput = form.querySelector('input[name="action"]');
+                                if (!actionInput) {
+                                    actionInput = document.createElement('input');
+                                    actionInput.type = 'hidden';
+                                    actionInput.name = 'action';
+                                    form.appendChild(actionInput);
                                 }
+                                actionInput.value = action;
+
+                                // Let Dropzone handle the submission
+                                myDropzone.processQueue();
+                                return;
                             }
-                        } catch (e) {
-                            alert('Error validating variations data: ' + e.message);
-                            return;
                         }
-                        
-                        // Mark as submitting
-                        form.setAttribute('data-submitting', 'true');
-                        
+
+                        // Standard form submission if no files
+                        console.log("Standard form submission - no files to upload");
+
                         // Add hidden input for action
                         let actionInput = form.querySelector('input[name="action"]');
                         if (!actionInput) {
@@ -651,8 +631,8 @@
                             form.appendChild(actionInput);
                         }
                         actionInput.value = action;
-                        
-                        // Submit the form directly
+
+                        // Submit the form
                         form.submit();
                     }
 
@@ -670,7 +650,7 @@
                 // Initialize dropzone
                 function initDropzone() {
                     Dropzone.autoDiscover = false;
-                    
+
                     let myDropzone = new Dropzone("#product-images-upload", {
                         url: "{{ isset($item) ? route('admin.products.update', $item->id) : route('admin.products.store') }}",
                         paramName: "images",
@@ -686,6 +666,10 @@
                         createImageThumbnails: true,
                         thumbnailWidth: 150,
                         thumbnailHeight: 150,
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-Processing-Images': 'true'
+                        },
                         init: function() {
                             let submitButton = document.querySelector("#publish-btn");
                             let myDropzone = this;
@@ -696,10 +680,10 @@
                                 // Create a new div for the image card
                                 let imageCard = document.createElement('div');
                                 imageCard.className = 'col-auto';
-                                
+
                                 let cardInner = document.createElement('div');
                                 cardInner.className = 'product-image-card';
-                                
+
                                 // Add remove button
                                 let removeBtn = document.createElement('button');
                                 removeBtn.type = 'button';
@@ -708,7 +692,7 @@
                                 removeBtn.onclick = function() {
                                     myDropzone.removeFile(file);
                                 };
-                                
+
                                 // Add primary image radio
                                 let actionDiv = document.createElement('div');
                                 actionDiv.className = 'image-actions';
@@ -724,12 +708,12 @@
                                         </div>
                                     </div>
                                 `;
-                                
+
                                 cardInner.appendChild(removeBtn);
                                 cardInner.appendChild(file.previewElement);
                                 cardInner.appendChild(actionDiv);
                                 imageCard.appendChild(cardInner);
-                                
+
                                 document.querySelector("#current-images-container").appendChild(imageCard);
                             });
 
@@ -745,35 +729,80 @@
                             form.addEventListener("submit", function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                
+
+                                // If form is already submitting, prevent duplicate submission
+                                if (form.hasAttribute('data-submitting')) {
+                                    console.log("Preventing duplicate form submission");
+                                    return false;
+                                }
+
+                                // Mark form as submitting
+                                form.setAttribute('data-submitting', 'true');
+
+                                // Update variants data before submitting
+                                updateVariantsData();
+
                                 // If there are files to upload
                                 if (myDropzone.getQueuedFiles().length > 0) {
+                                    // Add CSRF token to ensure the upload process has proper authentication
+                                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                                    myDropzone.headers = {
+                                        'X-CSRF-TOKEN': token
+                                    };
+
+                                    console.log("Form submit: processing queued files with Dropzone");
                                     myDropzone.processQueue();
                                 } else {
                                     // If no new files, just submit the form
+                                    console.log("Form submit: no files, submitting form directly");
+                                    form.removeAttribute('data-submitting');  // Remove to allow actual submit
                                     form.submit();
                                 }
                             });
 
                             // Handle the sending of the files
                             this.on("sending", function(file, xhr, formData) {
+                                console.log("Dropzone sending file: ", file.name);
+
                                 // Append all form data
                                 let formElements = form.elements;
                                 for (let i = 0; i < formElements.length; i++) {
                                     let element = formElements[i];
-                                    if (element.type !== 'file') {
+                                    if (element.type !== 'file' && element.name) {
                                         formData.append(element.name, element.value);
+                                        console.log("Added form field:", element.name);
                                     }
                                 }
-                                
+
+                                // Ensure CSRF token is included
+                                formData.append('_token', '{{ csrf_token() }}');
+
                                 // Add PUT method for update
                                 if ("{{ isset($item) }}") {
                                     formData.append('_method', 'PUT');
                                 }
+
+                                // Add action parameter
+                                formData.append('action', 'publish');
+
+                                // Add flag to prevent duplicate product creation
+                                if (!file.prevent_create_added) {
+                                    // Only check for first file to avoid setting multiple times
+                                    file.prevent_create_added = true;
+
+                                    // Set a flag to help server identify duplicates
+                                    const submitTimestamp = Date.now().toString();
+                                    formData.append('submit_timestamp', submitTimestamp);
+                                    localStorage.setItem('last_product_submit', submitTimestamp);
+
+                                    // Mark to make the server understand this is a coordinated request
+                                    formData.append('is_dropzone_request', 'true');
+                                }
                             });
 
-                            // After all files are processed
+                            // After all files are processed - only redirect on successful upload
                             this.on("successmultiple", function(files, response) {
+                                console.log("Dropzone success, redirecting");
                                 // Redirect or show success message
                                 window.location.href = "{{ route('admin.products.index') }}";
                             });
@@ -781,7 +810,23 @@
                             // Handle errors
                             this.on("error", function(file, errorMessage) {
                                 console.error('Upload error:', errorMessage);
-                                alert('Error uploading file: ' + errorMessage);
+                                // Fix: Handle when errorMessage is an object
+                                let message = errorMessage;
+                                if (typeof errorMessage === 'object') {
+                                    try {
+                                        // Try to get detailed message from the error object
+                                        if (errorMessage.message) {
+                                            message = errorMessage.message;
+                                        } else if (errorMessage.error) {
+                                            message = errorMessage.error;
+                                        } else {
+                                            message = JSON.stringify(errorMessage);
+                                        }
+                                    } catch (e) {
+                                        message = "Unknown upload error";
+                                    }
+                                }
+                                alert('Error uploading file: ' + message);
                             });
 
                             // Handle the submit button click
@@ -799,7 +844,7 @@
                 function toggleImageRemoval(button, imageId) {
                     const card = button.closest('.product-image-card');
                     const input = card.querySelector('.remove-image-input');
-                    
+
                     if (card.classList.contains('marked-for-removal')) {
                         card.classList.remove('marked-for-removal');
                         input.value = '';
@@ -842,11 +887,11 @@
                     const list = document.getElementById('variations-list');
                     const tableContainer = document.getElementById('variations-table-container');
                     const alert = document.querySelector('#generated-variations .alert');
-                    
+
                     // Show table, hide alert
                     tableContainer.style.display = 'block';
                     alert.style.display = 'none';
-                    
+
                     // Get existing data from hidden input
                     let existingData = [];
                     try {
@@ -855,48 +900,48 @@
                     } catch (error) {
                         existingData = [];
                     }
-                    
+
                     // Store all existing variation IDs in a Set for quick lookup
                     const existingIds = new Set(existingData.map(item => item.id));
-                    
+
                     // Only add new combinations that don't already exist
                     const newCombinations = combinations.filter(combo => !existingIds.has(combo.id));
-                    
+
                     // Create updated set of variations (maintain existing ones, add new ones)
                     // Important: We're NOT replacing existing variations with ones from combinations
                     // We're only adding new ones that don't exist yet
                     const updatedVariations = [...existingData, ...newCombinations];
-                    
+
                     // Clear the variations list in the UI
                     list.innerHTML = '';
-                    
+
                     // Sort variations by ID to ensure consistent display order
                     updatedVariations.sort((a, b) => {
                         // Simple string comparison of IDs
                         return a.id.localeCompare(b.id);
                     });
-                    
+
                     // Rebuild the visual list with all variations
                     updatedVariations.forEach((variation) => {
                         const item = document.createElement('li');
                         item.className = 'list-group-item';
                         item.dataset.variationId = variation.id;
-                        
+
                         // Format the variation name from the combination
                         const attributes = {};
                         variation.combination.forEach(attr => {
                             attributes[attr.attribute_name] = attr.value;
                         });
-                        
+
                         let variationName = '';
                         Object.keys(attributes).forEach(attrName => {
                             if (variationName) variationName += ', ';
                             variationName += `${attrName}: ${attributes[attrName]}`;
                         });
-                        
+
                         // Check if this variation has been purchased
                         const isPurchased = variation.is_purchased === true;
-                        
+
                         // Generate a different HTML based on whether variation is purchased
                         if (isPurchased) {
                             item.classList.add('purchased-variation');
@@ -916,18 +961,18 @@
                                 </div>
                             `;
                         }
-                        
+
                         list.appendChild(item);
                     });
-                    
+
                     // Save updated variations data to hidden input
                     saveGeneratedVariations(updatedVariations);
                 }
-                
+
                 // Load existing generated variations if any
                 function loadExistingGeneratedVariations() {
                     const input = document.getElementById('generated-variations-data');
-                    
+
                     if (input.value && input.value !== '[]') {
                         try {
                             const data = JSON.parse(input.value);
@@ -943,7 +988,7 @@
                 // Save generated variations to hidden input (always called before form submission)
                 function saveGeneratedVariations(variations) {
                     const input = document.getElementById('generated-variations-data');
-                    
+
                     // Ensure we're saving a clean array of variations
                     const cleanVariations = variations.map(variation => {
                         // Only keep essential properties to avoid circular references
@@ -959,11 +1004,11 @@
                             is_purchased: variation.is_purchased // Keep purchased status
                         };
                     });
-                    
+
                     // Format the JSON properly
                     const jsonString = JSON.stringify(cleanVariations);
                     input.value = jsonString;
-                    
+
                     return jsonString;
                 }
 
@@ -974,19 +1019,19 @@
                     if (item) {
                         item.remove();
                     }
-                    
+
                     // Get current data from hidden input
                     const input = document.getElementById('generated-variations-data');
                     let currentVariations = [];
-                    
+
                     try {
                         currentVariations = JSON.parse(input.value || '[]');
                         // Remove the specified variation
                         const updatedVariations = currentVariations.filter(variation => variation.id !== variationId);
-                        
+
                         // Update the hidden input with the new array
                         input.value = JSON.stringify(updatedVariations);
-                        
+
                         // If no variations left, show the alert and hide the table
                         if (updatedVariations.length === 0) {
                             document.getElementById('variations-table-container').style.display = 'none';
@@ -1002,14 +1047,14 @@
                     // Get all selected attribute options
                     const variantOptions = document.querySelectorAll('.variant-option');
                     const attributeSelections = [];
-                    
+
                     variantOptions.forEach(option => {
                         const select = option.querySelector('.variant-attribute-select');
                         if (select.value) {
                             const attributeId = select.value;
                             const attributeName = select.options[select.selectedIndex].text;
                             const selectedValues = option.querySelectorAll('.value-option.selected');
-                            
+
                             if (selectedValues.length > 0) {
                                 const values = [];
                                 selectedValues.forEach(val => {
@@ -1018,7 +1063,7 @@
                                         value: val.textContent
                                     });
                                 });
-                                
+
                                 attributeSelections.push({
                                     attribute_id: attributeId,
                                     attribute_name: attributeName,
@@ -1027,15 +1072,15 @@
                             }
                         }
                     });
-                    
+
                     if (attributeSelections.length === 0) {
                         alert('Please select at least one attribute and its values first');
                         return;
                     }
-                    
+
                     // Generate combinations
                     const combinations = generateCombinations(attributeSelections);
-                    
+
                     // Display combinations in the list
                     displayGeneratedVariations(combinations);
                 }
@@ -1044,7 +1089,7 @@
                 function toggleDebug() {
                     const panel = document.getElementById('debug-panel');
                     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-                    
+
                     // Add extra debug info for variations
                     if (panel.style.display !== 'none') {
                         showVariationsDebug();
@@ -1053,24 +1098,24 @@
 
                 function showVariationsDebug() {
                     const debugPanel = document.getElementById('debug-panel');
-                    
+
                     // Check if debug info already exists
                     if (debugPanel.querySelector('#variations-debug')) {
                         return;
                     }
-                    
+
                     // Create debug info
                     const variationsDebug = document.createElement('div');
                     variationsDebug.id = 'variations-debug';
                     variationsDebug.className = 'mt-3 p-2 bg-dark text-white';
-                    
+
                     // Get variations data
                     const generatedVariationsInput = document.getElementById('generated-variations-data');
                     const variantsDataInput = document.getElementById('variants-data');
-                    
+
                     // Create content
                     let content = '<h6>Variations Debug</h6>';
-                    
+
                     try {
                         const generatedData = JSON.parse(generatedVariationsInput.value || '[]');
                         content += `<p>Generated Variations Count: ${generatedData.length}</p>`;
@@ -1078,7 +1123,7 @@
                     } catch (e) {
                         content += `<p>Error parsing generated variations: ${e.message}</p>`;
                     }
-                    
+
                     try {
                         const variantsData = JSON.parse(variantsDataInput.value || '[]');
                         content += `<p>Variants Attributes Count: ${variantsData.length}</p>`;
@@ -1086,10 +1131,10 @@
                     } catch (e) {
                         content += `<p>Error parsing variants data: ${e.message}</p>`;
                     }
-                    
+
                     // Add button to validate data
                     content += `<button onclick="validateVariationsData()" class="btn btn-sm btn-info mt-2">Validate Variations</button>`;
-                    
+
                     variationsDebug.innerHTML = content;
                     debugPanel.appendChild(variationsDebug);
                 }
@@ -1098,17 +1143,17 @@
                     try {
                         const generatedVariationsInput = document.getElementById('generated-variations-data');
                         const generatedData = JSON.parse(generatedVariationsInput.value || '[]');
-                        
+
                         // Check for required fields
                         let valid = true;
                         const issues = [];
-                        
+
                         generatedData.forEach((variation, index) => {
                             if (!variation.id) {
                                 issues.push(`Variation ${index} missing ID`);
                                 valid = false;
                             }
-                            
+
                             if (!variation.combination || !Array.isArray(variation.combination)) {
                                 issues.push(`Variation ${index} missing combination array`);
                                 valid = false;
@@ -1121,27 +1166,27 @@
                                 });
                             }
                         });
-                        
+
                         // Update UI with results
                         const variationsDebug = document.getElementById('variations-debug');
                         if (variationsDebug) {
                             const validationResult = document.createElement('div');
                             validationResult.className = valid ? 'text-success' : 'text-danger';
                             validationResult.innerHTML = `<p>Validation result: ${valid ? 'VALID' : 'INVALID'}</p>`;
-                            
+
                             if (!valid) {
                                 validationResult.innerHTML += '<ul>' + issues.map(issue => `<li>${issue}</li>`).join('') + '</ul>';
                             }
-                            
+
                             const existing = variationsDebug.querySelector('.validation-result');
                             if (existing) {
                                 existing.remove();
                             }
-                            
+
                             validationResult.className += ' validation-result mt-2';
                             variationsDebug.appendChild(validationResult);
                         }
-                        
+
                         return valid;
                     } catch (e) {
                         console.error('Validation error:', e);
@@ -1196,21 +1241,21 @@
                 function generateCombinations(attributeSelections) {
                     // Start with an empty array to hold the combinations
                     let result = [[]];
-                    
+
                     // For each attribute
                     for (let i = 0; i < attributeSelections.length; i++) {
                         const attribute = attributeSelections[i];
                         const values = attribute.values;
                         const tmpResult = [];
-                        
+
                         // For each existing combination
                         for (let j = 0; j < result.length; j++) {
                             const combo = result[j];
-                            
+
                             // For each value of this attribute
                             for (let k = 0; k < values.length; k++) {
                                 const value = values[k];
-                                
+
                                 // Create a new combination with this value
                                 const newCombo = combo.slice();
                                 newCombo.push({
@@ -1219,16 +1264,16 @@
                                     value_id: value.id,
                                     value: value.value
                                 });
-                                
+
                                 // Add to temp results
                                 tmpResult.push(newCombo);
                             }
                         }
-                        
+
                         // Replace result with the new combinations
                         result = tmpResult;
                     }
-                    
+
                     // Now add unique IDs to each combination
                     result = result.map((combination, index) => {
                         const id = generateVariationId(combination);
@@ -1237,7 +1282,7 @@
                             combination: combination
                         };
                     });
-                    
+
                     return result;
                 }
 
@@ -1249,7 +1294,7 @@
                 // Load attributes into select elements
                 function loadAttributesIntoSelects() {
                     const attributeSelects = document.querySelectorAll('.variant-attribute-select');
-                    
+
                     const attributes = [
                         @foreach ($attributes as $attribute)
                             {
@@ -1258,7 +1303,7 @@
                             },
                         @endforeach
                     ];
-                    
+
                     // Get already selected attributes
                     const selectedAttributes = new Set();
                     attributeSelects.forEach(select => {
@@ -1266,14 +1311,14 @@
                             selectedAttributes.add(select.value);
                         }
                     });
-                    
+
                     attributeSelects.forEach(select => {
                         // Store current value if exists
                         const currentValue = select.value;
-                        
+
                         // Clear existing options
                         select.innerHTML = '<option value="">Select attribute</option>';
-                        
+
                         // Add attribute options
                         attributes.forEach(attr => {
                             // Skip if this attribute is already selected in another dropdown
@@ -1281,13 +1326,13 @@
                             if (selectedAttributes.has(attr.id.toString()) && attr.id.toString() !== currentValue) {
                                 return;
                             }
-                            
+
                             const option = document.createElement('option');
                             option.value = attr.id;
                             option.textContent = attr.name;
                             select.appendChild(option);
                         });
-                        
+
                         // Restore selected value
                         if (currentValue) {
                             select.value = currentValue;
@@ -1307,7 +1352,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize Dropzone
             initDropzone();
-            
+
             // Initialize variations display
             const existingVariationsData = document.getElementById('generated-variations-data').value;
             if (existingVariationsData && existingVariationsData !== '[]') {
@@ -1329,23 +1374,23 @@
                 document.querySelectorAll('.variant-attribute-select').forEach(select => {
                     select.disabled = true;
                 });
-                
+
                 // Hide remove option buttons
                 document.querySelectorAll('.remove-option').forEach(btn => {
                     btn.style.display = 'none';
                 });
-                
+
                 // Hide add option button
                 const addOptionBtn = document.getElementById('add-option-btn');
                 if (addOptionBtn) {
                     addOptionBtn.style.display = 'none';
                 }
-                
+
                 // Show notice at top of page
                 const noticeDiv = document.createElement('div');
                 noticeDiv.className = 'alert alert-warning mb-4';
                 noticeDiv.innerHTML = '<strong>Attention!</strong> This product has variations that have been purchased. Some editing options are restricted.';
-                
+
                 const formStart = document.querySelector('form .row.g-3.flex-between-end');
                 if (formStart) {
                     formStart.insertAdjacentElement('beforebegin', noticeDiv);

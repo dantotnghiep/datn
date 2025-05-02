@@ -11,6 +11,9 @@ class Product extends BaseModel
 
     protected $fillable = ['category_id', 'name', 'slug', 'sku', 'description', 'image', 'is_hot'];
 
+    // Prevent HasSlug trait from regenerating slug
+    protected $hasSlug = false;
+
     public static function rules($id = null)
     {
         return [

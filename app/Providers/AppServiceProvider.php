@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Cart;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Configure Bootstrap pagination
+        Paginator::useBootstrap();
+
         // Chia sẻ danh mục cho menu trong header
         View::composer('client.layouts.partials.menu', function ($view) {
             $categories = Category::all();

@@ -19,12 +19,15 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '35a6ad97d21e794e7e22a17d806652e4' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Functions.php',
+        '35a6ad97d21e794e7e22a17d806652e4' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Functions.php',
         '3bd81c9b8fcc150b69d8b63b4d2ccf23' => __DIR__ . '/..' . '/spatie/flare-client-php/src/helpers.php',
         '09f6b20656683369174dd6fa83b7e5fb' => __DIR__ . '/..' . '/symfony/polyfill-uuid/bootstrap.php',
         'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '47e1160838b5e5a10346ac4084b58c23' => __DIR__ . '/..' . '/laravel/prompts/src/helpers.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        '3109cb1a231dcd04bee1f9f620d46975' => __DIR__ . '/..' . '/paragonie/sodium_compat/autoload.php',
         '3109cb1a231dcd04bee1f9f620d46975' => __DIR__ . '/..' . '/paragonie/sodium_compat/autoload.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
@@ -99,6 +102,7 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
         ),
         'P' => 
         array (
+            'Pusher\\' => 7,
             'Pusher\\' => 7,
             'Psy\\' => 4,
             'Psr\\SimpleCache\\' => 16,
@@ -318,13 +322,13 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
         ),
         'Spatie\\LaravelIgnition\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/laravel-ignition',
-            1 => __DIR__ . '/..' . '/spatie/laravel-ignition/src',
+            0 => __DIR__ . '/..' . '/spatie/laravel-ignition/src',
+            1 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/laravel-ignition',
         ),
         'Spatie\\Ignition\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/ignition',
-            1 => __DIR__ . '/..' . '/spatie/ignition/src',
+            0 => __DIR__ . '/..' . '/spatie/ignition/src',
+            1 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/ignition',
         ),
         'Spatie\\FlareClient\\' => 
         array (
@@ -345,6 +349,10 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
         'Ramsey\\Collection\\' => 
         array (
             0 => __DIR__ . '/..' . '/ramsey/collection/src',
+        ),
+        'Pusher\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/pusher/pusher-php-server/src',
         ),
         'Pusher\\' => 
         array (
@@ -548,7 +556,12 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
 
     public static $classMap = array (
         'App\\Console\\Commands\\ShowTable' => __DIR__ . '/../..' . '/app/Console/Commands/ShowTable.php',
+        'App\\Console\\Commands\\ShowTable' => __DIR__ . '/../..' . '/app/Console/Commands/ShowTable.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
+        'App\\Events\\InventoryReceiptStatusChanged' => __DIR__ . '/../..' . '/app/Events/InventoryReceiptStatusChanged.php',
+        'App\\Events\\OrderCancellationProcessed' => __DIR__ . '/../..' . '/app/Events/OrderCancellationProcessed.php',
+        'App\\Events\\OrderCancellationRequestCreated' => __DIR__ . '/../..' . '/app/Events/OrderCancellationRequestCreated.php',
+        'App\\Events\\OrderStatusChanged' => __DIR__ . '/../..' . '/app/Events/OrderStatusChanged.php',
         'App\\Events\\InventoryReceiptStatusChanged' => __DIR__ . '/../..' . '/app/Events/InventoryReceiptStatusChanged.php',
         'App\\Events\\OrderCancellationProcessed' => __DIR__ . '/../..' . '/app/Events/OrderCancellationProcessed.php',
         'App\\Events\\OrderCancellationRequestCreated' => __DIR__ . '/../..' . '/app/Events/OrderCancellationRequestCreated.php',
@@ -559,9 +572,11 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
         'App\\Http\\Controllers\\Admin\\AttributeValueController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AttributeValueController.php',
         'App\\Http\\Controllers\\Admin\\AttributeValueVariationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AttributeValueVariationController.php',
         'App\\Http\\Controllers\\Admin\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AuthController.php',
+        'App\\Http\\Controllers\\Admin\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AuthController.php',
         'App\\Http\\Controllers\\Admin\\BaseController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/BaseController.php',
         'App\\Http\\Controllers\\Admin\\CartController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/CartController.php',
         'App\\Http\\Controllers\\Admin\\CategoryController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/CategoryController.php',
+        'App\\Http\\Controllers\\Admin\\DashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/DashboardController.php',
         'App\\Http\\Controllers\\Admin\\DashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/DashboardController.php',
         'App\\Http\\Controllers\\Admin\\InventoryReceiptController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/InventoryReceiptController.php',
         'App\\Http\\Controllers\\Admin\\InventoryReceiptItemController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/InventoryReceiptItemController.php',
@@ -583,11 +598,15 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
         'App\\Http\\Controllers\\Client\\CartController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/CartController.php',
         'App\\Http\\Controllers\\Client\\HomeController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/HomeController.php',
         'App\\Http\\Controllers\\Client\\OrderController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/OrderController.php',
+        'App\\Http\\Controllers\\Client\\OrderController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/OrderController.php',
         'App\\Http\\Controllers\\Client\\ProductController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/ProductController.php',
+        'App\\Http\\Controllers\\Client\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/ProfileController.php',
+        'App\\Http\\Controllers\\Client\\PromotionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/PromotionController.php',
         'App\\Http\\Controllers\\Client\\PromotionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/PromotionController.php',
         'App\\Http\\Controllers\\Client\\WishlistController' => __DIR__ . '/../..' . '/app/Http/Controllers/Client/WishlistController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
+        'App\\Http\\Middleware\\AdminMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/AdminMiddleware.php',
         'App\\Http\\Middleware\\AdminMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/AdminMiddleware.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
         'App\\Http\\Middleware\\EncryptCookies' => __DIR__ . '/../..' . '/app/Http/Middleware/EncryptCookies.php',
@@ -747,6 +766,7 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
         'Database\\Seeders\\ProductImageSeeder' => __DIR__ . '/../..' . '/database/seeders/ProductImageSeeder.php',
         'Database\\Seeders\\ProductSeeder' => __DIR__ . '/../..' . '/database/seeders/ProductSeeder.php',
         'Database\\Seeders\\ProductVariationSeeder' => __DIR__ . '/../..' . '/database/seeders/ProductVariationSeeder.php',
+        'Database\\Seeders\\PromotionSeeder' => __DIR__ . '/../..' . '/database/seeders/PromotionSeeder.php',
         'Database\\Seeders\\PromotionSeeder' => __DIR__ . '/../..' . '/database/seeders/PromotionSeeder.php',
         'Database\\Seeders\\UserSeeder' => __DIR__ . '/../..' . '/database/seeders/UserSeeder.php',
         'DateError' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
@@ -5123,6 +5143,13 @@ class ComposerStaticInite2fad47117f8cd2e9ea3ea419ea956cb
         'Psy\\VersionUpdater\\IntervalChecker' => __DIR__ . '/..' . '/psy/psysh/src/VersionUpdater/IntervalChecker.php',
         'Psy\\VersionUpdater\\NoopChecker' => __DIR__ . '/..' . '/psy/psysh/src/VersionUpdater/NoopChecker.php',
         'Psy\\VersionUpdater\\SelfUpdate' => __DIR__ . '/..' . '/psy/psysh/src/VersionUpdater/SelfUpdate.php',
+        'Pusher\\ApiErrorException' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/ApiErrorException.php',
+        'Pusher\\Pusher' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/Pusher.php',
+        'Pusher\\PusherCrypto' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/PusherCrypto.php',
+        'Pusher\\PusherException' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/PusherException.php',
+        'Pusher\\PusherInstance' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/PusherInstance.php',
+        'Pusher\\PusherInterface' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/PusherInterface.php',
+        'Pusher\\Webhook' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/Webhook.php',
         'Pusher\\ApiErrorException' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/ApiErrorException.php',
         'Pusher\\Pusher' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/Pusher.php',
         'Pusher\\PusherCrypto' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/PusherCrypto.php',
