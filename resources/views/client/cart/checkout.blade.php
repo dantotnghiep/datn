@@ -23,6 +23,9 @@
           @csrf
           <div class="d-flex align-items-end">
             <h3 class="mb-0 me-3">Thông tin giao hàng</h3>
+            <button type="button" class="btn btn-outline-primary btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#addressModal">
+              Thông tin địa chỉ
+            </button>
           </div>
           <div class="card mt-4">
             <div class="card-body">
@@ -36,19 +39,19 @@
               </div>
               <div class="mb-3">
                 <label class="form-label">Tỉnh/Thành phố</label>
-                <input type="text" class="form-control" name="province" value="{{ auth()->user()->province }}" required>
+                <input type="text" class="form-control" name="province" value="{{ $defaultLocation->province ?? auth()->user()->province }}" required>
               </div>
               <div class="mb-3">
                 <label class="form-label">Quận/Huyện</label>
-                <input type="text" class="form-control" name="district" value="{{ auth()->user()->district }}" required>
+                <input type="text" class="form-control" name="district" value="{{ $defaultLocation->district ?? auth()->user()->district }}" required>
               </div>
               <div class="mb-3">
                 <label class="form-label">Phường/Xã</label>
-                <input type="text" class="form-control" name="ward" value="{{ auth()->user()->ward }}" required>
+                <input type="text" class="form-control" name="ward" value="{{ $defaultLocation->ward ?? auth()->user()->ward }}" required>
               </div>
               <div class="mb-3">
                 <label class="form-label">Địa chỉ chi tiết</label>
-                <input type="text" class="form-control" name="address" value="{{ auth()->user()->address }}" required>
+                <input type="text" class="form-control" name="address" value="{{ $defaultLocation->address ?? auth()->user()->address }}" required>
               </div>
               <div class="mb-3">
                 <label class="form-label">Ghi chú</label>
@@ -151,4 +154,103 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Địa chỉ -->
+  <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addressModalLabel">Địa chỉ giao hàng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          @if(auth()->user()->locations->count() > 0)
+            <div class="row">
+              @foreach(auth()->user()->locations as $location)
+                <div class="col-md-6 mb-3">
+                  <div class="card h-100 {{ $location->is_default ? 'border-primary' : '' }}">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ auth()->user()->name }}</h5>
+                      <p class="card-text mb-1">{{ $location->address }}</p>
+                      <p class="card-text mb-1">{{ $location->ward }}, {{ $location->district }}</p>
+                      <p class="card-text">{{ $location->province }}, {{ $location->country }}</p>
+                      @if($location->is_default)
+                        <span class="badge bg-primary">Mặc định</span>
+                      @endif
+                      <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary select-address"
+                                data-address="{{ $location->address }}"
+                                data-province="{{ $location->province }}"
+                                data-district="{{ $location->district }}"
+                                data-ward="{{ $location->ward }}">
+                          Sử dụng địa chỉ này
+                        </button>
+                        @if(!$location->is_default)
+                          <a href="{{ route('locations.set-default', $location->id) }}" class="btn btn-sm btn-outline-secondary">
+                            Đặt làm mặc định
+                          </a>
+                        @endif
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              @endforeach
+            </div>
+          @else
+            <div class="alert alert-info">
+              Bạn chưa có địa chỉ nào được lưu. Vui lòng nhập thông tin giao hàng để tự động lưu địa chỉ mới.
+            </div>
+          @endif
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @push('scripts')
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Xử lý khi chọn địa chỉ từ modal
+      const selectButtons = document.querySelectorAll('.select-address');
+      selectButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const address = this.getAttribute('data-address');
+          const province = this.getAttribute('data-province');
+          const district = this.getAttribute('data-district');
+          const ward = this.getAttribute('data-ward');
+          
+          document.querySelector('input[name="address"]').value = address;
+          document.querySelector('input[name="province"]').value = province;
+          document.querySelector('input[name="district"]').value = district;
+          document.querySelector('input[name="ward"]').value = ward;
+          
+          // Đóng modal
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addressModal'));
+          modal.hide();
+        });
+      });
+
+      // Thêm chức năng lấy thông tin địa chỉ chi tiết
+      const locationDetailButtons = document.querySelectorAll('.get-location-detail');
+      locationDetailButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const locationId = this.getAttribute('data-location-id');
+          
+          // Gọi API lấy thông tin địa chỉ
+          fetch(`/locations/${locationId}`)
+            .then(response => response.json())
+            .then(data => {
+              document.querySelector('input[name="address"]').value = data.address;
+              document.querySelector('input[name="province"]').value = data.province;
+              document.querySelector('input[name="district"]').value = data.district;
+              document.querySelector('input[name="ward"]').value = data.ward;
+            })
+            .catch(error => console.error('Error fetching location:', error));
+        });
+      });
+    });
+  </script>
+  @endpush
 @endsection
