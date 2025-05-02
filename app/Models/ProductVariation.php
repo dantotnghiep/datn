@@ -35,7 +35,7 @@ class ProductVariation extends BaseModel
             'sku' => 'required|string|max:255|unique:product_variations,sku,' . $id,
             'name' => 'nullable|string|max:255',
             'price' => 'nullable|numeric|min:0',
-            'sale_price' => 'nullable|numeric|min:0',
+            'sale_price' => 'nullable|numeric|min:0|lt:price',   
             'stock' => 'integer|min:0'
         ];
     }

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Promotion;
 use App\Models\UsedPromotion;
 use Illuminate\Support\Facades\Log;
+use App\Models\Location;
 
 class CartController extends Controller
 {
@@ -195,8 +196,13 @@ class CartController extends Controller
         $shippingFee = 0;
         $total = $subtotal - $discount + $shippingFee;
 
+        // Lấy thông tin địa chỉ mặc định của user nếu có
+        $defaultLocation = Location::where('user_id', $user->id)
+            ->where('is_default', true)
+            ->first();
+
         return view('client.cart.checkout', compact(
-            'selectedItems', 'subtotal', 'discount', 'shippingFee', 'total'
+            'selectedItems', 'subtotal', 'discount', 'shippingFee', 'total', 'defaultLocation'
         ));
     }
 
@@ -231,6 +237,41 @@ class CartController extends Controller
                         DB::rollBack();
                         return back()->with('error', "Sản phẩm {$item->productVariation->product->name} không đủ số lượng trong kho.");
                     }
+                }
+
+                // Tự động lưu thông tin địa chỉ vào location nếu khác với các địa chỉ đã có
+                $locationData = [
+                    'province' => $request->province,
+                    'district' => $request->district,
+                    'ward' => $request->ward,
+                    'address' => $request->address,
+                    'user_id' => $user->id,
+                    'country' => 'Việt Nam',
+                ];
+                
+                // Kiểm tra xem địa chỉ này đã tồn tại chưa
+                $existingLocation = Location::where('user_id', $user->id)
+                    ->where('province', $request->province)
+                    ->where('district', $request->district)
+                    ->where('ward', $request->ward)
+                    ->where('address', $request->address)
+                    ->first();
+                
+                // Nếu địa chỉ chưa tồn tại, lưu mới
+                if (!$existingLocation) {
+                    // Nếu là địa chỉ đầu tiên, đặt làm mặc định
+                    $locationCount = Location::where('user_id', $user->id)->count();
+                    $isDefault = ($locationCount == 0);
+                    
+                    // Nếu là địa chỉ mặc định, cập nhật các địa chỉ khác thành không mặc định
+                    if ($isDefault) {
+                        Location::where('user_id', $user->id)->update(['is_default' => false]);
+                    }
+                    
+                    $locationData['is_default'] = $isDefault;
+                    
+                    // Lưu location mới
+                    Location::create($locationData);
                 }
 
                 if ($request->payment_method === 'bank') {

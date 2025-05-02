@@ -44,8 +44,8 @@
                                     <img src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/logo.png') }}"
                                         alt="phoenix" width="58" /></div>
                             </a>
-                            <h3 class="text-body-highlight">Sign Up</h3>
-                            <p class="text-body-tertiary">Create your account today</p>
+                            <h3 class="text-body-highlight">Đăng ký</h3>
+                            <p class="text-body-tertiary">Tạo tài khoản của bạn ngay lập tức</p>
                         </div>
 
                         @if ($errors->any())
@@ -61,8 +61,8 @@
                         <form method="POST" action="{{ route('register') }}">
                             @csrf
                             <div class="mb-3 text-start"><label class="form-label"
-                                    for="name">Name</label><input class="form-control @error('name') is-invalid @enderror"
-                                    id="name" type="text" name="name" value="{{ old('name') }}" required autocomplete="name" placeholder="Name" />
+                                    for="name">Họ và tên</label><input class="form-control @error('name') is-invalid @enderror"
+                                    id="name" type="text" name="name" value="{{ old('name') }}" required autocomplete="name" placeholder="Họ và tên" />
                                 @error('name')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -70,7 +70,7 @@
                                 @enderror
                             </div>
                             <div class="mb-3 text-start"><label class="form-label"
-                                    for="email">Email address</label><input class="form-control @error('email') is-invalid @enderror"
+                                    for="email">Email</label><input class="form-control @error('email') is-invalid @enderror"
                                     id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="name@example.com" />
                                 @error('email')
                                     <span class="invalid-feedback" role="alert">
@@ -79,9 +79,9 @@
                                 @enderror
                             </div>
                             <div class="mb-3 text-start">
-                                <label class="form-label" for="phone">Phone Number</label>
+                                <label class="form-label" for="phone">Số điện thoại</label>
                                 <input class="form-control @error('phone') is-invalid @enderror" id="phone" type="text" 
-                                       name="phone" value="{{ old('phone') }}" required autocomplete="phone" placeholder="Phone number" />
+                                       name="phone" value="{{ old('phone') }}" required autocomplete="phone" placeholder="Số điện thoại" />
                                 @error('phone')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -90,10 +90,10 @@
                             </div>
                             <div class="row g-3 mb-3">
                                 <div class="col-sm-6"><label class="form-label"
-                                        for="password">Password</label>
+                                        for="password">Mật khẩu</label>
                                     <div class="position-relative">
                                         <input class="form-control @error('password') is-invalid @enderror"
-                                            id="password" type="password" name="password" required autocomplete="new-password" placeholder="Password" />
+                                            id="password" type="password" name="password" required autocomplete="new-password" placeholder="Mật khẩu" />
                                         @error('password')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -102,21 +102,19 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-6"><label class="form-label"
-                                        for="password-confirm">Confirm Password</label>
+                                        for="password-confirm">Nhập lại mật khẩu</label>
                                     <div class="position-relative">
                                         <input class="form-control" id="password-confirm" type="password" 
-                                               name="password_confirmation" required autocomplete="new-password" placeholder="Confirm Password" />
+                                               name="password_confirmation" required autocomplete="new-password" placeholder="Nhập lại mật khẩu" />
                                     </div>
                                 </div>
                             </div>
                             <div class="form-check mb-3"><input class="form-check-input"
                                     id="termsService" type="checkbox" required /><label
-                                    class="form-label fs-9 text-transform-none" for="termsService">I
-                                    accept the <a href="#!">terms </a>and <a
-                                        href="#!">privacy policy</a></label></div><button
-                                type="submit" class="btn btn-primary w-100 mb-3">Sign up</button>
-                            <div class="text-center"><a class="fs-9 fw-bold" href="{{ route('login') }}">Sign
-                                    in to an existing account</a></div>
+                                    class="form-label fs-9 text-transform-none" for="termsService">Tôi đồng ý với <a href="#!">điều khoản sử dụng</a> và <a
+                                        href="#!">chính sách bảo mật</a></label></div><button
+                                type="submit" class="btn btn-primary w-100 mb-3">Đăng ký</button>
+                            <div class="text-center"><a class="fs-9 fw-bold" href="{{ route('login') }}">Đăng nhập vào tài khoản của bạn</a></div>
                         </form>
                     </div>
                 </div>
