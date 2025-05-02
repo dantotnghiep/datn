@@ -322,6 +322,13 @@ class CartController extends Controller
                 return redirect()->route('cart')->with('error', 'Có lỗi xảy ra trong quá trình xác thực thanh toán.');
             }
 
+            // Kiểm tra trạng thái thanh toán từ VNPay
+            $vnpResponseCode = $request->vnp_ResponseCode;
+            if ($vnpResponseCode != '00') {
+                // Trạng thái không thành công (hủy, thất bại, lỗi...)
+                return redirect()->route('cart')->with('error', 'Bạn đã hủy thanh toán hoặc thanh toán không thành công.');
+            }
+
             // Lấy thông tin đơn hàng từ session
             $pendingOrder = session('pending_order');
             if (!$pendingOrder) {

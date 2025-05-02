@@ -4,7 +4,7 @@ namespace App\Models;
 
 class OrderRefund extends BaseModel
 {
-    protected $fillable = ['order_id', 'amount', 'reason', 'notes', 'status', 'user_id', 'bank', 'bank_number', 'bank_name', 'is_active'];
+    protected $fillable = ['order_id', 'amount', 'reason', 'notes', 'status', 'refund_status', 'user_id', 'bank', 'bank_number', 'bank_name', 'is_active'];
 
     protected $casts = [
         'amount' => 'decimal:2'
