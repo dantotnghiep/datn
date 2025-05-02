@@ -9,6 +9,7 @@
  use App\Http\Controllers\Client\OrderController;
  use App\Http\Controllers\Client\PromotionController;
  use App\Http\Controllers\Client\ProfileController;
+ use App\Http\Controllers\Client\LocationController;
 
  /*
  |--------------------------------------------------------------------------
@@ -84,6 +85,10 @@
      // Voucher application routes
      Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply-voucher');
      Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.remove-voucher');
+
+     // Thêm route cho locations
+     Route::get('/locations/set-default/{location}', [LocationController::class, 'setDefault'])->name('locations.set-default');
+     Route::get('/locations/{location}', [LocationController::class, 'getLocation'])->name('locations.get');
  });
 
  
