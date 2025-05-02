@@ -3,7 +3,7 @@
 <!-- Mirrored from demo-egenslab.b-cdn.net/html/eg-shop-fashion/v1/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 11 Jan 2025 13:58:45 GMT -->
 
 <head>
-    <title>EG Shop Fashion - Multipurpose e-Commerce HTML Template 111111111111</title>
+    <title>Manso</title>
 
     <!-- Required meta tags -->
     <meta charset="utf-8" />

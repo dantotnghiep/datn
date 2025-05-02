@@ -41,10 +41,7 @@
                                 </li>
                             </ul>
                         </li>
-
-                        <li><a href="{{ route('hot-products.index') }}" class="cr-page-link drop"><i
-                            class="ri-checkbox-blank-circle-line"></i>Cài đặt trang chủ</a></li>
-
+                        
                         <li><a href="{{ route('admin.category') }}" class="cr-page-link drop"><i
                                     class="ri-checkbox-blank-circle-line"></i>Thêm danh mục</a></li>
                         <li><a href="add-sub-category.html" class="cr-page-link drop"><i

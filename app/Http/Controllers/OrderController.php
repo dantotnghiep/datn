@@ -133,7 +133,8 @@ class OrderController extends Controller
                         \Log::info('Reserved stock for variation ID: ' . $variation->id . ' - New stock: ' . $variation->stock);
                     }
                 }
-                
+    
+
                 // Lưu thông tin đơn hàng vào session để dùng sau khi thanh toán
                 session([
                     'pending_order' => [
