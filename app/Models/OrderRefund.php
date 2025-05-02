@@ -7,7 +7,8 @@ class OrderRefund extends BaseModel
     protected $fillable = ['order_id', 'amount', 'reason', 'notes', 'status', 'refund_status', 'user_id', 'bank', 'bank_number', 'bank_name', 'is_active'];
 
     protected $casts = [
-        'amount' => 'decimal:2'
+            'amount' => 'decimal:2',
+        'is_active' => 'boolean'
     ];
 
     public static function rules($id = null)
@@ -18,6 +19,7 @@ class OrderRefund extends BaseModel
             'reason' => 'required|string|max:255',
             'notes' => 'nullable|string',
             'status' => 'required|in:pending,approved,rejected',
+            'refund_status' => 'required|in:pending,approved,rejected',
             'user_id' => 'required|exists:users,id',
             'bank' => 'nullable|string|max:255',
             'bank_number' => 'nullable|string|max:255',
@@ -71,6 +73,22 @@ class OrderRefund extends BaseModel
                 ],
                 'sortable' => true
             ],
+            'refund_status' => [
+                'label' => 'Trạng thái hoàn tiền',
+                'type' => 'select',
+                'options' => [
+                    'pending' => 'Chưa hoàn tiền',
+                    'approved' => 'Đã hoàn tiền',
+                    'rejected' => 'Từ chối hoàn tiền'
+                ],
+                'filterable' => true,
+                'filter_options' => [
+                    'pending' => 'Chưa hoàn tiền',
+                    'approved' => 'Đã hoàn tiền',
+                    'rejected' => 'Từ chối hoàn tiền'
+                ],
+                'sortable' => true
+            ],
             'user_id' => [
                 'label' => 'Người thực hiện',
                 'type' => 'select',
@@ -84,8 +102,8 @@ class OrderRefund extends BaseModel
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
-            ],  
-            'bank_number' => [  
+            ],
+            'bank_number' => [
                 'label' => 'Số tài khoản',
                 'type' => 'text',
                 'searchable' => true,
@@ -97,7 +115,16 @@ class OrderRefund extends BaseModel
                 'searchable' => true,
                 'sortable' => true
             ],
-            
+            'is_active' => [
+                'label' => 'Kích hoạt',
+                'type' => 'checkbox',
+                'filterable' => true,
+                'filter_options' => [
+                    '1' => 'Kích hoạt',
+                    '0' => 'Vô hiệu'
+                ],
+                'sortable' => true
+            ],
             'created_at' => [
                 'label' => 'Thời gian tạo',
                 'type' => 'datetime',
@@ -115,4 +142,4 @@ class OrderRefund extends BaseModel
     {
         return $this->belongsTo(User::class);
     }
-} 
+}

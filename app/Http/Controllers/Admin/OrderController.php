@@ -18,7 +18,7 @@ class OrderController extends BaseController
         $this->route = 'admin.orders';
         parent::__construct();
     }
-    
+
     /**
      * Display the details of an order
      */
@@ -26,7 +26,7 @@ class OrderController extends BaseController
     {
         try {
             $order = $this->model::with(['items.productVariation.product', 'status', 'user'])->findOrFail($id);
-            
+
             return view($this->viewPath . '.details', [
                 'order' => $order,
                 'route' => $this->route,
@@ -37,7 +37,7 @@ class OrderController extends BaseController
                 ->with('error', 'Error finding order: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Update the status of an order
      */
@@ -47,26 +47,26 @@ class OrderController extends BaseController
             $request->validate([
                 'status_id' => 'required|in:1,2,3,4,5'
             ]);
-            
+
             $order = $this->model::with(['status', 'items.productVariation'])->findOrFail($id);
             $oldStatusId = $order->getRawOriginal('status_id');
             $newStatusId = $request->status_id;
-            
+
             // Bắt đầu transaction để đảm bảo toàn vẹn dữ liệu
             DB::beginTransaction();
-            
+
             try {
                 // Cập nhật trạng thái đơn hàng
                 $order->status_id = $newStatusId;
                 $order->save();
-                
+
                 // Nếu đơn hàng được chuyển sang trạng thái "Hoàn thành"
                 if ($newStatusId == 2) {
                     $order->payment_status = 'completed';
                     $order->paid_at = now();
                     $order->save();
                 }
-                
+
                 // Nếu đơn hàng được chuyển sang trạng thái "Đã hủy"
                 if ($newStatusId == 4 && $oldStatusId != 4) {
                     Log::info('Restoring product quantities for cancelled order', [
@@ -74,7 +74,7 @@ class OrderController extends BaseController
                         'old_status' => $oldStatusId,
                         'new_status' => $newStatusId
                     ]);
-                    
+
                     // Duyệt qua từng item trong đơn hàng và cập nhật lại số lượng vào kho
                     foreach ($order->items as $item) {
                         // Lấy biến thể sản phẩm
@@ -83,7 +83,7 @@ class OrderController extends BaseController
                             // Cập nhật số lượng sản phẩm trong kho
                             $variation->stock += $item->quantity;
                             $variation->save();
-                            
+
                             Log::info('Updated product stock after cancellation', [
                                 'product_variation_id' => $variation->id,
                                 'old_stock' => $variation->stock - $item->quantity,
@@ -98,13 +98,13 @@ class OrderController extends BaseController
                         }
                     }
                 }
-                
+
                 // Commit transaction
                 DB::commit();
-                
+
                 // Tải lại đơn hàng với quan hệ
                 $order = $this->model::with('status')->findOrFail($id);
-                
+
                 // Kích hoạt sự kiện để cập nhật giao diện
                 try {
                     event(new OrderStatusChanged($order));
@@ -113,25 +113,53 @@ class OrderController extends BaseController
                         'error' => $eventError->getMessage()
                     ]);
                 }
-                
+
                 return redirect()->route($this->route . '.index')
                     ->with('success', 'Order status updated successfully!');
-                    
+
             } catch (\Exception $e) {
                 // Rollback transaction nếu có lỗi
                 DB::rollBack();
                 throw $e;
             }
-            
+
         } catch (\Exception $e) {
             Log::error('Error updating order status', [
                 'order_id' => $id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return redirect()->back()
                 ->with('error', 'Error updating order status: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Check if an order has an active refund request
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkRefund($id)
+    {
+        try {
+            $order = Order::findOrFail($id);
+
+            $activeRefund = $order->refunds()
+                ->where('is_active', 1)
+                ->where('refund_status', 'pending')
+                ->first();
+
+            return response()->json([
+                'has_active_refund' => !is_null($activeRefund),
+                'payment_method' => $order->payment_method,
+                'refund_id' => $activeRefund ? $activeRefund->id : null
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }
