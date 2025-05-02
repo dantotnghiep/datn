@@ -149,7 +149,53 @@
                     @endforelse
                 </div>
                 <div class="d-flex justify-content-center">
-                    {{ isset($products) ? $products->withQueryString()->links() : '' }}
+                    @if(isset($products) && $products->hasPages())
+                        <nav aria-label="Products pagination">
+                            <ul class="pagination">
+                                @php
+                                    $currentPage = $products->currentPage();
+                                    $lastPage = $products->lastPage();
+                                    $window = 2; // Number of pages on each side of current page
+                                    $startPage = max($currentPage - $window, 1);
+                                    $endPage = min($currentPage + $window, $lastPage);
+                                @endphp
+
+                                @if($startPage > 1)
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $products->appends(request()->except('page'))->url(1) }}">1</a>
+                                    </li>
+                                    @if($startPage > 2)
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    @endif
+                                @endif
+
+                                @for($i = $startPage; $i <= $endPage; $i++)
+                                    @if($i == $currentPage)
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ $i }}</span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $products->appends(request()->except('page'))->url($i) }}">{{ $i }}</a>
+                                        </li>
+                                    @endif
+                                @endfor
+
+                                @if($endPage < $lastPage)
+                                    @if($endPage < $lastPage - 1)
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    @endif
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $products->appends(request()->except('page'))->url($lastPage) }}">{{ $lastPage }}</a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </nav>
+                    @endif
                 </div>
             </div>
         </div>

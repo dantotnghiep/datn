@@ -54,12 +54,12 @@
      })->name('profile');
  
      // Wishlist routes
-     Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
-     Route::delete('/wishlist/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
-     Route::get('/api/wishlist/check', [WishlistController::class, 'check'])->name('wishlist.check');
+     Route::post('/yeu-thich/them', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+     Route::delete('/yeu-thich/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+     Route::get('/api/yeu-thich/kiem-tra', [WishlistController::class, 'check'])->name('wishlist.check');
  
      // Checkout routes (Vietnamese)
-     Route::post('/gio-hang/checkout-chon', [CartController::class, 'saveSelectedItems'])->name('cart.checkout.selected');
+     Route::post('/gio-hang/thanh-toan-chon', [CartController::class, 'saveSelectedItems'])->name('cart.checkout.selected');
      Route::get('/thanh-toan', [CartController::class, 'checkout'])->name('checkout');
      Route::post('/dat-hang', [CartController::class, 'store'])->name('orders.store');
      
@@ -67,17 +67,17 @@
      Route::get('/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
  
      // Order routes
-     Route::get('/orders', [OrderController::class, 'index'])->name('client.order.list');
-     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('client.order.detail');
-     Route::post('/orders/{order}/cancel-request', [OrderController::class, 'cancelRequest'])->name('client.order.cancel.request');
-     Route::post('/client/orders/{id}/request-cancel', [OrderController::class, 'requestCancel'])->name('client.order.request-cancel');
+     Route::get('/don-hang', [OrderController::class, 'index'])->name('client.order.list');
+     Route::get('/don-hang/{order}', [OrderController::class, 'show'])->name('client.order.detail');
+     Route::post('/don-hang/{order}/cancel-request', [OrderController::class, 'cancelRequest'])->name('client.order.cancel.request');
+     Route::post('/don-hang/{id}/request-cancel', [OrderController::class, 'requestCancel'])->name('client.order.request-cancel');
  
      // Promotion routes
-     Route::get('/promotions/available', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
+     Route::get('/khuyen-mai/co-ban', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
      Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply-voucher');
      Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.remove-voucher');
  });
- 
+
  
  Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
  
@@ -86,6 +86,6 @@
  Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::post('/orders/{id}/confirm-cancel', [OrderController::class, 'confirmCancel'])->name('admin.order.confirm-cancel');
-    Route::get('/orders/cancellation-requests', [OrderController::class, 'getCancellationRequests'])->name('admin.orders.cancellation-requests');
+    Route::post('/don-hang/{id}/xac-nhan-huy', [OrderController::class, 'confirmCancel'])->name('admin.order.confirm-cancel');
+    Route::get('/don-hang/yeu-cau-huy', [OrderController::class, 'getCancellationRequests'])->name('admin.orders.cancellation-requests');
 });
