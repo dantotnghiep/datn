@@ -77,9 +77,11 @@
      Route::get('/don-hang/{order}', [OrderController::class, 'show'])->name('client.order.detail');
      Route::post('/don-hang/{order}/cancel-request', [OrderController::class, 'cancelRequest'])->name('client.order.cancel.request');
      Route::post('/don-hang/{id}/request-cancel', [OrderController::class, 'requestCancel'])->name('client.order.request-cancel');
- 
-     // Promotion routes
-     Route::get('/khuyen-mai/co-ban', [PromotionController::class, 'getAvailablePromotions'])->name('promotions.available');
+     Route::post('/don-hang/{order}/request-refund', [OrderController::class, 'requestRefund'])->name('client.order.request.refund');
+     Route::get('/api/don-hang/{order}/can-request-refund', [OrderController::class, 'canRequestRefund'])->name('client.order.can.request.refund');
+     Route::get('/api/don-hang/{order}/refund-status', [OrderController::class, 'checkRefundStatus'])->name('client.order.refund.status');
+
+     // Voucher application routes
      Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply-voucher');
      Route::post('/cart/remove-voucher', [CartController::class, 'removeVoucher'])->name('cart.remove-voucher');
  });
