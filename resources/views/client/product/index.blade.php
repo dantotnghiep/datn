@@ -3,6 +3,18 @@
     <div class="product-filter-container"><button class="btn btn-sm btn-phoenix-secondary text-body-tertiary mb-5 d-lg-none"
             data-phoenix-toggle="offcanvas" data-phoenix-target="#productFilterColumn"><span
                 class="fa-solid fa-filter me-2"></span>Bộ lọc</button>
+
+        @if(request('search'))
+        <div class="mb-4">
+            <div class="d-flex align-items-center">
+                <h5 class="mb-0">Kết quả tìm kiếm: "{{ request('search') }}"</h5>
+                <a href="{{ route('product.index', array_filter(request()->except('search'))) }}" class="btn btn-sm btn-phoenix-secondary ms-3">
+                    <span class="fas fa-times"></span> Xóa tìm kiếm
+                </a>
+            </div>
+        </div>
+        @endif
+
         <div class="row">
             <div class="col-lg-3 col-xxl-2 ps-2 ps-xxl-3">
                 <div class="phoenix-offcanvas-filter bg-body scrollbar phoenix-offcanvas phoenix-offcanvas-fixed"

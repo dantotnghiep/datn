@@ -93,10 +93,12 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <div class="search-box ecommerce-search-box w-100">
-                            <form class="position-relative">
+                            <form class="position-relative" action="{{ route('product.index') }}" method="GET">
                                 <input class="form-control search-input search form-control-sm" type="search"
-                                    placeholder="Search" aria-label="Search" />
-                                <span class="fas fa-search search-box-icon"></span>
+                                    name="search" placeholder="Search products" aria-label="Search" />
+                                <button type="submit" class="border-0 bg-transparent position-absolute end-0 top-50 translate-middle-y p-0">
+                                    <span class="fas fa-search search-box-icon"></span>
+                                </button>
                             </form>
                         </div>
                     </div>
