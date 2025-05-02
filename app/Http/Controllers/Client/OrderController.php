@@ -247,4 +247,51 @@ class OrderController extends Controller
             return response()->json(['can_request' => false, 'reason' => 'error']);
         }
     }
+
+    /**
+     * Kiểm tra trạng thái hoàn tiền của đơn hàng
+     */
+    public function checkRefundStatus(Order $order)
+    {
+        try {
+            // Kiểm tra xem đơn hàng có thuộc về người dùng hiện tại không
+            if ($order->getRawOriginal('user_id') !== auth()->id()) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized']);
+            }
+            
+            // Kiểm tra xem có yêu cầu hoàn tiền hay không
+            if (!$order->refunds()->exists()) {
+                return response()->json([
+                    'status' => 'not_found',
+                    'has_refund' => false
+                ]);
+            }
+            
+            // Lấy yêu cầu hoàn tiền mới nhất
+            $refund = $order->refunds()->latest()->first();
+            
+            return response()->json([
+                'status' => 'success',
+                'has_refund' => true,
+                'refund_status' => $refund->is_active == 0 ? 'completed' : 'processing',
+                'refund_data' => [
+                    'amount' => $refund->amount,
+                    'bank' => $refund->bank,
+                    'bank_number' => $refund->bank_number,
+                    'bank_name' => $refund->bank_name,
+                    'created_at' => $refund->created_at->format('d/m/Y H:i:s'),
+                    'is_active' => $refund->is_active
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Client OrderController@checkRefundStatus - Error', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['status' => 'error', 'message' => 'Đã xảy ra lỗi']);
+        }
+    }
 } 

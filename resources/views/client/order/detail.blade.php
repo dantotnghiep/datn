@@ -118,6 +118,23 @@
                             </p>
                         </div>
 
+                        {{-- Hiện trạng thái hoàn tiền nếu có --}}
+                        @if($order->status_id == 4 && $order->payment_method == 'bank' && $order->refunds()->exists())
+                            <div class="mb-4">
+                                <h5 class="mb-2">Trạng thái hoàn tiền</h5>
+                                <p class="mb-0" id="refund-status">
+                                    @php
+                                        $refund = $order->refunds()->latest()->first();
+                                    @endphp
+                                    @if($refund && $refund->is_active == 0)
+                                        <span class="badge bg-success">Đã hoàn tiền</span>
+                                    @else
+                                        <span class="badge bg-warning">Đang xử lý hoàn tiền</span>
+                                    @endif
+                                </p>
+                            </div>
+                        @endif
+
                         <div class="border-top pt-4">
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Tổng tiền hàng:</span>
@@ -408,6 +425,38 @@
       var refundModal = new bootstrap.Modal(document.getElementById('refundModal'));
       refundModal.show();
     @endif
+
+    // Kiểm tra trạng thái hoàn tiền định kỳ (60 giây một lần)
+    const currentOrderId = {{ $order->id }};
+    
+    function checkRefundStatus() {
+      if ($('#refund-status').length > 0) {
+        fetch(`/api/orders/${currentOrderId}/refund-status`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'success' && data.has_refund) {
+              // Cập nhật giao diện
+              const statusElement = $('#refund-status');
+              
+              if (data.refund_status === 'completed') {
+                statusElement.html('<span class="badge bg-success">Đã hoàn tiền</span>');
+                
+                // Ẩn nút yêu cầu hoàn tiền nếu có
+                $('#refund-button-container').hide();
+              } else {
+                statusElement.html('<span class="badge bg-warning">Đang xử lý hoàn tiền</span>');
+              }
+            }
+          })
+          .catch(error => console.error('Error checking refund status:', error));
+      }
+    }
+    
+    // Kiểm tra lần đầu
+    checkRefundStatus();
+    
+    // Thiết lập kiểm tra định kỳ
+    setInterval(checkRefundStatus, 60000); // 60 giây
   });
 </script>
 @endpush 

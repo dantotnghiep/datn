@@ -79,6 +79,7 @@
      Route::post('/client/orders/{id}/request-cancel', [OrderController::class, 'requestCancel'])->name('client.order.request-cancel');
      Route::post('/orders/{order}/request-refund', [OrderController::class, 'requestRefund'])->name('client.order.request.refund');
      Route::get('/api/orders/{order}/can-request-refund', [OrderController::class, 'canRequestRefund'])->name('client.order.can.request.refund');
+     Route::get('/api/orders/{order}/refund-status', [OrderController::class, 'checkRefundStatus'])->name('client.order.refund.status');
 
      // Voucher application routes
      Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply-voucher');
