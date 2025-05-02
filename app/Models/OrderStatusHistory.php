@@ -4,6 +4,7 @@ namespace App\Models;
 
 class OrderStatusHistory extends BaseModel
 {
+    protected $table = 'order_status_history';
     protected $fillable = ['order_id', 'status_id', 'notes', 'user_id'];
 
     public static function rules($id = null)
