@@ -45,13 +45,13 @@
                                                 <li class="nav-item">
                                                     <a class="nav-link px-3 d-block" href="{{route('profile')}}">
                                                         <span class="me-2 text-body align-bottom" data-feather="user"></span>
-                                                        <span>Profile</span>
+                                                        <span>Tài khoản</span>
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
                                                     <a class="nav-link px-3 d-block" href="{{route('client.order.list')}}">
                                                         <span class="me-2 text-body align-bottom" data-feather="shopping-bag"></span>
-                                                        <span>Order</span>
+                                                        <span>Đơn hàng</span>
                                                     </a>
                                                 </li>
                                             </ul>
@@ -61,7 +61,7 @@
                                                 <form method="POST" action="{{ route('logout') }}">
                                                     @csrf
                                                     <button type="submit" class="btn btn-phoenix-secondary d-flex flex-center w-100">
-                                                        <span class="me-2" data-feather="log-out"></span>Sign out
+                                                        <span class="me-2" data-feather="log-out"></span>Đăng xuất
                                                     </button>
                                                 </form>
                                             </div>
@@ -78,10 +78,10 @@
                                             </div>
                                             <div class="p-3">
                                                 <a href="{{ route('login') }}" class="btn btn-phoenix-primary d-flex flex-center w-100 mb-3">
-                                                    <span class="me-2" data-feather="log-in"></span>Sign in
+                                                    <span class="me-2" data-feather="log-in"></span>Đăng nhập
                                                 </a>
                                                 <a href="{{ route('register') }}" class="btn btn-phoenix-secondary d-flex flex-center w-100">
-                                                    <span class="me-2" data-feather="user-plus"></span>Register
+                                                    <span class="me-2" data-feather="user-plus"></span>Đăng ký
                                                 </a>
                                             </div>
                                         </div>

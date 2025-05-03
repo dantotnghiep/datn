@@ -137,7 +137,7 @@
                                                         // Get raw status_id before any getter transforms it
                                                         $statusId = $item->getRawOriginal('status_id') ?? $item->status_id;
                                                     @endphp
-                                                    
+
                                                     <div class="order-status-actions-{{ $item->id }}">
                                                         @if ($statusId == 1)
                                                             <span class="badge bg-warning">Pending</span>
@@ -160,9 +160,41 @@
                                                                 </button>
                                                             </form>
                                                         @elseif ($statusId == 2)
-                                                            <span class="badge bg-success">Completed</span>  
+                                                            <span class="badge bg-success">Completed</span>
+                                                            @php
+                                                                // Check if there's an active refund request
+                                                                $activeRefund = $item->refunds()->where('is_active', 1)
+                                                                    ->where('refund_status', 'pending')
+                                                                    ->first();
+                                                            @endphp
+                                                            @if ($activeRefund && $item->payment_method == 'bank')
+                                                                <form action="{{ route('admin.order-refunds.update-status', $activeRefund->id) }}" method="POST" class="d-inline ms-1">
+                                                                    @csrf
+                                                                    @method('PUT')
+                                                                    <input type="hidden" name="refund_status" value="approved">
+                                                                    <button type="submit" class="btn btn-sm btn-warning" title="Confirm Refund">
+                                                                        <span class="fas fa-money-bill-wave me-1"></span>Confirm Refund
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                         @elseif ($statusId == 4)
                                                             <span class="badge bg-danger">Cancle</span>
+                                                            @php
+                                                                // Check if there's an active refund request
+                                                                $activeRefund = $item->refunds()->where('is_active', 1)
+                                                                    ->where('refund_status', 'pending')
+                                                                    ->first();
+                                                            @endphp
+                                                            @if ($activeRefund && $item->payment_method == 'bank')
+                                                                <form action="{{ route('admin.order-refunds.update-status', $activeRefund->id) }}" method="POST" class="d-inline ms-1">
+                                                                    @csrf
+                                                                    @method('PUT')
+                                                                    <input type="hidden" name="refund_status" value="approved">
+                                                                    <button type="submit" class="btn btn-sm btn-warning" title="Confirm Refund">
+                                                                        <span class="fas fa-money-bill-wave me-1"></span>Confirm Refund
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                         @elseif ($statusId == 5)
                                                             <span class="badge bg-danger">Refunded</span>
                                                         @else
@@ -284,10 +316,10 @@
         // Get Pusher key and cluster from configuration
         const pusherKey = '{{ config("broadcasting.connections.pusher.key") }}';
         const pusherCluster = '{{ config("broadcasting.connections.pusher.options.cluster") }}';
-        
-        console.log('Pusher configuration:', { 
-            key: pusherKey || 'not set', 
-            cluster: pusherCluster || 'not set' 
+
+        console.log('Pusher configuration:', {
+            key: pusherKey || 'not set',
+            cluster: pusherCluster || 'not set'
         });
 
         // Make sure we have necessary configuration
@@ -305,12 +337,12 @@
                 cluster: pusherCluster || 'mt1',
                 forceTLS: true
             });
-            
+
             // Monitor connection state
             pusher.connection.bind('connected', function() {
                 console.log('Successfully connected to Pusher!');
             });
-            
+
             pusher.connection.bind('error', function(err) {
                 console.error('Pusher connection error:', err);
                 if (typeof toast !== 'undefined') {
@@ -320,7 +352,7 @@
 
             // Subscribe to orders channel
             const channel = pusher.subscribe('my-channel');
-            
+
             // Handle subscription errors
             channel.bind('pusher:subscription_error', function(status) {
                 console.error('Pusher subscription error:', status);
@@ -328,21 +360,21 @@
                     toast.error('Error subscribing to updates: ' + status);
                 }
             });
-            
+
             // Bind to order status change event
             channel.bind('my-event', function(data) {
                 console.log('Received order status update:', data);
-                
+
                 // Update the order status in real-time
                 const orderStatusElement = document.querySelector(`.order-status-actions-${data.id}`);
-                
+
                 if (orderStatusElement) {
                     console.log('Found status element to update');
-                    
+
                     // Create status HTML based on the new status
                     let statusHtml = '';
                     let statusName = data.status_name || 'Unknown';
-                    
+
                     if (data.status_id == 1) {
                         statusHtml = `
                             <span class="badge bg-warning">Pending</span>
@@ -369,18 +401,60 @@
                         `;
                     } else if (data.status_id == 2) {
                         statusHtml = `<span class="badge bg-success">Completed</span>`;
+
+                        // Add AJAX call to check if there's an active refund request
+                        fetch(`/admin/orders/${data.id}/check-refund`)
+                            .then(response => response.json())
+                            .then(refundData => {
+                                if (refundData.has_active_refund && refundData.payment_method === 'bank') {
+                                    statusHtml += `
+                                        <form action="/admin/order-refunds/${refundData.refund_id}/update-status" method="POST" class="d-inline ms-1">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="refund_status" value="approved">
+                                            <button type="submit" class="btn btn-sm btn-warning" title="Confirm Refund">
+                                                <span class="fas fa-money-bill-wave me-1"></span>Confirm Refund
+                                            </button>
+                                        </form>
+                                    `;
+                                    // Update the status cell with new HTML including refund button
+                                    orderStatusElement.innerHTML = statusHtml;
+                                }
+                            })
+                            .catch(error => console.error('Error checking refund status:', error));
                     } else if (data.status_id == 4) {
                         statusHtml = `<span class="badge bg-danger">Cancelled</span>`;
+
+                        // Add AJAX call to check if there's an active refund request
+                        fetch(`/admin/orders/${data.id}/check-refund`)
+                            .then(response => response.json())
+                            .then(refundData => {
+                                if (refundData.has_active_refund && refundData.payment_method === 'bank') {
+                                    statusHtml += `
+                                        <form action="/admin/order-refunds/${refundData.refund_id}/update-status" method="POST" class="d-inline ms-1">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="refund_status" value="approved">
+                                            <button type="submit" class="btn btn-sm btn-warning" title="Confirm Refund">
+                                                <span class="fas fa-money-bill-wave me-1"></span>Confirm Refund
+                                            </button>
+                                        </form>
+                                    `;
+                                    // Update the status cell with new HTML including refund button
+                                    orderStatusElement.innerHTML = statusHtml;
+                                }
+                            })
+                            .catch(error => console.error('Error checking refund status:', error));
                     } else if (data.status_id == 5) {
                         statusHtml = `<span class="badge bg-danger">Refunded</span>`;
                     } else {
                         statusHtml = `<span class="badge bg-secondary">${data.status_id}</span>`;
                     }
-                    
+
                     // Update the status cell with new HTML
                     orderStatusElement.innerHTML = statusHtml;
                     console.log('Updated status HTML');
-                    
+
                     // Highlight the row that was updated
                     const orderRow = document.getElementById(`order-row-${data.id}`);
                     if (orderRow) {
@@ -390,37 +464,37 @@
                         }, 3000);
                         console.log('Highlighted updated row');
                     }
-                    
+
                     // Show notification
                     showNotification('Order Status Updated', `Order #${data.order_number} status changed to ${statusName}`);
                 } else {
                     console.warn(`Could not find element with selector .order-status-actions-${data.id}`);
                 }
             });
-            
+
         } catch (error) {
             console.error('Error initializing Pusher:', error);
             if (typeof toast !== 'undefined') {
                 toast.error('Failed to initialize real-time updates: ' + error.message);
             }
         }
-        
+
         // Function to show notification
         function showNotification(title, message) {
             console.log('Showing notification:', title, message);
-            
+
             // Display toast notification if available
             if (typeof toast !== 'undefined') {
                 toast.success(message);
                 console.log('Displayed toast notification');
             }
-            
+
             // Check if the browser supports notifications
             if (!("Notification" in window)) {
                 console.log("This browser does not support desktop notification");
                 return;
             }
-            
+
             // Check if permission is already granted
             if (Notification.permission === "granted") {
                 createNotification(title, message);
@@ -434,23 +508,23 @@
                 });
             }
         }
-        
+
         function createNotification(title, message) {
             const notification = new Notification(title, {
                 body: message,
                 icon: '/favicon.ico',
             });
-            
+
             notification.onclick = function() {
                 window.focus();
                 notification.close();
             };
-            
+
             // Auto close after 5 seconds
             setTimeout(() => {
                 notification.close();
             }, 5000);
-            
+
             console.log('Created browser notification');
         }
     });

@@ -64,7 +64,7 @@
      Route::post('/yeu-thich/them', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
      Route::delete('/yeu-thich/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
      Route::get('/api/yeu-thich/kiem-tra', [WishlistController::class, 'check'])->name('wishlist.check');
- 
+
      // Checkout routes (Vietnamese)
      Route::post('/gio-hang/thanh-toan-chon', [CartController::class, 'saveSelectedItems'])->name('cart.checkout.selected');
      Route::get('/thanh-toan', [CartController::class, 'checkout'])->name('checkout');
@@ -91,7 +91,7 @@
      Route::get('/locations/{location}', [LocationController::class, 'getLocation'])->name('locations.get');
  });
 
- 
+
  Route::get('/san-pham/{slug}', [ProductController::class, 'show'])->name('product.detail');
 
  Route::get('/san-pham', [ProductController::class, 'index'])->name('product.index');
@@ -101,4 +101,11 @@
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('/don-hang/{id}/xac-nhan-huy', [OrderController::class, 'confirmCancel'])->name('admin.order.confirm-cancel');
     Route::get('/don-hang/yeu-cau-huy', [OrderController::class, 'getCancellationRequests'])->name('admin.orders.cancellation-requests');
+
+    // Add routes for order refund status
+    Route::get('/orders/{id}/check-refund', [App\Http\Controllers\Admin\OrderController::class, 'checkRefund'])->name('admin.orders.check-refund');
+    Route::put('/order-refunds/{id}/update-status', [App\Http\Controllers\Admin\OrderRefundController::class, 'updateStatus'])->name('admin.order-refunds.update-status');
+
+    // Statistics Routes
+
 });

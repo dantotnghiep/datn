@@ -44,8 +44,8 @@
                                             alt="phoenix" width="58" />
                                     </div>
                                 </a>
-                                <h3 class="text-body-highlight">Sign In</h3>
-                                <p class="text-body-tertiary">Get access to your account</p>
+                                <h3 class="text-body-highlight">Đăng nhập</h3>
+                                <p class="text-body-tertiary">Đăng nhập vào tài khoản của bạn</p>
                             </div>
 
                             @if ($errors->any())
@@ -67,7 +67,7 @@
                             <form method="POST" action="{{ route('login') }}">
                                 @csrf
                                 <div class="mb-3 text-start">
-                                    <label class="form-label" for="email">Email address</label>
+                                    <label class="form-label" for="email">Email</label>
                                     <div class="form-icon-container">
                                         <input class="form-control form-icon-input @error('email') is-invalid @enderror" 
                                                id="email" type="email" name="email" value="{{ old('email') }}" 
@@ -82,11 +82,11 @@
                                 </div>
 
                                 <div class="mb-3 text-start">
-                                    <label class="form-label" for="password">Password</label>
+                                    <label class="form-label" for="password">Mật khẩu</label>
                                     <div class="form-icon-container">
                                         <input class="form-control form-icon-input @error('password') is-invalid @enderror" 
                                                id="password" type="password" name="password" 
-                                               required autocomplete="current-password" placeholder="Password" />
+                                               required autocomplete="current-password" placeholder="Mật khẩu" />
                                         <span class="fas fa-key text-body fs-9 form-icon"></span>
                             </div>
                                     @error('password')
@@ -101,18 +101,18 @@
                                         <div class="form-check mb-0">
                                             <input class="form-check-input" id="remember" name="remember" 
                                                    type="checkbox" {{ old('remember') ? 'checked' : '' }} />
-                                            <label class="form-check-label mb-0" for="remember">Remember me</label>
+                                            <label class="form-check-label mb-0" for="remember">Ghi nhớ tôi</label>
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <a class="fs-9 fw-bold" href="{{ route('password.request') }}">Forgot Password?</a>
+                                        <a class="fs-9 fw-bold" href="{{ route('password.request') }}">Quên mật khẩu?</a>
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary w-100 mb-3">Sign In</button>
+                                <button type="submit" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
                                 
                                 <div class="text-center">
-                                    <a class="fs-9 fw-bold" href="{{ route('register') }}">Create an account</a>
+                                    <a class="fs-9 fw-bold" href="{{ route('register') }}">Tạo tài khoản</a>
                                 </div>
                             </form>
                         </div>

@@ -11,6 +11,13 @@
                                         class="nav-link-text">Dashboard</span></span>
                             </div>
                         </a></div><!-- parent pages-->
+                    <div class="nav-item-wrapper"><a class="nav-link label-1" href="{{ route('admin.statistics') }}"
+                            role="button" data-bs-toggle="" aria-expanded="false">
+                            <div class="d-flex align-items-center"><span class="nav-link-icon"><span
+                                        data-feather="home"></span></span><span class="nav-link-text-wrapper"><span
+                                        class="nav-link-text">Statistics</span></span>
+                            </div>
+                        </a></div><!-- parent pages-->
                     <div class="nav-item-wrapper"><a class="nav-link label-1"
                             href="{{ route('admin.product-variations.index') }}" role="button" data-bs-toggle=""
                             aria-expanded="false">
@@ -42,7 +49,7 @@
                                         class="nav-link-text">Promotions</span></span>
                             </div>
                         </a></div><!-- parent pages-->
-       
+
                     <div class="nav-item-wrapper"><a class="nav-link label-1" href="{{ route('admin.auth.index') }}"
                             role="button" data-bs-toggle="" aria-expanded="false">
                             <div class="d-flex align-items-center"><span class="nav-link-icon"><span

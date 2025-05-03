@@ -86,8 +86,8 @@ class ProductController extends Controller
     public function show($slug)
     {
         $product = Product::with([
-            'category', 
-            'images', 
+            'category',
+            'images',
             'variations',
             'variations.attributeValues',
             'variations.attributeValues.attribute'
@@ -105,7 +105,7 @@ class ProductController extends Controller
                         'values' => collect()
                     ]);
                 }
-                
+
                 $attr = $attributes->firstWhere('id', $attribute->id);
                 if (!$attr['values']->contains('id', $value->id)) {
                     $attr['values']->push([
@@ -121,16 +121,15 @@ class ProductController extends Controller
         $relatedProducts = Product::where('category_id', $categoryId)
             ->where('id', '!=', $product->id)
             ->whereNull('deleted_at')
-            ->with(['images', 'variations' => function($query) {
+            ->with(['images', 'variations' => function ($query) {
                 $query->select('id', 'product_id', 'price', 'sale_price', 'stock')
                     ->whereNotNull('price')
-                    ->where('price', '>', 0); 
+                    ->where('price', '>', 0);
             }])
             ->withCount('variations')
             ->take(6)
             ->orderBy('created_at', 'desc')
             ->get();
-
         // Tính toán giá thấp nhất và cao nhất cho mỗi sản phẩm liên quan
         foreach ($relatedProducts as $relatedProduct) {
             if ($relatedProduct->variations_count > 0) {
@@ -141,7 +140,7 @@ class ProductController extends Controller
                 $relatedProduct->max_price = $relatedProduct->price ?? 0;
             }
         }
-            
+
         return view('client.product.detail', compact('product', 'attributes', 'relatedProducts'));
     }
 }

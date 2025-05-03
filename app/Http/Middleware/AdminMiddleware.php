@@ -10,12 +10,38 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // Check if user is logged in and has admin role
-        if (Auth::check() && Auth::user()->role_id == 1) { // Assuming role_id 1 is for admin
-            return $next($request);
+        if (!Auth::check()) {
+            return redirect()->route('home')->with('error', 'Vui lòng đăng nhập');
         }
 
-        // If not admin, redirect to home page
-        return redirect()->route('home');
+        // Kiểm tra role
+        $user = Auth::user();
+        $isAdmin = $user->role_id === 1;
+        $isStaff = $user->role_id === 3;
+
+        // Nếu không phải admin hoặc nhân viên
+        if (!$isAdmin && !$isStaff) {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này');
+        }
+
+        // Nếu là nhân viên, chỉ cho phép truy cập một số route
+        if ($isStaff) {
+            $allowedRoutes = ['admin.dashboard', 'admin.orders.', 'admin.promotions.'];
+            $currentRoute = $request->route()->getName();
+
+            $hasAccess = false;
+            foreach ($allowedRoutes as $route) {
+                if (str_starts_with($currentRoute, $route)) {
+                    $hasAccess = true;
+                    break;
+                }
+            }
+
+            if (!$hasAccess) {
+                return redirect()->route('admin.dashboard')->with('error', 'Bạn không có quyền truy cập trang này');
+            }
+        }
+
+        return $next($request);
     }
-} 
+}
