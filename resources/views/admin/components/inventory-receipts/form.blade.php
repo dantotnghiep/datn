@@ -33,7 +33,12 @@
                             <label class="form-label fw-bold" for="{{ $field }}">
                                 {{ $options['label'] ?? ucfirst($field) }}
                             </label>
-
+                            @if($field === 'user_id')
+                                @php
+                                    $users = \App\Models\User::whereIn('role_id', [1, 2])->pluck('name', 'id')->toArray();
+                                    $options['options'] = $users;
+                                @endphp
+                            @endif
                             @switch($options['type'] ?? 'text')
                                 @case('textarea')
                                     <textarea

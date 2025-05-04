@@ -101,7 +101,7 @@ class InventoryReceipt extends BaseModel
     }
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->whereIn('role', [1, 2]);
     }
 
     public function items()
