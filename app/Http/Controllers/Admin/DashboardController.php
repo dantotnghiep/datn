@@ -12,23 +12,36 @@ use App\Models\ProductVariation;
 use App\Models\Promotion;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // Mặc định sẽ là thời gian từ tháng trước đến hiện tại
+        $startDate = $request->input('start_date') ? Carbon::parse($request->input('start_date'))->startOfDay() : Carbon::now()->subMonth()->startOfDay();
+        $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->endOfDay() : Carbon::now()->endOfDay();
+        
+        // Chuyển đổi ngày thành định dạng hiển thị
+        $formattedStartDate = $startDate->format('d/m/Y');
+        $formattedEndDate = $endDate->format('d/m/Y');
+        $periodTitle = "{$formattedStartDate} - {$formattedEndDate}";
+        
         // Các thống kê cơ bản
-        $totalOrders = Order::count();
+        $totalOrders = Order::whereBetween('created_at', [$startDate, $endDate])->count();
         $totalUsers = User::count();
         $totalProducts = Product::count();
-        $totalRevenue = Order::whereHas('status', function($query) {
-            $query->where('name', 'Completed');
-        })->sum('total');
+        $totalRevenue = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('status', function($query) {
+                $query->where('name', 'Completed');
+            })->sum('total');
 
         // Thống kê đơn hàng theo trạng thái
-        $orderStats = OrderStatus::withCount('orders')
+        $orderStats = OrderStatus::withCount(['orders' => function($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }])
             ->get()
             ->map(function($status) use ($totalOrders) {
                 return (object)[
@@ -40,6 +53,7 @@ class DashboardController extends Controller
 
         // Đơn hàng gần đây
         $recentOrders = Order::with(['user', 'items', 'status'])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->latest()
             ->take(5)
             ->get();
@@ -53,13 +67,15 @@ class DashboardController extends Controller
             ];
         });
 
-        // Đơn hàng mới trong 7 ngày qua
-        $newOrders = Order::where('created_at', '>=', Carbon::now()->subDays(7))->count();
+        // Đơn hàng mới trong khoảng thời gian được chọn
+        $newOrders = Order::where('status_id', 1)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
 
-        // Sản phẩm sắp hết hàng - lấy đúng số lượng sản phẩm còn ít hơn hoặc bằng 15
+        // Sản phẩm sắp hết hàng
         $lowStockProducts = ProductVariation::where('stock', '<=', 15)->count();
 
-        // Khuyến mãi đang hoạt động - đảm bảo chỉ lấy những khuyến mãi đang còn hoạt động
+        // Khuyến mãi đang hoạt động
         $activePromotions = Promotion::where('expires_at', '>=', Carbon::now())
             ->where('starts_at', '<=', Carbon::now())
             ->count();
@@ -69,12 +85,6 @@ class DashboardController extends Controller
             ->select('id', 'code', 'name', 'discount_type', 'discount_value', 'expires_at')
             ->latest()
             ->get();
-
-        // Debug thông tin khuyến mãi
-        Log::info('ActivePromotions: ' . $activePromotionsList->count());
-        if ($activePromotionsList->count() > 0) {
-            Log::info('First promotion: ' . json_encode($activePromotionsList->first()));
-        }
 
         // Lấy danh sách sản phẩm sắp hết hàng
         $lowStockProductsList = DB::table('product_variations')
@@ -90,31 +100,49 @@ class DashboardController extends Controller
             ->paginate(15);
 
         // Dữ liệu cho biểu đồ Revenue Projection vs Actual
-        $sixMonthsData = $this->getRevenueData();
+        $sixMonthsData = $this->getRevenueData($startDate, $endDate);
 
         // Dữ liệu cho biểu đồ khách hàng
-        $customerData = $this->getCustomerData();
+        $customerData = $this->getCustomerData($startDate, $endDate);
 
         // Dữ liệu cho biểu đồ order status
-        $orderStatusData = $this->getOrderStatusData();
+        $orderStatusData = $this->getOrderStatusData($startDate, $endDate);
 
         // Dữ liệu cho top 5 sản phẩm bán chạy
-        $topProducts = $this->getTopProducts();
+        $topProducts = $this->getTopProducts($startDate, $endDate);
 
         // Dữ liệu cho biểu đồ xu hướng tồn kho
-        $inventoryTrend = $this->getInventoryTrend();
+        $inventoryTrend = $this->getInventoryTrend($startDate, $endDate);
 
         // Dữ liệu cho biểu đồ doanh thu theo danh mục
-        $categoryRevenue = $this->getCategoryRevenue();
+        $categoryRevenue = $this->getCategoryRevenue($startDate, $endDate);
 
         // Dữ liệu người dùng mua hàng
-        $userPurchaseData = $this->getUserPurchaseData();
+        $userPurchaseData = $this->getUserPurchaseData($startDate, $endDate);
 
         // Dữ liệu marketing metrics
         $marketingMetrics = $this->getMarketingMetrics();
 
         // Dữ liệu business metrics
         $businessMetrics = $this->getBusinessMetrics();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'orderStats' => $orderStats,
+                'totalOrders' => $totalOrders,
+                'newOrders' => $newOrders,
+                'totalRevenue' => $totalRevenue,
+                'periodTitle' => $periodTitle,
+                'recentOrders' => view('admin.components.dashboard_recent_orders', ['recentOrders' => $recentOrders])->render(),
+                'sixMonthsData' => $sixMonthsData,
+                'customerData' => $customerData,
+                'orderStatusData' => $orderStatusData,
+                'topProducts' => $topProducts,
+                'inventoryTrend' => $inventoryTrend,
+                'categoryRevenue' => $categoryRevenue,
+                'userPurchaseData' => $userPurchaseData
+            ]);
+        }
 
         return view('admin.components.dashboard', compact(
             'totalOrders',
@@ -137,22 +165,41 @@ class DashboardController extends Controller
             'categoryRevenue',
             'userPurchaseData',
             'marketingMetrics',
-            'businessMetrics'
+            'businessMetrics',
+            'startDate',
+            'endDate',
+            'periodTitle'
         ));
     }
 
-    private function getRevenueData()
+    private function getRevenueData($startDate, $endDate)
     {
         $sixMonthsData = [];
 
-        // Lấy dữ liệu 6 tháng gần nhất
-        for ($i = 5; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
-            $monthName = $month->format('M');
+        // Nếu khoảng thời gian lớn hơn 6 tháng, chia theo tháng
+        $diffMonths = $startDate->diffInMonths($endDate) + 1;
+        $step = max(1, floor($diffMonths / 6));
+        $periods = collect();
+        
+        // Tạo mảng các khoảng thời gian để hiển thị
+        $currentStart = clone $startDate;
+        while ($currentStart <= $endDate) {
+            $currentEnd = (clone $currentStart)->addMonths($step)->subDay();
+            if ($currentEnd > $endDate) {
+                $currentEnd = clone $endDate;
+            }
+            $periods->push([
+                'start' => clone $currentStart,
+                'end' => clone $currentEnd,
+                'label' => $currentStart->format('M') . ($step > 1 ? '-' . $currentEnd->format('M') : '')
+            ]);
+            $currentStart = (clone $currentStart)->addMonths($step);
+        }
 
+        // Lấy dữ liệu cho mỗi khoảng thời gian
+        foreach ($periods as $period) {
             // Doanh thu thực tế
-            $actual = Order::whereMonth('created_at', $month->month)
-                ->whereYear('created_at', $month->year)
+            $actual = Order::whereBetween('created_at', [$period['start'], $period['end']])
                 ->whereHas('status', function($query) {
                     $query->where('name', 'Completed');
                 })
@@ -165,7 +212,7 @@ class DashboardController extends Controller
             }
 
             $sixMonthsData[] = [
-                'month' => $monthName,
+                'month' => $period['label'],
                 'actual' => $actual,
                 'projected' => $projected
             ];
@@ -174,24 +221,25 @@ class DashboardController extends Controller
         return $sixMonthsData;
     }
 
-    private function getCustomerData()
+    private function getCustomerData($startDate, $endDate)
     {
         try {
             // Phân loại khách hàng
-            $newCustomers = User::where('created_at', '>=', Carbon::now()->subDays(30))->count();
+            $newCustomers = User::whereBetween('created_at', [$startDate, $endDate])->count();
 
-            // Lấy số lượng khách hàng quay lại (có từ 2 đơn hàng trở lên)
+            // Lấy số lượng khách hàng quay lại (có từ 2 đơn hàng trở lên trong khoảng thời gian)
             $returningCustomersCount = DB::table('orders')
                 ->select('user_id')
+                ->whereBetween('created_at', [$startDate, $endDate])
                 ->whereNotNull('user_id')
                 ->groupBy('user_id')
                 ->havingRaw('COUNT(*) > 1')
                 ->count();
 
-            // Lấy số khách hàng không hoạt động (tồn tại > 90 ngày và không có đơn hàng trong 90 ngày)
-            $inactiveCustomers = User::where('created_at', '<', Carbon::now()->subDays(90))
-                ->whereDoesntHave('orders', function ($query) {
-                    $query->where('created_at', '>=', Carbon::now()->subDays(90));
+            // Lấy số khách hàng không hoạt động (tồn tại trước khoảng thời gian và không có đơn hàng trong khoảng thời gian)
+            $inactiveCustomers = User::where('created_at', '<', $startDate)
+                ->whereDoesntHave('orders', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('created_at', [$startDate, $endDate]);
                 })->count();
 
             return [
@@ -209,40 +257,46 @@ class DashboardController extends Controller
         }
     }
 
-    private function getInventoryTrend()
+    private function getInventoryTrend($startDate, $endDate)
     {
         try {
             $data = [];
-            $months = [];
-            $soldItems = [];
-            $newStock = [];
+            $diffMonths = $startDate->diffInMonths($endDate) + 1;
+            $step = max(1, floor($diffMonths / 6));
+            $periods = collect();
+            
+            // Tạo mảng các khoảng thời gian để hiển thị
+            $currentStart = clone $startDate;
+            while ($currentStart <= $endDate) {
+                $currentEnd = (clone $currentStart)->addMonths($step)->subDay();
+                if ($currentEnd > $endDate) {
+                    $currentEnd = clone $endDate;
+                }
+                $periods->push([
+                    'start' => clone $currentStart,
+                    'end' => clone $currentEnd,
+                    'label' => $currentStart->format('M') . ($step > 1 ? '-' . $currentEnd->format('M') : '')
+                ]);
+                $currentStart = (clone $currentStart)->addMonths($step);
+            }
 
-            // Lấy dữ liệu 6 tháng gần nhất
-            for ($i = 5; $i >= 0; $i--) {
-                $month = Carbon::now()->subMonths($i);
-                $months[] = $month->format('M');
-
+            // Lấy dữ liệu cho mỗi khoảng thời gian
+            foreach ($periods as $period) {
                 // Số lượng sản phẩm bán ra
-                $sold = OrderItem::whereHas('order', function ($query) use ($month) {
-                    $query->whereMonth('created_at', $month->month)
-                        ->whereYear('created_at', $month->year);
+                $sold = OrderItem::whereHas('order', function ($query) use ($period) {
+                    $query->whereBetween('created_at', [$period['start'], $period['end']]);
                 })->sum('quantity');
-                $soldItems[] = $sold;
-
+                
                 // Lấy số lượng sản phẩm nhập kho (giả định hoặc từ dữ liệu thực tế nếu có)
                 $stock = rand(intval($sold * 0.8), intval($sold * 1.5));
                 if ($sold == 0) {
                     $stock = rand(50, 200);
                 }
-                $newStock[] = $stock;
-            }
-
-            // Đảm bảo tất cả các mảng có cùng độ dài
-            for ($i = 0; $i < count($months); $i++) {
+                
                 $data[] = [
-                    'month' => $months[$i],
-                    'newStock' => $newStock[$i],
-                    'soldItems' => $soldItems[$i]
+                    'month' => $period['label'],
+                    'newStock' => $stock,
+                    'soldItems' => $sold
                 ];
             }
 
@@ -250,17 +304,12 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             Log::error('Error in getInventoryTrend: ' . $e->getMessage());
             return [
-                ['month' => 'Jan', 'newStock' => 0, 'soldItems' => 0],
-                ['month' => 'Feb', 'newStock' => 0, 'soldItems' => 0],
-                ['month' => 'Mar', 'newStock' => 0, 'soldItems' => 0],
-                ['month' => 'Apr', 'newStock' => 0, 'soldItems' => 0],
-                ['month' => 'May', 'newStock' => 0, 'soldItems' => 0],
-                ['month' => 'Jun', 'newStock' => 0, 'soldItems' => 0]
+                ['month' => 'No data', 'newStock' => 0, 'soldItems' => 0]
             ];
         }
     }
 
-    private function getCategoryRevenue()
+    private function getCategoryRevenue($startDate, $endDate)
     {
         // Lấy doanh thu theo danh mục từ đơn hàng đã hoàn thành
         return DB::table('categories')
@@ -271,6 +320,7 @@ class DashboardController extends Controller
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('order_status', 'orders.status_id', '=', 'order_status.id')
             ->where('order_status.name', '=', 'Completed')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->groupBy('categories.id', 'categories.name')
             ->get()
             ->map(function ($category) {
@@ -281,25 +331,25 @@ class DashboardController extends Controller
             });
     }
 
-    private function getTopProducts()
+    private function getTopProducts($startDate, $endDate, $limit = 5)
     {
         try {
-            // Lấy top 5 sản phẩm bán chạy nhất trong 30 ngày qua
+            // Lấy top 5 sản phẩm bán chạy nhất trong khoảng thời gian
             $result = DB::table('order_items')
                 ->select('products.name', DB::raw('SUM(order_items.quantity) as total_sold'))
                 ->join('product_variations', 'order_items.product_variation_id', '=', 'product_variations.id')
                 ->join('products', 'product_variations.product_id', '=', 'products.id')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
-                ->where('orders.created_at', '>=', Carbon::now()->subDays(30))
+                ->whereBetween('orders.created_at', [$startDate, $endDate])
                 ->whereNull('products.deleted_at')
                 ->groupBy('products.id', 'products.name')
                 ->orderBy('total_sold', 'desc')
-                ->take(5)
+                ->take($limit)
                 ->get();
 
             if ($result->isEmpty()) {
                 // Nếu không có dữ liệu, tạo dữ liệu mẫu để hiển thị
-                $products = Product::take(5)->get();
+                $products = Product::take($limit)->get();
                 return $products->map(function($product, $index) {
                     return [
                         'name' => $product->name,
@@ -320,28 +370,28 @@ class DashboardController extends Controller
         }
     }
 
-    private function getUserPurchaseData()
+    private function getUserPurchaseData($startDate, $endDate)
     {
         try {
             // Thống kê giá trị mua hàng trung bình
-            $avgOrderValue = Order::whereHas('status', function($query) {
-                $query->where('name', 'Completed');
-            })->avg('total') ?? 0;
+            $avgOrderValue = Order::whereBetween('created_at', [$startDate, $endDate])
+                ->whereHas('status', function($query) {
+                    $query->where('name', 'Completed');
+                })->avg('total') ?? 0;
 
             // Thống kê tần suất mua hàng
             $orderFrequencyData = [
                 'daily' => Order::whereDate('created_at', Carbon::today())->count(),
                 'weekly' => Order::where('created_at', '>=', Carbon::now()->subDays(7))->count(),
-                'monthly' => Order::where('created_at', '>=', Carbon::now()->subDays(30))->count(),
+                'monthly' => Order::whereBetween('created_at', [$startDate, $endDate])->count(),
             ];
 
             // Thống kê khách hàng mới và quay lại
             $newVsReturningData = [
-                'new' => Order::whereHas('user', function($query) {
-                    $query->where('created_at', '>=', Carbon::now()->subDays(30));
-                })->distinct('user_id')->count('user_id'),
+                'new' => User::whereBetween('created_at', [$startDate, $endDate])->count(),
                 'returning' => DB::table('orders')
                     ->select('user_id')
+                    ->whereBetween('created_at', [$startDate, $endDate])
                     ->whereNotNull('user_id')
                     ->groupBy('user_id')
                     ->havingRaw('COUNT(*) > 1')
@@ -354,6 +404,7 @@ class DashboardController extends Controller
                 ->join('users', 'orders.user_id', '=', 'users.id')
                 ->join('order_status', 'orders.status_id', '=', 'order_status.id')
                 ->where('order_status.name', '=', 'Completed')
+                ->whereBetween('orders.created_at', [$startDate, $endDate])
                 ->whereNotNull('orders.user_id')
                 ->groupBy('users.id', 'users.name')
                 ->orderBy('total_spent', 'desc')
@@ -405,10 +456,12 @@ class DashboardController extends Controller
         }
     }
 
-    private function getOrderStatusData()
+    private function getOrderStatusData($startDate, $endDate)
     {
         try {
-            return OrderStatus::withCount('orders')
+            return OrderStatus::withCount(['orders' => function($query) use ($startDate, $endDate) {
+                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                }])
                 ->get()
                 ->map(function ($status) {
                     return [

@@ -84,7 +84,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Statistics routes
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
-    Route::get('/statistics/user-order-stats', [StatisticsController::class, 'userOrderStats'])->name('statistics.user-orders');
+    Route::get('/statistics/data', [StatisticsController::class, 'getStatistics'])->name('statistics.data');
 
     // Categories routes
     Route::prefix('categories')->name('categories.')->group(function () {

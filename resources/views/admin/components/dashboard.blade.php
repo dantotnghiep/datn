@@ -5,9 +5,32 @@
     <!-- Header Stats Cards -->
     <div class="row mb-5">
         <div class="col-12">
-            <div class="mb-8">
-                <h2 class="mb-2">Dashboard</h2>
-                <h5 class="text-body-tertiary fw-semibold">Tổng quan về hoạt động kinh doanh của bạn</h5>
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-2">Dashboard</h2>
+                    <h5 class="text-body-tertiary fw-semibold">Tổng quan về hoạt động kinh doanh của bạn</h5>
+                </div>
+                <div class="time-filter">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="date-range d-flex align-items-center">
+                                    <div class="me-2">
+                                        <label for="start_date" class="form-label mb-0">Từ ngày:</label>
+                                        <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ $startDate->format('Y-m-d') }}">
+                                    </div>
+                                    <div class="me-2">
+                                        <label for="end_date" class="form-label mb-0">Đến ngày:</label>
+                                        <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ $endDate->format('Y-m-d') }}">
+                                    </div>
+                                    <div class="d-flex align-items-end">
+                                        <button id="apply_date_filter" class="btn btn-sm btn-primary">Áp dụng</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -21,9 +44,9 @@
                             </div>
                             <h5 class="card-title mb-0 ms-2">Đơn hàng</h5>
                         </div>
-                        <div class="badge bg-primary-subtle text-primary rounded-pill">{{ $newOrders }} mới</div>
+                        <div class="badge bg-primary-subtle text-primary rounded-pill"><span id="new_orders">{{ $newOrders }}</span> mới</div>
                     </div>
-                    <h2 class="mb-0">{{ number_format($totalOrders) }}</h2>
+                    <h2 class="mb-0" id="total_orders">{{ number_format($totalOrders) }}</h2>
                     <p class="card-text text-body-tertiary">Tổng số đơn hàng</p>
                 </div>
             </div>
@@ -40,7 +63,7 @@
                             <h5 class="card-title mb-0 ms-2">Doanh thu</h5>
                         </div>
                     </div>
-                    <h2 class="mb-0">{{ number_format($totalRevenue, 0, ',', '.') }}đ</h2>
+                    <h2 class="mb-0" id="total_revenue">{{ number_format($totalRevenue, 0, ',', '.') }}đ</h2>
                     <p class="card-text text-body-tertiary">Tổng doanh thu đơn hoàn thành</p>
                 </div>
             </div>
@@ -78,6 +101,15 @@
                     <h2 class="mb-0">{{ number_format($totalProducts) }}</h2>
                     <p class="card-text text-body-tertiary">Tổng số sản phẩm</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading_overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 9999;">
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
             </div>
         </div>
     </div>
@@ -201,7 +233,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover recent-orders-table">
                             <thead>
                                 <tr>
                                     <th>Mã đơn</th>
@@ -257,19 +289,19 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between mb-2">
                             <div class="fw-semibold">Giá trị đơn hàng trung bình</div>
-                            <div class="fw-bold text-success">{{ number_format($userPurchaseData['avgOrderValue'], 0, ',', '.') }}đ</div>
+                            <div class="fw-bold text-success" id="avg_order_value">{{ number_format($userPurchaseData['avgOrderValue'], 0, ',', '.') }}đ</div>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <div class="fw-semibold">Đơn hàng trong ngày</div>
-                            <div class="fw-bold">{{ $userPurchaseData['orderFrequency']['daily'] }}</div>
+                            <div class="fw-bold" id="daily_orders">{{ $userPurchaseData['orderFrequency']['daily'] }}</div>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <div class="fw-semibold">Đơn hàng trong tuần</div>
-                            <div class="fw-bold">{{ $userPurchaseData['orderFrequency']['weekly'] }}</div>
+                            <div class="fw-bold" id="weekly_orders">{{ $userPurchaseData['orderFrequency']['weekly'] }}</div>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <div class="fw-semibold">Đơn hàng trong tháng</div>
-                            <div class="fw-bold">{{ $userPurchaseData['orderFrequency']['monthly'] }}</div>
+                            <div class="fw-bold" id="monthly_orders">{{ $userPurchaseData['orderFrequency']['monthly'] }}</div>
                         </div>
                     </div>
 
@@ -283,7 +315,7 @@
                                     <th class="text-end">Tổng chi tiêu</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="top_customers_body">
                                 @foreach($userPurchaseData['topCustomers'] as $customer)
                                 <tr>
                                     <td>{{ $customer->name }}</td>
@@ -412,281 +444,404 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     // 1. Revenue Chart
-    const revenueCtx = document.getElementById('revenueChart');
-    const revenueData = @json($sixMonthsData);
-
-    new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: revenueData.map(item => item.month),
-            datasets: [
-                {
-                    label: 'Doanh thu thực tế',
-                    data: revenueData.map(item => item.actual),
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                    borderColor: colors.primary,
-                    borderWidth: 2,
-                    pointBackgroundColor: colors.primary,
-                    pointBorderColor: '#fff',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    fill: true,
-                    tension: 0.1
-                },
-                {
-                    label: 'Doanh thu dự kiến',
-                    data: revenueData.map(item => item.projected),
-                    borderColor: colors.secondary,
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    pointBackgroundColor: colors.secondary,
-                    pointBorderColor: '#fff',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    fill: false
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        drawBorder: false
+    let revenueChart;
+    
+    function initRevenueChart(revenueData) {
+        const revenueCtx = document.getElementById('revenueChart');
+        
+        if (revenueChart) {
+            revenueChart.destroy();
+        }
+        
+        revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: revenueData.map(item => item.month),
+                datasets: [
+                    {
+                        label: 'Doanh thu thực tế',
+                        data: revenueData.map(item => item.actual),
+                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                        borderColor: colors.primary,
+                        borderWidth: 2,
+                        pointBackgroundColor: colors.primary,
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.1
                     },
-                    ticks: {
-                        callback: function(value) {
-                            return value.toLocaleString() + 'đ';
+                    {
+                        label: 'Doanh thu dự kiến',
+                        data: revenueData.map(item => item.projected),
+                        borderColor: colors.secondary,
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointBackgroundColor: colors.secondary,
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + 'đ';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
                         }
                     }
                 },
-                x: {
-                    grid: {
-                        display: false
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': ' + context.raw.toLocaleString() + 'đ';
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw.toLocaleString() + 'đ';
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 
     // 2. Order Status Chart
-    const orderStatusCtx = document.getElementById('orderStatusChart');
-    const orderStatusData = @json($orderStatusData);
-
-    new Chart(orderStatusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: orderStatusData.map(item => item.name),
-            datasets: [{
-                data: orderStatusData.map(item => item.value),
-                backgroundColor: [
-                    colors.success,
-                    colors.warning,
-                    colors.danger,
-                    colors.info,
-                    colors.secondary
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '70%',
-            plugins: {
-                legend: {
-                    display: false
+    let orderStatusChart;
+    
+    function initOrderStatusChart(orderStatusData) {
+        const orderStatusCtx = document.getElementById('orderStatusChart');
+        
+        if (orderStatusChart) {
+            orderStatusChart.destroy();
+        }
+        
+        orderStatusChart = new Chart(orderStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: orderStatusData.map(item => item.name),
+                datasets: [{
+                    data: orderStatusData.map(item => item.value),
+                    backgroundColor: [
+                        colors.success,
+                        colors.warning,
+                        colors.danger,
+                        colors.info,
+                        colors.secondary
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
     // 3. Top Products Chart
-    const topProductsCtx = document.getElementById('topProductsChart');
-    const topProductsData = @json($topProducts);
-
-    new Chart(topProductsCtx, {
-        type: 'bar',
-        data: {
-            labels: topProductsData.map(item => {
-                // Truncate long product names
-                let name = item.name;
-                return name.length > 20 ? name.substring(0, 20) + '...' : name;
-            }),
-            datasets: [{
-                label: 'Đã bán',
-                data: topProductsData.map(item => item.value),
-                backgroundColor: colors.primary,
-                borderRadius: 4,
-                maxBarThickness: 30
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    grid: {
-                        display: false
+    let topProductsChart;
+    
+    function initTopProductsChart(topProductsData) {
+        const topProductsCtx = document.getElementById('topProductsChart');
+        
+        if (topProductsChart) {
+            topProductsChart.destroy();
+        }
+        
+        topProductsChart = new Chart(topProductsCtx, {
+            type: 'bar',
+            data: {
+                labels: topProductsData.map(item => {
+                    // Truncate long product names
+                    let name = item.name;
+                    return name.length > 20 ? name.substring(0, 20) + '...' : name;
+                }),
+                datasets: [{
+                    label: 'Đã bán',
+                    data: topProductsData.map(item => item.value),
+                    backgroundColor: colors.primary,
+                    borderRadius: 4,
+                    maxBarThickness: 30
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
                     }
                 },
-                y: {
-                    grid: {
+                plugins: {
+                    legend: {
                         display: false
                     }
                 }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
             }
-        }
-    });
+        });
+    }
 
     // 4. Category Revenue Chart
-    const categoryRevenueCtx = document.getElementById('categoryRevenueChart');
-    const categoryRevenueData = @json($categoryRevenue);
-
-    new Chart(categoryRevenueCtx, {
-        type: 'pie',
-        data: {
-            labels: categoryRevenueData.map(item => item.name),
-            datasets: [{
-                data: categoryRevenueData.map(item => item.value),
-                backgroundColor: [
-                    colors.primary,
-                    colors.success,
-                    colors.info,
-                    colors.warning,
-                    colors.danger,
-                    '#6f42c1',
-                    '#20c9a6',
-                    '#fd7e14'
-                ],
-                borderWidth: 1,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        boxWidth: 15,
-                        font: {
-                            size: 11
+    let categoryRevenueChart;
+    
+    function initCategoryRevenueChart(categoryRevenueData) {
+        const categoryRevenueCtx = document.getElementById('categoryRevenueChart');
+        
+        if (categoryRevenueChart) {
+            categoryRevenueChart.destroy();
+        }
+        
+        categoryRevenueChart = new Chart(categoryRevenueCtx, {
+            type: 'pie',
+            data: {
+                labels: categoryRevenueData.map(item => item.name),
+                datasets: [{
+                    data: categoryRevenueData.map(item => item.value),
+                    backgroundColor: [
+                        colors.primary,
+                        colors.success,
+                        colors.info,
+                        colors.warning,
+                        colors.danger,
+                        '#6f42c1',
+                        '#20c9a6',
+                        '#fd7e14'
+                    ],
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 15,
+                            font: {
+                                size: 11
+                            }
                         }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.label + ': ' + context.raw.toLocaleString() + 'đ';
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw.toLocaleString() + 'đ';
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 
     // 5. Customer Type Chart
-    const customerTypeCtx = document.getElementById('customerTypeChart');
-    const customerData = @json($customerData);
-
-    new Chart(customerTypeCtx, {
-        type: 'pie',
-        data: {
-            labels: customerData.map(item => item.name),
-            datasets: [{
-                data: customerData.map(item => item.value),
-                backgroundColor: [
-                    colors.info,
-                    colors.success,
-                    colors.secondary
-                ],
-                borderWidth: 1,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        boxWidth: 15,
-                        font: {
-                            size: 11
+    let customerTypeChart;
+    
+    function initCustomerTypeChart(customerData) {
+        const customerTypeCtx = document.getElementById('customerTypeChart');
+        
+        if (customerTypeChart) {
+            customerTypeChart.destroy();
+        }
+        
+        customerTypeChart = new Chart(customerTypeCtx, {
+            type: 'pie',
+            data: {
+                labels: customerData.map(item => item.name),
+                datasets: [{
+                    data: customerData.map(item => item.value),
+                    backgroundColor: [
+                        colors.info,
+                        colors.success,
+                        colors.secondary
+                    ],
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 15,
+                            font: {
+                                size: 11
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 
     // 6. Inventory Trend Chart
-    const inventoryTrendCtx = document.getElementById('inventoryTrendChart');
-    const inventoryData = @json($inventoryTrend);
-
-    new Chart(inventoryTrendCtx, {
-        type: 'bar',
-        data: {
-            labels: inventoryData.map(item => item.month),
-            datasets: [
-                {
-                    label: 'Nhập kho',
-                    data: inventoryData.map(item => item.newStock),
-                    backgroundColor: colors.info,
-                    borderRadius: 4,
-                    maxBarThickness: 20
-                },
-                {
-                    label: 'Bán ra',
-                    data: inventoryData.map(item => item.soldItems),
-                    backgroundColor: colors.success,
-                    borderRadius: 4,
-                    maxBarThickness: 20
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    grid: {
-                        display: false
+    let inventoryTrendChart;
+    
+    function initInventoryTrendChart(inventoryData) {
+        const inventoryTrendCtx = document.getElementById('inventoryTrendChart');
+        
+        if (inventoryTrendChart) {
+            inventoryTrendChart.destroy();
+        }
+        
+        inventoryTrendChart = new Chart(inventoryTrendCtx, {
+            type: 'bar',
+            data: {
+                labels: inventoryData.map(item => item.month),
+                datasets: [
+                    {
+                        label: 'Nhập kho',
+                        data: inventoryData.map(item => item.newStock),
+                        backgroundColor: colors.info,
+                        borderRadius: 4,
+                        maxBarThickness: 20
+                    },
+                    {
+                        label: 'Bán ra',
+                        data: inventoryData.map(item => item.soldItems),
+                        backgroundColor: colors.success,
+                        borderRadius: 4,
+                        maxBarThickness: 20
                     }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        drawBorder: false
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        }
                     }
                 }
             }
+        });
+    }
+
+    // Initialize charts
+    initRevenueChart(@json($sixMonthsData));
+    initOrderStatusChart(@json($orderStatusData));
+    initTopProductsChart(@json($topProducts));
+    initCategoryRevenueChart(@json($categoryRevenue));
+    initCustomerTypeChart(@json($customerData));
+    initInventoryTrendChart(@json($inventoryTrend));
+    
+    // Xử lý sự kiện lọc theo ngày
+    document.getElementById('apply_date_filter').addEventListener('click', function() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        
+        if (!startDate || !endDate) {
+            alert('Vui lòng chọn khoảng thời gian');
+            return;
         }
+        
+        loadDashboard(startDate, endDate);
     });
+    
+    // Hàm tải dữ liệu dashboard
+    function loadDashboard(startDate, endDate) {
+        // Hiển thị loading
+        document.getElementById('loading_overlay').style.display = 'block';
+        
+        // Tạo URL với tham số lọc
+        let url = '{{ route("admin.dashboard") }}?';
+        
+        if (startDate) {
+            url += 'start_date=' + startDate;
+        }
+        
+        if (endDate) {
+            url += '&end_date=' + endDate;
+        }
+        
+        // Thực hiện AJAX request
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Cập nhật số liệu tổng quan
+            document.getElementById('total_orders').textContent = data.totalOrders.toLocaleString();
+            document.getElementById('new_orders').textContent = data.newOrders;
+            document.getElementById('total_revenue').textContent = new Intl.NumberFormat('vi-VN').format(data.totalRevenue) + 'đ';
+            
+            // Cập nhật bảng đơn hàng gần đây nếu có
+            if (data.recentOrders) {
+                document.querySelector('.recent-orders-table tbody').innerHTML = data.recentOrders;
+            }
+            
+            // Cập nhật biểu đồ
+            initRevenueChart(data.sixMonthsData);
+            initOrderStatusChart(data.orderStatusData);
+            initTopProductsChart(data.topProducts);
+            initCategoryRevenueChart(data.categoryRevenue);
+            initCustomerTypeChart(data.customerData);
+            initInventoryTrendChart(data.inventoryTrend);
+            
+            // Cập nhật thông tin thống kê mua hàng
+            if (data.userPurchaseData) {
+                document.getElementById('avg_order_value').textContent = new Intl.NumberFormat('vi-VN').format(data.userPurchaseData.avgOrderValue) + 'đ';
+                document.getElementById('daily_orders').textContent = data.userPurchaseData.orderFrequency.daily;
+                document.getElementById('weekly_orders').textContent = data.userPurchaseData.orderFrequency.weekly;
+                document.getElementById('monthly_orders').textContent = data.userPurchaseData.orderFrequency.monthly;
+            }
+            
+            // Ẩn loading
+            document.getElementById('loading_overlay').style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error loading dashboard data:', error);
+            document.getElementById('loading_overlay').style.display = 'none';
+            alert('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.');
+        });
+    }
 });
 </script>
 @endsection
