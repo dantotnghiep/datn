@@ -126,7 +126,6 @@
                                             {{ $options['label'] ?? ucfirst($field) }}
                                         </th>
                                     @endforeach
-                                    <th class="sort align-middle text-center" scope="col">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -215,10 +214,6 @@
                                                     </button>
                                                 </form>
                                             @else
-                                                <a href="{{ route($route . '.edit', $item->id) }}"
-                                                    class="btn btn-sm p-0 text-primary me-2" title="Edit">
-                                                    <span class="fas fa-edit"></span>
-                                                </a>
                                                 <form action="{{ route($route . '.destroy', $item->id) }}" method="POST"
                                                     class="d-inline">
                                                     @csrf
