@@ -175,4 +175,9 @@ class Order extends BaseModel
     {
         return $this->hasOne(OrderRefund::class)->latest();
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

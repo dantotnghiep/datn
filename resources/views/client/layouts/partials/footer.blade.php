@@ -6,7 +6,7 @@
                             src="{{ asset('storage/logo/1.png') }}"
                             alt="phoenix" width="70" />
                     </div>
-                    <p class="text-body-tertiary mb-1 fw-semibold lh-sm fs-9">Phoenix là một mẫu bảng điều khiển quản trị
+                    <p class="text-body-tertiary mb-1 fw-semibold lh-sm fs-9">MANSO là một mẫu bảng điều khiển quản trị
                         với các tính năng hấp dẫn và bố cục tuyệt vời. Giao diện này tương thích với tất cả
                         các trình duyệt chính và hoạt động tốt trên mọi thiết bị và kích thước màn hình.</p>
                 </div>
@@ -17,16 +17,6 @@
                             href="#!">Chương trình liên kết</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
                             href="#!">Chính sách bảo mật</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
                             href="#!">Điều khoản & Điều kiện</a></div>
-                </div>
-                <div class="col-6 col-md-auto">
-                    <h5 class="fw-bolder mb-3">Kết Nối</h5>
-                    <div class="d-flex flex-column"><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Bài viết</a><a class="mb-1 fw-semibold fs-9 d-flex" href="#!"><span
-                                class="fab fa-facebook-square text-primary me-2 fs-8"></span><span
-                                class="text-body-secondary">Facebook</span></a><a
-                            class="mb-1 fw-semibold fs-9 d-flex" href="#!"><span
-                                class="fab fa-twitter-square text-info me-2 fs-8"></span><span
-                                class="text-body-secondary">Twitter</span></a></div>
                 </div>
                 <div class="col-6 col-md-auto">
                     <h5 class="fw-bolder mb-3">Dịch Vụ Khách Hàng</h5>

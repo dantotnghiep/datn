@@ -10,6 +10,7 @@
  use App\Http\Controllers\Client\PromotionController;
  use App\Http\Controllers\Client\ProfileController;
  use App\Http\Controllers\Client\LocationController;
+ use App\Http\Controllers\Client\ReviewController;
 
  /*
  |--------------------------------------------------------------------------
@@ -81,6 +82,9 @@
      Route::post('/don-hang/{order}/request-refund', [OrderController::class, 'requestRefund'])->name('client.order.request.refund');
      Route::get('/api/don-hang/{order}/can-request-refund', [OrderController::class, 'canRequestRefund'])->name('client.order.can.request.refund');
      Route::get('/api/don-hang/{order}/refund-status', [OrderController::class, 'checkRefundStatus'])->name('client.order.refund.status');
+
+     // Review routes
+     Route::post('/don-hang/{order}/danh-gia', [ReviewController::class, 'store'])->name('reviews.store');
 
      // Voucher application routes
      Route::post('/cart/apply-voucher', [CartController::class, 'applyVoucher'])->name('cart.apply-voucher');

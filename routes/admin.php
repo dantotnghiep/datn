@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\InventoryReceiptController;
 use App\Http\Controllers\Admin\ProductVariationController;
 use App\Http\Controllers\Admin\OrderCancellationController;
+use App\Http\Controllers\Admin\ReviewController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     // Dashboard
@@ -260,5 +261,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
         // Restore from trash
         Route::put('/{id}/restore', [AuthController::class, 'restore'])->name('restore');
+    });
+
+    // Reviews routes
+    Route::prefix('reviews')->name('reviews.')->group(function () {
+        // List
+        Route::get('/', [ReviewController::class, 'index'])->name('index');
     });
 });

@@ -601,16 +601,6 @@ class ProductController extends BaseController
     public function destroy($id)
     {
         $item = $this->model::findOrFail($id);
-
-        // Delete all associated product images
-        $images = ProductImage::where('product_id', $item->id)->get();
-        foreach ($images as $image) {
-            if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
-                Storage::disk('public')->delete($image->image_path);
-            }
-            $image->delete();
-        }
-
         $item->delete();
 
         return redirect()->route($this->route . '.index')

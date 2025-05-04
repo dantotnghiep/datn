@@ -110,4 +110,5 @@ class Product extends BaseModel
     {
         return $this->hasMany(ProductVariation::class);
     }
+
 }
