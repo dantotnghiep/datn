@@ -29,12 +29,11 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <img src="{{ asset(optional($item->productVariation->product->images->first())->image_path ?? 'assets/img/products/default.png') }}"
-                                                        alt="{{ $item->productVariation->product->name }}" width="60"
-                                                        class="me-3">
+                                                    <img src="{{ $item->productVariation->product->first_image ?? asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/products/1.png') }}"
+                                                        alt="{{ $item->productVariation->product->name }}" width="53" />
                                                     <div>
-                                                        <h6 class="mb-1">{{ $item->productVariation->product->name }}</h6>
-                                                        <p class="mb-0 text-muted small">
+                                                        <h6 class="mb-1 ms-2">{{ $item->productVariation->product->name }}</h6>
+                                                        <p class="mb-0 text-muted small ms-2">
                                                             {{ $item->productVariation->name }}
                                                             @if ($item->productVariation->attributeValues->count())
                                                                 -
@@ -193,7 +192,9 @@
                                     Đánh giá đơn hàng
                                 </button>
                             </div>
-                        @elseif ($order->reviews()->where('user_id', auth()->id())->exists())
+                        @elseif (
+                            $order->status_id == 2 &&
+                                $order->reviews()->where('user_id', auth()->id())->exists())
                             <div class="mt-3 text-center">
                                 <span class="badge bg-success p-2">
                                     <i class="fas fa-check-circle me-1"></i> Bạn đã đánh giá đơn hàng này
@@ -304,7 +305,7 @@
                                             if (!refundContainer) {
                                                 // Tạo container nếu chưa có
                                                 const newRefundContainer = document.createElement(
-                                                'div');
+                                                    'div');
                                                 newRefundContainer.id = 'refund-button-container';
                                                 newRefundContainer.innerHTML = `
                                                 <button type="button" class="btn btn-primary w-100 mt-3" data-bs-toggle="modal" data-bs-target="#refundModal">

@@ -22,8 +22,9 @@ class OrderController extends Controller
         return view('client.order.list', compact('orders'));
     }
 
-    public function show(Order $order)
+    public function show($order_number)
     {
+        $order = Order::where('order_number', $order_number)->first();
         // Kiểm tra xem đơn hàng có thuộc về người dùng hiện tại không
         if ($order->getRawOriginal('user_id') !== auth()->id()) {
             abort(403);

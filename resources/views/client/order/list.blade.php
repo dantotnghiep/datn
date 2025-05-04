@@ -46,7 +46,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{ route('client.order.detail', $order->id) }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ route('client.order.detail', $order->order_number) }}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i> Xem chi tiết
                                         </a>
                                     </td>

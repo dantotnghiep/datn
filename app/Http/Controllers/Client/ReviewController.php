@@ -17,7 +17,6 @@ class ReviewController extends Controller
     {
         $order = Order::where('order_number', $order)->firstOrFail();
         
-        // Check if order belongs to authenticated user
         
         // Check if order has been completed
         if ($order->status_id != 2) { // Assuming 2 is the ID for completed status

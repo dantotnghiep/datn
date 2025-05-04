@@ -297,7 +297,8 @@ class CartController extends Controller
                             'notes' => $request->notes,
                             'payment_method' => 'bank',
                             'selected_items' => $selectedItems->toArray(),
-                            'total' => $total,
+                            'total' => $subtotal,
+                            'total_with_discount' => $total,
                             'discount' => $discount
                         ]
                     ]);
@@ -412,7 +413,7 @@ class CartController extends Controller
                 'paid_at' => now(),
                 'discount' => $pendingOrder['discount'],
                 'total' => $pendingOrder['total'],
-                'total_with_discount' => $pendingOrder['total']
+                'total_with_discount' => $pendingOrder['total_with_discount']
             ]);
 
             // Tạo chi tiết đơn hàng và cập nhật tồn kho

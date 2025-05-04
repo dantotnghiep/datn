@@ -28,7 +28,7 @@
                         href="{{ route('admin.products.index') }}">Cancel</a>
                     @if (!isset($isReadOnly) || !$isReadOnly)
                         <button class="btn btn-primary mb-2 mb-sm-0" type="button" id="publish-btn" name="action"
-                            value="publish" onclick="submitForm('publish')">Create new</button>
+                            value="publish" onclick="submitForm('publish')">{{ isset($item) ? 'Update' : 'Create new' }}</button>
                     @else
                         <button class="btn btn-primary mb-2 mb-sm-0" type="button" disabled title="This product has purchased variations and cannot be updated">Update</button>
                     @endif

@@ -76,7 +76,7 @@
 
      // Order routes
      Route::get('/don-hang', [OrderController::class, 'index'])->name('client.order.list');
-     Route::get('/don-hang/{order}', [OrderController::class, 'show'])->name('client.order.detail');
+     Route::get('/don-hang/{order_number}', [OrderController::class, 'show'])->name('client.order.detail');
      Route::post('/don-hang/{order}/cancel-request', [OrderController::class, 'cancelRequest'])->name('client.order.cancel.request');
      Route::post('/don-hang/{id}/request-cancel', [OrderController::class, 'requestCancel'])->name('client.order.request-cancel');
      Route::post('/don-hang/{order}/request-refund', [OrderController::class, 'requestRefund'])->name('client.order.request.refund');
