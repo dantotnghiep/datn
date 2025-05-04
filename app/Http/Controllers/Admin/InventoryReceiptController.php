@@ -257,4 +257,18 @@ class InventoryReceiptController extends BaseController
                 ->with('error', 'Error updating inventory receipt status: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        $receipt = $this->model::with(['items.productVariation.product', 'user'])->findOrFail($id);
+        
+        return view($this->viewPath . '.details', [
+            'receipt' => $receipt,
+            'title' => 'Chi tiết phiếu nhập kho #' . $receipt->receipt_number,
+            'route' => $this->route
+        ]);
+    }
 } 

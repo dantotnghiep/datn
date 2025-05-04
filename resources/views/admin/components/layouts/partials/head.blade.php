@@ -2,16 +2,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Phoenix</title>
-<link rel="apple-touch-icon" sizes="180x180"
-    href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/favicons/apple-touch-icon.png') }}">
-<link rel="icon" type="image/png" sizes="32x32"
-    href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/favicons/favicon-32x32.png') }}">
-<link rel="icon" type="image/png" sizes="16x16"
-    href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/favicons/favicon-16x16.png') }}">
-<link rel="shortcut icon" type="image/x-icon"
-    href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/favicons/favicon.ico') }}">
-<link rel="manifest" href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/favicons/manifest.json') }}">
+<title>MANSO</title>
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('storage/logo/logo2.jpg') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('storage/logo/logo2.jpg') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('storage/logo/logo2.jpg') }}">
+<link rel="shortcut icon" type="image/x-icon" href="{{ asset('storage/logo/logo2.jpg') }}">
+<link rel="manifest" href="{{ asset('storage/logo/logo2.jpg') }}">
 <meta name="msapplication-TileImage"
     content="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/favicons/mstile-150x150.png') }}">
 <meta name="theme-color" content="#ffffff">
@@ -24,7 +20,7 @@
 <link href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/vendors/simplebar/simplebar.min.css') }}" rel="stylesheet">
 {{-- <link rel="stylesheet"
     href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/unicons.iconscout.com/release/v4.0.8/css/line.css') }}"> --}}
-    <link rel="stylesheet" href="{{ asset('theme/unicons.iconscout.com/release/v4.0.8/css/line.css') }}">
+<link rel="stylesheet" href="{{ asset('theme/unicons.iconscout.com/release/v4.0.8/css/line.css') }}">
 
 <link href="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/css/theme-rtl.min.css') }}" type="text/css"
     rel="stylesheet" id="style-rtl">

@@ -34,19 +34,19 @@
                             @if (request()->has('search') || request()->has('filter') || request()->has('sort'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    <span class="fas fa-times me-2"></span> Clear Filters
+                                    <span class="fas fa-times me-2"></span> Xóa bộ lọc
                                 </a>
                             @endif
 
                             @if ($items->count() > 0 && method_exists($items->first(), 'trashed'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
+                                    {{ request()->get('trashed') ? 'Xem thuộc tính' : 'Xem thùng rác' }}
                                 </a>
                             @endif
 
                             <a href="{{ route($route . '.create') }}" class="btn btn-primary">
-                                <span class="fas fa-plus me-2"></span> Add New
+                                <span class="fas fa-plus me-2"></span> Thêm mới
                             </a>
                         </div>
                     </div>

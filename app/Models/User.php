@@ -60,7 +60,7 @@ class User extends Authenticatable
     {
         return [
             'name' => [
-                'label' => 'Name',
+                'label' => 'Tên',
                 'sortable' => true,
             ],
             'email' => [
@@ -68,7 +68,7 @@ class User extends Authenticatable
                 'sortable' => true,
             ],
             'role_id' => [
-                'label' => 'Role',
+                'label' => 'Vai trò',
                 'sortable' => true,
                 'filterable' => true,
                 'filter_options' => self::getRoleOptions(),
@@ -77,7 +77,7 @@ class User extends Authenticatable
                 }
             ],
             'is_active' => [
-                'label' => 'Status',
+                'label' => 'Trạng thái',
                 'sortable' => true,
                 'filterable' => true,
                 'filter_options' => [
@@ -89,7 +89,7 @@ class User extends Authenticatable
                 }
             ],
             'created_at' => [
-                'label' => 'Created At',
+                'label' => 'Ngày tạo',
                 'sortable' => true,
                 'formatter' => function($value) {
                     return $value ? $value->format('Y-m-d') : '-';

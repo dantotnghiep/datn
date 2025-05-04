@@ -184,27 +184,18 @@ class OrderController extends BaseController
             $order = $this->model::with(['status', 'items.productVariation'])->findOrFail($id);
             $oldStatusId = $order->getRawOriginal('status_id');
             $newStatusId = $request->status_id;
-
-            // Bắt đầu transaction để đảm bảo toàn vẹn dữ liệu
             DB::beginTransaction();
 
             try {
-                // Cập nhật trạng thái đơn hàng
                 $order->status_id = $newStatusId;
                 $order->save();
-
-                // Tạo lịch sử trạng thái
                 $notes = $request->notes ?? 'Cập nhật trạng thái đơn hàng';
-
-                // Tạo bản ghi lịch sử trạng thái
                 OrderStatusHistory::create([
                     'order_id' => $order->id,
                     'status_id' => $newStatusId,
                     'user_id' => Auth::id(),
                     'notes' => $notes
                 ]);
-
-                // Set session flag to prevent duplicate records from observer
                 session(['status_history_tracked_' . $order->id => true]);
 
                 // Nếu đơn hàng được chuyển sang trạng thái "Hoàn thành"
@@ -222,40 +213,21 @@ class OrderController extends BaseController
                         'new_status' => $newStatusId
                     ]);
 
-                    // Duyệt qua từng item trong đơn hàng và cập nhật lại số lượng vào kho
                     foreach ($order->items as $item) {
-                        // Lấy biến thể sản phẩm
                         $variation = $item->productVariation;
                         if ($variation) {
-                            // Cập nhật số lượng sản phẩm trong kho
                             $variation->stock += $item->quantity;
                             $variation->save();
-
-                            Log::info('Updated product stock after cancellation', [
-                                'product_variation_id' => $variation->id,
-                                'old_stock' => $variation->stock - $item->quantity,
-                                'quantity_returned' => $item->quantity,
-                                'new_stock' => $variation->stock
-                            ]);
                         } else {
-                            Log::warning('Product variation not found for order item', [
-                                'order_item_id' => $item->id,
-                                'product_variation_id' => $item->product_variation_id
-                            ]);
+                       
                         }
                     }
                 }
 
-                // Commit transaction
                 DB::commit();
 
-                // Remove session flag
                 session()->forget('status_history_tracked_' . $order->id);
-
-                // Tải lại đơn hàng với quan hệ
                 $order = $this->model::with('status')->findOrFail($id);
-
-                // Kích hoạt sự kiện để cập nhật giao diện
                 try {
                     event(new OrderStatusChanged($order));
                 } catch (\Exception $eventError) {

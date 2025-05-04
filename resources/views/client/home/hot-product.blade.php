@@ -1,15 +1,14 @@
 <div class="row g-4 mb-6">
-        <div class="col-12 col-lg-9 col-xxl-10">
+        <div class="col-12 col-lg-12 col-xxl-12">
             <div class="d-flex flex-between-center mb-3">
                 <div class="d-flex"><span class="fas fa-bolt text-warning fs-6"></span>
                     <h3 class="mx-2">Sản phẩm nổi bật</h3><span
                         class="fas fa-bolt text-warning fs-6"></span>
-                </div><a class="btn btn-link btn-lg p-0 d-none d-md-block" href="#!">Xem thêm
-                    <span class="fas fa-chevron-right fs-9 ms-1"></span></a>
+                </div>
             </div>
             <div class="swiper-theme-container products-slider">
                 <div class="swiper swiper theme-slider"
-                    data-swiper='{"slidesPerView":1,"spaceBetween":16,"breakpoints":{"450":{"slidesPerView":2,"spaceBetween":16},"768":{"slidesPerView":3,"spaceBetween":20},"1200":{"slidesPerView":4,"spaceBetween":16},"1540":{"slidesPerView":5,"spaceBetween":16}}}'>
+                    data-swiper='{"slidesPerView":1,"spaceBetween":16,"breakpoints":{"450":{"slidesPerView":2,"spaceBetween":16},"768":{"slidesPerView":3,"spaceBetween":20},"1200":{"slidesPerView":6,"spaceBetween":16},"1540":{"slidesPerView":5,"spaceBetween":16}}}'>
                     <div class="swiper-wrapper">
                         @foreach($hotProducts as $product)
                         <div class="swiper-slide">
@@ -68,18 +67,7 @@
                     </div>
                 </div>
             </div>
-            <a class="fw-bold d-md-none px-0" href="#!">Xem thêm<span
-                    class="fas fa-chevron-right fs-9 ms-1"></span></a>
         </div>
-        <div class="col-lg-3 d-none d-lg-block col-xxl-2">
-            <div class="h-100 position-relative rounded-3 overflow-hidden">
-                <div class="bg-holder"
-                    style="background-image:url({{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/e-commerce/4.png') }});"></div>
-                <!--/.bg-holder-->
-            </div>
-        </div>
-        <div class="col-12 d-lg-none"><a href="#!"><img class="w-100 rounded-3"
-                    src="../../../assets/img/e-commerce/6.png" alt="" /></a></div>
     </div>
     
 @push('scripts')

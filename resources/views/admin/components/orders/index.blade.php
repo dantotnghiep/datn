@@ -44,7 +44,7 @@
                                             </button>
                                             <ul class="dropdown-menu">
                                                 <li><a class="dropdown-item"
-                                                        href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">All</a>
+                                                        href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Tất cả</a>
                                                 </li>
                                                 @foreach ($options['filter_options'] ?? [] as $value => $label)
                                                     <li>
@@ -64,12 +64,12 @@
                                     <button class="btn btn-phoenix-secondary px-4 flex-shrink-0" type="button"
                                         data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true"
                                         aria-expanded="false">
-                                        Sort By
+                                        Sắp xếp theo
                                         <span class="fas fa-angle-down ms-2"></span>
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item"
-                                                href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Default</a>
+                                                href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Mặc định</a>
                                         </li>
                                         @foreach ($fields as $field => $options)
                                             @if (!isset($options['sortable']) || $options['sortable'])
@@ -96,14 +96,14 @@
                             @if (request()->has('search') || request()->has('filter') || request()->has('sort'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    <span class="fas fa-times me-2"></span> Clear Filters
+                                    <span class="fas fa-times me-2"></span> Xóa bộ lọc
                                 </a>
                             @endif
 
                             @if ($items->count() > 0 && method_exists($items->first(), 'trashed'))
                             <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
                                 class="btn btn-phoenix-secondary me-1">
-                                {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
+                                    {{ request()->get('trashed') ? 'Xem đơn hàng' : 'Xem thùng rác' }}
                             </a>
                             @endif
                         </div>
@@ -132,6 +132,18 @@
                                                         width="40" height="40" class="rounded object-fit-cover">
                                                 @elseif (isset($options['formatter']) && is_callable($options['formatter']))
                                                     {!! $options['formatter']($item->$field, $item) !!}
+                                                @elseif ($field == 'payment_method')
+                                                    @if ($item->payment_method == 'bank')
+                                                        <span class="badge bg-success">Chuyển khoản</span>
+                                                    @else
+                                                        <span class="badge bg-danger">Thanh toán khi nhận hàng</span>
+                                                    @endif
+                                                @elseif ($field == 'payment_status')
+                                                    @if ($item->payment_status == 'pending')
+                                                        <span class="badge bg-warning">Chờ thanh toán</span>
+                                                    @else
+                                                        <span class="badge bg-success">Đã thanh toán</span>
+                                                    @endif
                                                 @elseif ($field == 'status_id')
                                                     @php
                                                         // Get raw status_id before any getter transforms it
@@ -140,7 +152,7 @@
 
                                                     <div class="order-status-actions-{{ $item->id }}">
                                                         @if ($statusId == 1)
-                                                            <span class="badge bg-warning">Pending</span>
+                                                            <span class="badge bg-warning">Chờ xác nhận</span>
                                                             <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
                                                                 @csrf
                                                                 @method('PUT')
@@ -150,7 +162,7 @@
                                                                 </button>
                                                             </form>
                                                         @elseif ($statusId == 3)
-                                                            <span class="badge bg-info">Shipping</span>
+                                                            <span class="badge bg-info">Đang giao hàng</span>
                                                             <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
                                                                 @csrf
                                                                 @method('PUT')
@@ -160,7 +172,7 @@
                                                                 </button>
                                                             </form>
                                                         @elseif ($statusId == 2)
-                                                            <span class="badge bg-success">Completed</span>
+                                                            <span class="badge bg-success">Đã giao hàng</span>
                                                             @php
                                                                 // Check if there's an active refund request
                                                                 $activeRefund = $item->refunds()->where('is_active', 1)
@@ -178,7 +190,7 @@
                                                                 </form>
                                                             @endif
                                                         @elseif ($statusId == 4)
-                                                            <span class="badge bg-danger">Cancle</span>
+                                                            <span class="badge bg-danger">Đã hủy</span>
                                                             @php
                                                                 // Check if there's an active refund request
                                                                 $activeRefund = $item->refunds()->where('is_active', 1)
@@ -196,7 +208,7 @@
                                                                 </form>
                                                             @endif
                                                         @elseif ($statusId == 5)
-                                                            <span class="badge bg-danger">Refunded</span>
+                                                            <span class="badge bg-danger">Đã hoàn tiền</span>
                                                         @else
                                                             <span class="badge bg-secondary">{{ $item->status_id }}</span>
                                                         @endif
@@ -222,21 +234,21 @@
                             <div class="pagination">
                                 <div class="d-flex align-items-center">
                                     <p class="mb-0 me-3">
-                                        Showing {{ $items->firstItem() ?? 0 }} to {{ $items->lastItem() ?? 0 }} of
-                                        {{ $items->total() }} results
+                                        Hiển thị {{ $items->firstItem() ?? 0 }} đến {{ $items->lastItem() ?? 0 }} của
+                                        {{ $items->total() }} kết quả
                                     </p>
 
                                     <nav aria-label="Page navigation">
                                         <ul class="pagination mb-0">
                                             @if ($items->onFirstPage())
                                                 <li class="page-item disabled">
-                                                    <span class="page-link">« Previous</span>
+                                                    <span class="page-link">Trang trước</span>
                                                 </li>
                                             @else
                                                 <li class="page-item">
                                                     <a class="page-link" href="{{ $items->previousPageUrl() }}"
                                                         aria-label="Previous">
-                                                        « Previous
+                                                        Trang trước
                                                     </a>
                                                 </li>
                                             @endif
@@ -286,12 +298,12 @@
                                                 <li class="page-item">
                                                     <a class="page-link" href="{{ $items->nextPageUrl() }}"
                                                         aria-label="Next">
-                                                        Next »
+                                                        Trang tiếp
                                                     </a>
                                                 </li>
                                             @else
                                                 <li class="page-item disabled">
-                                                    <span class="page-link">Next »</span>
+                                                    <span class="page-link">Trang tiếp</span>
                                                 </li>
                                             @endif
                                         </ul>

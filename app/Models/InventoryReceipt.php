@@ -42,13 +42,13 @@ class InventoryReceipt extends BaseModel
     {
         return [
             'receipt_number' => [
-                'label' => 'Inventory Receipt Number',
+                'label' => 'Số phiếu nhập kho',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'user_id' => [
-                'label' => 'Staff',
+                'label' => 'Nhân viên',
                 'type' => 'select',
                 'options' => User::pluck('name', 'id')->toArray(),
                 'filterable' => true,
@@ -56,38 +56,38 @@ class InventoryReceipt extends BaseModel
                 'sortable' => true
             ],
             'supplier_name' => [
-                'label' => 'Supplier Name',
+                'label' => 'Nhà cung cấp',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'supplier_contact' => [
-                'label' => 'Supplier Contact',
+                'label' => 'Liên hệ nhà cung cấp',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'total_amount' => [
-                'label' => 'Total Amount',
+                'label' => 'Tổng tiền',
                 'type' => 'number',
                 'step' => '0.01',
                 'sortable' => true
             ],
             'notes' => [
-                'label' => 'Notes',
+                'label' => 'Ghi chú',
                 'type' => 'textarea',
                 'searchable' => true,
                 'sortable' => false
             ],
             'created_at' => [
-                'label' => 'Created At',
+                'label' => 'Ngày tạo',
                 'type' => 'datetime',
                 'sortable' => true
             ],
             'status' => [
-                'label' => 'Status',
+                'label' => 'Trạng thái',
                 'type' => 'select',
-                'options' => ['pending' => 'Pending', 'completed' => 'Completed', 'cancelled' => 'Cancelled'],
+                'options' => ['pending' => 'Chờ xử lý', 'completed' => 'Đã xử lý', 'cancelled' => 'Đã hủy'],
                 'sortable' => true
             ]
      

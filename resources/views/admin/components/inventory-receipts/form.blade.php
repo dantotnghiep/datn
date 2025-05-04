@@ -97,11 +97,11 @@
                         <table class="table table-bordered" id="receiptItemsTable">
                             <thead>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th>Unit Cost</th>
-                                    <th>Subtotal</th>
-                                    <th>Actions</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -169,7 +169,7 @@
                                 <tr>
                                     <td colspan="5">
                                         <button type="button" class="btn btn-primary btn-sm" id="addItemButton">
-                                            <i class="fas fa-plus me-1"></i> Add Item
+                                            <i class="fas fa-plus me-1"></i> Thêm sản phẩm
                                         </button>
                                     </td>
                                 </tr>
@@ -179,7 +179,17 @@
                         </table>
                     </div>
                 </div>
-
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end">
+                            <div class="me-3 bg-light p-3 rounded border">
+                                <span class="fw-bold fs-7">Tổng tiền: </span>
+                                <span id="displayTotalAmount" class="fs-7 fw-bold text-primary">{{ isset($item) ? number_format($item->total_amount, 2) : '0.00' }}</span>
+                                <span class="fs-7 fw-bold text-primary">VND</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{{ route($route.'.index') }}" class="btn btn-phoenix-secondary">
                         Cancel
@@ -310,6 +320,7 @@
             });
             
             document.getElementById('totalAmount').value = total.toFixed(2);
+            document.getElementById('displayTotalAmount').textContent = new Intl.NumberFormat('vi-VN').format(total);
         }
         
         function updateItemIndexes() {

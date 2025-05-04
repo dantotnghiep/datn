@@ -64,12 +64,12 @@
                                     <button class="btn btn-phoenix-secondary px-4 flex-shrink-0" type="button"
                                         data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true"
                                         aria-expanded="false">
-                                        Sort By
+                                        Sắp xếp theo
                                         <span class="fas fa-angle-down ms-2"></span>
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item"
-                                                href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Default</a>
+                                                href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Mặc định</a>
                                         </li>
                                         @foreach ($fields as $field => $options)
                                             @if (!isset($options['sortable']) || $options['sortable'])
@@ -96,19 +96,19 @@
                             @if (request()->has('search') || request()->has('filter') || request()->has('sort'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    <span class="fas fa-times me-2"></span> Clear Filters
+                                    <span class="fas fa-times me-2"></span> Xóa bộ lọc
                                 </a>
                             @endif
 
-                            @if ($items->count() > 0 && method_exists($items->first(), 'trashed'))
+                            @if ($route !== 'admin.categories' && $items->count() > 0 && method_exists($items->first(), 'trashed'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
+                                    {{ request()->get('trashed') ? 'Xem sản phẩm' : 'Xem thùng rác' }}
                                 </a>
                             @endif
                             @if ($route !== 'admin.product-variations' && route($route . '.create'))
                                 <a href="{{ route($route . '.create') }}" class="btn btn-primary">
-                                    <span class="fas fa-plus me-2"></span> Add New
+                                    <span class="fas fa-plus me-2"></span> Thêm mới
                                 </a>
                             @endif
                         </div>
@@ -125,7 +125,7 @@
                                             {{ $options['label'] ?? ucfirst($field) }}
                                         </th>
                                     @endforeach
-                                    <th class="sort align-middle text-center" scope="col">Actions</th>
+                                    <th class="sort align-middle text-center" scope="col">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -144,31 +144,38 @@
                                             </td>
                                         @endforeach
                                         <td class="align-middle text-center">
-                                            @if (method_exists($item, 'trashed') && $item->trashed())
-                                                <form action="{{ route($route . '.restore', $item->id) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <button type="submit" class="btn btn-sm p-0 text-success me-2"
-                                                        title="Restore">
-                                                        <span class="fas fa-trash-restore"></span>
-                                                    </button>
-                                                </form>
+                                            @if($route !== 'admin.categories')
+                                                @if (method_exists($item, 'trashed') && $item->trashed())
+                                                    <form action="{{ route($route . '.restore', $item->id) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <button type="submit" class="btn btn-sm p-0 text-success me-2"
+                                                            title="Restore">
+                                                            <span class="fas fa-trash-restore"></span>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <a href="{{ route($route . '.edit', $item->id) }}"
+                                                        class="btn btn-sm p-0 text-primary me-2" title="Edit">
+                                                        <span class="fas fa-edit"></span>
+                                                    </a>
+                                                    <form action="{{ route($route . '.destroy', $item->id) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm p-0 text-danger"
+                                                            title="Move to Trash"
+                                                            onclick="return confirm('Are you sure you want to move this item to trash?')">
+                                                            <span class="fas fa-trash-alt"></span>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             @else
                                                 <a href="{{ route($route . '.edit', $item->id) }}"
                                                     class="btn btn-sm p-0 text-primary me-2" title="Edit">
                                                     <span class="fas fa-edit"></span>
                                                 </a>
-                                                <form action="{{ route($route . '.destroy', $item->id) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm p-0 text-danger"
-                                                        title="Move to Trash"
-                                                        onclick="return confirm('Are you sure you want to move this item to trash?')">
-                                                        <span class="fas fa-trash-alt"></span>
-                                                    </button>
-                                                </form>
                                             @endif
                                         </td>
                                     </tr>
@@ -183,21 +190,21 @@
                             <div class="pagination">
                                 <div class="d-flex align-items-center">
                                     <p class="mb-0 me-3">
-                                        Showing {{ $items->firstItem() ?? 0 }} to {{ $items->lastItem() ?? 0 }} of
-                                        {{ $items->total() }} results
+                                        Hiển thị {{ $items->firstItem() ?? 0 }} đến {{ $items->lastItem() ?? 0 }} của
+                                        {{ $items->total() }} kết quả
                                     </p>
 
                                     <nav aria-label="Page navigation">
                                         <ul class="pagination mb-0">
                                             @if ($items->onFirstPage())
                                                 <li class="page-item disabled">
-                                                    <span class="page-link">« Previous</span>
+                                                    <span class="page-link">Trang trước</span>
                                                 </li>
                                             @else
                                                 <li class="page-item">
                                                     <a class="page-link" href="{{ $items->previousPageUrl() }}"
                                                         aria-label="Previous">
-                                                        « Previous
+                                                        Trang trước
                                                     </a>
                                                 </li>
                                             @endif
@@ -247,12 +254,12 @@
                                                 <li class="page-item">
                                                     <a class="page-link" href="{{ $items->nextPageUrl() }}"
                                                         aria-label="Next">
-                                                        Next »
+                                                        Trang tiếp
                                                     </a>
                                                 </li>
                                             @else
                                                 <li class="page-item disabled">
-                                                    <span class="page-link">Next »</span>
+                                                    <span class="page-link">Trang tiếp</span>
                                                 </li>
                                             @endif
                                         </ul>

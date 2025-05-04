@@ -19,11 +19,10 @@
                         aria-controls="navbarVerticalCollapse" aria-expanded="false"
                         aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span
                                 class="toggle-line"></span></span></button>
-                    <a class="navbar-brand me-1 me-sm-3" href="index.html">
+                    <a class="navbar-brand me-1 me-sm-3" href="{{route('admin.dashboard')}}">
                         <div class="d-flex align-items-center">
-                            <div class="d-flex align-items-center"><img src="{{asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/logo.png')}}" alt="phoenix"
-                                    width="27" />
-                                <h5 class="logo-text ms-2 d-none d-sm-block">phoenix</h5>
+                            <div class="d-flex align-items-center"><img src="{{asset('storage/logo/1.png')}}" alt="phoenix"
+                                    width="70" />
                             </div>
                         </div>
                     </a>

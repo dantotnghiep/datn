@@ -3,27 +3,25 @@
             <div class="row justify-content-between gy-4">
                 <div class="col-12 col-lg-4">
                     <div class="d-flex align-items-center mb-3"><img
-                            src="{{ asset('theme/prium.github.io/phoenix/v1.22.0/assets/img/icons/logo.png') }}"
-                            alt="phoenix" width="27" />
-                        <h5 class="logo-text ms-2">phoenix</h5>
+                            src="{{ asset('storage/logo/1.png') }}"
+                            alt="phoenix" width="70" />
                     </div>
-                    <p class="text-body-tertiary mb-1 fw-semibold lh-sm fs-9">Phoenix is an admin dashboard
-                        template with fascinating features and amazing layout. The template is responsive to all
-                        major browsers and is compatible with all available devices and screen sizes.</p>
+                    <p class="text-body-tertiary mb-1 fw-semibold lh-sm fs-9">Phoenix là một mẫu bảng điều khiển quản trị
+                        với các tính năng hấp dẫn và bố cục tuyệt vời. Giao diện này tương thích với tất cả
+                        các trình duyệt chính và hoạt động tốt trên mọi thiết bị và kích thước màn hình.</p>
                 </div>
                 <div class="col-6 col-md-auto">
-                    <h5 class="fw-bolder mb-3">About Phoenix</h5>
+                    <h5 class="fw-bolder mb-3">Về Chúng Tôi</h5>
                     <div class="d-flex flex-column"><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Careers</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Affiliate Program</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Privacy Policy</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Terms &
-                            Conditions</a></div>
+                            href="#!">Tuyển dụng</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
+                            href="#!">Chương trình liên kết</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
+                            href="#!">Chính sách bảo mật</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
+                            href="#!">Điều khoản & Điều kiện</a></div>
                 </div>
                 <div class="col-6 col-md-auto">
-                    <h5 class="fw-bolder mb-3">Stay Connected</h5>
+                    <h5 class="fw-bolder mb-3">Kết Nối</h5>
                     <div class="d-flex flex-column"><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Blogs</a><a class="mb-1 fw-semibold fs-9 d-flex" href="#!"><span
+                            href="#!">Bài viết</a><a class="mb-1 fw-semibold fs-9 d-flex" href="#!"><span
                                 class="fab fa-facebook-square text-primary me-2 fs-8"></span><span
                                 class="text-body-secondary">Facebook</span></a><a
                             class="mb-1 fw-semibold fs-9 d-flex" href="#!"><span
@@ -31,19 +29,17 @@
                                 class="text-body-secondary">Twitter</span></a></div>
                 </div>
                 <div class="col-6 col-md-auto">
-                    <h5 class="fw-bolder mb-3">Customer Service</h5>
+                    <h5 class="fw-bolder mb-3">Dịch Vụ Khách Hàng</h5>
                     <div class="d-flex flex-column"><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Help Desk</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Support, 24/7</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Community of Phoenix</a></div>
+                            href="#!">Trợ giúp</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
+                            href="#!">Hỗ trợ 24/7</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
+                            href="#!">Cộng đồng</a></div>
                 </div>
                 <div class="col-6 col-md-auto">
-                    <h5 class="fw-bolder mb-3">Payment Method</h5>
+                    <h5 class="fw-bolder mb-3">Phương Thức Thanh Toán</h5>
                     <div class="d-flex flex-column"><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Cash on Delivery</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Online Payment</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">PayPal</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
-                            href="#!">Installment</a>
+                            href="#!">Thanh toán khi nhận hàng</a><a class="text-body-tertiary fw-semibold fs-9 mb-1"
+                            href="#!">Thanh toán trực tuyến</a>
                     </div>
                 </div>
             </div>

@@ -37,7 +37,7 @@ class Product extends BaseModel
                 'sortable' => true
             ],
             'category_id' => [
-                'label' => 'Category',
+                'label' => 'Danh mục',
                 'type' => 'select',
                 'options' => Category::orderBy('name')->pluck('name', 'id')->toArray(),
                 'filterable' => true,
@@ -45,39 +45,44 @@ class Product extends BaseModel
                 'sortable' => true
             ],
             'image' => [
-                'label' => 'Image',
+                'label' => 'Hình ảnh',
                 'type' => 'file',
                 'sortable' => false,
                 'searchable' => false
             ],
             'name' => [
-                'label' => 'Product Name',
+                'label' => 'Tên sản phẩm',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
 
             'description' => [
-                'label' => 'Description',
+                'label' => 'Mô tả',
                 'type' => 'textarea',
                 'searchable' => true,
                 'sortable' => false
             ],
             'is_hot' => [
-                'label' => 'Featured Product',
+                'label' => 'Sản phẩm nổi bật',
                 'type' => 'select',
                 'options' => [
-                    0 => 'No',
-                    1 => 'Yes'
+                    0 => 'Không',
+                    1 => 'Có'
                 ],
                 'filter_options' => [
-                    0 => 'No',
-                    1 => 'Yes'
+                    0 => 'Không',
+                    1 => 'Có'
                 ],
                 'filterable' => true,
                 'sortable' => true
             ]
         ];
+    }
+
+    public function getIsHotAttribute($value)
+    {
+        return $value == 1 ? 'Có' : 'Không';
     }
 
     public function getCategoryIdAttribute($value)

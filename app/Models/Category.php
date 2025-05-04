@@ -22,13 +22,13 @@ class Category extends BaseModel
     {
         return [
             'name' => [
-                'label' => 'Category Name',
+                'label' => 'Tên danh mục',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'description' => [
-                'label' => 'Description',
+                'label' => 'Mô tả',
                 'type' => 'textarea',
                 'searchable' => true,
                 'sortable' => false

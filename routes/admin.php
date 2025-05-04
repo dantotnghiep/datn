@@ -218,6 +218,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
         // Store
         Route::post('/', [InventoryReceiptController::class, 'store'])->name('store');
+        
+        // Show details
+        Route::get('/{id}', [InventoryReceiptController::class, 'show'])->name('show');
 
         // Edit form
         Route::get('/{id}/edit', [InventoryReceiptController::class, 'edit'])->name('edit');

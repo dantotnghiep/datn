@@ -237,7 +237,6 @@ class ProductController extends BaseController
                 'is_purchased' => in_array($variation->id, $purchasedVariationIds)
             ];
         }
-        Log::info('Variation data debug:', ['variations' => $debug_variations]);
 
         // Prepare existing variants data for the UI
         $existingVariantsData = [];
@@ -569,14 +568,14 @@ class ProductController extends BaseController
 
             DB::commit();
 
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Product updated successfully',
-                    'redirect' => route('admin.products.index'),
-                    'product' => $item->fresh()
-                ]);
-            }
+            // if ($request->ajax() || $request->wantsJson()) {
+            //     return response()->json([
+            //         'success' => true,
+            //         'message' => 'Product updated successfully',
+            //         'redirect' => route('admin.products.index'),
+            //         'product' => $item->fresh()
+            //     ]);
+            // }
 
             return redirect()->route($this->route . '.index')
                 ->with('success', 'Product updated successfully!');

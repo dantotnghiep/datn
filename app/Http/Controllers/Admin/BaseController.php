@@ -165,10 +165,10 @@ abstract class BaseController extends Controller
         $item = $this->model::findOrFail($id);
 
         // Xử lý xóa ảnh nếu có
-        if ($this->hasImage) {
-            $this->handleImageDelete($item);
-        }
-
+        // if ($this->hasImage) {
+        //     $this->handleImageDelete($item);
+        // }
+ 
         $item->delete();
 
         return redirect()->route($this->route . '.index')

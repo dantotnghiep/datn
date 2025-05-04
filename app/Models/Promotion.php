@@ -100,6 +100,11 @@ class Promotion extends BaseModel
                 'type' => 'number',
                 'sortable' => true
             ],
+            'usage_count' => [
+                'label' => 'Số lần sử dụng',
+                'type' => 'number',
+                'sortable' => true
+            ],
             'starts_at' => [
                 'label' => 'Ngày bắt đầu',
                 'type' => 'datetime',
@@ -111,7 +116,7 @@ class Promotion extends BaseModel
                 'sortable' => true
             ],
             'is_active' => [
-                'label' => 'Kích hoạt',
+                'label' => 'Trạng thái',
                 'type' => 'boolean',
                 'filterable' => true,
                 'filter_options' => [0 => 'Không', 1 => 'Có'],
@@ -121,8 +126,69 @@ class Promotion extends BaseModel
         ];
     }
 
+
     public function usedPromotions()
     {
         return $this->hasMany(UsedPromotion::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($promotion) {
+            $now = now()->setTimezone('Asia/Ho_Chi_Minh');
+
+            // Check if usage limit is reached
+            if ($promotion->usage_limit > 0 && $promotion->usage_count >= $promotion->usage_limit) {
+                $promotion->is_active = false;
+                return;
+            }
+
+            // Check if promotion is within valid date range
+            if ($promotion->starts_at && $now->format('Y-m-d H:i:s') < $promotion->starts_at) {
+                $promotion->is_active = false;
+                return;
+            }
+
+            if ($promotion->expires_at && $now->format('Y-m-d H:i:s') >= $promotion->expires_at) {
+                $promotion->is_active = false;
+                return;
+            }
+
+            // If all checks pass, set promotion as active
+            $promotion->is_active = true;
+        });
+
+        static::retrieved(function ($promotion) {
+            $now = now()->setTimezone('Asia/Ho_Chi_Minh');
+            $shouldUpdate = false;
+
+            // Check if usage limit is reached
+            if ($promotion->usage_limit > 0 && $promotion->usage_count >= $promotion->usage_limit) {
+                $promotion->is_active = false;
+                $shouldUpdate = true;
+            }
+            // Check if promotion is within valid date range
+            else if ($promotion->starts_at && $now->format('Y-m-d H:i:s') < $promotion->starts_at) {
+                $promotion->is_active = false;
+                $shouldUpdate = true;
+            }
+            else if ($promotion->expires_at && $now->format('Y-m-d H:i:s') >= $promotion->expires_at) {
+                $promotion->is_active = false;
+                $shouldUpdate = true;
+            }
+            // If current time matches starts_at and promotion is not expired, activate it
+            else if ($promotion->starts_at && $now->format('Y-m-d H:i:s') >= $promotion->starts_at &&
+                    (!$promotion->expires_at || $now->format('Y-m-d H:i:s') < $promotion->expires_at)) {
+                $promotion->is_active = true;
+                $shouldUpdate = true;
+            }
+
+            if ($shouldUpdate) {
+                $promotion->save();
+            }
+        });
+    }
+
 }

@@ -230,6 +230,16 @@ class CartController extends Controller
             DB::beginTransaction();
 
             try {
+                // Xử lý voucher nếu có
+                if ($request->has('voucher_code')) {
+                    $discount = $request->voucher_value;
+                    $voucher = Promotion::where('code', $request->voucher_code)->first();
+                    if ($voucher) {
+                        $voucher->increment('usage_count');
+                    }
+                }
+
+                $total = $subtotal - $discount + $shippingFee;
                 // Validate stock and lock rows for update
                 foreach ($selectedItems as $item) {
                     $variation = ProductVariation::lockForUpdate()->find($item->product_variation_id);

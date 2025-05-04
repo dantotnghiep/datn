@@ -44,7 +44,7 @@
                                             </button>
                                             <ul class="dropdown-menu">
                                                 <li><a class="dropdown-item"
-                                                        href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">All</a>
+                                                        href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Tất cả</a>
                                                 </li>
                                                 @foreach ($options['filter_options'] ?? [] as $value => $label)
                                                     <li>
@@ -64,12 +64,12 @@
                                     <button class="btn btn-phoenix-secondary px-4 flex-shrink-0" type="button"
                                         data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true"
                                         aria-expanded="false">
-                                        Sort By
+                                        Sắp xếp theo
                                         <span class="fas fa-angle-down ms-2"></span>
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item"
-                                                href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Default</a>
+                                                href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Mặc định</a>
                                         </li>
                                         @foreach ($fields as $field => $options)
                                             @if (!isset($options['sortable']) || $options['sortable'])
@@ -96,19 +96,19 @@
                             @if (request()->has('search') || request()->has('filter') || request()->has('sort'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    <span class="fas fa-times me-2"></span> Clear Filters
+                                    <span class="fas fa-times me-2"></span> Xóa bộ lọc
                                 </a>
                             @endif
 
                             @if ($items->count() > 0 && method_exists($items->first(), 'trashed'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
+                                    {{ request()->get('trashed') ? 'Xem sản phẩm' : 'Xem thùng rác' }}
                                 </a>
                             @endif
                             @if ($route !== 'admin.product-variations' && route($route . '.create'))
                                 <a href="{{ route($route . '.create') }}" class="btn btn-primary">
-                                    <span class="fas fa-plus me-2"></span> Add New
+                                    <span class="fas fa-plus me-2"></span> Thêm mới
                                 </a>
                             @endif
                         </div>
@@ -125,7 +125,7 @@
                                             {{ $options['label'] ?? ucfirst($field) }}
                                         </th>
                                     @endforeach
-                                    <th class="sort align-middle text-center" scope="col">Actions</th>
+                                    <th class="sort align-middle text-center" scope="col">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -183,21 +183,21 @@
                             <div class="pagination">
                                 <div class="d-flex align-items-center">
                                     <p class="mb-0 me-3">
-                                        Showing {{ $items->firstItem() ?? 0 }} to {{ $items->lastItem() ?? 0 }} of
-                                        {{ $items->total() }} results
+                                        Hiển thị {{ $items->firstItem() ?? 0 }} đến {{ $items->lastItem() ?? 0 }} của
+                                        {{ $items->total() }} kết quả
                                     </p>
 
                                     <nav aria-label="Page navigation">
                                         <ul class="pagination mb-0">
                                             @if ($items->onFirstPage())
                                                 <li class="page-item disabled">
-                                                    <span class="page-link">« Previous</span>
+                                                    <span class="page-link">Trang trước</span>
                                                 </li>
                                             @else
                                                 <li class="page-item">
                                                     <a class="page-link" href="{{ $items->previousPageUrl() }}"
                                                         aria-label="Previous">
-                                                        « Previous
+                                                        Trang trước
                                                     </a>
                                                 </li>
                                             @endif
@@ -247,12 +247,12 @@
                                                 <li class="page-item">
                                                     <a class="page-link" href="{{ $items->nextPageUrl() }}"
                                                         aria-label="Next">
-                                                        Next »
+                                                        Trang tiếp
                                                     </a>
                                                 </li>
                                             @else
                                                 <li class="page-item disabled">
-                                                    <span class="page-link">Next »</span>
+                                                    <span class="page-link">Trang tiếp</span>
                                                 </li>
                                             @endif
                                         </ul>

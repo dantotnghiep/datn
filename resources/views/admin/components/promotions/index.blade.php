@@ -44,7 +44,8 @@
                                             </button>
                                             <ul class="dropdown-menu">
                                                 <li><a class="dropdown-item"
-                                                        href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">All</a>
+                                                        href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Tất
+                                                        cả</a>
                                                 </li>
                                                 @foreach ($options['filter_options'] ?? [] as $value => $label)
                                                     <li>
@@ -64,12 +65,13 @@
                                     <button class="btn btn-phoenix-secondary px-4 flex-shrink-0" type="button"
                                         data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true"
                                         aria-expanded="false">
-                                        Sort By
+                                        Sắp xếp theo
                                         <span class="fas fa-angle-down ms-2"></span>
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item"
-                                                href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Default</a>
+                                                href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}">Mặc
+                                                định</a>
                                         </li>
                                         @foreach ($fields as $field => $options)
                                             @if (!isset($options['sortable']) || $options['sortable'])
@@ -96,19 +98,19 @@
                             @if (request()->has('search') || request()->has('filter') || request()->has('sort'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed', 0)]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    <span class="fas fa-times me-2"></span> Clear Filters
+                                    <span class="fas fa-times me-2"></span> Xóa bộ lọc
                                 </a>
                             @endif
 
                             @if ($items->count() > 0 && method_exists($items->first(), 'trashed'))
                                 <a href="{{ route($route . '.index', ['trashed' => request()->get('trashed') ? 0 : 1]) }}"
                                     class="btn btn-phoenix-secondary me-1">
-                                    {{ request()->get('trashed') ? 'View Active' : 'View Trash' }}
+                                    {{ request()->get('trashed') ? 'Xem mã khuyến mãi' : 'Xem thùng rác' }}
                                 </a>
                             @endif
 
                             <a href="{{ route($route . '.create') }}" class="btn btn-primary">
-                                <span class="fas fa-plus me-2"></span> Add New
+                                <span class="fas fa-plus me-2"></span> Thêm mới
                             </a>
                         </div>
                     </div>
@@ -124,7 +126,7 @@
                                             {{ $options['label'] ?? ucfirst($field) }}
                                         </th>
                                     @endforeach
-                                    <th class="sort align-middle text-center" scope="col">Actions</th>
+                                    <th class="sort align-middle text-center" scope="col">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -137,41 +139,61 @@
                                                         width="40" height="40" class="rounded object-fit-cover">
                                                 @elseif (isset($options['formatter']) && is_callable($options['formatter']))
                                                     {!! $options['formatter']($item->$field, $item) !!}
+                                                @elseif ($field == 'is_active')
+                                                    @if ($item->is_active)
+                                                        <span class="badge bg-success">Có</span>
+                                                    @else
+                                                        <span class="badge bg-danger">Không</span>
+                                                    @endif
+                                                @elseif ($field == 'discount_type')
+                                                    @if ($item->discount_type == 'percentage')
+                                                        <span class="badge bg-success">Phần trăm</span>
+                                                    @else
+                                                        <span class="badge bg-danger">Giá trị</span>
+                                                    @endif
                                                 @elseif ($field == 'status')
                                                     @if ($item->status == 'pending')
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline">
+                                                        <form action="{{ route($route . '.update-status', $item->id) }}"
+                                                            method="POST" class="d-inline">
                                                             @csrf
                                                             @method('PUT')
                                                             <input type="hidden" name="status" value="completed">
-                                                            <button type="submit" class="btn btn-sm btn-success me-1" title="Mark as Completed">
+                                                            <button type="submit" class="btn btn-sm btn-success me-1"
+                                                                title="Mark as Completed">
                                                                 <span class="fas fa-check me-1"></span>Complete
                                                             </button>
                                                         </form>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline">
+                                                        <form action="{{ route($route . '.update-status', $item->id) }}"
+                                                            method="POST" class="d-inline">
                                                             @csrf
                                                             @method('PUT')
                                                             <input type="hidden" name="status" value="cancelled">
-                                                            <button type="submit" class="btn btn-sm btn-danger" title="Mark as Cancelled">
+                                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                                title="Mark as Cancelled">
                                                                 <span class="fas fa-times me-1"></span>Cancel
                                                             </button>
                                                         </form>
                                                     @elseif ($item->status == 'completed')
                                                         <span class="badge bg-success">Completed</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
+                                                        <form action="{{ route($route . '.update-status', $item->id) }}"
+                                                            method="POST" class="d-inline ms-1">
                                                             @csrf
                                                             @method('PUT')
                                                             <input type="hidden" name="status" value="pending">
-                                                            <button type="submit" class="btn btn-sm btn-warning" title="Revert to Pending">
+                                                            <button type="submit" class="btn btn-sm btn-warning"
+                                                                title="Revert to Pending">
                                                                 <span class="fas fa-undo me-1"></span>Revert
                                                             </button>
                                                         </form>
                                                     @elseif ($item->status == 'cancelled')
                                                         <span class="badge bg-danger">Cancelled</span>
-                                                        <form action="{{ route($route . '.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
+                                                        <form action="{{ route($route . '.update-status', $item->id) }}"
+                                                            method="POST" class="d-inline ms-1">
                                                             @csrf
                                                             @method('PUT')
                                                             <input type="hidden" name="status" value="pending">
-                                                            <button type="submit" class="btn btn-sm btn-warning" title="Revert to Pending">
+                                                            <button type="submit" class="btn btn-sm btn-warning"
+                                                                title="Revert to Pending">
                                                                 <span class="fas fa-undo me-1"></span>Revert
                                                             </button>
                                                         </form>
@@ -221,21 +243,21 @@
                             <div class="pagination">
                                 <div class="d-flex align-items-center">
                                     <p class="mb-0 me-3">
-                                        Showing {{ $items->firstItem() ?? 0 }} to {{ $items->lastItem() ?? 0 }} of
-                                        {{ $items->total() }} results
+                                        Hiển thị {{ $items->firstItem() ?? 0 }} đến {{ $items->lastItem() ?? 0 }} của
+                                        {{ $items->total() }} kết quả
                                     </p>
 
                                     <nav aria-label="Page navigation">
                                         <ul class="pagination mb-0">
                                             @if ($items->onFirstPage())
                                                 <li class="page-item disabled">
-                                                    <span class="page-link">« Previous</span>
+                                                    <span class="page-link">Trang trước</span>
                                                 </li>
                                             @else
                                                 <li class="page-item">
                                                     <a class="page-link" href="{{ $items->previousPageUrl() }}"
                                                         aria-label="Previous">
-                                                        « Previous
+                                                        Trang trước
                                                     </a>
                                                 </li>
                                             @endif
@@ -285,12 +307,12 @@
                                                 <li class="page-item">
                                                     <a class="page-link" href="{{ $items->nextPageUrl() }}"
                                                         aria-label="Next">
-                                                        Next »
+                                                        Trang tiếp
                                                     </a>
                                                 </li>
                                             @else
                                                 <li class="page-item disabled">
-                                                    <span class="page-link">Next »</span>
+                                                    <span class="page-link">Trang tiếp</span>
                                                 </li>
                                             @endif
                                         </ul>

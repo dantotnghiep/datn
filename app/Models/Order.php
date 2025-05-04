@@ -59,73 +59,73 @@ class Order extends BaseModel
     {
         return [
             'order_number' => [
-                'label' => 'Order Number',
+                'label' => 'Số đơn hàng',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
 
             'user_name' => [
-                'label' => 'Customer Name',
+                'label' => 'Tên khách hàng',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'user_phone' => [
-                'label' => 'Customer Phone',
+                'label' => 'Số điện thoại khách hàng',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'address' => [
-                'label' => 'Address',
+                'label' => 'Địa chỉ',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => false
             ],
             'total_with_discount' => [
-                'label' => 'Total Price',
+                'label' => 'Tổng tiền',
                 'type' => 'number',
                 'step' => '0.01',
                 'sortable' => true
             ],
             'payment_method' => [
-                'label' => 'Payment Method',
+                'label' => 'Phương thức thanh toán',
                 'type' => 'select',
                 'options' => [
-                    'bank' => 'Bank Transfer',
-                    'cod' => 'Cash on Delivery'
+                    'bank' => 'Chuyển khoản',
+                    'cod' => 'Thanh toán khi nhận hàng'
                 ],
                 'filterable' => true,
                 'filter_options' => [
-                    'bank' => 'Bank Transfer',
-                    'cod' => 'Cash on Delivery'
+                    'bank' => 'Chuyển khoản',
+                    'cod' => 'Thanh toán khi nhận hàng'
                 ],
                 'sortable' => true
             ],
             'payment_status' => [
-                'label' => 'Payment Status',
+                'label' => 'Trạng thái thanh toán',
                 'type' => 'select',
                 'options' => [
-                    'pending' => 'Pending',
+                    'pending' => 'Chờ thanh toán',
                     'completed' => 'Completed',
                     'failed' => 'Failed'
                 ],
                 'filterable' => true,
                 'filter_options' => [
-                    'pending' => 'Pending',
-                    'completed' => 'Completed',
-                    'failed' => 'Failed'
+                    'pending' => 'Chờ thanh toán',
+                    'completed' => 'Đã thanh toán',
+                    'failed' => 'Thất bại'
                 ],
                 'sortable' => true
             ],
             'paid_at' => [
-                'label' => 'Payment Date',
+                'label' => 'Ngày thanh toán',
                 'type' => 'datetime',
                 'sortable' => true
             ],
             'status_id' => [
-                'label' => 'Status',
+                'label' => 'Trạng thái',
                 'type' => 'select',
                 'options' => OrderStatus::pluck('name', 'id')->toArray(),
                 'filterable' => true,

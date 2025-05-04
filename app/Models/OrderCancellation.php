@@ -19,7 +19,7 @@ class OrderCancellation extends BaseModel
     {
         return [
             'order_id' => [
-                'label' => 'Order Number',
+                'label' => 'Số đơn hàng',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true,
@@ -28,7 +28,7 @@ class OrderCancellation extends BaseModel
                 }
             ],
             'customer_info' => [
-                'label' => 'Customer',
+                'label' => 'Khách hàng',
                 'type' => 'text',
                 'searchable' => false,
                 'sortable' => false,
@@ -38,7 +38,7 @@ class OrderCancellation extends BaseModel
                 }
             ],
             'order_status' => [
-                'label' => 'Order Status',
+                'label' => 'Trạng thái đơn hàng',
                 'type' => 'text',
                 'searchable' => false,
                 'sortable' => false,
@@ -80,24 +80,24 @@ class OrderCancellation extends BaseModel
                 }
             ],
             'reason' => [
-                'label' => 'Cancellation Reason',
+                'label' => 'Lý do hủy đơn hàng',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'notes' => [
-                'label' => 'Notes',
+                'label' => 'Ghi chú',
                 'type' => 'textarea',
                 'searchable' => true,
                 'sortable' => false
             ],
             'created_at' => [
-                'label' => 'Requested Date',
+                'label' => 'Ngày yêu cầu',
                 'type' => 'datetime',
                 'sortable' => true
             ],
             'action' => [
-                'label' => 'Actions',
+                'label' => 'Hành động',
                 'type' => 'text',
                 'searchable' => false,
                 'sortable' => false

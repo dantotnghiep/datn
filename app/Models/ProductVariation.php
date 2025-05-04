@@ -34,8 +34,8 @@ class ProductVariation extends BaseModel
             'product_id' => 'required|exists:products,id',
             'sku' => 'required|string|max:255|unique:product_variations,sku,' . $id,
             'name' => 'nullable|string|max:255',
-            'price' => 'nullable|numeric|min:0',
-            'sale_price' => 'nullable|numeric|min:0|lt:price',   
+            'price' => 'nullable|numeric|min:0|max:999999999',
+            'sale_price' => 'nullable|numeric|min:0|max:999999999|lt:price',   
             'stock' => 'integer|min:0'
         ];
     }
@@ -44,7 +44,7 @@ class ProductVariation extends BaseModel
     {
         return [
             'product_id' => [
-                'label' => 'Product',
+                'label' => 'Sản phẩm',
                 'type' => 'select',
                 'options' => Product::orderBy('name')->pluck('name', 'id')->toArray(),
                 'filterable' => true,
@@ -62,25 +62,25 @@ class ProductVariation extends BaseModel
                 'sortable' => true
             ],
             'name' => [
-                'label' => 'Variation Name',
+                'label' => 'Tên biến thể',
                 'type' => 'text',
                 'searchable' => true,
                 'sortable' => true
             ],
             'price' => [
-                'label' => 'Price',
+                'label' => 'Giá',
                 'type' => 'number',
                 'step' => '0.01',
                 'sortable' => true
             ],
             'sale_price' => [
-                'label' => 'Sale Price',
+                'label' => 'Giá khuyến mãi',
                 'type' => 'number',
                 'step' => '0.01',
                 'sortable' => true
             ],
             'stock' => [
-                'label' => 'Stock',
+                'label' => 'Kho hàng',
                 'type' => 'number',
                 'sortable' => true
             ]

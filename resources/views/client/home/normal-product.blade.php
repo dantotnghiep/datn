@@ -1,7 +1,6 @@
 <div class="mb-6">
     <div class="d-flex flex-between-center mb-3">
-        <h3>Sản phẩm thường</h3><a class="fw-bold d-none d-md-block" href="#!">Xem thêm
-            <span class="fas fa-chevron-right fs-9 ms-1"></span></a>
+        <h3>Sản phẩm thường</h3>
     </div>
     <div class="swiper-theme-container products-slider">
         <div class="swiper swiper theme-slider"
@@ -64,5 +63,4 @@
             </div>
         </div>
     </div>
-    <a class="fw-bold d-md-none" href="#!">Xem thêm<span class="fas fa-chevron-right fs-9 ms-1"></span></a>
 </div>
